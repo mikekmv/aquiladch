@@ -1,0 +1,8 @@
+
+Develstatus:
+	- event handler.
+		- add events for user creation and deletion. (Why??)
+	- add anti-flooder module (not for 0.1)
+	- SSL (not for 0.1)
+	- ADC (future)
+	- hublist support

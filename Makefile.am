@@ -1,0 +1,3 @@
+
+EXTRA_DIST = TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README doc/aquila-manual.txt
+SUBDIRS = src tools

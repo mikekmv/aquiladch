@@ -1,0 +1,400 @@
+/*                                                                                                                                    
+ *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
+ *
+ *  This file is subject to the terms and conditions of the GNU General
+ *  Public License.  See the file COPYING in the main directory of this
+ *  distribution for more details.     
+ *  
+ */
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+#include <errno.h>
+
+#include <assert.h>
+#define ASSERT assert
+
+#include "buffer.h"
+
+buffer_stats_t bufferstats;
+buffer_t static_buf;
+
+
+buffer_t *bf_alloc (unsigned long size)
+{
+  buffer_t *b;
+
+  /* alloc buffer */
+  b = malloc (size + sizeof (buffer_t));
+  if (!b)
+    return NULL;
+
+  /* init buffer */
+  memset (b, 0, sizeof (buffer_t)+size);
+  
+  b->buffer = ((unsigned char *) b) + sizeof (buffer_t);
+  b->s      = b->buffer;
+  b->e 	    = b->s;
+  b->size   = size;
+  b->refcnt = 1;
+
+  bufferstats.size += size;
+  if (bufferstats.size > bufferstats.peak)
+  	bufferstats.peak = bufferstats.size;
+  bufferstats.count ++;
+  if (bufferstats.max < bufferstats.count)
+  	bufferstats.max = bufferstats.count;
+  
+  return b;
+}
+
+void bf_free (buffer_t * buffer)
+{
+  if (!buffer)
+    return;
+
+  ASSERT (buffer != &static_buf);
+  ASSERT (buffer->refcnt > 0);
+  ASSERT (buffer->e <= (buffer->buffer+buffer->size));
+
+  bf_free (buffer->next);
+
+  /* if there is still a refcnt, do not free the memory */
+  if (--buffer->refcnt)
+  	return;
+
+  /* real free */
+  if (buffer->prev)
+    buffer->prev->next = NULL;
+
+  bufferstats.size -= buffer->size;
+  bufferstats.count --;
+  
+  free (buffer);
+  
+}
+
+void bf_free_single (buffer_t * buffer)
+{
+  if (!buffer)
+    return;
+
+  ASSERT (buffer != &static_buf);
+  ASSERT (buffer->refcnt > 0);
+  ASSERT (buffer->e <= (buffer->buffer+buffer->size));
+  
+  /* if there is still a refcnt, do not free the memory */
+  if (--buffer->refcnt)
+  	return;
+
+  /* real free */
+  if (buffer->next)
+    buffer->next->prev = buffer->prev;
+  if (buffer->prev)
+    buffer->prev->next = buffer->next;
+
+  bufferstats.size -= buffer->size;
+  bufferstats.count --;
+  
+  free (buffer);
+}
+
+void bf_claim (buffer_t * buffer)
+{
+  if (!buffer)
+    return;
+
+  ASSERT (buffer != &static_buf);
+
+  buffer->refcnt++;
+     
+  bf_claim (buffer->next);
+}
+
+int bf_append_raw (buffer_t ** buffer, unsigned char *data, unsigned long size)
+{
+  buffer_t *l, *b;
+
+  b = bf_alloc (size);
+  if (!b)
+    return errno;
+
+  memcpy (b->buffer, data, size);
+  b->e += size;
+
+  /* no list yet */
+  if (!*buffer) {
+    *buffer = b;
+    return 0;
+  }
+
+  /* append to list */
+  l = *buffer;
+  while (l->next)
+    l = l->next;
+  l->next = b;
+  b->prev = l;
+
+  return 0;
+}
+
+int bf_append (buffer_t ** buffer, buffer_t * b)
+{
+  buffer_t *l;
+
+  ASSERT (b != &static_buf);
+
+  /* no list yet */
+  if (!*buffer) {
+    *buffer = b;
+    return 0;
+  }
+
+  /* append to list */
+  l = *buffer;
+  while (l->next)
+    l = l->next;
+  l->next = b;
+  b->prev = l;
+
+  return 0;
+}
+
+buffer_t *bf_sep (buffer_t ** list, unsigned char *sep)
+{
+  unsigned char c = '\0';
+  unsigned char *p, *s;
+  buffer_t *b, *r;
+  unsigned long size, l;
+
+  if (!*list)
+    return NULL;
+
+  /* first, we determine length */
+  size = 0;
+
+
+  /* search se[erator */
+  b = *list;
+  s = &c;
+  for (; b && (!*s); b = b->next) {
+    for (p = b->s; (p < b->e) && (!*s); p++)
+      for (s = sep; (*s) && (*s != *p); s++);
+
+    size += (p - b->s);
+  };
+
+  /* return if no seperator found */
+  if ((!b) && (!*s))
+    return NULL;
+
+  /* alloc new buffers */
+  r = bf_alloc (size);
+  if (!r)
+    return NULL;
+
+  /* copy all complete buffers into the dest buffer */
+  b = *list;
+  l = bf_used(b);
+  for (; b && (size > l);) {
+    memcpy (r->e, b->s, l);
+    size -= l;
+    r->e += l;
+    
+    b = b->next;
+    bf_free_single (*list);
+    *list = b;
+    if (!b) break;
+
+    l = bf_used(b);
+  };
+
+  /* add part of next buffer */
+  memcpy (r->e, b->s, size);
+
+  /* overwrite seperator and expand buffer */
+  r->e[size - 1] = '\0';
+  r->e += size;
+
+  /* remove used data from last buffer */
+  b->s += size;
+
+  /* check if the current buffer is empty */
+  if (b->s == b->e) {
+    b = b->next;
+    bf_free_single (*list);
+    *list = b;
+  }
+
+  return r;
+}
+
+buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
+{
+  register unsigned char *p;
+  register buffer_t *b;
+  buffer_t *r;
+  unsigned long size, l;
+
+  if (!(*list))
+    return NULL;
+
+  /* first, we determine length */
+  size = 0;
+
+  /* search se[erator */
+  b = *list;
+  p = b->s;
+  for (; b ; b = b->next) {
+    for (p = b->s; (p < b->e) && (*p != sep); p++);
+    size += (p - b->s);
+    if ((p < b->e) && (*p == sep)) {
+      /* eat seperator too */
+      p++; size++;
+      break;
+    }
+  };
+
+  /* return if no seperator found */
+  if (!b)
+    return NULL;
+
+  /* alloc new buffers */
+  r = bf_alloc (size);
+  if (!r)
+    return NULL;
+
+  /* copy all complete buffers into the dest buffer */
+  b = *list;
+  l = bf_used(b);
+  for (; b && (size > l);) {
+    memcpy (r->e, b->s, l);
+    size -= l;
+    r->e += l;
+    
+    b = b->next;
+    bf_free_single (*list);
+    *list = b;
+    if (!b) break;
+
+    l = bf_used(b);
+  };
+
+  /* add part of next buffer */
+  if (size)
+    memcpy (r->e, b->s, size);
+
+  /* overwrite seperator and expand buffer */
+  r->e[size - 1] = '\0';
+  r->e += size;
+
+  /* remove used data from last buffer */
+  b->s += size;
+
+  /* check if the current buffer is empty */
+  if (b->s == b->e) {
+    b = b->next;
+    bf_free_single (*list);
+    *list = b;
+  }
+
+  return r;
+}
+
+int bf_prepend (buffer_t ** list, buffer_t * buf)
+{
+  buffer_t *b;
+
+  ASSERT (buf != &static_buf);
+
+  for (b = buf; b->next; b = b->next);
+
+  b->next = *list;
+  if (*list)
+    (*list)->prev = b;
+
+  *list = buf;
+
+  return 0;
+}
+
+buffer_t *bf_copy (buffer_t *src, unsigned long extra) {
+  unsigned long total, l;
+  buffer_t *b, *dst;
+
+  total = 0;  
+  for (b= src; b; b=b->next) 
+	total += bf_used (b);
+  
+  dst = bf_alloc (total+extra);
+  if (!dst) return NULL;
+  
+  for (b= src; b; b=b->next) {
+  	l = bf_used (b);
+  	memcpy (dst->e, b->s, l);
+  	dst->e += l;
+  }
+  
+  return dst;
+}
+
+int bf_strcat (buffer_t *dst, unsigned char *data) {
+  /* FIXME could be optimized to run over the data only once */
+  return bf_strncat (dst, data, strlen ((char *)data));
+}
+
+int bf_strncat (buffer_t *dst, unsigned char *data, unsigned long length) {
+  if (bf_unused(dst) < length) 
+  	length = bf_unused(dst);
+
+  strncpy ((char *)dst->e, (char *)data, length);
+  dst->e += length;
+
+  ASSERT (dst->e <= (dst->buffer+dst->size));
+  
+  return length;
+}
+
+unsigned long bf_size (buffer_t *src) {
+  unsigned long total = 0;
+  buffer_t *b;
+  
+  for (b= src; b; b=b->next) 
+	total += bf_used (b);
+
+  return total;  
+}
+
+int bf_printf (buffer_t *dst, const char *format, ...) {
+  va_list ap;
+  int retval;
+  
+  va_start (ap, format);
+  retval = vsnprintf ((char *)dst->e, dst->size - bf_used (dst), format, ap);
+  va_end (ap);
+  
+  dst->e += retval;
+  
+  return retval;
+}
+
+int bf_vprintf (buffer_t *dst, const char *format, va_list ap) {
+  int retval;
+  
+  retval = vsnprintf ((char *)dst->e, dst->size - bf_used (dst), format, ap);
+  
+  dst->e += retval;
+  
+  return retval;
+}
+
+buffer_t *bf_buffer(unsigned char *text) {
+  static_buf.buffer = static_buf.s = text;
+  static_buf.e	= text + strlen ((char *)text);
+  static_buf.size = static_buf.s - static_buf.e;
+  static_buf.refcnt = 1;
+	
+  return &static_buf;
+}
+
