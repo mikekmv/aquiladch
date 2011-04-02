@@ -631,8 +631,11 @@ user_t *proto_nmdc_user_alloc (void *priv)
   init_bucket (&user->rate_getinfo, now.tv_sec);
   init_bucket (&user->rate_downloads, now.tv_sec);
 
-  /* warnings start with a full token load ! */
+  /* warnings and searches start with a full token load ! */
   user->rate_warnings.tokens = rates.warnings.burst;
+
+  /* searches start with a full load too to prevent users from getting the warning at login. */
+  user->rate_search.tokens = rates.search.refill;
 
   /* protocol private data */
   user->pdata = malloc (sizeof (nmdc_user_t));

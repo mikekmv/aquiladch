@@ -255,6 +255,9 @@ int server_write (client_t * cl, buffer_t * b)
     if (w < 0)
       w = 0;
 
+    if (!cl->outgoing.count)
+      buffering++;
+
     string_list_add (&cl->outgoing, cl->user, e);
     cl->offset = w;
     esocket_addevents (s, ESOCKET_EVENT_OUT);
@@ -263,7 +266,6 @@ int server_write (client_t * cl, buffer_t * b)
 			 DEFAULT_MAX_OUTGOINGSIZE) ? PROTO_TIMEOUT_BUFFERING :
 			PROTO_TIMEOUT_OVERFLOW);
     DPRINTF (" %p Starting to buffer... %lu\n", cl->user, cl->outgoing.size);
-    buffering++;
   };
 
   return t;
@@ -346,7 +348,7 @@ int server_handle_output (esocket_t * es)
 
       /* store "next" pointer and free buffer memory */
       n = b->next;
-      cl->outgoing.count -= bf_used (b);
+      cl->outgoing.size -= bf_used (b);
       bf_free_single (b);
     }
     e->data = b;

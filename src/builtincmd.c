@@ -1265,16 +1265,15 @@ leave:
   return 0;
 }
 
+#ifdef DEBUG
+#include "stacktrace.h"
 unsigned long handler_crash (plugin_user_t * user, buffer_t * output, void *priv,
 			     unsigned int argc, unsigned char **argv)
 {
-  int test = 0;
-
-  /* boom */
-  *((char *) NULL) = test;
-
+  ASSERT (0);
   return 0;
 }
+#endif
 
 /************************** config ******************************/
 
@@ -1584,8 +1583,9 @@ int builtincmd_init ()
   
   command_register ("passwd",     &handler_passwd,	0,            "Change your password.");
   command_register ("pwgen",      &handler_pwgen,	0,            "Let " HUBSOFT_NAME " generate a random password.");
+#ifdef DEBUG
   command_register ("crash",      &handler_crash,	CAP_OWNER,    "Let " HUBSOFT_NAME " CRASH!.");
-
+#endif
   gettimeofday (&savetime, NULL);
   
   plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *)handler_autosave);
