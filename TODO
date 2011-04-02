@@ -15,7 +15,6 @@ Large changes:
 		use generic cache elements of 1->N, 1->(N-1) and 1->1 nature.
 	- move all token parsing to nmdc_token.c (Is this worth it?)
 	- split off timers in esocket.c, export them genericly
-	- add poll() to esocket to replace epoll if epoll unavailable.
 	- consider adding the chunked approach FarCry suggested for the nicklistcache
 	- command line parameters.
 		- config dir

@@ -66,9 +66,10 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
   return h;
 }
 
-unsigned int esocket_add_type (esocket_handler_t * h, unsigned int events, input_handler_t input,
-			       output_handler_t output, error_handler_t error,
-			       timeout_handler_t timeout)
+unsigned int
+esocket_add_type (esocket_handler_t * h, unsigned int events,
+		  input_handler_t input, output_handler_t output,
+		  error_handler_t error, timeout_handler_t timeout)
 {
   if (h->curtypes == h->numtypes)
     return -1;
@@ -99,8 +100,9 @@ unsigned int esocket_setevents (esocket_t * s, unsigned int events)
 
     ee.events = events;
     ee.data.ptr = s;
-    epoll_ctl (h->epfd, events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL,
-	       s->socket, &ee);
+    epoll_ctl (h->epfd,
+	       events ? (s->
+			 events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL, s->socket, &ee);
     s->events = events;
   }
 #else
@@ -145,23 +147,26 @@ unsigned int esocket_setevents (esocket_t * s, unsigned int events)
 
 unsigned int esocket_addevents (esocket_t * s, unsigned int events)
 {
+#ifdef USE_EPOLL
   esocket_handler_t *h = s->handler;
 
-#ifdef USE_EPOLL
   if ((events | s->events) != s->events) {
     struct epoll_event ee;
 
     memset (&ee, 0, sizeof (ee));
     ee.events = s->events | events;
     ee.data.ptr = s;
-    epoll_ctl (h->epfd, ee.events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL,
-	       s->socket, &ee);
+    epoll_ctl (h->epfd,
+	       ee.events ? (s->
+			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
+	       EPOLL_CTL_DEL, s->socket, &ee);
     s->events = ee.events;
   }
 #else
 #ifdef POLL
   s->events |= events;
 #else
+  esocket_handler_t *h = s->handler;
   unsigned int e = ~s->events & events;
 
   if (e & ESOCKET_EVENT_IN) {
@@ -184,23 +189,26 @@ unsigned int esocket_addevents (esocket_t * s, unsigned int events)
 
 unsigned int esocket_clearevents (esocket_t * s, unsigned int events)
 {
+#ifdef USE_EPOLL
   esocket_handler_t *h = s->handler;
 
-#ifdef USE_EPOLL
   if (events & s->events) {
     struct epoll_event ee;
 
     memset (&ee, 0, sizeof (ee));
     ee.events = s->events & ~events;
     ee.data.ptr = s;
-    epoll_ctl (h->epfd, ee.events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL,
-	       s->socket, &ee);
+    epoll_ctl (h->epfd,
+	       ee.events ? (s->
+			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
+	       EPOLL_CTL_DEL, s->socket, &ee);
     s->events = ee.events;
   }
 #else
 #ifdef POLL
   s->events = s->events & ~events;
 #else
+  esocket_handler_t *h = s->handler;
   unsigned int e = s->events & events;
 
   if (e & ESOCKET_EVENT_IN) {
@@ -275,9 +283,6 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 #ifdef USE_EPOLL
   uint32_t events = 0;
 #endif
-#ifdef POLL
-  uint32_t events = 0;
-#endif
 
   esocket_handler_t *h = s->handler;
 
@@ -296,7 +301,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
       FD_CLR (s->socket, &h->output);
       h->no--;
 #else
-      events &= ~POLLOUT;
+      s->events &= ~POLLOUT;
 #endif
 #else
       events &= ~EPOLLOUT;
@@ -319,7 +324,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 	h->ne--;
       };
 #else
-      events &= ~s->events;
+      s->events = 0;
 #endif
 #else
       events &= ~s->events;
@@ -342,7 +347,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
       /* add to wait for connect */
 #ifndef USE_EPOLL
 #ifdef POLL
-      events |= POLLOUT;
+      s->events |= POLLOUT;
 #else
       FD_SET (s->socket, &h->output);
       h->no++;
@@ -369,7 +374,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 	h->ne++;
       };
 #else
-      events |= h->types[s->type].default_events;
+      s->events |= h->types[s->type].default_events;
 #endif
 #else
       events |= h->types[s->type].default_events;
@@ -387,16 +392,18 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 
     ee.events = events;
     ee.data.ptr = s;
-    epoll_ctl (h->epfd, ee.events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL,
-	       s->socket, &ee);
+    epoll_ctl (h->epfd,
+	       ee.events ? (s->
+			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
+	       EPOLL_CTL_DEL, s->socket, &ee);
     s->events = events;
   }
 #endif
   return 0;
 }
 
-esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, unsigned int state,
-			       unsigned long long context)
+esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
+			       unsigned int state, unsigned long long context)
 {
   esocket_t *socket;
 
@@ -539,7 +546,9 @@ unsigned int esocket_connect (esocket_t * s, char *address, unsigned int port)
 unsigned int esocket_remove_socket (esocket_t * s)
 {
 #ifndef USE_EPOLL
+#ifndef POLL
   int max;
+#endif
 #endif
   esocket_handler_t *h;
 
@@ -720,7 +729,8 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
 	      assert (!err);
 	      esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	      if ((h->types[s->type].error) && esocket_hasevent (s, ESOCKET_EVENT_OUT))
+	      if ((h->types[s->type].error)
+		  && esocket_hasevent (s, ESOCKET_EVENT_OUT))
 		h->types[s->type].error (s);
 
 	    }
@@ -735,7 +745,8 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       if (e && FD_ISSET (s->socket, e)) {
 	FD_CLR (s->socket, e);
 	s->to = now;
-	if ((h->types[s->type].error) && esocket_hasevent (s, ESOCKET_EVENT_ERR))
+	if ((h->types[s->type].error)
+	    && esocket_hasevent (s, ESOCKET_EVENT_ERR))
 	  h->types[s->type].error (s);
 	num--;
 	s = h->sockets;
@@ -753,6 +764,16 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     esocket_checktimers (h);
   }
 
+  /* clear freelist */
+  while (freelist) {
+    s = freelist;
+    freelist = s->next;
+    if (s->addr) {
+      freeaddrinfo (s->addr);
+      s->addr = NULL;
+    }
+    free (s);
+  }
   return 0;
 }
 #else
@@ -776,17 +797,33 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   for (i = 0, pfdi = pfd, li = l; i < h->n; ++i, ++pfdi, ++li) {
     pfdi->fd = s->socket;
     pfdi->events = s->events;
+    pfdi->revents = 0;
     *li = s;
     s = s->next;
   };
 
   n = poll (pfd, h->n, to->tv_sec * 1000 + to->tv_usec / 1000);
+  if (n < 0) {
+    perror ("esocket_select: poll:");
+    goto leave;
+  }
+  if (!n)
+    goto leave;
 
-  for (i = 0, pfdi = pfd, li = i; i < h->n; ++i, ++pfdi, ++li) {
+  gettimeofday (&now, NULL);
+  now.tv_sec += h->toval.tv_sec;
+  now.tv_usec += h->toval.tv_usec;
+  if (now.tv_usec > 1000000) {
+    now.tv_sec += now.tv_sec / 1000000;
+    now.tv_usec = now.tv_usec % 1000000;
+  }
+  /* h->n will grow when we accept users... */
+  n = h->n;
+  for (i = 0, pfdi = pfd, li = l; i < n; ++i, ++pfdi, ++li) {
     if (!pfdi->revents)
       continue;
 
-    s = *l;
+    s = *li;
     if (pfdi->revents & (POLLERR | POLLHUP | POLLNVAL)) {
       s->to = now;
       if (h->types[s->type].error)
@@ -795,7 +832,8 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	continue;
       if (s->socket < 0)
 	continue;
-    } else if (pfdi->revents & POLLIN) {
+    }
+    if (pfdi->revents & POLLIN) {
       s->to = now;
       if (h->types[s->type].input)
 	h->types[s->type].input (s);
@@ -803,7 +841,8 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	continue;
       if (s->socket < 0)
 	continue;
-    } else if (pfdi->revents & POLLOUT) {
+    }
+    if (pfdi->revents & POLLOUT) {
       s->to = now;
       switch (s->state) {
 	case SOCKSTATE_CONNECTED:
@@ -834,6 +873,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     }
   }
 
+leave:
   free (pfd);
   free (l);
 
@@ -847,7 +887,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     freelist = s->next;
     if (s->addr) {
       freeaddrinfo (s->addr);
-      s = NULL;
+      s->addr = NULL;
     }
     free (s);
   }
@@ -946,7 +986,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     freelist = s->next;
     if (s->addr) {
       freeaddrinfo (s->addr);
-      s = NULL;
+      s->addr = NULL;
     }
     free (s);
   }

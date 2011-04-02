@@ -249,7 +249,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
   /* rebuild reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "You were kicked because: ");
+  bf_printf (buf, "You were dropped because: ");
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -262,7 +262,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
 
   /* kick the user */
   ip.s_addr = target->ipaddress;
-  bf_printf (output, "Kicked user %s (ip %s) because: %.*s", target->nick, inet_ntoa (ip),
+  bf_printf (output, "Dropped user %s (ip %s) because: %.*s", target->nick, inet_ntoa (ip),
 	     bf_used (buf), buf->s);
 
   /* permban the user if the kick string contains _BAN_. */
@@ -1466,6 +1466,7 @@ int builtincmd_init ()
   command_register ("version",    &handler_version,      0,           "Displays the Aquila version.");
   command_register ("myip",       &handler_myip,         0,           "Shows you your IP address.");
   command_register ("kick",       &handler_kick,         CAP_KICK,    "Kick a user. Automatic short ban included.");
+  command_register ("drop",       &handler_drop,         CAP_KICK,    "Drop a user. Automatic short ban included.");
   command_register ("banip",      &handler_banip,        CAP_BAN,     "IP Ban a user by IP address.");
   command_register ("bannick",    &handler_bannick,      CAP_BAN,     "Nick ban a user by nick.");
   command_register ("ban",        &handler_ban,          CAP_BAN,     "Ban a user by nick.");

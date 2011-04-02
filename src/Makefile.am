@@ -11,7 +11,7 @@ aquila_LDADD = @ZLIB@
 indent: .indent
 
 .indent: $(aquila_SOURCES)
-	indent	$?
+	indent -l100 -bad -bap -br -ce -cli2 -cbi2 -nss -nbc -brs -lp -npsl -saf -sai -saw $?
 	rm *~
 	touch .indent
 
