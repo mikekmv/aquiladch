@@ -17,7 +17,8 @@ typedef enum { CFG_ELEM_PTR,
   CFG_ELEM_INT, CFG_ELEM_UINT,
   CFG_ELEM_DOUBLE,
   CFG_ELEM_STRING,
-  CFG_ELEM_IP
+  CFG_ELEM_IP,
+  CFG_ELEM_BYTESIZE
 } config_type_t;
 
 typedef struct config_element {

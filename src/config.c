@@ -166,6 +166,7 @@ int config_save (unsigned char *filename)
       case CFG_ELEM_CAP:
 	fprintf (fp, "%s %lu\n", elem->name, *elem->val.v_ulong);
 	break;
+      case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
 	fprintf (fp, "%s %Lu\n", elem->name, *elem->val.v_ulonglong);
 	break;
@@ -235,6 +236,7 @@ int config_load (unsigned char *filename)
       case CFG_ELEM_CAP:
 	sscanf (c, "%lu", elem->val.v_ulong);
 	break;
+      case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
 	sscanf (c, "%Lu", elem->val.v_ulonglong);
 	break;

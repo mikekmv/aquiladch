@@ -23,14 +23,14 @@ unsigned char *format_size (unsigned long long size)
   double output;
 
   i = 0;
-  output = size;
   while (((size >> 10) > 0) && (i < 5)) {
     i++;
+    output = size;
     size = size >> 10;
     output = output / 1024;
   };
 
-  snprintf (buf, 128, "%.2f %s", output, units[i]);
+  snprintf (buf, 128, "%.3f %s", output, units[i]);
 
   return buf;
 }

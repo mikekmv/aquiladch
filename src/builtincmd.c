@@ -1253,6 +1253,9 @@ int printconfig (buffer_t * buf, config_element_t * elem)
 	bf_printf (buf, "%s %s\n", elem->name, inet_ntoa (ia));
       }
       break;
+    case CFG_ELEM_BYTESIZE:
+      bf_printf (buf, "%s %s\n", elem->name, format_size (*elem->val.v_ulonglong));
+      break;
     default:
       bf_printf (buf, "%s !Unknown Type!\n", elem->name);
   }
@@ -1384,6 +1387,9 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	}
 	*elem->val.v_ip = ia.s_addr;
       }
+      break;
+    case CFG_ELEM_BYTESIZE:
+      *elem->val.v_ulonglong = parse_size (argv[2]);
       break;
     default:
       bf_printf (output, "%s !Unknown Type!\n", elem->name);

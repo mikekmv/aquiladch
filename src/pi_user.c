@@ -17,6 +17,7 @@
 #include "commands.h"
 #include "hub.h"
 #include "banlistclient.h"
+#include "utils.h"
 
 #include "esocket.h"
 
@@ -120,21 +121,21 @@ unsigned long pi_user_check_user (plugin_user_t * user)
     if (user->flags & PROTO_FLAG_REGISTERED) {
       if (user->op) {
 	if (user->share < sharereq_op_share) {
-	  plugin_user_printf (user, "Sorry, your class has a minimum share of %lu.\n",
-			      sharereq_op_share);
+	  plugin_user_printf (user, "Sorry, your class has a minimum share of %s.\n",
+			      format_size (sharereq_op_share));
 	  goto drop;
 	}
       } else {
 	if (user->share < sharereq_registered_share) {
-	  plugin_user_printf (user, "Sorry, your class has a minimum share of %lu.\n",
-			      sharereq_registered_share);
+	  plugin_user_printf (user, "Sorry, your class has a minimum share of %s.\n",
+			      format_size (sharereq_registered_share));
 	  goto drop;
 	}
       }
     } else {
       if (user->share < sharereq_unregistered_share) {
-	plugin_user_printf (user, "Sorry, your class has a minimum share of %lu.\n",
-			    sharereq_unregistered_share);
+	plugin_user_printf (user, "Sorry, your class has a minimum share of %s.\n",
+			    format_size (sharereq_unregistered_share));
 	goto drop;
       }
     }
@@ -348,8 +349,7 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 #else
   if ((user_unregistered_max + user_registered_max + user_op_max) >= 5000) {
     bf_printf (buf,
-	       "WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n",
-	       (FD_SETSIZE - 5));
+	       "WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n")
   }
 #endif
 #endif
@@ -390,9 +390,9 @@ int pi_user_init ()
 
   /* config_register ("file.clientbanlist",      CFG_ELEM_STRING, &ClientBanFileName,     "Name of the file containing the client banlist."); */
   
-  config_register ("sharemin.unregistered",   CFG_ELEM_ULONGLONG, &sharereq_unregistered_share, "Minimum share requirement for unregistered users.");
-  config_register ("sharemin.registered",     CFG_ELEM_ULONGLONG, &sharereq_registered_share,   "Minimum share requirement for registered users.");
-  config_register ("sharemin.op",             CFG_ELEM_ULONGLONG, &sharereq_op_share,           "Minimum share requirement for OPS");
+  config_register ("sharemin.unregistered",   CFG_ELEM_BYTESIZE, &sharereq_unregistered_share, "Minimum share requirement for unregistered users.");
+  config_register ("sharemin.registered",     CFG_ELEM_BYTESIZE, &sharereq_registered_share,   "Minimum share requirement for registered users.");
+  config_register ("sharemin.op",             CFG_ELEM_BYTESIZE, &sharereq_op_share,           "Minimum share requirement for OPS");
 
   config_register ("hub.unregistered.min",    CFG_ELEM_UINT,   &slotratios[0].minhub,  "Minimum hubs for unregistered users.");
   config_register ("hub.unregistered.max",    CFG_ELEM_UINT,   &slotratios[0].maxhub,  "Maximum hubs for unregistered users.");
