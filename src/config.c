@@ -16,6 +16,15 @@
 #include "hash.h"
 #include "cap.h"
 
+#include "../config.h"
+#include <sys/socket.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 config_element_t configlist[CONFIG_HASHSIZE];
 config_element_t config_sorted;
 
@@ -173,6 +182,18 @@ int config_save (unsigned char *filename)
 	fprintf (fp, "%s \"%s\"\n", elem->name,
 		 *elem->val.v_string ? *elem->val.v_string : (unsigned char *) "");
 	break;
+      case CFG_ELEM_IP:
+	{
+#ifdef HAVE_INET_NTOA
+	  struct in_addr ia;
+
+	  ia.s_addr = *elem->val.v_ip;
+	  fprintf (fp, "%s %s\n", elem->name, inet_ntoa (ia));
+#else
+#warning "inet_ntoa not support. Support for CFG_ELEM_IP disabled."
+#endif
+	  break;
+	}
       default:
 	fprintf (fp, "%s !Unknown Type!\n", elem->name);
     }
@@ -238,6 +259,18 @@ int config_load (unsigned char *filename)
 	};
 	*elem->val.v_string = strdup (c);
 	break;
+      case CFG_ELEM_IP:
+	{
+#ifdef HAVE_INET_NTOA
+	  struct in_addr ia;
+
+	  if (inet_aton (c, &ia))
+	    *elem->val.v_ip = ia.s_addr;
+#else
+#warning "inet_ntoa not support. Support for CFG_ELEM_IP disabled."
+#endif
+	  break;
+	}
     }
   };
 

@@ -68,6 +68,9 @@ user_t *hash_find_nick (hashlist_t * list, unsigned char *n, unsigned int len)
   uint32_t h, l;
   unsigned char nick[NICKLENGTH], *s, *d;
 
+  if (len > NICKLENGTH)
+    return NULL;
+
   /* lowercase nick for hashing */
   d = nick;
   s = n;

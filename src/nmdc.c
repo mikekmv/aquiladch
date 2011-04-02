@@ -22,14 +22,18 @@ int nmdc_init ()
 int nmdc_setup (esocket_handler_t * h)
 {
   config_element_t *listenport;
+  config_element_t *listenaddress;;
   config_element_t *extraports;
 
   nmdc_proto.setup ();
 
+  listenaddress = config_find ("NMDC.listenaddress");
+
   /* setup main listen port */
   listenport = config_find ("NMDC.listenport");
   if (listenport)
-    server_add_port (h, &nmdc_proto, *listenport->val.v_uint);
+    server_add_port (h, &nmdc_proto,
+		     (listenaddress ? *listenaddress->val.v_ip : 0L), *listenport->val.v_uint);
 
   /* setup extra nmdc ports */
   extraports = config_find ("NMDC.ExtraPorts");
@@ -41,7 +45,7 @@ int nmdc_setup (esocket_handler_t * h)
 
     p = work;
     while (*p && (port = strtol (p, &p, 0))) {
-      server_add_port (h, &nmdc_proto, port);
+      server_add_port (h, &nmdc_proto, (listenaddress ? *listenaddress->val.v_ip : 0L), port);
       while ((*p == ' ') || (*p == ','))
 	p++;
     }

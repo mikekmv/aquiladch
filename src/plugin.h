@@ -95,6 +95,7 @@ extern unsigned int plugin_user_next (plugin_user_t ** user);
 /* user management */
 extern plugin_user_t *plugin_user_find (unsigned char *name);
 extern unsigned int plugin_user_kick (plugin_user_t * user, buffer_t * message);
+extern unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message);
 extern unsigned int plugin_user_banip (plugin_user_t * user, buffer_t * message,
 				       unsigned long period);
 extern unsigned int plugin_user_banip_hard (plugin_user_t * user, buffer_t * message,

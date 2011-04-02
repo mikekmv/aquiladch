@@ -54,6 +54,6 @@ extern int server_setup (esocket_handler_t *);
 extern int server_disconnect_user (client_t *);
 extern int server_write (client_t *, buffer_t *);
 extern int server_settimeout (client_t * cl, unsigned long timeout);
-extern int server_add_port (esocket_handler_t * h, proto_t * proto, int port);
+extern int server_add_port (esocket_handler_t * h, proto_t * proto,  unsigned long address, int port);
 
 #endif /* _HUB_H_ */

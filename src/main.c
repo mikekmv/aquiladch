@@ -70,6 +70,9 @@ int main (int argc, char **argv)
   /* add lowest member of the statistices */
   gettimeofday (&boottime, NULL);
 
+  /* initialize the random generator */
+  srandom (boottime.tv_sec ^ boottime.tv_usec);
+
   /* setup socket handler */
   h = esocket_create_handler (3);
   h->toval.tv_sec = 60;

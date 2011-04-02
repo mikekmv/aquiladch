@@ -37,7 +37,7 @@ plugin_manager_t *manager;
 unsigned long pluginIDs;
 
 
-/******************************* UTILITIES: USER MANAGEMENT **************************************/
+/******************************* UTILITIES: REPORING **************************************/
 
 unsigned int plugin_report (buffer_t * message)
 {
@@ -53,6 +53,8 @@ unsigned int plugin_report (buffer_t * message)
 
   return ((plugin_private_t *) u->plugin_priv)->proto->chat_priv (HubSec, u, HubSec, message);
 }
+
+/******************************* UTILITIES: USER MANAGEMENT **************************************/
 
 unsigned int plugin_user_next (plugin_user_t ** user)
 {
@@ -75,6 +77,24 @@ plugin_user_t *plugin_user_find (unsigned char *name)
     return NULL;
 
   return &((plugin_private_t *) u->plugin_priv)->user;
+}
+
+/******************************* UTILITIES: KICK/BAN **************************************/
+
+unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message)
+{
+  struct timeval now;
+  user_t *u;
+
+  if (!user)
+    return 0;
+
+  u = ((plugin_private_t *) user->private)->parent;
+
+  if (u->state == PROTO_STATE_VIRTUAL)
+    return 0;
+
+  return ((plugin_private_t *) user->private)->proto->user_drop (u, message);
 }
 
 unsigned int plugin_user_kick (plugin_user_t * user, buffer_t * message)
@@ -295,6 +315,8 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   }
 }
 
+/******************************* UTILITIES: USER MANAGEMENT **************************************/
+
 unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message)
 {
   user_t *u;
@@ -328,6 +350,8 @@ unsigned int plugin_user_forcemove (plugin_user_t * user, unsigned char *destina
 
   return ((plugin_private_t *) user->private)->proto->user_forcemove (u, destination, message);
 }
+
+/******************************* UTILITIES: USER MANAGEMENT **************************************/
 
 unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message)
 {

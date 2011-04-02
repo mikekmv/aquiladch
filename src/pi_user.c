@@ -105,7 +105,8 @@ unsigned long pi_user_check_user (plugin_user_t * user)
 			  slotratios[class].minslot);
       goto drop;
     }
-    if (user->hubs[0] > (slotratios[class].ratio * user->slots)) {
+    /* if slot rules allow 0 slots, do not kick for a bad slotratio... */
+    if ((user->slots) && (user->hubs[0] > (slotratios[class].ratio * user->slots))) {
       plugin_user_printf (user, "Sorry, your class has a maximum hub/slot ratio of %f.\n",
 			  slotratios[class].ratio);
       goto drop;

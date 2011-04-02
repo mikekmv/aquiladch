@@ -15,6 +15,7 @@
 typedef struct {
   /* hub data */
   unsigned int ListenPort;
+  unsigned long ListenAddress;
   unsigned char *NMDCExtraPorts;
   unsigned char *HubName;
   unsigned char *HubDesc;

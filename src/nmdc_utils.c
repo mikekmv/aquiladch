@@ -139,8 +139,7 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
     e++;
   l = e - s;
   /* extrat sharesize */
-  share = strtoll (s, &e, 10);
-  ASSERT (e <= b->e);
+  share = strtoll (s, NULL, 10);
   if (share >= 0LL) {
     u->share = share;
     if (!(u->rights & CAP_SHAREHIDE)) {

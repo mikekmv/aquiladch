@@ -55,7 +55,7 @@ int server_settimeout (client_t * cl, unsigned long timeout)
 /*
  * GENERIC NETWORK FUNCTIONS
  */
-int setup_incoming_socket (int port)
+int setup_incoming_socket (unsigned long address, int port)
 {
   struct sockaddr_in a;
   int s, yes = 1;
@@ -73,6 +73,7 @@ int setup_incoming_socket (int port)
   }
   /* init the socket address structure */
   memset (&a, 0, sizeof (a));
+  a.sin_addr.s_addr = address;
   a.sin_port = htons (port);
   a.sin_family = AF_INET;
 
@@ -383,11 +384,11 @@ int server_error (esocket_t * s)
   return server_disconnect_user (cl);
 }
 
-int server_add_port (esocket_handler_t * h, proto_t * proto, int port)
+int server_add_port (esocket_handler_t * h, proto_t * proto, unsigned long address, int port)
 {
   int s;
 
-  s = setup_incoming_socket (port);
+  s = setup_incoming_socket (address, port);
   if (s >= 0)
     esocket_add_socket (h, es_type_listen, s, SOCKSTATE_CONNECTED, (unsigned long long) proto);
 

@@ -133,6 +133,7 @@ typedef struct {
   unsigned long srrobot;
   unsigned long srtoolong;
   unsigned long srfakesource;
+  unsigned long srnodest;
   unsigned long ctmoverflow;
   unsigned long ctmbadtarget;
   unsigned long rctmoverflow;

@@ -16,7 +16,8 @@ typedef enum { CFG_ELEM_PTR,
   CFG_ELEM_LONG, CFG_ELEM_ULONG, CFG_ELEM_CAP, CFG_ELEM_ULONGLONG,
   CFG_ELEM_INT, CFG_ELEM_UINT,
   CFG_ELEM_DOUBLE,
-  CFG_ELEM_STRING
+  CFG_ELEM_STRING,
+  CFG_ELEM_IP
 } config_type_t;
 
 typedef struct config_element {
@@ -31,6 +32,7 @@ typedef struct config_element {
     unsigned long *v_ulong;
     unsigned long long *v_ulonglong;
     unsigned long *v_cap;
+    unsigned long *v_ip;
     int *v_int;
     unsigned int *v_uint;
     double *v_double;

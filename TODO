@@ -6,16 +6,22 @@ Develstatus:
 	- SSL (not for 0.1)
 	- ADC (future)
 	- hublist support
-	- !drop command.
-	- redo tag parsing, make it more flexible. (allow missing fields.
+	- !warn command
+	- redo tag parsing, make it more flexible. (allow missing fields).
 
 Large changes:
 	- rebuild proto_nmdc_flush_cache()
 		use generic cache elements of 1->N, 1->(N-1) and 1->1 nature.
-	- move all token parsing to nmdc_token.c
+	- move all token parsing to nmdc_token.c (Is this worth it?)
 	- split off timers in esocket.c, export them genericly
 	- add poll() to esocket to replace epoll if epoll unavailable.
 	- consider adding the chunked approach FarCry suggested for the nicklistcache
+	- command line parameters.
+		- config dir
+
+Plugins:
+	- nick rules: unwanted/required nick prefixes
+	- passive user module.
 
 Ideas:
 	- if i ever implement something of a congestion measure, i could add

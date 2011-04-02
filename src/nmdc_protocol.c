@@ -1484,7 +1484,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	n = tkn->argument;
 
 	/* find end of nick */
-	for (; *c && (*c != ' '); c++);
+	for (; *c && (*c != ' ') && (c < b->e); ++c);
 	l = c - n;
 
 	if ((!*c) || strncmp (n, u->nick, l)) {
@@ -1495,7 +1495,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	c = b->e;
 	c--;			/* point to last valid character */
 	while ((*c != 5) && (c > b->s))
-	  c--;
+	  --c;
 	/* no \5 found */
 	if (*c != 5)
 	  break;
@@ -1503,10 +1503,17 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	l = b->e - c;
 	b->e = c - 1;
 
+	if (l > NICKLENGTH) {
+	  ++nmdc_stats.srnodest;
+	  break;
+	}
+
 	/* find target */
 	t = hash_find_nick (&hashlist, c, l);
-	if (!t)
+	if (!t) {
+	  ++nmdc_stats.srnodest;
 	  break;
+	}
 
 	if (!(t->rights & CAP_SEARCH))
 	  break;
@@ -1892,6 +1899,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	break;
       }
   }
+
   if (u && (u->state != PROTO_STATE_DISCONNECTED))
     server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
 

@@ -232,6 +232,75 @@ leave:
   return 0;
 }
 
+unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
+			    unsigned char **argv)
+{
+  unsigned int i = 0;
+  buffer_t *buf;
+  plugin_user_t *target;
+  struct in_addr ip;
+  unsigned char *c;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <nick> <reason>", argv[0]);
+    return 0;
+  };
+
+  /* rebuild reason */
+  buf = bf_alloc (1024);
+  *buf->e = '\0';
+  bf_printf (buf, "You were kicked because: ");
+  for (i = 2; i < argc; i++)
+    bf_printf (buf, " %s", argv[i]);
+
+  /* find target */
+  target = plugin_user_find (argv[1]);
+  if (!target) {
+    bf_printf (output, "User %s not found.\n", argv[1]);
+    goto leave;
+  }
+
+  /* kick the user */
+  ip.s_addr = target->ipaddress;
+  bf_printf (output, "Kicked user %s (ip %s) because: %.*s", target->nick, inet_ntoa (ip),
+	     bf_used (buf), buf->s);
+
+  /* permban the user if the kick string contains _BAN_. */
+  if ((c = strcasestr (buf->s, "_BAN_"))) {
+    unsigned long total = 0;
+
+    if (KickNoBanMayBan || (user->rights & CAP_BAN)) {
+      total = time_parse (c + 5);
+      if ((KickMaxBanTime == 0) || ((KickMaxBanTime > 0) && (total <= KickMaxBanTime))
+	  || (user->rights & CAP_BAN)) {
+	if (total != 0) {
+	  bf_printf (output, "\nBanning user for ");
+	  time_print (output, total);
+	  bf_strcat (output, "\n");
+	} else {
+	  bf_printf (output, "\nBanning user forever");
+	}
+	plugin_ban_nick (target->nick, buf, total);
+	plugin_ban_ip (target->ipaddress, buf, total);
+      } else {
+	bf_printf (output, "\nSorry. You cannot ban users for longer than ");
+	time_print (output, KickMaxBanTime);
+	bf_strcat (output, " with a kick.");
+      }
+    } else {
+      bf_printf (output, "\nSorry, you cannot ban.");
+    }
+  }
+
+  /* actually kick the user. */
+  plugin_user_drop (target, buf);
+
+leave:
+  bf_free (buf);
+
+  return 0;
+}
+
 
 unsigned long handler_zombie (plugin_user_t * user, buffer_t * output, void *priv,
 			      unsigned int argc, unsigned char **argv)
@@ -788,6 +857,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   unsigned long cap = 0, ncap = 0;
   account_type_t *type;
   account_t *account;
+  plugin_user_t *target;
 
   if (argc < 3) {
     bf_printf (output, "Usage: %s <nick> <group> [<rights...>]", argv[0]);
@@ -832,10 +902,29 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 		       account->rights | type->rights);
   bf_strcat (output, "\n");
-  if (plugin_user_find (argv[1]))
-    bf_printf (output,
-	       "User is already logged in. Tell him to rejoin to gain all rights of his new account.\n");
 
+  /* if user is online, warm him of his reg and notify to op we did so. */
+  target = plugin_user_find (argv[1]);
+  if (target) {
+    buffer_t *message;
+
+    /* warn user */
+    message = bf_alloc (1024);
+    bf_printf (message,
+	       "You have been registered by %s. Please use !passwd <password> to set a password "
+	       "and relogin to gain your new rights. You have been assigned:\n", user->nick);
+    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), message,
+			 account->rights | type->rights);
+    plugin_user_sayto (NULL, target, message);
+    bf_free (message);
+
+    bf_printf (output,
+	       "User is already logged in. He has been told to set a password and to relogin.\n");
+  } else {
+    bf_printf (output,
+	       "No user with nickname %s is currently logged in. Please notify the user yourself.\n",
+	       argv[1]);
+  }
 leave:
   return 0;
 }
@@ -1052,6 +1141,66 @@ leave:
   return 0;
 }
 
+unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv,
+			     unsigned int argc, unsigned char **argv)
+{
+  account_t *account = NULL;
+  unsigned char passwd[NICKLENGTH];
+  plugin_user_t *target;
+  unsigned int i;
+  buffer_t *message;
+
+  if ((argc < 1) || (argc > 2)) {
+    bf_printf (output,
+	       "Usage: %s [<nick>]\n If no nick is specified, your own password is changed.",
+	       argv[0]);
+    return 0;
+  }
+
+  if (argc > 1) {
+    account = account_find (argv[1]);
+    if (!account) {
+      bf_printf (output, "User %s not found.\n", argv[1]);
+      goto leave;
+    }
+
+    if (!(user->rights & CAP_USER) || (user->rights <= account->rights)) {
+      bf_printf (output, "You are not allowed to change %s\'s password\n", account->nick);
+      goto leave;
+    }
+
+    target = plugin_user_find (argv[1]);
+  } else {
+    account = account_find (user->nick);
+    if (!account) {
+      bf_printf (output, "No account for user %s.\n", user->nick);
+      goto leave;
+    }
+    target = user;
+  }
+
+  for (i = 0; i < (NICKLENGTH - 1); i++) {
+    passwd[i] = (33 + (random () % 90));
+  }
+  passwd[i] = '\0';
+
+  if (target) {
+    message = bf_alloc (1024);
+    bf_printf (message, "Your password was reset. It is now\n%*s\n", NICKLENGTH - 1, passwd);
+    plugin_user_priv (NULL, target, NULL, message, 1);
+    bf_free (message);
+  } else {
+    bf_printf (output, "The password of %s was reset. It is now\n%*s\n", argv[1], NICKLENGTH - 1,
+	       passwd);
+  }
+
+  /* copy the password */
+  account_pwd_set (account, passwd);
+  bf_printf (output, "Password set.\n");
+leave:
+  return 0;
+}
+
 /************************** config ******************************/
 
 #include "config.h"
@@ -1090,6 +1239,14 @@ int printconfig (buffer_t * buf, config_element_t * elem)
     case CFG_ELEM_STRING:
       bf_printf (buf, "%s \"%s\"\n", elem->name,
 		 *elem->val.v_string ? *elem->val.v_string : (unsigned char *) "(NULL)");
+      break;
+    case CFG_ELEM_IP:
+      {
+	struct in_addr ia;
+
+	ia.s_addr = *elem->val.v_ip;
+	bf_printf (buf, "%s %s\n", elem->name, inet_ntoa (ia));
+      }
       break;
     default:
       bf_printf (buf, "%s !Unknown Type!\n", elem->name);
@@ -1211,6 +1368,16 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
       if (*elem->val.v_string)
 	free (*elem->val.v_string);
       *elem->val.v_string = strdup (argv[2]);
+    case CFG_ELEM_IP:
+      {
+	struct in_addr ia;
+
+	if (!inet_aton (argv[2], &ia)) {
+	  bf_printf (output, "\"%s\" is not a valid IP address.\n");
+	  break;
+	}
+	*elem->val.v_ip = ia.s_addr;
+      }
       break;
     default:
       bf_printf (output, "%s !Unknown Type!\n", elem->name);
@@ -1332,6 +1499,7 @@ int builtincmd_init ()
   command_register ("save",       &handler_save,       CAP_CONFIG,    "Save all changes to file. WARNING: All previously saved settings will be lost!");
   
   command_register ("passwd",     &handler_passwd,	0,            "Change your password.");
+  command_register ("pwgen",      &handler_pwgen,	0,            "Let " HUBSOFT_NAME " generate a random password.");
 
   gettimeofday (&savetime, NULL);
   

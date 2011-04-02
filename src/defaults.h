@@ -41,6 +41,7 @@
 #define DEFAULT_MAX_OUTGOINGSIZE    100*1024
 
 #define DEFAULT_PORT	      411
+#define DEFAULT_IP	      0L
 #define DEFAULT_ADDRESS	      "localhost"
 #define NMDC_EXTRA_PORTS      ""
 

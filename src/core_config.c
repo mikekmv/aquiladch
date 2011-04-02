@@ -22,6 +22,7 @@ int core_config_init ()
 {
   /* *INDENT-OFF* */
   config.ListenPort      = DEFAULT_PORT;
+  config.ListenAddress   = DEFAULT_IP;
   config.NMDCExtraPorts  = strdup (NMDC_EXTRA_PORTS);
   config.HubName         = strdup (HUBNAME);
   config.HubDesc         = strdup (HUBDESC);
@@ -42,6 +43,7 @@ int core_config_init ()
   config.DefaultRights = CAP_DEFAULT;
   
   config_register ("NMDC.ListenPort",    CFG_ELEM_UINT,   &config.ListenPort,      "Port on which the hub will listen.");
+  config_register ("NMDC.ListenAddress", CFG_ELEM_IP,     &config.ListenAddress,   "IP on which the hub will listen, set to 0.0.0.0 for all.");
   config_register ("NMDC.ExtraPorts",    CFG_ELEM_STRING, &config.NMDCExtraPorts,  "Extra NMDC ports to listen on.");
   config_register ("HubAddress",         CFG_ELEM_STRING, &config.Hostname,        "A hostname (or IP address) where your machine will be reachable.");
   config_register ("HubName",            CFG_ELEM_STRING, &config.HubName,         "Name of the hub");

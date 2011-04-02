@@ -103,7 +103,10 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
   cmd->next->prev = cmd;
   cmd->prev = list;
   cmd->req_cap = cap;
-  cmd->help = strdup (help);
+  if (help)
+    cmd->help = strdup (help);
+  else
+    cmd->help = strdup ("No help available.");
   list->next = cmd;
 
   {
