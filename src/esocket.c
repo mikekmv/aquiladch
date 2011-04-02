@@ -405,7 +405,7 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
 
 #ifndef USE_EPOLL
 #ifndef USE_POLL
-  if (s > 1024)
+  if (s >= FD_SETSIZE)
     return NULL;
 #endif
 #endif

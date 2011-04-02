@@ -1368,6 +1368,7 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
       if (*elem->val.v_string)
 	free (*elem->val.v_string);
       *elem->val.v_string = strdup (argv[2]);
+      break;
     case CFG_ELEM_IP:
       {
 	struct in_addr ia;

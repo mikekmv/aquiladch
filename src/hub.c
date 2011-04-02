@@ -160,7 +160,7 @@ int accept_new_user (esocket_t * s)
   cl->es =
     esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED,
 			(unsigned long long) cl);
-  
+
   if (!cl->es) {
     int l;
     char buffer[256];
