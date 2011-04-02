@@ -434,6 +434,16 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
+
+indent: .indent
+
+.indent: $(aquila_SOURCES)
+	indent	$?
+	rm *~
+	touch .indent
+
+commit:
+	make -C .. commit
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

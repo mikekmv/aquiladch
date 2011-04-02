@@ -54,17 +54,18 @@ unsigned long long parse_size (unsigned char *token)
   return size * mod;
 }
 
-unsigned int time_print (buffer_t *b, unsigned long s) {
+unsigned int time_print (buffer_t * b, unsigned long s)
+{
   unsigned int weeks, days, hours, minutes, seconds, total;
-  
+
   seconds = s % 60;
   minutes = s / 60;
-  hours   = minutes / 60;
-  days    = hours / 24;
-  weeks   = days / 7;
+  hours = minutes / 60;
+  days = hours / 24;
+  weeks = days / 7;
   minutes = minutes % 60;
-  hours   = hours % 24;
-  days    = days % 7;
+  hours = hours % 24;
+  days = days % 7;
 
   total = 0;
 
@@ -73,46 +74,46 @@ unsigned int time_print (buffer_t *b, unsigned long s) {
   if (days)
     total += bf_printf (b, "%u day%s, ", days, (days > 1) ? "s" : "");
 
-  if ((hours || minutes || seconds)||(!(weeks||days)))
+  if ((hours || minutes || seconds) || (!(weeks || days)))
     total += bf_printf (b, "%02u:%02u:%02u", hours, minutes, seconds);
-  
+
   return total;
 }
 
-unsigned long time_parse (unsigned char * string) {
+unsigned long time_parse (unsigned char *string)
+{
   unsigned long total, reg;
   unsigned char *c;
-  
+
   reg = 0;
   total = 0;
   c = string;
   while (*c && *c != ' ') {
-    if (isdigit(*c)) {
+    if (isdigit (*c)) {
       reg *= 10;
-      reg += (*c -'0');
-    } else
-    if (isalpha(*c)) {
-      switch (tolower(*c)) {
-        case 'y':
-          reg *= 365*24*60*60;
-          break;
-        case 'w':
-          reg *= 7*24*60*60;
-          break;
-        case 'd':
-          reg *= 24*60*60;
-          break;
-        case 'h':
-          reg *= 3600;
-          break;
-        case 'm':
-          reg *= 60;
-          break;
-        case 's':
-          break;
-        default:
-          return 0;
-      } 
+      reg += (*c - '0');
+    } else if (isalpha (*c)) {
+      switch (tolower (*c)) {
+	case 'y':
+	  reg *= 365 * 24 * 60 * 60;
+	  break;
+	case 'w':
+	  reg *= 7 * 24 * 60 * 60;
+	  break;
+	case 'd':
+	  reg *= 24 * 60 * 60;
+	  break;
+	case 'h':
+	  reg *= 3600;
+	  break;
+	case 'm':
+	  reg *= 60;
+	  break;
+	case 's':
+	  break;
+	default:
+	  return 0;
+      }
       total += reg;
       reg = 0;
     } else {

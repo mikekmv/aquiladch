@@ -12,6 +12,7 @@
 /* IMPORTANT add new capabilitie names BEFORE the CAP_DEFAULT name
 	otherwise printcapabilities will not work correctly */
 
+/* *INDENT-OFF* */
 cap_array_t Capabilities[] = {
 	{"default",	CAP_DEFAULT,	"Default capabilities: chat, pmop, dl and search."},
 	{"reg",		CAP_REG,	"Default REG capabilities: chat, search, pm, dl."},
@@ -43,3 +44,4 @@ cap_array_t Capabilities[] = {
 	{"spam",	CAP_SPAM,	"Users with this right can post messages as large as they want."},
 	{0, 0, 0}
 };
+/* *INDENT-ON* */

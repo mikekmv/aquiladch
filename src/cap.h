@@ -43,9 +43,9 @@
 #define CAP_PRINT_OFFSET 8
 
 typedef struct cap_array {
-	unsigned char *name;
-	unsigned long cap;
-	unsigned char *help;
+  unsigned char *name;
+  unsigned long cap;
+  unsigned char *help;
 } cap_array_t;
 
 extern cap_array_t Capabilities[];

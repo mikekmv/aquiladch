@@ -33,21 +33,22 @@ unsigned long users = 0;
 unsigned long refused = 0;
 
 /* banlist */
-banlist_t        hardbanlist, softbanlist;
-banlist_nick_t   nickbanlist;
+banlist_t hardbanlist, softbanlist;
+banlist_nick_t nickbanlist;
 
 unsigned int es_type_server, es_type_listen;
 
 hub_statistics_t hubstats;
 
 int server_disconnect_user (client_t *);
-int server_handle_output (esocket_t *es);
+int server_handle_output (esocket_t * es);
 
 
 /* only reset timeouts if we aren't already in a buffering state */
-int server_settimeout (client_t *cl, unsigned long timeout) {
-  if (!cl->outgoing.count > 0) 
-  	return esocket_settimeout (cl->es, timeout);
+int server_settimeout (client_t * cl, unsigned long timeout)
+{
+  if (!cl->outgoing.count)
+    return esocket_settimeout (cl->es, timeout);
   return 0;
 }
 
@@ -133,21 +134,23 @@ int accept_new_user (esocket_t * s)
   memset (cl, 0, sizeof (client_t));
 
   /* create new context */
-  cl->proto = (proto_t *)s->context;
+  cl->proto = (proto_t *) s->context;
   cl->user = cl->proto->user_alloc (cl);
-  
+
   /* user connection refused. */
   if (!cl->user) {
-  	shutdown (r, SHUT_RDWR);
-  	close (r);
-  	
-  	free (cl);
-  	return -1;
+    shutdown (r, SHUT_RDWR);
+    close (r);
+
+    free (cl);
+    return -1;
   }
-  
+
   /* init some fields */
   cl->user->ipaddress = client_address.sin_addr.s_addr;
-  cl->es = esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED, (unsigned long long) cl);
+  cl->es =
+    esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED,
+			(unsigned long long) cl);
   esocket_settimeout (cl->es, PROTO_TIMEOUT_INIT);
 
   DPRINTF (" Accepted %s user from %s\n", cl->proto->name, inet_ntoa (client_address.sin_addr));
@@ -158,47 +161,50 @@ int accept_new_user (esocket_t * s)
   return r;
 }
 
-int server_write (client_t *cl, buffer_t *b) {
+int server_write (client_t * cl, buffer_t * b)
+{
   esocket_t *s = cl->es;
   long l, w, t;
   buffer_t *e;
-  
+
   /* if data is queued, queue this after it */
   if (cl->outgoing.count) {
-  	if (cl->outgoing.count > DEFAULT_MAX_OUTGOINGBUFFERS)
-	  	esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
-	
-	/* if we are still below max buffer per user, queue buffer */
-	if (cl->outgoing.size < DEFAULT_MAX_OUTGOINGSIZE) {
-		string_list_add (&cl->outgoing, cl->user, b);
-	  	DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count, cl->outgoing.size, cl->user->nick);
-	}
-	
-  	/* try sending some of that data */
-	server_handle_output (s);
-	return 0;
+    if (cl->outgoing.count > DEFAULT_MAX_OUTGOINGBUFFERS)
+      esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
+
+    /* if we are still below max buffer per user, queue buffer */
+    if (cl->outgoing.size < DEFAULT_MAX_OUTGOINGSIZE) {
+      string_list_add (&cl->outgoing, cl->user, b);
+      DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count,
+	       cl->outgoing.size, cl->user->nick);
+    }
+
+    /* try sending some of that data */
+    server_handle_output (s);
+    return 0;
   }
-  
+
   /* write as much as we are able */
   w = l = t = 0;
-  for (e = b; e ; e = e->next) {
-  	l = bf_used (e);
-  	t += l;
-	w = write (s->socket, e->s, l);
-        if (w < 0) {
-          DPRINTF ("server_write: write: %s\n", strerror (errno));
-          switch (errno) {
-            case EAGAIN:
-          	break;
-            case EPIPE:
-            	return server_disconnect_user (cl);
-            default:
-              return -1;
-          }
-          break;
-        }
-        hubstats.TotalBytesSend += w;
-	if (w != l) break;
+  for (e = b; e; e = e->next) {
+    l = bf_used (e);
+    t += l;
+    w = write (s->socket, e->s, l);
+    if (w < 0) {
+      DPRINTF ("server_write: write: %s\n", strerror (errno));
+      switch (errno) {
+	case EAGAIN:
+	  break;
+	case EPIPE:
+	  return server_disconnect_user (cl);
+	default:
+	  return -1;
+      }
+      break;
+    }
+    hubstats.TotalBytesSend += w;
+    if (w != l)
+      break;
   }
   if (w > 0)
     t += w - l;
@@ -207,20 +213,20 @@ int server_write (client_t *cl, buffer_t *b) {
    * and ask esocket to notify us as the socket becomes writable 
    */
   if (e) {
-        if (w < 0)
-          w=0;
+    if (w < 0)
+      w = 0;
 
-  	string_list_add (&cl->outgoing, cl->user, e);
-  	cl->offset = w;
-  	esocket_addevents (s, ESOCKET_EVENT_OUT);
-  	esocket_settimeout (s, PROTO_TIMEOUT_BUFFERING);
-  	DPRINTF (" %p Starting to buffer... %lu\n", cl->user, cl->outgoing.size);
+    string_list_add (&cl->outgoing, cl->user, e);
+    cl->offset = w;
+    esocket_addevents (s, ESOCKET_EVENT_OUT);
+    esocket_settimeout (s, PROTO_TIMEOUT_BUFFERING);
+    DPRINTF (" %p Starting to buffer... %lu\n", cl->user, cl->outgoing.size);
   };
-  
+
   return t;
 }
 
-int server_disconnect_user (client_t *cl)
+int server_disconnect_user (client_t * cl)
 {
   int s;
 
@@ -229,10 +235,10 @@ int server_disconnect_user (client_t *cl)
 
   /* close the real socket */
   if (cl->es) {
-  	s = cl->es->socket;
-  	esocket_remove_socket (cl->es);
-  	cl->es = NULL;
-  	close (s);
+    s = cl->es->socket;
+    esocket_remove_socket (cl->es);
+    cl->es = NULL;
+    close (s);
   }
 
   /* clear buffered output buffers */
@@ -252,38 +258,40 @@ int server_disconnect_user (client_t *cl)
   return 0;
 }
 
-int server_handle_output (esocket_t *es) 
+int server_handle_output (esocket_t * es)
 {
-  client_t *cl = (client_t *)es->context;
-  buffer_t *b, *n;  
+  client_t *cl = (client_t *) es->context;
+  buffer_t *b, *n;
   long w, l;
   unsigned long t;
   string_list_entry_t *e;
-  
+
   DPRINTF (" %p Writing output (%u, %lu)...", cl->user, cl->outgoing.count, cl->offset);
-  w = 0; t = 0;
+  w = 0;
+  t = 0;
   b = NULL;
   /* write out as much data as possible */
-  for (e = cl->outgoing.first; e ; e = cl->outgoing.first) {
-    for (b = e->data; b ; b = n) {
-       /* write data */
+  for (e = cl->outgoing.first; e; e = cl->outgoing.first) {
+    for (b = e->data; b; b = n) {
+      /* write data */
       l = bf_used (b) - cl->offset;
-      w = write (es->socket, b->s+cl->offset, l);
+      w = write (es->socket, b->s + cl->offset, l);
       if (w < 0) {
-        switch (errno) {
-          case EAGAIN:
-          	break;
-          case EPIPE:
-          	return server_disconnect_user (cl);
-          default:
-            return -1;
-        }
-        w = 0;
-        break;
+	switch (errno) {
+	  case EAGAIN:
+	    break;
+	  case EPIPE:
+	    return server_disconnect_user (cl);
+	  default:
+	    return -1;
+	}
+	w = 0;
+	break;
       }
       hubstats.TotalBytesSend += w;
       t += w;
-      if (w != l) break;
+      if (w != l)
+	break;
       cl->offset = 0;
 
       /* store "next" pointer and free buffer memory */
@@ -291,33 +299,37 @@ int server_handle_output (esocket_t *es)
       bf_free_single (b);
     }
     e->data = b;
-    if (b) break;
-    
+    if (b)
+      break;
+
     string_list_del (&cl->outgoing, e);
   }
   /* still not all data written */
   if (b) {
-    if (w>0)
+    if (w > 0)
       cl->offset += w;
-    if (t > (cl->outgoing.size/10))
-	    esocket_settimeout (cl->es, (cl->outgoing.count < 50) ? PROTO_TIMEOUT_BUFFERING : PROTO_TIMEOUT_OVERFLOW);
+    if (t > (cl->outgoing.size / 10))
+      esocket_settimeout (cl->es,
+			  (cl->outgoing.count <
+			   50) ? PROTO_TIMEOUT_BUFFERING : PROTO_TIMEOUT_OVERFLOW);
 
-    DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu)\n", t, cl->outgoing.count, cl->outgoing.size, cl->offset);
+    DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu)\n", t, cl->outgoing.count,
+	     cl->outgoing.size, cl->offset);
     return 0;
   }
 
   DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
   /* all data was written, we don't need the output event anymore */
   if (!cl->outgoing.count) {
-	  esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
-	  esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
+    esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
+    esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
   }
   return 0;
 }
 
 int server_handle_input (esocket_t * s)
 {
-  client_t *cl = (client_t *)s->context;
+  client_t *cl = (client_t *) s->context;
   buffer_t *b;
   int n, first;
 
@@ -344,19 +356,20 @@ int server_handle_input (esocket_t * s)
     b = NULL;
   }
 
-  if ((n<=0) && first) {
+  if ((n <= 0) && first) {
     server_disconnect_user (cl);
     return -1;
   }
 
-  cl->proto->handle_input (cl->user, &cl->buffers);
-  
+  if (cl->buffers)
+    cl->proto->handle_input (cl->user, &cl->buffers);
+
   return 0;
 }
 
 int server_timeout (esocket_t * s)
 {
-  client_t *cl = (client_t *) ((unsigned long long)s->context);
+  client_t *cl = (client_t *) ((unsigned long long) s->context);
 
   DPRINTF ("Timeout user %s : %d\n", cl->user->nick, cl->user->state);
   return server_disconnect_user (cl);
@@ -364,18 +377,19 @@ int server_timeout (esocket_t * s)
 
 int server_error (esocket_t * s)
 {
-  client_t *cl = (client_t *) ((unsigned long long)s->context);
+  client_t *cl = (client_t *) ((unsigned long long) s->context);
 
   DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
   return server_disconnect_user (cl);
 }
 
-int server_add_port (esocket_handler_t *h, proto_t *proto, int port) {
+int server_add_port (esocket_handler_t * h, proto_t * proto, int port)
+{
   int s;
 
   s = setup_incoming_socket (port);
   if (s >= 0)
-    esocket_add_socket (h, es_type_listen, s, SOCKSTATE_CONNECTED, (unsigned long long)proto);
+    esocket_add_socket (h, es_type_listen, s, SOCKSTATE_CONNECTED, (unsigned long long) proto);
 
   return 0;
 }
@@ -383,7 +397,9 @@ int server_add_port (esocket_handler_t *h, proto_t *proto, int port) {
 int server_setup (esocket_handler_t * h)
 {
   es_type_listen = esocket_add_type (h, ESOCKET_EVENT_IN, accept_new_user, NULL, NULL, NULL);
-  es_type_server = esocket_add_type (h, ESOCKET_EVENT_IN, server_handle_input, server_handle_output, server_error, server_timeout);
+  es_type_server =
+    esocket_add_type (h, ESOCKET_EVENT_IN, server_handle_input, server_handle_output, server_error,
+		      server_timeout);
 
   /* set default timeout */
   h->toval.tv_sec = 1200;
@@ -391,14 +407,15 @@ int server_setup (esocket_handler_t * h)
   return 0;
 }
 
-int server_init () {
+int server_init ()
+{
   memset (&hubstats, 0, sizeof (hubstats));
-  
+
   banlist_init (&hardbanlist);
   banlist_init (&softbanlist);
   banlist_nick_init (&nickbanlist);
 
-  core_config_init();
-  
+  core_config_init ();
+
   return 0;
 }

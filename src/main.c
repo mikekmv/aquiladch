@@ -41,30 +41,30 @@ int main (int argc, char **argv)
   struct timeval to, tnow, tnext;
   esocket_handler_t *h;
   sigset_t set;
-  
-  /* unbuffer the output*/ 
-  setvbuf(stdout, (char *)NULL, _IOLBF, 0);
+
+  /* unbuffer the output */
+  setvbuf (stdout, (char *) NULL, _IOLBF, 0);
 
   sigemptyset (&set);
   sigaddset (&set, SIGPIPE);
   sigprocmask (SIG_BLOCK, &set, NULL);
 
   /* initialize the global configuration */
-  config_init();
-  accounts_init();
-  plugin_init();
-  command_init();
-  builtincmd_init();
-  server_init();
+  config_init ();
+  accounts_init ();
+  plugin_init ();
+  command_init ();
+  builtincmd_init ();
+  server_init ();
   nmdc_init ();
 
-  pi_user_init();
-  pi_chatroom_init();
-  pi_statistics_init();
-  pi_trigger_init();
-  pi_chatlog_init();
-  pi_statbot_init();
-  
+  pi_user_init ();
+  pi_chatroom_init ();
+  pi_statistics_init ();
+  pi_trigger_init ();
+  pi_chatlog_init ();
+  pi_statbot_init ();
+
   plugin_config_load ();
 
   /* add lowest member of the statistices */
@@ -83,7 +83,7 @@ int main (int argc, char **argv)
   gettimeofday (&tnext, NULL);
   tnext.tv_sec += 1;
   cont = 1;
-  for (;cont;) {
+  for (; cont;) {
     /* do not assume select does not alter timeout value */
     to.tv_sec = 1;
     to.tv_usec = 0;
@@ -96,11 +96,11 @@ int main (int argc, char **argv)
     if (timercmp (&tnow, &tnext, >=)) {
       tnext = tnow;
       tnext.tv_sec += 1;
-      nmdc_proto.flush_cache();
+      nmdc_proto.flush_cache ();
     }
   }
   /* should never be reached... */
   printf ("Shutdown\n");
-  
+
   return 0;
 }

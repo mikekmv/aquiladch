@@ -104,33 +104,33 @@ account_t *account_add (account_type_t * type, unsigned char *nick)
   accounts = a;
 
   a->class = type->id;
-  type->refcnt ++;
+  type->refcnt++;
   a->classp = type;
- 
+
   account_count++;
 
   return a;
 }
 
-int account_pwd_set (account_t *account, unsigned char *pwd) 
+int account_pwd_set (account_t * account, unsigned char *pwd)
 {
   unsigned char salt[3];
 
-  salt [0] = ((random() % 46) + 45);
-  salt [1] = ((random() % 46) + 45);
-  salt [2] = 0;
-  
+  salt[0] = ((random () % 46) + 45);
+  salt[1] = ((random () % 46) + 45);
+  salt[2] = 0;
+
   strcpy (account->passwd, crypt (pwd, salt));
-  
+
   return 0;
 }
 
-int account_pwd_check (account_t *account, unsigned char *pwd) 
+int account_pwd_check (account_t * account, unsigned char *pwd)
 {
   return !strcmp (account->passwd, crypt (pwd, account->passwd));
 }
 
-account_t * account_find (unsigned char *nick)
+account_t *account_find (unsigned char *nick)
 {
   account_t *r;
 
@@ -142,13 +142,14 @@ account_t * account_find (unsigned char *nick)
 
 }
 
-unsigned int account_set_type (account_t *a, account_type_t *new) {
+unsigned int account_set_type (account_t * a, account_type_t * new)
+{
   account_type_t *old = a->classp;
 
   /* adjust group refcnts. */
-  new->refcnt ++;
-  old->refcnt --;
-  
+  new->refcnt++;
+  old->refcnt--;
+
   /* store new data */
   a->class = new->id;
   a->classp = new;
@@ -160,12 +161,12 @@ unsigned int account_set_type (account_t *a, account_type_t *new) {
 unsigned int account_del (account_t * a)
 {
   account_type_t *t;
-  
+
   account_count--;
-  
+
   t = account_type_find_byid (a->class);
   t->refcnt--;
-  
+
   if (a->next)
     a->next->prev = a->prev;
   if (a->prev) {
@@ -173,7 +174,7 @@ unsigned int account_del (account_t * a)
   } else {
     accounts = a->next;
   }
-  
+
   free (a);
 
   return 0;
@@ -187,7 +188,8 @@ unsigned int accounts_load (const unsigned char *filename)
   unsigned char buffer[1024];
 
   fp = fopen (filename, "r");
-  if (!fp) return errno;
+  if (!fp)
+    return errno;
 
   fgets (buffer, 1024, fp);
   while (!feof (fp)) {
@@ -198,7 +200,7 @@ unsigned int accounts_load (const unsigned char *filename)
 	sscanf (buffer, "T %s %lu %u", t->name, &t->rights, &t->id);
 
 	if ((ot = account_type_find (t->name)))
-		account_type_del (ot);
+	  account_type_del (ot);
 
 	t->next = accountTypes;
 	if (t->next)
@@ -218,7 +220,7 @@ unsigned int accounts_load (const unsigned char *filename)
 	sscanf (buffer, "A %s %s %lu %u %lu", a->nick, a->passwd, &a->rights, &a->class, &a->id);
 
 	if ((oa = account_find (a->nick)))
-		account_del (oa);
+	  account_del (oa);
 
 	a->next = accounts;
 	if (a->next)
@@ -227,8 +229,8 @@ unsigned int accounts_load (const unsigned char *filename)
 	accounts = a;
 
 	if (a->passwd[0] == 1)
-		a->passwd[0] = '\0';
-	
+	  a->passwd[0] = '\0';
+
 	for (t = accountTypes; t; t = t->next)
 	  if (t->id == a->class)
 	    break;
@@ -236,7 +238,7 @@ unsigned int accounts_load (const unsigned char *filename)
 	if (t)
 	  t->refcnt++;
 
-	ASSERT (t);	
+	ASSERT (t);
 	a->classp = t;
 	if (a->id >= account_ids)
 	  account_ids = t->id + 1;
@@ -261,13 +263,15 @@ unsigned int accounts_save (const unsigned char *filename)
   nopasswd[0] = 1;
   nopasswd[1] = 0;
   fp = fopen (filename, "w+");
-  if (!fp) return errno;
+  if (!fp)
+    return errno;
 
   for (t = accountTypes; t; t = t->next)
     fprintf (fp, "T %s %lu %d\n", t->name, t->rights, t->id);
 
   for (a = accounts; a; a = a->next)
-    fprintf (fp, "A %s %s %lu %d %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd, a->rights, a->class, a->id);
+    fprintf (fp, "A %s %s %lu %d %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd, a->rights,
+	     a->class, a->id);
 
   fclose (fp);
   return 0;

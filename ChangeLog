@@ -1,5 +1,19 @@
 This is the Aquila Changelog.
 
+0.1.2:
+	Fix a few bugs in rebuild_myinfo that could crash the hub.
+	Fix a off-by-one read in unescape_string
+	Fix a few signed errors. 
+	Fix crash when a EPIPE happened on a forcemove.
+	Split nmdc_handle_token into multiple functions.
+	Fix valgrind warning by clearing hashlist struct.
+	Fix illegal pointer reference in nmdc_handle_input
+	Fix server_settimeout... timeouts work again.
+	Do not call proto.handle_input if there are no buffers.
+	init hashlist before use.
+	Added indent and commit target.
+	Fixed hub send a lot of unnecessary |s.
+
 0.1.1:
 	Fixed bug in pm handling. no longer extra \0 chars attached.
 	Added check for linux/eventpoll.h to see if kernel supports epoll.

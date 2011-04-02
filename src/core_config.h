@@ -13,32 +13,32 @@
 #include "defaults.h"
 
 typedef struct {
-	/* hub data */
-	unsigned int  ListenPort;
-	unsigned char *NMDCExtraPorts;
-	unsigned char *HubName;
-	unsigned char *HubDesc;
-	unsigned char *HubOwner;
-	unsigned char *Hostname;
-	unsigned char *HubSecurityNick;
-	unsigned char *HubSecurityDesc;
+  /* hub data */
+  unsigned int ListenPort;
+  unsigned char *NMDCExtraPorts;
+  unsigned char *HubName;
+  unsigned char *HubDesc;
+  unsigned char *HubOwner;
+  unsigned char *Hostname;
+  unsigned char *HubSecurityNick;
+  unsigned char *HubSecurityDesc;
 
-	/* protocol settings */
-	unsigned int   MaxDescriptionLength;
-	unsigned int   MaxTagLength;
-	unsigned int   MaxSpeedLength;
-	unsigned int   MaxEMailLength;
-	unsigned int   MaxShareLength;
+  /* protocol settings */
+  unsigned int MaxDescriptionLength;
+  unsigned int MaxTagLength;
+  unsigned int MaxSpeedLength;
+  unsigned int MaxEMailLength;
+  unsigned int MaxShareLength;
 
-	/* user specific settings */
-	unsigned long  DefaultRights;
-	unsigned long   defaultKickPeriod;
-	
-	/* more settings */
-	unsigned char  *Redirect;
+  /* user specific settings */
+  unsigned long DefaultRights;
+  unsigned long defaultKickPeriod;
+
+  /* more settings */
+  unsigned char *Redirect;
 } config_t;
 
-extern config_t	config;
+extern config_t config;
 
 extern int core_config_init ();
 

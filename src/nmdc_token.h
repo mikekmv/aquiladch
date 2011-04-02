@@ -11,40 +11,40 @@
 #define _TOKEN_H_
 
 enum {
-	 TOKEN_UNIDENTIFIED = 0,
-	 TOKEN_CHAT,
-	 TOKEN_MYINFO,
-	 TOKEN_MYPASS,
-	 TOKEN_MULTISEARCH,
-	 TOKEN_MULTICONNECTTOME,
-	 TOKEN_SEARCH,
-	 TOKEN_SR,
-	 TOKEN_SUPPORTS,
-	 TOKEN_LOCK,
-	 TOKEN_KEY,
-	 TOKEN_KICK,
-	 TOKEN_HELLO,
-	 TOKEN_GETNICKLIST,
-	 TOKEN_GETINFO,
-	 TOKEN_CONNECTTOME,
-	 TOKEN_REVCONNECTOTME,
-	 TOKEN_TO,
-	 TOKEN_QUIT,
-	 TOKEN_OPFORCEMOVE,
-	 TOKEN_VALIDATENICK,
-	 TOKEN_BOTINFO,
-	 TOKEN_NUM
+  TOKEN_UNIDENTIFIED = 0,
+  TOKEN_CHAT,
+  TOKEN_MYINFO,
+  TOKEN_MYPASS,
+  TOKEN_MULTISEARCH,
+  TOKEN_MULTICONNECTTOME,
+  TOKEN_SEARCH,
+  TOKEN_SR,
+  TOKEN_SUPPORTS,
+  TOKEN_LOCK,
+  TOKEN_KEY,
+  TOKEN_KICK,
+  TOKEN_HELLO,
+  TOKEN_GETNICKLIST,
+  TOKEN_GETINFO,
+  TOKEN_CONNECTTOME,
+  TOKEN_REVCONNECTOTME,
+  TOKEN_TO,
+  TOKEN_QUIT,
+  TOKEN_OPFORCEMOVE,
+  TOKEN_VALIDATENICK,
+  TOKEN_BOTINFO,
+  TOKEN_NUM
 };
 
 typedef struct token_definition {
-	unsigned short num;
-	unsigned short len;
-	unsigned char *identifier;
+  unsigned short num;
+  unsigned short len;
+  unsigned char *identifier;
 } token_definition_t;
 
 typedef struct token {
-	unsigned short type;
-	unsigned char *argument;
+  unsigned short type;
+  unsigned char *token, *argument;
 } token_t;
 
 extern struct token_definition Tokens[];

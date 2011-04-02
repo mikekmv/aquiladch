@@ -60,7 +60,7 @@
 #define DEFAULT_MAXTAGLENGTH		50
 #define DEFAULT_MAXSPEEDLENGTH		10
 #define DEFAULT_MAXEMAILLENGTH		50
-#define DEFAULT_MAXSHARELENGTH		13 /* should be in the PetaByte range */
+#define DEFAULT_MAXSHARELENGTH		13	/* should be in the PetaByte range */
 
 #define DEFAULT_KICKPERIOD		300
 

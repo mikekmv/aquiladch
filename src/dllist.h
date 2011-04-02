@@ -17,12 +17,12 @@
  */
 
 typedef struct dllist_entry {
-	struct dllist_entry *next, *prev;
+  struct dllist_entry *next, *prev;
 } dllist_entry_t;
 
 typedef struct {
-	dllist_entry_t *hashlist;
-	unsigned long buckets;
+  dllist_entry_t *hashlist;
+  unsigned long buckets;
 } dllist_t;
 
 /*
@@ -38,11 +38,11 @@ typedef struct {
 #define dllist_prev(e) ((void*)((dllist_entry_t *)e)->prev)
 #define dllist_end(lst) (lst)
 
-extern __inline__ void dllist_del (dllist_entry_t *e);
-extern __inline__ void dllist_append (dllist_entry_t* list, dllist_entry_t *new);
-extern __inline__ void dllist_prepend (dllist_entry_t *list, dllist_entry_t *new);
-extern __inline__ void dllist_init (dllist_entry_t* list);
-extern __inline__ int dlhashlist_init (dllist_t *list, unsigned long buckets);
+extern __inline__ void dllist_del (dllist_entry_t * e);
+extern __inline__ void dllist_append (dllist_entry_t * list, dllist_entry_t * new);
+extern __inline__ void dllist_prepend (dllist_entry_t * list, dllist_entry_t * new);
+extern __inline__ void dllist_init (dllist_entry_t * list);
+extern __inline__ int dlhashlist_init (dllist_t * list, unsigned long buckets);
 
 #define dlhashlist_append(lst, hsh, entry) dllist_append (&(((dllist_t *)lst)->hashlist[hsh]), entry)
 #define dlhashlist_prepend(lst, hsh, Entry) dllist_prepend (&( ((dllist_t *)lst)->hashlist[hsh] ), (dllist_entry_t *)Entry)

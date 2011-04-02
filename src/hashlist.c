@@ -23,41 +23,42 @@
 #include "hash.h"
 #include "hashlist.h"
 
-void hash_init (hashlist_t* list)
+void hash_init (hashlist_t * list)
 {
   dlhashlist_init (&list->nick, SERVER_HASH_ENTRIES);
-  dlhashlist_init (&list->ip,   SERVER_HASH_ENTRIES);
+  dlhashlist_init (&list->ip, SERVER_HASH_ENTRIES);
 }
 
-void hash_deluser(hashlist_entry_t *entry) { 
-  dllist_del(&entry->nick);
-  dllist_del(&entry->ip);
+void hash_deluser (hashlist_entry_t * entry)
+{
+  dllist_del (&entry->nick);
+  dllist_del (&entry->ip);
 }
 
 /* i choose append so it doesn't influence "to top" handling */
-unsigned int hash_adduser (hashlist_t * list, user_t *u)
+unsigned int hash_adduser (hashlist_t * list, user_t * u)
 {
   uint32_t h, l;
   unsigned char nick[NICKLENGTH], *s, *d;
-  hashlist_entry_t *entry = (hashlist_entry_t *)u;
+  hashlist_entry_t *entry = (hashlist_entry_t *) u;
 
   /* Use nick to link it in list */
   d = nick;
   s = u->nick;
   for (l = 0; *s && (l < NICKLENGTH); l++)
-    *d++ = isalpha(*s) ? tolower (*s++) : *s++;
+    *d++ = isalpha (*s) ? tolower (*s++) : *s++;
 
   h = SuperFastHash (nick, l);
   h &= SERVER_HASH_MASK;
 
-  dllist_append (dllist_bucket (&list->nick, h), (dllist_entry_t *)&entry->nick);
+  dllist_append (dllist_bucket (&list->nick, h), (dllist_entry_t *) & entry->nick);
 
   /* use ip to link it in ip list */
-  h = SuperFastHash ((const unsigned char *)&u->ipaddress, 4);
+  h = SuperFastHash ((const unsigned char *) &u->ipaddress, 4);
   h &= SERVER_HASH_MASK;
-  
-  dllist_append (dllist_bucket (&list->ip, h), (dllist_entry_t *)&entry->ip);
-    
+
+  dllist_append (dllist_bucket (&list->ip, h), (dllist_entry_t *) & entry->ip);
+
   return 0;
 }
 
@@ -71,18 +72,20 @@ user_t *hash_find_nick (hashlist_t * list, unsigned char *n, unsigned int len)
   d = nick;
   s = n;
   for (l = 0; *s && (l < len); l++)
-    *d++ = isalpha(*s) ? tolower (*s++) : *s++;
+    *d++ = isalpha (*s) ? tolower (*s++) : *s++;
 
   /* hash it */
   h = SuperFastHash (nick, l);
   h &= SERVER_HASH_MASK;
 
   /* get nick */
-  lst = dllist_bucket (&list->nick, h);
+  u = lst = dllist_bucket (&list->nick, h);
   dllist_foreach (lst, u)
-     if (!(strncasecmp (u->nick, n, len) || u->nick[len])) break;
-     
-  if (lst == u) return NULL;
+    if (!(strncasecmp (u->nick, n, len) || u->nick[len]))
+    break;
+
+  if (lst == u)
+    return NULL;
 
   return u;
 }
@@ -93,15 +96,15 @@ user_t *hash_find_ip (hashlist_t * list, unsigned long ip)
   user_t *u, *lst;
   uint32_t h;
 
-  h = SuperFastHash ((const unsigned char *)&ip, 4);
+  h = SuperFastHash ((const unsigned char *) &ip, 4);
   h &= SERVER_HASH_MASK;
 
   lst = dllist_bucket (&list->ip, h);
   dllist_foreach (lst, p) {
-     u = (user_t *)((char *)p - sizeof (dllist_t));
-     if (u->ipaddress == ip) return u;
+    u = (user_t *) ((char *) p - sizeof (dllist_t));
+    if (u->ipaddress == ip)
+      return u;
   }
 
   return NULL;
 }
-

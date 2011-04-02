@@ -15,23 +15,23 @@
 struct user;
 
 typedef struct string_list_entry {
-	struct string_list_entry *next, *prev;
-	struct string_list_entry *hnext, *hprev;
-	struct user 	*user;
-	buffer_t        *data;
+  struct string_list_entry *next, *prev;
+  struct string_list_entry *hnext, *hprev;
+  struct user *user;
+  buffer_t *data;
 } string_list_entry_t;
 
 typedef struct string_list {
-	struct string_list_entry *first, *last, **hash;
-	unsigned int count;
-	unsigned long size;
-}  string_list_t;
+  struct string_list_entry *first, *last, **hash;
+  unsigned int count;
+  unsigned long size;
+} string_list_t;
 
-inline void string_list_init (string_list_t *list);
-inline string_list_entry_t *string_list_add (string_list_t *list, struct user * user, buffer_t *);
-inline void string_list_del (string_list_t *list, string_list_entry_t *entry);
-inline void string_list_purge (string_list_t *list, struct user *user);
-inline string_list_entry_t *string_list_find (string_list_t *list, struct user *user);
-inline void string_list_clear (string_list_t *list);
+inline void string_list_init (string_list_t * list);
+inline string_list_entry_t *string_list_add (string_list_t * list, struct user *user, buffer_t *);
+inline void string_list_del (string_list_t * list, string_list_entry_t * entry);
+inline void string_list_purge (string_list_t * list, struct user *user);
+inline string_list_entry_t *string_list_find (string_list_t * list, struct user *user);
+inline void string_list_clear (string_list_t * list);
 
 #endif

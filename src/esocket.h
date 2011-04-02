@@ -82,8 +82,8 @@
 struct esockethandler;
 
 typedef struct esocket {
-  rbt_t 	rbt;
-  struct esocket *next, *prev;   /* main socket list */
+  rbt_t rbt;
+  struct esocket *next, *prev;	/* main socket list */
 
   int socket;
   unsigned int state;
@@ -109,9 +109,9 @@ typedef int (timeout_handler_t) (esocket_t * s);
 /* socket types */
 typedef struct esockettypes {
   unsigned int type;
-    input_handler_t *input;
-   output_handler_t *output;
-    error_handler_t *error;
+  input_handler_t *input;
+  output_handler_t *output;
+  error_handler_t *error;
   timeout_handler_t *timeout;
   uint32_t default_events;
 } esocket_type_t;
@@ -122,9 +122,9 @@ typedef struct esockethandler {
   unsigned int numtypes, curtypes;
 
   esocket_t *sockets;
-  rbt_t	     *root;
+  rbt_t *root;
   unsigned long timercnt;
-  
+
 #ifndef USE_EPOLL
   fd_set input;
   fd_set output;
@@ -141,9 +141,9 @@ typedef struct esockethandler {
 
 /* function prototypes */
 extern esocket_handler_t *esocket_create_handler (unsigned int numtypes);
-extern unsigned int esocket_add_type (esocket_handler_t * h, unsigned int events, input_handler_t input,
-				      output_handler_t output, error_handler_t error,
-				      timeout_handler_t timeout);
+extern unsigned int esocket_add_type (esocket_handler_t * h, unsigned int events,
+				      input_handler_t input, output_handler_t output,
+				      error_handler_t error, timeout_handler_t timeout);
 extern esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
 			       int protocol, unsigned long long context);
 extern esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
@@ -162,9 +162,9 @@ extern unsigned int esocket_update (esocket_t * s, int fd, unsigned int state);
 extern unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout);
 extern unsigned int esocket_deltimeout (esocket_t * s);
 
-extern unsigned int esocket_setevents(esocket_t * s, unsigned int events);
-extern unsigned int esocket_addevents(esocket_t * s, unsigned int events);
-extern unsigned int esocket_clearevents(esocket_t * s, unsigned int events);
+extern unsigned int esocket_setevents (esocket_t * s, unsigned int events);
+extern unsigned int esocket_addevents (esocket_t * s, unsigned int events);
+extern unsigned int esocket_clearevents (esocket_t * s, unsigned int events);
 
 #define esocket_hasevent(s,e)     (s->events & e)
 

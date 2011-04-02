@@ -10,6 +10,6 @@
 #ifndef _BUILTINCMD_H_
 #define _BUILTINCMD_H_
 
-extern int builtincmd_init();
+extern int builtincmd_init ();
 
 #endif

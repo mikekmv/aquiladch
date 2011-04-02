@@ -218,14 +218,14 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
   gettimeofday (&s->to, NULL);
 
   /* determine key */
-  key = (s->to.tv_sec * 1000) + (s->to.tv_usec/1000) + timeout; 
+  key = (s->to.tv_sec * 1000) + (s->to.tv_usec / 1000) + timeout;
 
   /* create timeout */
-  s->to.tv_sec += timeout/1000;
-  s->to.tv_usec += ((timeout*1000) % 1000000);
+  s->to.tv_sec += timeout / 1000;
+  s->to.tv_usec += ((timeout * 1000) % 1000000);
   if (s->to.tv_usec > 1000000) {
-  	s->to.tv_sec++;
-  	s->to.tv_usec -= 1000000;
+    s->to.tv_sec++;
+    s->to.tv_usec -= 1000000;
   }
   s->tovalid = 1;
 
@@ -494,9 +494,9 @@ unsigned int esocket_remove_socket (esocket_t * s)
   h = s->handler;
 
   esocket_update_state (s, SOCKSTATE_CLOSED);
-  
+
   if (s->tovalid)
-  	esocket_deltimeout (s);
+    esocket_deltimeout (s);
 
   /* remove from list */
   if (s->next)
@@ -507,7 +507,7 @@ unsigned int esocket_remove_socket (esocket_t * s)
     h->sockets = s->next;
   };
 
-  /* put in freelist */ 
+  /* put in freelist */
   s->next = freelist;
   freelist = s;
   s->prev = NULL;
@@ -560,26 +560,27 @@ unsigned int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
   return 1;
 }
 
-unsigned int esocket_checktimers (esocket_handler_t * h) {
+unsigned int esocket_checktimers (esocket_handler_t * h)
+{
   esocket_t *s;
   struct timeval now;
   rbt_t *rbt;
-        
+
   gettimeofday (&now, NULL);
 
   /* handle timers */
   while ((rbt = smallestNode (&h->root))) {
-    s = (esocket_t *)rbt;
+    s = (esocket_t *) rbt;
 
     ASSERT (s->tovalid);
-    	
+
     if (!timercmp ((&s->to), (&now), <))
       return 0;
-    	
+
     s->tovalid = 0;
     deleteNode (&h->root, rbt);
     h->timercnt--;
-    	
+
     h->types[s->type].timeout (s);
   }
   return 0;
@@ -633,7 +634,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	continue;
       }
       if (o && FD_ISSET (s->socket, o)) {
-        DPRINTF ("output event! ");
+	DPRINTF ("output event! ");
 	FD_CLR (s->socket, o);
 	s->to = now;
 	switch (s->state) {
@@ -645,7 +646,8 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	  case SOCKSTATE_CONNECTING:
 	    {
 	      int err, len;
- 	      DPRINTF ("Connecting and %s!", s->error ? "error" : "connected");
+
+	      DPRINTF ("Connecting and %s!", s->error ? "error" : "connected");
 
 	      len = sizeof (s->error);
 	      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
@@ -671,17 +673,17 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	num--;
 	s = h->sockets;
 	continue;
-     }
+      }
     }
     s = s->next;
     if (!s) {
-    	DPRINTF (" All sockets tried, num still %d\n", num);
+      DPRINTF (" All sockets tried, num still %d\n", num);
     };
   }
 
   /* timer stuff */
   if (h->timercnt) {
-  	esocket_checktimers (h);
+    esocket_checktimers (h);
   }
 
   return 0;
@@ -721,7 +723,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       if (s->state == SOCKSTATE_FREED)
 	continue;
       if (s->socket < 0)
-        continue;
+	continue;
     }
     if (activity & EPOLLIN) {
       s->to = now;
@@ -730,7 +732,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       if (s->state == SOCKSTATE_FREED)
 	continue;
       if (s->socket < 0)
-        continue;
+	continue;
     }
     if (activity & EPOLLOUT) {
       s->to = now;
@@ -759,13 +761,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       if (s->state == SOCKSTATE_FREED)
 	continue;
       if (s->socket < 0)
-        continue;
+	continue;
     }
   }
 
   /* timer stuff */
   if (h->timercnt)
-  	esocket_checktimers (h);
+    esocket_checktimers (h);
 
   /* clear freelist */
   while (freelist) {

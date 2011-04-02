@@ -17,8 +17,8 @@
 #define SERVER_HASH_MASK	(SERVER_HASH_ENTRIES-1)
 
 typedef struct hashlist_entry {
-	dllist_entry_t nick;
-	dllist_entry_t ip;
+  dllist_entry_t nick;
+  dllist_entry_t ip;
 } hashlist_entry_t;
 
 typedef struct hashlist {

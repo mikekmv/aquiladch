@@ -12,10 +12,10 @@
 
 #include "hashlist.h"
 
-void hash_init (hashlist_t* list);
+void hash_init (hashlist_t * list);
 
 unsigned int hash_adduser (hashlist_t * list, user_t *);
-void hash_deluser(hashlist_entry_t *);
+void hash_deluser (hashlist_entry_t *);
 
 user_t *hash_find_nick (hashlist_t * list, unsigned char *n, unsigned int len);
 user_t *hash_find_ip (hashlist_t * list, unsigned long ip);

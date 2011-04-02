@@ -10,6 +10,6 @@
 #ifndef _HASH_H_
 #define _HASH_H_
 
-extern __inline__ unsigned int SuperFastHash (const unsigned char * data, int len);
+extern __inline__ unsigned int SuperFastHash (const unsigned char *data, int len);
 
 #endif

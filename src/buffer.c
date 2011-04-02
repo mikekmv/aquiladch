@@ -31,21 +31,21 @@ buffer_t *bf_alloc (unsigned long size)
     return NULL;
 
   /* init buffer */
-  memset (b, 0, sizeof (buffer_t)+size);
-  
+  memset (b, 0, sizeof (buffer_t) + size);
+
   b->buffer = ((unsigned char *) b) + sizeof (buffer_t);
-  b->s      = b->buffer;
-  b->e 	    = b->s;
-  b->size   = size;
+  b->s = b->buffer;
+  b->e = b->s;
+  b->size = size;
   b->refcnt = 1;
 
   bufferstats.size += size;
   if (bufferstats.size > bufferstats.peak)
-  	bufferstats.peak = bufferstats.size;
-  bufferstats.count ++;
+    bufferstats.peak = bufferstats.size;
+  bufferstats.count++;
   if (bufferstats.max < bufferstats.count)
-  	bufferstats.max = bufferstats.count;
-  
+    bufferstats.max = bufferstats.count;
+
   return b;
 }
 
@@ -56,23 +56,23 @@ void bf_free (buffer_t * buffer)
 
   ASSERT (buffer != &static_buf);
   ASSERT (buffer->refcnt > 0);
-  ASSERT (buffer->e <= (buffer->buffer+buffer->size));
+  ASSERT (buffer->e <= (buffer->buffer + buffer->size));
 
   bf_free (buffer->next);
 
   /* if there is still a refcnt, do not free the memory */
   if (--buffer->refcnt)
-  	return;
+    return;
 
   /* real free */
   if (buffer->prev)
     buffer->prev->next = NULL;
 
   bufferstats.size -= buffer->size;
-  bufferstats.count --;
-  
+  bufferstats.count--;
+
   free (buffer);
-  
+
 }
 
 void bf_free_single (buffer_t * buffer)
@@ -82,11 +82,11 @@ void bf_free_single (buffer_t * buffer)
 
   ASSERT (buffer != &static_buf);
   ASSERT (buffer->refcnt > 0);
-  ASSERT (buffer->e <= (buffer->buffer+buffer->size));
-  
+  ASSERT (buffer->e <= (buffer->buffer + buffer->size));
+
   /* if there is still a refcnt, do not free the memory */
   if (--buffer->refcnt)
-  	return;
+    return;
 
   /* real free */
   if (buffer->next)
@@ -95,8 +95,8 @@ void bf_free_single (buffer_t * buffer)
     buffer->prev->next = buffer->next;
 
   bufferstats.size -= buffer->size;
-  bufferstats.count --;
-  
+  bufferstats.count--;
+
   free (buffer);
 }
 
@@ -108,7 +108,7 @@ void bf_claim (buffer_t * buffer)
   ASSERT (buffer != &static_buf);
 
   buffer->refcnt++;
-     
+
   bf_claim (buffer->next);
 }
 
@@ -196,18 +196,19 @@ buffer_t *bf_sep (buffer_t ** list, unsigned char *sep)
 
   /* copy all complete buffers into the dest buffer */
   b = *list;
-  l = bf_used(b);
+  l = bf_used (b);
   for (; b && (size > l);) {
     memcpy (r->e, b->s, l);
     size -= l;
     r->e += l;
-    
+
     b = b->next;
     bf_free_single (*list);
     *list = b;
-    if (!b) break;
+    if (!b)
+      break;
 
-    l = bf_used(b);
+    l = bf_used (b);
   };
 
   /* add part of next buffer */
@@ -215,7 +216,7 @@ buffer_t *bf_sep (buffer_t ** list, unsigned char *sep)
 
   /* overwrite seperator and expand buffer */
   r->e[size - 1] = '\0';
-  r->e += (size-1);
+  r->e += (size - 1);
 
   /* remove used data from last buffer */
   b->s += size;
@@ -237,7 +238,7 @@ buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
   buffer_t *r;
   unsigned long size, l;
 
-  if (!(*list))
+  if ((!list) || (!(*list)))
     return NULL;
 
   /* first, we determine length */
@@ -246,12 +247,13 @@ buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
   /* search seperator */
   b = *list;
   p = b->s;
-  for (; b ; b = b->next) {
+  for (; b; b = b->next) {
     for (p = b->s; (p < b->e) && (*p != sep); p++);
     size += (p - b->s);
     if ((p < b->e) && (*p == sep)) {
       /* eat seperator too */
-      p++; size++;
+      p++;
+      size++;
       break;
     }
   };
@@ -267,18 +269,19 @@ buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
 
   /* copy all complete buffers into the dest buffer */
   b = *list;
-  l = bf_used(b);
+  l = bf_used (b);
   for (; b && (size > l);) {
     memcpy (r->e, b->s, l);
     size -= l;
     r->e += l;
-    
+
     b = b->next;
     bf_free_single (*list);
     *list = b;
-    if (!b) break;
+    if (!b)
+      break;
 
-    l = bf_used(b);
+    l = bf_used (b);
   };
 
   /* add part of next buffer */
@@ -287,7 +290,7 @@ buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
 
   /* overwrite seperator and expand buffer */
   r->e[size - 1] = '\0';
-  r->e += (size-1);
+  r->e += (size - 1);
 
   /* remove used data from last buffer */
   b->s += size;
@@ -319,94 +322,103 @@ int bf_prepend (buffer_t ** list, buffer_t * buf)
   return 0;
 }
 
-buffer_t *bf_copy (buffer_t *src, unsigned long extra) {
+buffer_t *bf_copy (buffer_t * src, unsigned long extra)
+{
   unsigned long total, l;
   buffer_t *b, *dst;
 
-  total = 0;  
-  for (b= src; b; b=b->next) 
-	total += bf_used (b);
-  
-  dst = bf_alloc (total+extra);
-  if (!dst) return NULL;
-  
-  for (b= src; b; b=b->next) {
-  	l = bf_used (b);
-  	memcpy (dst->e, b->s, l);
-  	dst->e += l;
+  total = 0;
+  for (b = src; b; b = b->next)
+    total += bf_used (b);
+
+  dst = bf_alloc (total + extra);
+  if (!dst)
+    return NULL;
+
+  for (b = src; b; b = b->next) {
+    l = bf_used (b);
+    memcpy (dst->e, b->s, l);
+    dst->e += l;
   }
-  
+
   return dst;
 }
 
-int bf_strcat (buffer_t *dst, unsigned char *data) {
+int bf_strcat (buffer_t * dst, unsigned char *data)
+{
   /* FIXME could be optimized to run over the data only once */
-  return bf_strncat (dst, data, strlen ((char *)data));
+  return bf_strncat (dst, data, strlen ((char *) data));
 }
 
-int bf_strncat (buffer_t *dst, unsigned char *data, unsigned long length) {
-  if (bf_unused(dst) < length) 
-  	length = bf_unused(dst);
+int bf_strncat (buffer_t * dst, unsigned char *data, unsigned long length)
+{
+  if (bf_unused (dst) < length)
+    length = bf_unused (dst);
 
-  strncpy ((char *)dst->e, (char *)data, length);
+  strncpy ((char *) dst->e, (char *) data, length);
   dst->e += length;
-  
-  ASSERT (dst->e <= (dst->buffer+dst->size));
-  
+
+  ASSERT (dst->e <= (dst->buffer + dst->size));
+
   return length;
 }
 
-unsigned long bf_size (buffer_t *src) {
+unsigned long bf_size (buffer_t * src)
+{
   unsigned long total = 0;
   buffer_t *b;
-  
-  for (b= src; b; b=b->next) 
-	total += bf_used (b);
 
-  return total;  
+  for (b = src; b; b = b->next)
+    total += bf_used (b);
+
+  return total;
 }
 
-int bf_printf (buffer_t *dst, const char *format, ...) {
+int bf_printf (buffer_t * dst, const char *format, ...)
+{
   va_list ap;
   int retval, available;
 
   /* if the buffer is full, just return */
   available = bf_unused (dst);
-  if (!available) return 0;
+  if (!available)
+    return 0;
 
   /* print to the buffer */
   va_start (ap, format);
-  retval = vsnprintf ((char *)dst->e, available, format, ap);
+  retval = vsnprintf ((char *) dst->e, available, format, ap);
   va_end (ap);
-  
+
   /* make sure dst->e is always valid */
   dst->e += (retval > available) ? available : retval;
-  
+
   return retval;
 }
 
-int bf_vprintf (buffer_t *dst, const char *format, va_list ap) {
+int bf_vprintf (buffer_t * dst, const char *format, va_list ap)
+{
   int retval, available;
-  
+
   /* if the buffer is full, just return */
   available = bf_unused (dst);
-  if (!available) return 0;
-  
+  if (!available)
+    return 0;
+
   /* print to the buffer */
-  retval = vsnprintf ((char *)dst->e, available, format, ap);
-  
+  retval = vsnprintf ((char *) dst->e, available, format, ap);
+
   /* make sure dst->e is always valid */
   dst->e += (retval > available) ? available : retval;
-  
+
   return retval;
 }
 
-buffer_t *bf_buffer(unsigned char *text) {
+buffer_t *bf_buffer (unsigned char *text)
+{
   static_buf.buffer = static_buf.s = text;
-  static_buf.e	= text + strlen ((char *)text);
+  static_buf.e = text + strlen ((char *) text);
   static_buf.size = static_buf.s - static_buf.e;
   static_buf.refcnt = 1;
-	
+
   return &static_buf;
 }
-

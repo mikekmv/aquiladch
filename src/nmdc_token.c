@@ -17,6 +17,7 @@
 	Protocol Definition
 */
 
+/* *INDENT-OFF* */
 struct token_definition Tokens[] = {
 	{ TOKEN_CHAT, 			 1, "<" },
 	{ TOKEN_MYINFO,			 8, "$MyINFO "},
@@ -41,6 +42,7 @@ struct token_definition Tokens[] = {
 	{ TOKEN_BOTINFO,		 9, "$BotINFO "},
 	{ TOKEN_NUM, 			 0, NULL}
 };
+/* *INDENT-ON* */
 
 /* local tables */
 
@@ -52,47 +54,53 @@ unsigned char *hashtable;
 	TOKENISER
 */
 
-void token_init () {
-	int i, h;
-	unsigned char ht[256];
+void token_init ()
+{
+  int i, h;
+  unsigned char ht[256];
 
-	/* EXTERNDED PROTOCOL TOKEN HASHTABLE */
-	memset (ht, 0, 256);
-	/* start from 1 to skip < */
-	for (i=1; i < (TOKEN_NUM-1); i++) {
-		h = HASH_EXT (Tokens[i].identifier);
-		if (ht [h] == 0)
-			ht [h] = i;
-	}
-	hashtable = malloc (32);
-	memcpy (hashtable, ht, 32);
+  /* EXTERNDED PROTOCOL TOKEN HASHTABLE */
+  memset (ht, 0, 256);
+  /* start from 1 to skip < */
+  for (i = 1; i < (TOKEN_NUM - 1); i++) {
+    h = HASH_EXT (Tokens[i].identifier);
+    if (ht[h] == 0)
+      ht[h] = i;
+  }
+  hashtable = malloc (32);
+  memcpy (hashtable, ht, 32);
 }
 
-int token_parse (struct token *token, unsigned char *string) {
-	int i, h;
-	
-	if (!*string)
-		return TOKEN_UNIDENTIFIED;
 
-	/* filter out the chat lines */
-	if (string[0] == '<') {
-		token->type = TOKEN_CHAT;
-		token->argument = string;
-		return TOKEN_CHAT;
-	};
-	
-	/* calculate hash and look for token in the table */
-	h = HASH_EXT(string);
-	i = hashtable[h];
-	if (!i) return TOKEN_UNIDENTIFIED;
-	do {
-		if (!strncmp (Tokens[i].identifier, string, Tokens[i].len)) {
-			/* matches */
-			token->type = Tokens[i].num;
-			token->argument = string + Tokens[i].len;
-			return Tokens[i].num;
-		}
-	} while (Tokens[++i].identifier && (HASH_EXT (Tokens[i].identifier) == h));
-	
-	return TOKEN_UNIDENTIFIED;
+int token_parse (struct token *token, unsigned char *string)
+{
+  int i, h;
+
+  if (!*string)
+    return TOKEN_UNIDENTIFIED;
+
+  token->token = string;
+
+  /* filter out the chat lines */
+  if (string[0] == '<') {
+    token->type = TOKEN_CHAT;
+    token->argument = string;
+    return TOKEN_CHAT;
+  };
+
+  /* calculate hash and look for token in the table */
+  h = HASH_EXT (string);
+  i = hashtable[h];
+  if (!i)
+    return TOKEN_UNIDENTIFIED;
+  do {
+    if (!strncmp (Tokens[i].identifier, string, Tokens[i].len)) {
+      /* matches */
+      token->type = Tokens[i].num;
+      token->argument = string + Tokens[i].len;
+      return Tokens[i].num;
+    }
+  } while (Tokens[++i].identifier && (HASH_EXT (Tokens[i].identifier) == h));
+
+  return TOKEN_UNIDENTIFIED;
 }

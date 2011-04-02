@@ -28,28 +28,29 @@
 #define BANLIST_NICK_HASHMASK	(BANLIST_NICK_HASHSIZE-1)
 
 typedef struct banlist_nick {
-	dllist_entry_t dllist;
-	
-	unsigned char  nick[NICKLENGTH];
-	buffer_t      *message;
-	time_t	       expire;
+  dllist_entry_t dllist;
+
+  unsigned char nick[NICKLENGTH];
+  buffer_t *message;
+  time_t expire;
 } banlist_nick_entry_t;
 
 typedef dllist_t banlist_nick_t;
 
-extern banlist_nick_entry_t * banlist_nick_add (banlist_nick_t* list, unsigned char *nick, buffer_t *reason, unsigned long expire);
+extern banlist_nick_entry_t *banlist_nick_add (banlist_nick_t * list, unsigned char *nick,
+					       buffer_t * reason, unsigned long expire);
 
-extern unsigned int banlist_nick_del (banlist_nick_t* list, banlist_nick_entry_t *);
-extern unsigned int banlist_nick_del_bynick (banlist_nick_t* list, unsigned char *nick);
+extern unsigned int banlist_nick_del (banlist_nick_t * list, banlist_nick_entry_t *);
+extern unsigned int banlist_nick_del_bynick (banlist_nick_t * list, unsigned char *nick);
 
-extern banlist_nick_entry_t * banlist_nick_find (banlist_nick_t* list, unsigned char *nick);
+extern banlist_nick_entry_t *banlist_nick_find (banlist_nick_t * list, unsigned char *nick);
 
-extern unsigned int banlist_nick_cleanup (banlist_nick_t* list);
-extern void banlist_nick_clear (banlist_nick_t* list);
+extern unsigned int banlist_nick_cleanup (banlist_nick_t * list);
+extern void banlist_nick_clear (banlist_nick_t * list);
 
-extern unsigned int banlist_nick_save (banlist_nick_t* list, unsigned char *file);
-extern unsigned int banlist_nick_load (banlist_nick_t* list, unsigned char *file);
+extern unsigned int banlist_nick_save (banlist_nick_t * list, unsigned char *file);
+extern unsigned int banlist_nick_load (banlist_nick_t * list, unsigned char *file);
 
-extern void banlist_nick_init (banlist_nick_t* list);
+extern void banlist_nick_init (banlist_nick_t * list);
 
 #endif /* _BANLIST_H_ */
