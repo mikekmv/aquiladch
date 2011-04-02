@@ -45,6 +45,10 @@ do
 			PREFIX=$2;
 			shift;
 			;;
+		-c|--service)
+			SERVICE=$2;
+			shift;
+			;;
 		-f|--force)
 			force=1;
 			;;
@@ -92,6 +96,11 @@ then
 	echo " -d, --directory <home directory> : user home directory. (default: ${DEFAULT_HOME})"
 	echo "                In this directory comes the daemontools service files."
 	echo
+	echo "If you are sure daemontools is instaled, but this script does not detect it,"
+	echo "use the following option to enable detection."
+	echo " -c, --service <service directory>: point this to the service directory of your"
+	echo "                daemontools install"
+	echo
 	echo " Generic options."
 	echo " -h, --help			: This help"
 	echo " -v, --verbose			: Verbose. Print settings."
@@ -120,13 +129,21 @@ fi;
 # Determine linux flavour
 #
 
-if [ -f /etc/gentoo-releaset ]
+if [ -f /etc/gentoo-release ]
 then
 	FLAVOUR=gentoo
 	INSTALLDT="emerge daemontools"
-	SERVICE=/service
+	if [ -z "${SERVICE}" ]
+	then
+		SERVICE="/service"
+	fi
 	RCDT="rc-update add svscan default"
 	RCSTART="/etc/init.d/svscan start"
+else if [ -f /etc/debian_version ]
+then
+	FLAVOUR=debian
+else if [ -f /etc/redhat_release ]
+	FLAVOUR=redhat
 else
 	if [ ! -n "${force}" ]
 	then
@@ -144,13 +161,19 @@ else
 	fi;
 fi
 
-if [ -d ${SERVICE}t ]
+if [ -d ${SERVICE} ]
 then
 	echo Daemontools Installed.
 else
-	if [ -n "${FLAVOUR}" ];
+	if [ "${FLAVOUR}" = "gentoo" ]
 	then
 		${ECHO} ${INSTALLDT}
+	else if [ "${FLAVOUR}" = "debian" ]
+	then
+		echo "You can download and install the daemontools packages from"
+		echo "    http://smarden.sunsite.dk/pape/Debian/daemontools.html"
+		echo "or use --force to install from source (not recommended)."
+		exit;
 	else
 		echo Installing daemontools from source.
 		mkdir /package
@@ -164,6 +187,7 @@ else
 		patch < daemontools-0.76.errno.patch
 		cd ..
 		package/install
+		SERVICE=/service
 	fi;
 fi
 

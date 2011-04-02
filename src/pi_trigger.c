@@ -551,7 +551,7 @@ unsigned int trigger_show (buffer_t * buf, trigger_t * trigger)
       return bf_printf (buf, "Trigger %s dumps file %s (Hits %ld)\n",
 			trigger->name, trigger->file, trigger->usecnt);
       break;
-    case TRIGGER_TYPE_COMMAND:
+    case TRIGGER_TYPE_TEXT:
       return bf_printf (buf, "Trigger %s dumps text %*s (Hits %ld)\n",
 			trigger->name, bf_used (trigger->text), trigger->text->s, trigger->usecnt);
       break;
@@ -596,7 +596,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   unsigned char *arg, *help;
   unsigned long cap = 0, ncap = 0, capstart = 0;
 
-  if (argc < 4) {
+  if (argc < 3) {
     bf_printf (output, "Usage: %s <name> <type> [<arg> <help>] [<cap>]\n"
 	       "   name: name of the trigger\n"
 	       "   type: one of:\n"

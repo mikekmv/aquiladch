@@ -30,7 +30,7 @@
 #define PROTO_TIMEOUT_WAITNICK		5000	/* waiting for user $ValidateNick */
 #define PROTO_TIMEOUT_WAITPASS		30000	/* waiting for user $MyPass */
 #define PROTO_TIMEOUT_HELLO		5000	/* waiting for user $MyInfo */
-#define PROTO_TIMEOUT_ONLINE		0	/* send $ForceMove command to user */
+#define PROTO_TIMEOUT_ONLINE		300000	/* send $ForceMove command to user */
 #define PROTO_TIMEOUT_BUFFERING		10000	/* we buffer for a max of x seconds. then disconnect */
 #define PROTO_TIMEOUT_OVERFLOW		1000	/* on too many buffers, we buffer for a max of x seconds. then disconnect */
 #define PROTO_TIMEOUT_DISCONNECTED	2000	/* users is disconnected */

@@ -40,7 +40,7 @@
 #define CAP_CHEEF (CAP_OP   | CAP_USER)
 #define CAP_ADMIN (CAP_CHEEF | CAP_CONFIG | CAP_INHERIT | CAP_GROUP)
 
-#define CAP_PRINT_OFFSET 8
+#define CAP_PRINT_OFFSET 7
 
 typedef struct cap_array {
   unsigned char *name;

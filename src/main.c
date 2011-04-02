@@ -58,6 +58,7 @@ int main (int argc, char **argv)
   server_init ();
   nmdc_init ();
 
+  pi_iplog_init ();
   pi_user_init ();
   pi_chatroom_init ();
   pi_statistics_init ();

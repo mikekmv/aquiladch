@@ -1,7 +1,11 @@
 This is the Aquila Changelog.
 
 
-0.1.8-pre3:
+0.1.8-pre4:
+	Added iplog module
+	Fixed bug in pi_trigger.c: text rules are now correctly printed.
+	Fix some stuff in aqdtinstall
+	Owner right is now printed.
 	Fixed userlist problem. There should no longer be "invisible users".
 	You can no longer redirect users higher than you.
 	Added say command again.

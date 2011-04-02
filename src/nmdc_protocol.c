@@ -794,9 +794,6 @@ int proto_nmdc_user_exists (user_t * u, buffer_t * output, token_t * tkn)
   return retval;
 }
 
-
-
-
 /******************************************************************************\
 **                                                                            **
 **                    PROTOCOL HANDLING PER STATE                             **
@@ -2207,7 +2204,8 @@ void proto_nmdc_flush_cache ()
       b->e += proto_nmdc_build_buffer (b->e, u, as, ps, ch, pm, res);
 
       if (bf_used (b))
-	server_write (u->parent, b);
+	if (server_write (u->parent, b) > 0)
+	  server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
 
       bf_free (b);
 
@@ -2223,7 +2221,8 @@ void proto_nmdc_flush_cache ()
       b = (u->active ? buf_active : buf_passive);
 #endif
       if (bf_used (b))
-	server_write (u->parent, b);
+	if (server_write (u->parent, b) > 0)
+	  server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
     }
     /* send extra OP buffer */
     if (miuo && u->op)

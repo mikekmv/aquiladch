@@ -19,6 +19,9 @@
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_TCP_H
+#  include <netinet/tcp.h>
+#endif
 
 #include "core_config.h"
 
@@ -108,7 +111,7 @@ int setup_incoming_socket (unsigned long address, int port)
 
 int accept_new_user (esocket_t * s)
 {
-  int r, l;
+  int r, l, yes = 1;
   struct sockaddr_in client_address;
   client_t *cl;
 
@@ -117,6 +120,13 @@ int accept_new_user (esocket_t * s)
 
   if (r == -1)
     return -1;
+
+  /* FIXME: test. we disable naggle: we do our own queueing! */
+  if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
+    perror ("setsockopt:");
+    close (r);
+    return -1;
+  }
 
   /* before all else, test hardban */
   if (banlist_find (&hardbanlist, client_address.sin_addr.s_addr)) {
@@ -194,14 +204,17 @@ int server_write (client_t * cl, buffer_t * b)
 
   /* if data is queued, queue this after it */
   if (cl->outgoing.count) {
-    if (cl->outgoing.count > DEFAULT_MAX_OUTGOINGBUFFERS)
-      esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
+    // this woudl reset the timer each time a write is done.
+    //if (cl->outgoing.count > DEFAULT_MAX_OUTGOINGBUFFERS)
+    //  esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
 
     /* if we are still below max buffer per user, queue buffer */
     if (cl->outgoing.size < DEFAULT_MAX_OUTGOINGSIZE) {
       string_list_add (&cl->outgoing, cl->user, b);
       DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count,
 	       cl->outgoing.size, cl->user->nick);
+      if (cl->outgoing.size >= DEFAULT_MAX_OUTGOINGSIZE)
+	esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
     }
 
     /* try sending some of that data */
@@ -244,7 +257,10 @@ int server_write (client_t * cl, buffer_t * b)
     string_list_add (&cl->outgoing, cl->user, e);
     cl->offset = w;
     esocket_addevents (s, ESOCKET_EVENT_OUT);
-    esocket_settimeout (s, PROTO_TIMEOUT_BUFFERING);
+    esocket_settimeout (s,
+			(cl->outgoing.size <
+			 DEFAULT_MAX_OUTGOINGSIZE) ? PROTO_TIMEOUT_BUFFERING :
+			PROTO_TIMEOUT_OVERFLOW);
     DPRINTF (" %p Starting to buffer... %lu\n", cl->user, cl->outgoing.size);
   };
 
