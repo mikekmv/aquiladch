@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -84,6 +94,7 @@ int main (int argc, char **argv)
   pi_trigger_init ();
   pi_chatlog_init ();
   pi_statbot_init ();
+  pi_hublist_init ();
 #ifdef ALLOW_LUA
 #ifdef HAVE_LUA_H
   pi_lua_init ();
@@ -98,13 +109,14 @@ int main (int argc, char **argv)
   srandom (boottime.tv_sec ^ boottime.tv_usec);
 
   /* setup socket handler */
-  h = esocket_create_handler (3);
+  h = esocket_create_handler (4);
   h->toval.tv_sec = 60;
 
   /* setup server */
   server_setup (h);
   nmdc_setup (h);
   command_setup ();
+  pi_hublist_setup (h);
 
   /* main loop */
   gettimeofday (&tnext, NULL);
@@ -112,8 +124,8 @@ int main (int argc, char **argv)
   cont = 1;
   for (; cont;) {
     /* do not assume select does not alter timeout value */
-    to.tv_sec = 1;
-    to.tv_usec = 0;
+    to.tv_sec = 0;
+    to.tv_usec = 100000;
 
     /* wait until an event */
     ret = esocket_select (h, &to);

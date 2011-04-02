@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -442,6 +452,7 @@ unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plug
   }
 
   t = ((plugin_private_t *) target->private)->parent;
+
   if (user) {
     s = ((plugin_private_t *) user->private)->parent;
   } else {

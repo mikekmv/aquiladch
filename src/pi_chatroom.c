@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -52,7 +62,7 @@ unsigned long pi_chatroom_event_pm (plugin_user_t * user, void *dummy, unsigned 
 plugin_t *plugin_chatroom = NULL;
 chatroom_t chatrooms;
 
-unsigned char *SaveFile;
+unsigned char *pi_chatroom_savefile;
 
 /*********************************************************************************************/
 
@@ -496,14 +506,14 @@ leave:
 unsigned long pi_chatroom_event_save (plugin_user_t * user, buffer_t * output, void *dummy,
 				      unsigned long event, buffer_t * token)
 {
-  chatroom_save (SaveFile);
+  chatroom_save (pi_chatroom_savefile);
   return PLUGIN_RETVAL_CONTINUE;
 }
 
 unsigned long pi_chatroom_event_load (plugin_user_t * user, buffer_t * output, void *dummy,
 				      unsigned long event, buffer_t * token)
 {
-  chatroom_load (SaveFile);
+  chatroom_load (pi_chatroom_savefile);
   return PLUGIN_RETVAL_CONTINUE;
 }
 
@@ -515,9 +525,9 @@ int pi_chatroom_init ()
   chatrooms.next = &chatrooms;
   chatrooms.prev = &chatrooms;
 
-  SaveFile = strdup ("chatroom.conf");
+  pi_chatroom_savefile = strdup ("chatroom.conf");
 
-  /* config_register ("chatroom.file",  CFG_ELEM_STRING, &SaveFile, "Save file for chatrooms."); */
+  /* config_register ("chatroom.file",  CFG_ELEM_STRING, &pi_chatroom_savefile, "Save file for chatrooms."); */
 
   plugin_chatroom = plugin_register ("chatroom");
 

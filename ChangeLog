@@ -1,6 +1,20 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	Fixed illegal memory reference in input handling.
+	Fixed possible crash when disconnecting user.
+	Improved pi_hublist error handling.
+	Fixed and moved escape_string from nmdc_utils.c to pi_hublist.c
+	Added pi_hublist.c Hublist registering
+	Fixed copyright message in headers
+	Fixed FD restrictions on cygwin
+	Fixed bug in ruleadd
+	adjusted rbt.c header.
+	Added load and save functionality in pi_lua.c
+	Added *all* events in the event handler support.
+	Rewrote all original lua commands. Removed zexx86 (c) message.
+	Changed file headers to GPL suggested header.
+	Fixed bug with !ruleadd
 	removed assert, allowing kicking of self.
 	fixed bug in help. Can no longer see any commands that aren't available.
 	added LUA support... reasonably tested!

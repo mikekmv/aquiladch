@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -32,7 +42,7 @@
 #define DPRINTF(...)
 #endif
 
-esocket_t *freelist;
+esocket_t *freelist = NULL;
 
 /*
  * Handler functions
@@ -235,11 +245,27 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
   unsigned long long key;
   esocket_handler_t *h = s->handler;
 
-  if (s->tovalid)
-    esocket_deltimeout (s);
-
-  if (!timeout)
+  if (!timeout) {
+    if (s->tovalid)
+      esocket_deltimeout (s);
     return 0;
+  }
+
+  /* if timer is valid already, just set the reset time... 
+   * it will be handled when the timer expires 
+   */
+  if (s->tovalid) {
+    gettimeofday (&s->reset, NULL);
+    s->reset.tv_sec += timeout / 1000;
+    s->reset.tv_usec += ((timeout * 1000) % 1000000);
+    if (s->reset.tv_usec > 1000000) {
+      s->reset.tv_sec++;
+      s->reset.tv_usec -= 1000000;
+    }
+    s->resetvalid = 1;
+
+    return 0;
+  }
 
   gettimeofday (&s->to, NULL);
 
@@ -271,6 +297,7 @@ unsigned int esocket_deltimeout (esocket_t * s)
 
   deleteNode (&s->handler->root, &s->rbt);
 
+  s->resetvalid = 0;
   s->tovalid = 0;
   s->handler->timercnt--;
 
@@ -484,6 +511,7 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   s->state = SOCKSTATE_INIT;
   s->tovalid = 0;
   s->events = 0;
+  s->addr = NULL;
 
   s->prev = NULL;
   s->next = h->sockets;
@@ -519,7 +547,7 @@ unsigned int esocket_close (esocket_t * s)
   return 0;
 }
 
-unsigned int esocket_connect (esocket_t * s, char *address, unsigned int port)
+int esocket_connect (esocket_t * s, char *address, unsigned int port)
 {
   int err;
 
@@ -647,6 +675,19 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
     if (!timercmp ((&s->to), (&now), <))
       return 0;
 
+    if (s->resetvalid) {
+      unsigned long long key = (s->reset.tv_sec * 1000) + (s->reset.tv_usec / 1000);
+
+      s->to = s->reset;
+      s->resetvalid = 0;
+
+      deleteNode (&h->root, rbt);
+
+      s->rbt.data = key;
+      insertNode (&h->root, rbt);
+      continue;
+    }
+
     s->tovalid = 0;
     deleteNode (&h->root, rbt);
     h->timercnt--;
@@ -660,7 +701,7 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
 #ifndef POLL
 /************************************************************************
 **
-**                             EPOLL
+**                             SELECT
 **
 ************************************************************************/
 unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
@@ -897,7 +938,7 @@ leave:
 #else
 /************************************************************************
 **
-**                             select
+**                             EPOLL
 **
 ************************************************************************/
 

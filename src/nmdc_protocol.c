@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -695,6 +705,7 @@ int proto_nmdc_user_free (user_t * user)
 
   user->parent = NULL;
   user->next = freelist;
+  user->prev = NULL;
   freelist = user;
 
   nmdc_stats.userpart++;
@@ -2467,8 +2478,9 @@ void proto_nmdc_flush_cache ()
     nmdc_stats.cache_results += cache.results.length + cache.results.messages.count;
 
   DPRINTF
-    ("///////////////////////////// Cache Flush \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"
+    ("//////// %10lu //////// Cache Flush \\\\\\\\\\\\\\\\\\\\\\ %7lu \\\\\\\\\\\\\\\\\\\\\\\n"
      " Chat %d (%lu), MyINFO %d (%lu), MyINFOupdate %d (%lu), as %d (%lu), ps %d (%lu), res %d\n",
+     now.tv_sec, now.tv_usec,
      ch, cache.chat.length + cache.chat.messages.count, mi,
      cache.myinfo.length + cache.myinfo.messages.count, miu,
      cache.myinfoupdate.length + cache.myinfoupdate.messages.count, as,
@@ -2613,7 +2625,8 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
       break;
     }
     bf_free (b);
-    if (user->state == PROTO_STATE_DISCONNECTED)
+    /* if parent is freed "buffers" is not longer valid */
+    if (!user->parent)
       break;
   }
 

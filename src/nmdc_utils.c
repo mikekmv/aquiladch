@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -194,45 +204,6 @@ int unescape_string (char *output, unsigned int j)
   *k = '\0';
 
   return k - output;
-}
-
-int escape_string (char *output, int j)
-{
-  int i;
-  char *l, *k;
-  char tmpbuf[2048];
-
-  if (j > 2048)
-    return -1;
-
-  memcpy (tmpbuf, output, j);
-
-  l = tmpbuf;
-  k = output;
-
-  /* do not escape first $ character */
-  if (*k == '$') {
-    k++;
-    l++;
-    j--;
-  };
-
-  for (i = 0; (i < j) && ((k - output) < 2038); i++)
-    switch (l[i]) {
-      case 0:
-      case 5:
-      case 36:
-      case 96:
-      case 124:
-      case 126:
-	k += sprintf (k, "/%%DCN%03d%%/", l[i]);
-	break;
-      default:
-	*k++ = l[i];
-    }
-  *k = '\0';
-
-  return 0;
 }
 
 int parse_tag (char *desc, user_t * user)

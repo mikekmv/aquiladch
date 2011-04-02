@@ -1,12 +1,21 @@
 /*
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)    
- *  (C) Copyright 2006 Toma "ZeXx86" Jedrzejek (admin@infern0.tk)
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
  *
- *  Thanks to Toma "ZeXx86" Jedrzejek (admin@infern0.tk) for original implementation
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *  Thanks to Tomas "ZeXx86" Jedrzejek (admin@infern0.tk) for original implementation
  */
 
 #include "plugin_int.h"
@@ -26,7 +35,8 @@
 
 #include "utils.h"
 #include "commands.h"
-
+#include "user.h"
+#include "cap.h"
 
 const unsigned char *pi_lua_eventnames[] = {
   "EventLogin",
@@ -50,9 +60,9 @@ const unsigned char *pi_lua_eventnames[] = {
 };
 
 
-plugin_t *plugin_lua = NULL;
+unsigned char *pi_lua_savefile;
 
-unsigned int breakmainchat = 0;
+plugin_t *plugin_lua = NULL;
 
 unsigned int lua_ctx_cnt, lua_ctx_peak;
 
@@ -66,11 +76,40 @@ typedef struct lua_context {
 
 lua_context_t lua_list;
 
-int lua_arrival (const char *command, unsigned int args, const char *nick, const char *data);
-unsigned int plugin_lua_close (char name[256]);
-
+unsigned int plugin_lua_close (unsigned char *name);
 
 /******************************* LUA INTERFACE *******************************************/
+
+/******************************************************************************************
+ *   Utilities
+ */
+
+unsigned int parserights (unsigned char *caps, unsigned long *cap, unsigned long *ncap)
+{
+  unsigned int j;
+  unsigned char *c, *tmp;
+
+  tmp = strdup (caps);
+  c = strtok (tmp, " ,");
+  while (c) {
+    for (j = 0; Capabilities[j].name; j++) {
+      if (!strcasecmp (Capabilities[j].name, c)) {
+	if (c[0] != '-') {
+	  *cap |= Capabilities[j].cap;
+	  *ncap &= ~Capabilities[j].cap;
+	} else {
+	  *ncap |= Capabilities[j].cap;
+	  *cap &= ~Capabilities[j].cap;
+	}
+	break;
+      }
+    };
+    c = strtok (NULL, " ,");
+  }
+  free (tmp);
+
+  return 0;
+}
 
 /******************************************************************************************
  *  LUA Function Configuration handling
@@ -80,7 +119,7 @@ int pi_lua_getconfig (lua_State * lua)
 {
   config_element_t *elem;
 
-  char *name = (char *) luaL_checkstring (lua, 1);
+  unsigned char *name = (unsigned char *) luaL_checkstring (lua, 1);
 
   elem = config_find (name);
   if (!elem) {
@@ -140,8 +179,8 @@ int pi_lua_setconfig (lua_State * lua)
 {
   config_element_t *elem;
 
-  char *name = (char *) luaL_checkstring (lua, 1);
-  char *value = (char *) luaL_checkstring (lua, 2);
+  unsigned char *name = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *value = (unsigned char *) luaL_checkstring (lua, 2);
 
   elem = config_find (name);
   if (!elem) {
@@ -204,214 +243,20 @@ int pi_lua_setconfig (lua_State * lua)
 /******************************************************************************************
  *  LUA Function IO Handling
  */
-int pi_lua_user_printf (lua_State * lua)
-{
-  plugin_user_t *user;
-
-  // read first param/argument with local Lua buffer
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *format = luaL_checkstring (lua, 2);
-
-  user = plugin_user_find ((char *) nick);
-
-  if (user)
-    plugin_user_printf (user, format);
-
-  return 0;
-}
-
-int pi_lua_user_say (lua_State * lua)
-{
-  plugin_user_t *user;
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *format = luaL_checkstring (lua, 2);
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  plugin_user_say (user, buf);
-
-  bf_free (buf);
-
-  return 0;
-}
-
-int lua_bot_say (lua_State * lua)
-{
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *format = luaL_checkstring (lua, 1);
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  plugin_user_say (NULL, buf);
-
-  bf_free (buf);
-
-  return 0;
-}
-
-int pi_lua_user_sayto (lua_State * lua)
-{
-  plugin_user_t *src, *target;
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *targetnick = luaL_checkstring (lua, 1);
-  const char *srcnick = luaL_checkstring (lua, 2);
-  const char *format = luaL_checkstring (lua, 3);
-
-  src = plugin_user_find ((char *) srcnick);
-  target = plugin_user_find ((char *) targetnick);
-
-  if (!src || !target)
-    return 0;
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  plugin_user_sayto (src, target, buf);
-
-  bf_free (buf);
-
-  return 0;
-}
-
-
-int lua_bot_privto (lua_State * lua)
-{
-  plugin_user_t *tgt;
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *targetnick = luaL_checkstring (lua, 1);
-  const char *format = luaL_checkstring (lua, 2);
-
-  tgt = plugin_user_find ((char *) targetnick);
-
-  if (!tgt)
-    return 0;
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  plugin_user_priv (NULL, tgt, NULL, buf, 1);
-
-  bf_free (buf);
-
-  return 0;
-}
-
-int pi_lua_user_privto (lua_State * lua)
-{
-  plugin_user_t *tgt, *user;
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *targetnick = luaL_checkstring (lua, 1);
-  const char *srcnick = luaL_checkstring (lua, 2);
-  const char *format = luaL_checkstring (lua, 3);
-
-  tgt = plugin_user_find ((char *) targetnick);
-  user = plugin_user_find ((char *) srcnick);
-
-  if (!tgt)
-    return 0;
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  if (user)
-    plugin_user_priv (user, tgt, user, buf, 1);
-  else
-    plugin_user_priv (NULL, tgt, NULL, buf, 1);
-
-  bf_free (buf);
-
-  return 0;
-}
-
-
-int pi_lua_user_privall (lua_State * lua)
-{
-  plugin_user_t *tgt = NULL, *user;
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *srcnick = luaL_checkstring (lua, 1);
-  const char *format = luaL_checkstring (lua, 2);
-
-  user = plugin_user_find ((char *) srcnick);
-  if (!user)
-    return 0;
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  while (plugin_user_next (&tgt)) {
-    plugin_user_priv (user, tgt, user, buf, 1);
-  }
-
-  bf_free (buf);
-
-  return 0;
-}
-
-int lua_bot_privall (lua_State * lua)
-{
-  plugin_user_t *tgt = NULL;
-  buffer_t *buf;
-
-  // read first param/argument with local Lua buffer
-  const char *format = luaL_checkstring (lua, 1);
-
-  buf = bf_alloc (10240);
-
-  bf_printf (buf, format);
-
-  while (plugin_user_next (&tgt))
-    plugin_user_priv (NULL, tgt, NULL, buf, 1);
-
-  bf_free (buf);
-
-  return 0;
-}
-
-/******************************************************************************************
- *  LUA Function User data handling
- */
-
-
 extern long users_total;
-int lua_getuserstotal (lua_State * lua)
+int pi_lua_getuserstotal (lua_State * lua)
 {
   lua_pushnumber (lua, users_total);
 
   return 1;
 }
 
-int lua_getuserip (lua_State * lua)
+int pi_lua_getuserip (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find ((char *) nick);
+  user = plugin_user_find (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -425,43 +270,28 @@ int lua_getuserip (lua_State * lua)
   return 1;
 }
 
-int lua_getusershare (lua_State * lua)
+int pi_lua_getuserclient (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find ((char *) nick);
-
-  if (!user) {
-    lua_pushnil (lua);
-  } else {
-    lua_pushstring (lua, format_size (user->share));
-  }
-
-  return 1;
-}
-
-int lua_getuserclient (lua_State * lua)
-{
-  const char *nick = luaL_checkstring (lua, 1);
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
+  user = plugin_user_find (nick);
 
   if (!user) {
     lua_pushnil (lua);
   } else {
     lua_pushstring (lua, user->client);
   }
+
   return 1;
 }
 
-int lua_getuserclientversion (lua_State * lua)
+int pi_lua_getuserclientversion (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find ((char *) nick);
+  user = plugin_user_find (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -472,9 +302,78 @@ int lua_getuserclientversion (lua_State * lua)
   return 1;
 }
 
+int pi_lua_getusershare (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    lua_pushstring (lua, format_size (user->share));
+  }
+
+  return 1;
+}
+
+int pi_lua_getusersharenum (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    lua_pushnumber (lua, user->share);
+  }
+
+  return 1;
+}
+
+int pi_lua_getuserslots (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    lua_pushnumber (lua, user->slots);
+  }
+
+  return 1;
+}
+
+int pi_lua_getuserhubs (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+    lua_pushnil (lua);
+    lua_pushnil (lua);
+  } else {
+    lua_pushnumber (lua, user->hubs[0]);
+    lua_pushnumber (lua, user->hubs[1]);
+    lua_pushnumber (lua, user->hubs[2]);
+  }
+
+  return 3;
+}
+
+
 int pi_lua_userisop (lua_State * lua)
 {
-  char *nick = (char *) luaL_checkstring (lua, 1);
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
   user = plugin_user_find (nick);
@@ -488,30 +387,100 @@ int pi_lua_userisop (lua_State * lua)
   return 1;
 }
 
+int pi_lua_userisactive (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    lua_pushboolean (lua, user->active);
+  }
+
+  return 1;
+}
+
+int pi_lua_userisregistered (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    lua_pushboolean (lua, user->flags & 2);
+  }
+
+  return 1;
+}
+
+int pi_lua_useriszombie (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    lua_pushboolean (lua, user->flags & 4);
+  }
+
+  return 1;
+}
+
+
+int pi_lua_getuserrights (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+  buffer_t *b;
+
+  user = plugin_user_find (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    b = bf_alloc (10240);
+    command_flags_print ((command_flag_t *) Capabilities, b, user->rights);
+    lua_pushstring (lua, b->s);
+    bf_free (b);
+  }
+
+  return 1;
+}
+
+
 /******************************************************************************************
  *  LUA Functions Bot handling
  */
 
 
-int lua_addbot (lua_State * lua)
+int pi_lua_addbot (lua_State * lua)
 {
   plugin_user_t *u;
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *description = luaL_checkstring (lua, 2);
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *description = (unsigned char *) luaL_checkstring (lua, 2);
 
-  u = plugin_robot_add ((char *) nick, (char *) description, NULL);
+  u = plugin_robot_add (nick, description, NULL);
 
   lua_pushboolean (lua, (u != NULL));
 
   return 1;
 }
 
-int lua_delbot (lua_State * lua)
+int pi_lua_delbot (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *u;
 
-  u = plugin_user_find ((char *) nick);
+  u = plugin_user_find (nick);
 
   if (u)
     plugin_robot_remove (u);
@@ -522,323 +491,641 @@ int lua_delbot (lua_State * lua)
 }
 
 /******************************************************************************************
- *  LUA Functions String utilities
+ *  LUA Functions User handling
  */
 
-
-/* search string */
-int lua_strsearch (lua_State * lua)
+int pi_lua_user_kick (lua_State * lua)
 {
-  const char *str = luaL_checkstring (lua, 1);
-  const char *str2 = luaL_checkstring (lua, 2);
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
+  plugin_user_t *u;
 
-  const char *buf = strstr (str, str2);
+  u = plugin_user_find (nick);
 
-  if (buf != NULL) {
-    lua_pushstring (lua, buf);
-  } else {
-    lua_pushnumber (lua, 0);
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
   }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_kick (u, b);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_user_drop (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
+  plugin_user_t *u;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_drop (u, b);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_user_ban (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  plugin_user_t *u;
+  unsigned long period;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  period = time_parse (periodstring);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_ban (u, b, period);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_user_bannick (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  plugin_user_t *u;
+  unsigned long period;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  period = time_parse (periodstring);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_bannick (u, b, period);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_user_banip (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  plugin_user_t *u;
+  unsigned long period;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  period = time_parse (periodstring);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_banip (u, b, period);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_user_banip_hard (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  plugin_user_t *u;
+  unsigned long period;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  period = time_parse (periodstring);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_banip_hard (u, b, period);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+
+int pi_lua_banip (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  unsigned long period;
+  struct in_addr ia;
+
+  period = time_parse (periodstring);
+
+
+  if (!inet_aton (ip, &ia)) {
+    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_error (lua);
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_ban_ip (ia.s_addr, b, period);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_banip_hard (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  unsigned long period;
+  struct in_addr ia;
+
+  period = time_parse (periodstring);
+
+
+  if (!inet_aton (ip, &ia)) {
+    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_error (lua);
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_ban_ip_hard (ia.s_addr, b, period);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
+
+int pi_lua_unban (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+
+  lua_pushboolean (lua, plugin_unban (nick));
+
+  return 1;
+}
+
+int pi_lua_unbannick (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+
+  lua_pushboolean (lua, plugin_unban_nick (nick));
+
+  return 1;
+}
+
+int pi_lua_unbanip (lua_State * lua)
+{
+  unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
+  struct in_addr ia;
+
+  if (!inet_aton (ip, &ia)) {
+    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_error (lua);
+  }
+
+  lua_pushboolean (lua, plugin_unban_ip (ia.s_addr));
+
+  return 1;
+}
+
+int pi_lua_unbanip_hard (lua_State * lua)
+{
+  unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
+  struct in_addr ia;
+
+  if (!inet_aton (ip, &ia)) {
+    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_error (lua);
+  }
+
+  lua_pushboolean (lua, plugin_unban_ip_hard (ia.s_addr));
+
+  return 1;
+}
+
+int pi_lua_user_zombie (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *u;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  lua_pushboolean (lua, plugin_user_zombie (u));
+
+  return 1;
+}
+
+int pi_lua_user_unzombie (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *u;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  lua_pushboolean (lua, plugin_user_unzombie (u));
+
+  return 1;
+}
+
+int pi_lua_findnickban (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+
+  b = bf_alloc (10240);
+
+  if (plugin_user_findnickban (b, nick)) {
+    lua_pushstring (lua, b->s);
+  } else {
+    lua_pushnil (lua);
+  }
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_findipban (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
+  struct in_addr ia;
+
+  if (!inet_aton (ip, &ia)) {
+    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_error (lua);
+  }
+
+  b = bf_alloc (10240);
+
+  if (plugin_user_findipban (b, ia.s_addr)) {
+    lua_pushstring (lua, b->s);
+  } else {
+    lua_pushnil (lua);
+  }
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_report (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 1);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_report (b);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
 
   return 1;
 }
 
 /******************************************************************************************
- *  LUA Functions IO handling
+ *  LUA message functions
  */
+
+int pi_lua_sendtoall (lua_State * lua)
+{
+  buffer_t *b;
+  plugin_user_t *u;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  lua_pushboolean (lua, plugin_user_say (u, b));
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_sendtonick (lua_State * lua)
+{
+  buffer_t *b;
+  plugin_user_t *s, *d;
+  unsigned char *src = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *dest = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+
+  s = plugin_user_find (src);
+  /* s can be NULL, wil become hubsec */
+
+  d = plugin_user_find (dest);
+  if (!d) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  lua_pushboolean (lua, plugin_user_sayto (s, d, b));
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_sendpmtoall (lua_State * lua)
+{
+  unsigned int i;
+  buffer_t *b;
+  plugin_user_t *tgt = NULL, *u;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
+
+  u = plugin_user_find (nick);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  /* send to all users */
+  i = 0;
+  while (plugin_user_next (&tgt)) {
+    /* weird is i set direct to 1 it doesn't work. */
+    plugin_user_priv (u, tgt, u, b, 0);
+    i++;
+  }
+  lua_pushnumber (lua, i);
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_sendpmtonick (lua_State * lua)
+{
+  buffer_t *b;
+  plugin_user_t *s, *d;
+  unsigned char *src = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *dest = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+
+  s = plugin_user_find (src);
+  /* s can be NULL, wil become hubsec */
+
+  d = plugin_user_find (dest);
+  if (!d) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  lua_pushboolean (lua, plugin_user_priv (s, d, s, b, 1));
+
+  bf_free (b);
+
+  return 1;
+}
 
 /******************************************************************************************
- *  LUA Functions User handling
+ *  LUA Account Command Handling
  */
 
-/* disconnect user */
-int lua_disconnectbyname (lua_State * lua)
+int pi_lua_account_create (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned int retval = 0;
+  account_type_t *grp;
+  account_t *acc;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *group = (unsigned char *) luaL_checkstring (lua, 2);
 
-  plugin_user_t *user;
+  grp = account_type_find (group);
+  if (!grp)
+    goto leave;
 
-  user = plugin_user_find ((char *) nick);
+  acc = account_add (grp, nick);
+  if (!acc)
+    goto leave;
 
-  if (user)
-    plugin_user_drop (user, bf_buffer (""));
-
-  return 0;
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
 }
 
-/* kick user */
-int lua_kickbyname (lua_State * lua)
+int pi_lua_account_delete (lua_State * lua)
 {
-  buffer_t *buf;
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *str = luaL_checkstring (lua, 2);
+  unsigned int retval = 0;
+  account_t *acc;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
 
-  plugin_user_t *user;
+  acc = account_find (nick);
+  if (!acc)
+    goto leave;
 
-  user = plugin_user_find ((char *) nick);
+  account_del (acc);
 
-  if (!user)
-    return 0;
-
-
-  /* rebuild reason */
-  buf = bf_alloc (1024);
-  *buf->e = '\0';
-
-  bf_printf (buf, "You were kicked because: %s", str);
-
-  plugin_user_kick (user, buf);
-
-  return 0;
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
 }
 
-
-/* banip user */
-int lua_banip (lua_State * lua)
+int pi_lua_account_passwd (lua_State * lua)
 {
-  buffer_t *buf;
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *str = luaL_checkstring (lua, 2);
-  const char *str2 = luaL_checkstring (lua, 3);
+  unsigned int retval = 0;
+  account_t *acc;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *passwd = (unsigned char *) luaL_checkstring (lua, 2);
 
-  unsigned long period = 0;
+  acc = account_find (nick);
+  if (!acc)
+    goto leave;
 
-  plugin_user_t *user;
+  account_pwd_set (acc, passwd);
 
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-
-  /* rebuild reason */
-  buf = bf_alloc (1024);
-  *buf->e = '\0';
-  bf_printf (buf, str);
-
-  period = time_parse ((char *) str2);
-  plugin_user_banip (user, buf, period);
-
-  return 0;
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
 }
 
-/* bannick user */
-int lua_bannick (lua_State * lua)
+int pi_lua_account_pwgen (lua_State * lua)
 {
-  buffer_t *buf;
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *str = luaL_checkstring (lua, 2);
-  const char *str2 = luaL_checkstring (lua, 3);
+  unsigned int i;
+  account_t *acc;
+  unsigned char passwd[64];
 
-  unsigned long period = 0;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned int pwlen = luaL_checknumber (lua, 2);
 
-  plugin_user_t *user;
+  if ((pwlen < 4) || (pwlen > 50))
+    pwlen = 12;
 
-  user = plugin_user_find ((char *) nick);
+  passwd[0] = 0;
+  acc = account_find (nick);
+  if (!acc)
+    goto leave;
 
-  if (!user)
-    return 0;
-
-
-  /* rebuild reason */
-  buf = bf_alloc (1024);
-  *buf->e = '\0';
-  bf_printf (buf, str);
-
-  period = time_parse ((char *) str2);
-  plugin_user_bannick (user, buf, period);
-
-  return 0;
-}
-
-/* ban user */
-int lua_ban (lua_State * lua)
-{
-  buffer_t *buf;
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *str = luaL_checkstring (lua, 2);
-  const char *str2 = luaL_checkstring (lua, 3);
-
-  unsigned long period = 0;
-
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  /* rebuild reason */
-  buf = bf_alloc (1024);
-  *buf->e = '\0';
-  bf_printf (buf, str);
-
-  period = time_parse ((char *) str2);
-  plugin_user_ban (user, buf, period);
-
-  return 0;
-}
-
-/* baniphard user */
-int lua_baniphard (lua_State * lua)
-{
-  buffer_t *buf;
-
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *str = luaL_checkstring (lua, 2);
-  const char *str2 = luaL_checkstring (lua, 3);
-
-  unsigned long period = 0;
-
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  /* rebuild reason */
-  buf = bf_alloc (1024);
-  *buf->e = '\0';
-  bf_printf (buf, str);
-
-  period = time_parse ((char *) str2);
-  plugin_user_banip_hard (user, buf, period);
-
-  return 0;
-}
-
-
-/* unbanip user */
-int lua_unbanip (lua_State * lua)
-{
-  struct in_addr ia;
-
-  char *value = (char *) luaL_checkstring (lua, 1);
-
-  if (!inet_aton (value, &ia)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
-    lua_error (lua);
+  for (i = 0; i < pwlen; i++) {
+    passwd[i] = (33 + (random () % 90));
   }
+  passwd[i] = '\0';
 
-  plugin_unban_ip (ia.s_addr);
+  account_pwd_set (acc, passwd);
 
-  return 0;
+leave:
+  lua_pushstring (lua, passwd);
+  return 1;
 }
 
-/* unbannick user */
-int lua_unbannick (lua_State * lua)
+int pi_lua_group_create (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned int retval = 0;
+  unsigned long caps = 0, ncaps = 0;
+  account_type_t *grp;
+  unsigned char *group = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
 
-  plugin_unban_nick ((char *) nick);
+  parserights (rights, &caps, &ncaps);
 
-  return 0;
+  grp = account_type_add (group, caps);
+  if (!grp)
+    goto leave;
+
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
 }
 
-/* unban user */
-int lua_unban (lua_State * lua)
+int pi_lua_group_inuse (lua_State * lua)
 {
-  const char *nick = luaL_checkstring (lua, 1);
+  unsigned int retval = 0;
+  account_type_t *grp;
 
-  plugin_unban ((char *) nick);
+  unsigned char *group = (unsigned char *) luaL_checkstring (lua, 1);
 
-  return 0;
+  grp = account_type_find (group);
+  if (!grp)
+    goto leave;
+
+  retval = (grp->refcnt != 0);
+
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
 }
 
-/* unbaniphard user */
-int lua_unbaniphard (lua_State * lua)
+int pi_lua_group_delete (lua_State * lua)
 {
-  struct in_addr ia;
+  unsigned int retval = 0;
+  account_type_t *grp;
 
-  char *value = (char *) luaL_checkstring (lua, 1);
+  unsigned char *group = (unsigned char *) luaL_checkstring (lua, 1);
 
-  if (!inet_aton (value, &ia)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
-    lua_error (lua);
-  }
+  grp = account_type_find (group);
+  if (!grp)
+    goto leave;
 
-  plugin_unban_ip_hard (ia.s_addr);
+  if (grp->refcnt)
+    goto leave;
 
-  return 0;
+  account_type_del (grp);
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
 }
 
-/* gag user */
-int lua_gag (lua_State * lua)
-{
-  const char *nick = luaL_checkstring (lua, 1);
-
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  plugin_user_zombie (user);
-
-  return 0;
-}
-
-/* ungag user */
-int lua_ungag (lua_State * lua)
-{
-  const char *nick = luaL_checkstring (lua, 1);
-
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  plugin_user_unzombie (user);
-
-  return 0;
-}
-
-/* get a user group */
-int lua_getusergroup (lua_State * lua)
-{
-  const char *nick = luaL_checkstring (lua, 1);
-
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  lua_pushnumber (lua, user->rights);
-
-  return 0;
-}
-
-/* forcemove user */
-int lua_forcemove (lua_State * lua)
-{
-  const char *nick = luaL_checkstring (lua, 1);
-  const char *str = luaL_checkstring (lua, 2);
-  const char *str2 = luaL_checkstring (lua, 3);
-
-  buffer_t *buf;
-
-  plugin_user_t *user;
-
-  user = plugin_user_find ((char *) nick);
-
-  if (!user)
-    return 0;
-
-  /* rebuild reason */
-  buf = bf_alloc (1024);
-  *buf->e = '\0';
-  bf_printf (buf, str2);
-
-  plugin_user_forcemove (user, (char *) str, buf);
-
-  return 0;
-}
 
 /******************************************************************************************
  *  LUA Functions Custom Command Handling
@@ -886,7 +1173,7 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
   /* call funtion. */
   result = lua_pcall (ctx->lua, argc, 1, 0);
   if (result) {
-    char *error = (char *) luaL_checkstring (ctx->lua, 1);
+    unsigned char *error = (unsigned char *) luaL_checkstring (ctx->lua, 1);
     buffer_t *buf;
 
     DPRINTF ("LUA ERROR: %s\n", error);
@@ -904,13 +1191,13 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
 }
 
 /* lua reg command */
-int lua_cmdreg (lua_State * lua)
+int pi_lua_cmdreg (lua_State * lua)
 {
   pi_lua_command_context_t *ctx;
-
-  const char *cmd = luaL_checkstring (lua, 1);
-  const char *rights = luaL_checkstring (lua, 2);	// FIXME
-  const char *desc = luaL_checkstring (lua, 3);
+  unsigned long caps = 0, ncaps = 0;
+  unsigned char *cmd = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);	// FIXME
+  unsigned char *desc = (unsigned char *) luaL_checkstring (lua, 3);
 
   lua_pushstring (lua, cmd);
   lua_gettable (lua, LUA_GLOBALSINDEX);
@@ -921,7 +1208,9 @@ int lua_cmdreg (lua_State * lua)
   }
   lua_remove (lua, -1);
 
-  if (command_register ((char *) cmd, &handler_luacommand, 0, (char *) desc)) {
+  parserights (rights, &caps, &ncaps);
+
+  if (command_register (cmd, &handler_luacommand, caps, desc)) {
     lua_pushstring (lua, "Command failed to register.");
     return lua_error (lua);
   }
@@ -929,7 +1218,7 @@ int lua_cmdreg (lua_State * lua)
   /* alloc and init */
   ctx = malloc (sizeof (pi_lua_command_context_t));
   if (!ctx) {
-    command_unregister ((char *) cmd);
+    command_unregister (cmd);
     lua_pushstring (lua, "Could not allocate memory.");
     return lua_error (lua);
   }
@@ -948,10 +1237,10 @@ int lua_cmdreg (lua_State * lua)
 }
 
 /* lua del command */
-int lua_cmddel (lua_State * lua)
+int pi_lua_cmddel (lua_State * lua)
 {
   pi_lua_command_context_t *ctx;
-  const char *cmd = luaL_checkstring (lua, 1);
+  unsigned char *cmd = (unsigned char *) luaL_checkstring (lua, 1);
 
   for (ctx = pi_lua_command_list.next; ctx != &pi_lua_command_list; ctx = ctx->next) {
     if ((lua != ctx->lua) || (strcmp (ctx->name, cmd)))
@@ -960,7 +1249,7 @@ int lua_cmddel (lua_State * lua)
     ctx->prev->next = ctx->next;
     ctx->next->prev = ctx->prev;
 
-    command_unregister ((char *) cmd);
+    command_unregister (cmd);
 
     free (ctx->name);
     free (ctx);
@@ -972,7 +1261,7 @@ int lua_cmddel (lua_State * lua)
 }
 
 /* clean out all command of this script */
-int lua_cmdclean (lua_State * lua)
+int pi_lua_cmdclean (lua_State * lua)
 {
   pi_lua_command_context_t *ctx;
 
@@ -998,49 +1287,87 @@ int lua_cmdclean (lua_State * lua)
  *  LUA Function registration
  */
 
-int luaregister (lua_State * l)
+typedef struct pi_lua_symboltable_element {
+  const unsigned char *name;
+  int (*func) (lua_State * lua);
+} pi_lua_symboltable_element_t;
+
+pi_lua_symboltable_element_t pi_lua_symboltable[] = {
+  /* all user info related functions */
+  {"GetUserIP", pi_lua_getuserip,},
+  {"GetUserShare", pi_lua_getusershare,},
+  {"GetUserShareNum", pi_lua_getusersharenum,},
+  {"GetUserClient", pi_lua_getuserclient,},
+  {"GetUserClientVersion", pi_lua_getuserclientversion,},
+  {"GetUserSlots", pi_lua_getuserslots,},
+  {"GetUserHubs", pi_lua_getuserhubs,},
+  {"GetUserRights", pi_lua_getuserrights,},
+
+  {"UserIsOP", pi_lua_userisop,},
+  {"UserIsActive", pi_lua_userisactive,},
+  {"UserIsRegistered", pi_lua_userisactive,},
+  {"UserIsZombie", pi_lua_userisactive,},
+
+  /* kick and ban functions */
+  {"UserKick", pi_lua_user_kick,},
+  {"UserDrop", pi_lua_user_drop,},
+  {"UserBan", pi_lua_user_ban,},
+  {"UserBanNick", pi_lua_user_bannick,},
+  {"UserBanIP", pi_lua_user_banip,},
+  {"UserBanIPHard", pi_lua_user_banip_hard,},
+  {"BanIP", pi_lua_banip,},
+  {"BanIPHard", pi_lua_banip_hard,},
+  {"UnBan", pi_lua_unban,},
+  {"UnBanNick", pi_lua_unbannick,},
+  {"UnBanIP", pi_lua_unbanip,},
+  {"UnBanIPHard", pi_lua_unbanip_hard,},
+  {"Zombie", pi_lua_user_zombie,},
+  {"UnZombie", pi_lua_user_unzombie,},
+
+  {"FindNickBan", pi_lua_findnickban,},
+  {"FindIPBan", pi_lua_findipban,},
+
+  {"Report", pi_lua_report,},
+
+  /* hub message functions */
+  {"ChatToAll", pi_lua_sendtoall,},
+  {"ChatToNick", pi_lua_sendtonick,},
+  {"PMToAll", pi_lua_sendpmtoall,},
+  {"PMToNick", pi_lua_sendpmtonick,},
+
+  /* account management */
+  {"GroupCreate", pi_lua_group_create,},
+  {"GroupInUse", pi_lua_group_inuse,},
+  {"GroupDelete", pi_lua_group_inuse,},
+  {"AccountCreate", pi_lua_account_create,},
+  {"AccountDelete", pi_lua_account_delete,},
+  {"AccountPasswd", pi_lua_account_passwd,},
+  {"AccountPwGen", pi_lua_account_pwgen,},
+
+  /* hubinfo stat related info */
+  {"GetActualUsersTotal", pi_lua_getuserstotal,},
+
+  /* robot functions */
+  {"AddBot", pi_lua_addbot,},
+  {"DelBot", pi_lua_delbot,},
+
+  /* lua created command functions */
+  {"RegCommand", pi_lua_cmdreg,},
+  {"DelCommand", pi_lua_cmddel,},
+
+  /* config functions */
+  {"SetConfig", pi_lua_setconfig,},
+  {"GetConfig", pi_lua_getconfig,},
+
+  {NULL, NULL}
+};
+
+int pi_lua_register_functions (lua_State * l)
 {
-  lua_register (l, "SendToNick", pi_lua_user_printf);
-  lua_register (l, "SendBotToAll", lua_bot_say);
-  lua_register (l, "SendToAll", pi_lua_user_say);
-  lua_register (l, "SendNickToNick", pi_lua_user_sayto);
-  lua_register (l, "SendPmToNick", pi_lua_user_privto);
-  lua_register (l, "SendBotPmToNick", lua_bot_privto);
-  lua_register (l, "SendPmToAll", pi_lua_user_privall);
-  lua_register (l, "SendBotPmToAll", lua_bot_privall);
+  pi_lua_symboltable_element_t *cmd;
 
-  lua_register (l, "GetActualUsersTotal", lua_getuserstotal);
-  lua_register (l, "GetUserIP", lua_getuserip);
-  lua_register (l, "GetUserShare", lua_getusershare);
-  lua_register (l, "GetUserGroup", lua_getusergroup);
-  lua_register (l, "GetUserClient", lua_getuserclient);
-  lua_register (l, "GetUserClientVer", lua_getuserclientversion);
-  lua_register (l, "UserIsOP", pi_lua_userisop);
-
-  lua_register (l, "AddBot", lua_addbot);
-  lua_register (l, "DelBot", lua_delbot);
-  lua_register (l, "RegCommand", lua_cmdreg);
-  lua_register (l, "DelCommand", lua_cmddel);
-
-  lua_register (l, "SearchString", lua_strsearch);
-
-  lua_register (l, "DisconnectByName", lua_disconnectbyname);
-  lua_register (l, "KickByName", lua_kickbyname);
-  lua_register (l, "BanIP", lua_banip);
-  lua_register (l, "BanNick", lua_bannick);
-  lua_register (l, "Ban", lua_ban);
-  lua_register (l, "BanIPHard", lua_baniphard);
-  lua_register (l, "UnBanIP", lua_unbanip);
-  lua_register (l, "UnBanNick", lua_unbannick);
-  lua_register (l, "UnBan", lua_unban);
-  lua_register (l, "UnBanIPHard", lua_unbaniphard);
-  lua_register (l, "ForceMove", lua_forcemove);
-
-  lua_register (l, "Gag", lua_gag);
-  lua_register (l, "UnGag", lua_ungag);
-
-  lua_register (l, "SetConfig", pi_lua_setconfig);
-  lua_register (l, "GetConfig", pi_lua_getconfig);
+  for (cmd = pi_lua_symboltable; cmd->name; cmd++)
+    lua_register (l, cmd->name, cmd->func);
 
   return 1;
 }
@@ -1095,7 +1422,7 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
   l = lua_open ();
   openlualibs (l);		/* Load Lua libraries */
-  luaregister (l);		/* register lua commands */
+  pi_lua_register_functions (l);	/* register lua commands */
 
   // load the file
   result = luaL_loadfile (l, name);
@@ -1104,7 +1431,7 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
   result = lua_pcall (l, 0, LUA_MULTRET, 0);
   if (result) {
-    char *error = (char *) luaL_checkstring (l, 1);
+    unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
 
     bf_printf (output, "LUA ERROR: %s\n", error);
 
@@ -1154,7 +1481,7 @@ unsigned int pi_lua_close (unsigned char *name)
     if (strcmp (name, ctx->name))
       continue;
 
-    lua_cmdclean (ctx->l);
+    pi_lua_cmdclean (ctx->l);
 
     lua_close (ctx->l);
     free (ctx->name);
@@ -1268,7 +1595,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
     /* call funtion. */
     result = lua_pcall (ctx->l, 2, 1, 0);
     if (result) {
-      char *error = (char *) luaL_checkstring (ctx->l, 1);
+      unsigned char *error = (unsigned char *) luaL_checkstring (ctx->l, 1);
       buffer_t *buf;
 
       DPRINTF ("LUA ERROR: %s\n", error);
@@ -1292,30 +1619,68 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
   return result;
 }
 
-/*
-unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *dummy,
+
+unsigned long pi_lua_event_save (plugin_user_t * user, buffer_t * output, void *dummy,
 				 unsigned long event, buffer_t * token)
 {
-  int j;
+  FILE *fp;
+  lua_context_t *ctx;
 
-  for (j = 0; j < 25; j++)
-    lua_script_id[j].l = NULL;	// Null the lua state pointer
+  fp = fopen (pi_lua_savefile, "w+");
+  if (!fp)
+    return PLUGIN_RETVAL_CONTINUE;
+
+  for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
+    fprintf (fp, "%s\n", ctx->name);
+
+  fclose (fp);
 
   return PLUGIN_RETVAL_CONTINUE;
 }
-*/
+
+unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *dummy,
+				 unsigned long event, buffer_t * token)
+{
+  unsigned int i;
+  FILE *fp;
+  unsigned char buffer[10240];
+
+  fp = fopen (pi_lua_savefile, "r+");
+  if (!fp)
+    return PLUGIN_RETVAL_CONTINUE;
+
+  fgets (buffer, sizeof (buffer), fp);
+  while (!feof (fp)) {
+    for (i = 0; buffer[i] && buffer[i] != '\n' && (i < sizeof (buffer)); i++);
+    if (i == sizeof (buffer))
+      break;
+    if (buffer[i] == '\n')
+      buffer[i] = '\0';
+
+    pi_lua_load (output, buffer);
+    fgets (buffer, sizeof (buffer), fp);
+  }
+
+  fclose (fp);
+
+  return PLUGIN_RETVAL_CONTINUE;
+}
+
 
 /******************************* INIT *******************************************/
 
 int pi_lua_init ()
 {
+  int i;
+
+  pi_lua_savefile = strdup ("lua.conf");
+
   lua_list.next = &lua_list;
   lua_list.prev = &lua_list;
   lua_list.l = NULL;
   lua_list.name = NULL;
   lua_ctx_cnt = 0;
   lua_ctx_peak = 0;
-  breakmainchat = 0;
 
   pi_lua_command_list.next = &pi_lua_command_list;
   pi_lua_command_list.prev = &pi_lua_command_list;
@@ -1324,22 +1689,12 @@ int pi_lua_init ()
 
   plugin_lua = plugin_register ("lua");
 
-  //plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
+  plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
+  plugin_request (plugin_lua, PLUGIN_EVENT_SAVE, (plugin_event_handler_t *) & pi_lua_event_save);
 
   /* lua event handlers */
-  plugin_request (plugin_lua, PLUGIN_EVENT_LOGIN,
-		  (plugin_event_handler_t *) & pi_lua_event_handler);
-  plugin_request (plugin_lua, PLUGIN_EVENT_LOGOUT,
-		  (plugin_event_handler_t *) & pi_lua_event_handler);
-  plugin_request (plugin_lua, PLUGIN_EVENT_CHAT, (plugin_event_handler_t *) & pi_lua_event_handler);
-  plugin_request (plugin_lua, PLUGIN_EVENT_SEARCH,
-		  (plugin_event_handler_t *) & pi_lua_event_handler);
-  plugin_request (plugin_lua, PLUGIN_EVENT_PM_IN,
-		  (plugin_event_handler_t *) & pi_lua_event_handler);
-  plugin_request (plugin_lua, PLUGIN_EVENT_PRELOGIN,
-		  (plugin_event_handler_t *) & pi_lua_event_handler);
-  plugin_request (plugin_lua, PLUGIN_EVENT_INFOUPDATE,
-		  (plugin_event_handler_t *) & pi_lua_event_handler);
+  for (i = 0; pi_lua_eventnames[i] != NULL; i++)
+    plugin_request (plugin_lua, i, (plugin_event_handler_t *) & pi_lua_event_handler);
 
   command_register ("luastat", &handler_luastat, CAP_CONFIG, "Show lua stats.");
   command_register ("luaload", &handler_luaload, CAP_CONFIG, "Load a lua script.");

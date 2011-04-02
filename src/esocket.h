@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -52,6 +62,11 @@
 #  endif
 #endif
 
+#ifdef __CYGWIN__
+#define MAX_FD		16384
+#define FD_SETSIZE 	16384
+#endif
+
 #include <sys/types.h>
 
 #if HAVE_INTTYPES_H
@@ -76,7 +91,7 @@
 
 #ifdef USE_EPOLL
 #include <sys/epoll.h>
-#define ESOCKET_MAX_FDS 	8096
+#define ESOCKET_MAX_FDS 	16384
 #define ESOCKET_ASK_FDS 	1024
 #endif
 
@@ -120,8 +135,8 @@ typedef struct esocket {
   struct addrinfo *addr;
   uint32_t events;
 
-  unsigned int tovalid;
-  struct timeval to;
+  unsigned int tovalid, resetvalid;
+  struct timeval to, reset;
   struct esockethandler *handler;
 } esocket_t;
 
@@ -180,12 +195,7 @@ extern esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, 
 extern unsigned int esocket_close (esocket_t * s);
 extern unsigned int esocket_remove_socket (esocket_t * s);
 
-/* 
- *   Connect. will respond with a errorfunc call. 
- *     success:  state SOCKSTATE_CONNECTED
- *     failure:  state SOCKSTATE_ERROR
- */
-extern unsigned int esocket_connect (esocket_t * s, char *address, unsigned int port);
+extern int esocket_connect (esocket_t * s, char *address, unsigned int port);
 extern unsigned int esocket_select (esocket_handler_t * h, struct timeval *to);
 extern unsigned int esocket_update (esocket_t * s, int fd, unsigned int state);
 extern unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout);

@@ -2,7 +2,7 @@
 
 /*
  * from http://www.cs.auckland.ac.nz/software/AlgAnim/niemann/s_man.htm
- * Public domain.
+ * Source code, when part of a software project, may be used freely without reference to the author
  */ 
   
 #define compLT(a,b) (a < b)

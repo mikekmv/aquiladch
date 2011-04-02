@@ -1,9 +1,19 @@
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
- *  This file is subject to the terms and conditions of the GNU General
- *  Public License.  See the file COPYING in the main directory of this
- *  distribution for more details.     
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
 
@@ -436,7 +446,9 @@ int trigger_load (unsigned char *file)
 
   fgets (buffer, sizeof (buffer), fp);
   while (!feof (fp)) {
-    for (i = 0; buffer[i] && buffer[i] != '\n'; i++);
+    for (i = 0; buffer[i] && (buffer[i] != '\n') && (i < sizeof (buffer)); i++);
+    if (i == sizeof (buffer))
+      break;
     if (buffer[i] == '\n')
       buffer[i] = '\0';
 
@@ -598,18 +610,8 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   unsigned char *arg, *help;
   unsigned long cap = 0, ncap = 0, capstart = 0;
 
-  if (argc < 3) {
-    bf_printf (output, "Usage: %s <name> <type> [<arg> <help>] [<cap>]\n"
-	       "   name: name of the trigger\n"
-	       "   type: one of:\n"
-	       "      - login   : the trigger will be triggered on user login, provide capabilties after type\n"
-	       "      - command : the trigger will be triggered by a command, provide the command in <arg>,\n"
-	       "                    then a help msg for the command, followed by any required capabilities\n"
-	       "   arg: depends on type\n"
-	       "   help: help message for command\n"
-	       "   cap: capabilities required to activate rule\n", argv[0]);
-    return 0;
-  }
+  if (argc < 3)
+    goto printhelp;
 
   if (!(t = trigger_find (argv[1]))) {
     bf_printf (output, "Triggername %s doesn't exist.", argv[1]);
@@ -617,11 +619,15 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   }
 
   if (!strcmp (argv[2], "login")) {
+    if (argc < 4)
+      goto printhelp;
     type = TRIGGER_RULE_LOGIN;
     help = argv[3];
     capstart = 4;
     arg = NULL;
   } else if (!strcmp (argv[2], "command")) {
+    if (argc < 5)
+      goto printhelp;
     type = TRIGGER_RULE_COMMAND;
     capstart = 5;
     help = argv[4];
@@ -641,6 +647,19 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   } else {
     bf_printf (output, "Rule creation failed.");
   }
+
+  return 0;
+
+printhelp:
+  bf_printf (output, "Usage: %s <name> <type> [<arg> <help>] [<cap>]\n"
+	     "   name: name of the trigger\n"
+	     "   type: one of:\n"
+	     "      - login   : the trigger will be triggered on user login, provide capabilties after type\n"
+	     "      - command : the trigger will be triggered by a command, provide the command in <arg>,\n"
+	     "                    then a help msg for the command, followed by any required capabilities\n"
+	     "   arg: depends on type\n"
+	     "   help: help message for command\n"
+	     "   cap: capabilities required to activate rule\n", argv[0]);
   return 0;
 }
 
