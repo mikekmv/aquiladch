@@ -1,11 +1,14 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	Fixed problem with double nicks. (Reported by Cyber_Ninja)
+		- crash when using nick of chatroom
+		- disconnect any other user.
 	Fixed illegal memory reference in input handling.
 	Fixed possible crash when disconnecting user.
 	Improved pi_hublist error handling.
 	Fixed and moved escape_string from nmdc_utils.c to pi_hublist.c
-	Added pi_hublist.c Hublist registering
+	Added pi_hublist.c Hublist registering (thanks to ZeXx86 for example code)
 	Fixed copyright message in headers
 	Fixed FD restrictions on cygwin
 	Fixed bug in ruleadd
@@ -17,8 +20,7 @@ This is the Aquila Changelog.
 	Fixed bug with !ruleadd
 	removed assert, allowing kicking of self.
 	fixed bug in help. Can no longer see any commands that aren't available.
-	added LUA support... reasonably tested!
-		- can't assign rights for commands yet
+	added LUA support... (thanks to ZeXx86 for example code)
 	added unzombie command	
 	added protocol proto_send_direct (which was old proto_send)
 	rights parsing now obeys last setting for a right. 

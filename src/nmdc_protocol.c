@@ -866,43 +866,6 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
 
 /******************************************************************************\
 **                                                                            **
-**                             PROTOCOL UTILITY FUNCTIONS                     **
-**                                                                            **
-\******************************************************************************/
-
-int proto_nmdc_user_exists (user_t * u, buffer_t * output, token_t * tkn)
-{
-  int retval = 0;
-  user_t *existing_user;
-
-  /* nick already used ? */
-  if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
-    /* same nick from same IP ? 
-       if (existing_user->ipaddress != u->ipaddress) {
-       // if not, refuse nick
-       bf_strcat (output, "$ValidateDenide ");
-       bf_strcat (output, u->nick);
-       bf_strcat (output, "|");
-       retval = server_write (u->parent, output);
-       proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
-       nmdc_stats.usednick++;
-       retval = 1;
-       } else { */
-    /* if so, disconnect previous user. */
-    proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
-    server_write (existing_user->parent, output);
-    server_disconnect_user (existing_user->parent);
-    /* reset output buffer. */
-    output->s = output->buffer;
-    *output->s = '\0';
-    /* continue as normal */
-    /*} */
-  }
-  return retval;
-}
-
-/******************************************************************************\
-**                                                                            **
 **                    PROTOCOL HANDLING PER STATE                             **
 **                                                                            **
 \******************************************************************************/
@@ -1091,7 +1054,17 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
   do {
     strncpy (u->nick, tkn->argument, NICKLENGTH);
     u->nick[NICKLENGTH - 1] = 0;
-    if (proto_nmdc_user_exists (u, output, tkn)) {
+
+    existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick));
+
+    /* the existing user is a bot or chatroom? deny user. */
+    if (existing_user && (existing_user->state == PROTO_STATE_VIRTUAL)) {
+      bf_strcat (output, "$ValidateDenide ");
+      bf_strcat (output, u->nick);
+      bf_strcat (output, "|");
+      retval = server_write (u->parent, output);
+      proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+      nmdc_stats.usednick++;
       retval = -1;
       break;
     }
@@ -1113,6 +1086,26 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       } else {
 	proto_nmdc_user_say_string (HubSec, output,
 				    "Your account priviliges will not be awarded until you set a password.");
+      }
+    }
+
+    /* if user exists */
+    if (existing_user) {
+      if (existing_user->ipaddress != u->ipaddress) {
+	bf_strcat (output, "$ValidateDenide ");
+	bf_strcat (output, u->nick);
+	bf_strcat (output, "|");
+	retval = server_write (u->parent, output);
+	proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+	nmdc_stats.usednick++;
+	retval = -1;
+	break;
+      } else {
+	proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+	server_write (existing_user->parent, output);
+	server_disconnect_user (existing_user->parent);
+	*output->s = '\0';
+	output->e = output->s;
       }
     }
 
@@ -1192,6 +1185,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
   account_t *a;
   account_type_t *t;
   buffer_t *output;
+  user_t *existing_user;
 
   if (tkn->type != TOKEN_MYPASS)
     return 0;
@@ -1212,6 +1206,15 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       break;
     }
     t = a->classp;
+
+    /* check if users exists, if so, redirect old */
+    if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
+      proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+      server_write (existing_user->parent, output);
+      server_disconnect_user (existing_user->parent);
+      *output->s = '\0';
+      output->e = output->s;
+    }
 
     /* assign rights */
     if (a->passwd[0]) {
@@ -1253,6 +1256,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 {
   int retval = 0;
   buffer_t *output;
+  user_t *existing_user;
 
   if (tkn->type == TOKEN_GETNICKLIST) {
     u->flags |= NMDC_FLAG_DELAYEDNICKLIST;
@@ -1271,9 +1275,17 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     /* $MyINFO $ALL Jove yes... i cannot type. I can Dream though...<DCGUI V:0.3.3,M:A,H:1,S:5>$ $DSL.$email$0$ */
 
     /* check again if user exists */
-    if (proto_nmdc_user_exists (u, output, tkn)) {
-      retval = -1;
-      break;
+    if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
+      if (existing_user->ipaddress != u->ipaddress) {
+	proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+	nmdc_stats.usednick++;
+	retval = -1;
+	break;
+      } else {
+	proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+	server_write (existing_user->parent, output);
+	server_disconnect_user (existing_user->parent);
+      }
     }
 
     /* should not happen */
