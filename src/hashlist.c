@@ -10,6 +10,15 @@
 #include <ctype.h>
 #include <strings.h>
 
+#include "../config.h"
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
+#endif
+
 #include "proto.h"
 #include "hash.h"
 #include "hashlist.h"

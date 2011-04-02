@@ -8,12 +8,18 @@
  */
 
 #define _GNU_SOURCE
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../config.h"
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+#include <arpa/inet.h>
+
 
 #include "defaults.h"
 #include "builtincmd.h"

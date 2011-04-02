@@ -154,7 +154,6 @@ unsigned int banlist_save (banlist_t* list, unsigned char *file) {
 
 unsigned int banlist_load (banlist_t* list, unsigned char *file) {
 	FILE *fp;
-	unsigned int t;
 	unsigned long l;
 	banlist_entry_t e;
 

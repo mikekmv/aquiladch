@@ -7,11 +7,16 @@
  *  
  */
 
+#include "../config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <crypt.h>
 #include <time.h>
 #include "../src/cap.h"
+
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
        
 int main (int argc, char **argv) {
 	unsigned char salt[3];

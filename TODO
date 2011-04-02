@@ -6,3 +6,15 @@ Develstatus:
 	- SSL (not for 0.1)
 	- ADC (future)
 	- hublist support
+
+Large changes:
+	- rebuild proto_nmdc_flush_cache()
+		use generic cache elements of 1->N, 1->(N-1) and 1->1 nature.
+	- move all token parsing to nmdc_token.c
+	- split off timers in esocket.c, export them genericly
+	- add poll() to esocket to replace epoll if epoll unavailable.
+
+Ideas:
+	- if i ever implement something of a congestion measure, i could add
+		cache_rebuild  to the "when i got time" list 
+	

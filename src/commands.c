@@ -171,14 +171,15 @@ unsigned long cmd_parser (plugin_user_t *user, plugin_user_t *target, void *priv
 		return PLUGIN_RETVAL_CONTINUE;
 	
 	/*  switch to local buffer copy so we can modify it.*/
-	local = bf_copy (token, 0);
+	local = bf_copy (token, 1);
+	local->e = '\0';
 	c = local->s + (c - token->s);
 	
 	/* parse command.*/
 	DPRINTF ("CMD: %s\n", c);
 	
 	c++;	
-	while (*c) {
+	while (*c && (argc < (COMMAND_MAX_ARGS-1))) {
 		argv[argc] = c;
 		/* if argument starts with a ' or a " include everything until next matching quote. */
 		if (( *c == '\'')||(*c == '\"')) {
@@ -211,6 +212,11 @@ unsigned long cmd_parser (plugin_user_t *user, plugin_user_t *target, void *priv
 
 	if (!argc)
 		goto leave;
+
+	/* string wasn't completely parsed, but we are running out of argv spaces. all the rest in one argument. */
+	if (*c && (argc == (COMMAND_MAX_ARGS-1))) {
+		argv[argc++] = c;
+	}
 
 	for (i= argc; i < COMMAND_MAX_ARGS ; i++)
 		argv[i] = NULL;

@@ -7,12 +7,18 @@
  *  
  */
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
 #include <assert.h>
 #include <string.h>
+
+#include "../config.h"
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
 
 #include "core_config.h"
 

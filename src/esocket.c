@@ -8,6 +8,11 @@
  */
 
 #include "esocket.h"
+
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>

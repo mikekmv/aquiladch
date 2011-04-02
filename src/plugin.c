@@ -8,8 +8,13 @@
  */
 
 #include "plugin_int.h"
+#include <sys/types.h>
 #include <string.h>
 #include <assert.h>
+
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif                
 
 #include "hub.h"
 #include "banlist.h"

@@ -10,7 +10,14 @@
 #ifndef _BANLISTCLIENT_H_
 #define _BANLISTCLIENT_H_
 
-#include <stdint.h>
+#include "../config.h"
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
+#endif
 
 #include "config.h"
 #include "buffer.h"

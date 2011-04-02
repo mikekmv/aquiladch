@@ -10,7 +10,15 @@
 #ifndef _BANLIST_H_
 #define _BANLIST_H_
 
-#include <stdint.h>
+#include "../config.h"
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
+#endif
+
 #include "buffer.h"
 #include "dllist.h"
 

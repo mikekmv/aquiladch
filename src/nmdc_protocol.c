@@ -12,7 +12,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include <netinet/in.h>
+
+#include "../config.h"
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
 
 #include "hub.h"
 #include "hash.h"
@@ -1157,7 +1161,7 @@ int proto_nmdc_handle_token (user_t * u, buffer_t * b)
 
 	  /* rest of add cached data */
 	  for (; le; le = le->next) {
-	    bf_strncat (buf, le->data->s, bf_used (le->data)-1);
+	    bf_strncat (buf, le->data->s, bf_used (le->data));
 	    bf_strcat (buf, "|");
 	  }
 	  /* add string to send */
@@ -1745,7 +1749,7 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
     for (; le; le = le->next) {
       /* data and length */
       b = le->data;
-      l = bf_used(b) - 1;
+      l = bf_used(b);
 
       /* copy data */
       memcpy (t, b->s, l);
@@ -1762,7 +1766,7 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 
         /* data and length */
         b = le->data;
-        l = bf_used(b) - 1;
+        l = bf_used(b);
 
         /* copy data */
         memcpy (t, b->s, l);
@@ -1779,7 +1783,7 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 
         /* data and length */
         b = le->data;
-        l = bf_used(b) - 1;
+        l = bf_used(b);
 
         /* copy data */
         memcpy (t, b->s, l);
@@ -1836,7 +1840,7 @@ inline int proto_nmdc_add_element (cache_element_t *elem, buffer_t *buf, unsigne
     for (le = elem->messages.first; le; le = le->next) {
       /* data and length */
       b =  le->data;
-      l = bf_used(b) - 1;
+      l = bf_used(b);
 
       /* copy data */
       memcpy (t, b->s, l);

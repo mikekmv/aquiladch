@@ -215,7 +215,7 @@ buffer_t *bf_sep (buffer_t ** list, unsigned char *sep)
 
   /* overwrite seperator and expand buffer */
   r->e[size - 1] = '\0';
-  r->e += size;
+  r->e += (size-1);
 
   /* remove used data from last buffer */
   b->s += size;
@@ -243,7 +243,7 @@ buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
   /* first, we determine length */
   size = 0;
 
-  /* search se[erator */
+  /* search seperator */
   b = *list;
   p = b->s;
   for (; b ; b = b->next) {
@@ -287,7 +287,7 @@ buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep)
 
   /* overwrite seperator and expand buffer */
   r->e[size - 1] = '\0';
-  r->e += size;
+  r->e += (size-1);
 
   /* remove used data from last buffer */
   b->s += size;
@@ -350,7 +350,7 @@ int bf_strncat (buffer_t *dst, unsigned char *data, unsigned long length) {
 
   strncpy ((char *)dst->e, (char *)data, length);
   dst->e += length;
-
+  
   ASSERT (dst->e <= (dst->buffer+dst->size));
   
   return length;
@@ -368,23 +368,35 @@ unsigned long bf_size (buffer_t *src) {
 
 int bf_printf (buffer_t *dst, const char *format, ...) {
   va_list ap;
-  int retval;
-  
+  int retval, available;
+
+  /* if the buffer is full, just return */
+  available = bf_unused (dst);
+  if (!available) return 0;
+
+  /* print to the buffer */
   va_start (ap, format);
-  retval = vsnprintf ((char *)dst->e, dst->size - bf_used (dst), format, ap);
+  retval = vsnprintf ((char *)dst->e, available, format, ap);
   va_end (ap);
   
-  dst->e += retval;
+  /* make sure dst->e is always valid */
+  dst->e += (retval > available) ? available : retval;
   
   return retval;
 }
 
 int bf_vprintf (buffer_t *dst, const char *format, va_list ap) {
-  int retval;
+  int retval, available;
   
-  retval = vsnprintf ((char *)dst->e, dst->size - bf_used (dst), format, ap);
+  /* if the buffer is full, just return */
+  available = bf_unused (dst);
+  if (!available) return 0;
   
-  dst->e += retval;
+  /* print to the buffer */
+  retval = vsnprintf ((char *)dst->e, available, format, ap);
+  
+  /* make sure dst->e is always valid */
+  dst->e += (retval > available) ? available : retval;
   
   return retval;
 }

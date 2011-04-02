@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.1]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -63,6 +63,8 @@ fi
 AC_SUBST(GCC_CFLAGS)
 
 # Checks for libraries.
+AC_CHECK_LIB(crypt, crypt)
+
 if test "${ZLINE}" = "" ;
 then
 	unset ZLIB;
@@ -73,12 +75,12 @@ AC_SUBST(ZLIB)
 	
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h inttypes.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h crypt.h])
 
 # if epoll is enables, check for the header
 if test "${USE_EPOLL}" != "" ;
 then
-	AC_CHECK_HEADERS([sys/epoll.h])
+	AC_CHECK_HEADERS([sys/epoll.h linux/eventpoll.h])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.

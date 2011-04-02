@@ -14,11 +14,29 @@
 #include "../config.h"
 #endif
 
+/*
+ * Decide if we want to use epoll.
+ *   We checked for: sys/epoll.h header, linux/eventpoll.h (we don't need this
+ *     but if this isn't there, the kernel does not have epoll support) and 
+ *     epoll_wait in the libc
+ */
 #ifndef USE_EPOLL
 # ifdef HAVE_SYS_EPOLL_H
 #  ifdef HAVE_EPOLL_WAIT
-#    define USE_EPOLL 1
+#    ifdef HAVE_LINUX_EVENTPOLL_H
+#      define USE_EPOLL 1
+#    endif
 #  endif
+# endif
+#endif
+
+#include <sys/types.h>
+
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
 # endif
 #endif
 

@@ -12,8 +12,12 @@
 #include <string.h>
 #include <assert.h>
 #include <strings.h>
-#include <crypt.h>
 #include <errno.h>
+
+#include "../config.h"
+#ifdef HAVE_CRYPT_H
+#  include <crypt.h>
+#endif
 
 #include "user.h"
 

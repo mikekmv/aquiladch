@@ -1,5 +1,14 @@
 This is the Aquila Changelog.
 
+0.1.1:
+	Fixed bug in pm handling. no longer extra \0 chars attached.
+	Added check for linux/eventpoll.h to see if kernel supports epoll.
+	OS X support thanks to Dj_Offset (Jan Vidar Krey)
+	Fixed command handler: now correctly handles commands with more than
+		255 arguments.
+	Fixed bf_printf and bf_vprintf to correctly update buf->e if the
+		buffer overflows.
+
 0.1:
 	Released version.
 
