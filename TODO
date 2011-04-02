@@ -9,11 +9,12 @@ Develstatus:
 	- !warn command
 	- redo tag parsing, make it more flexible. (allow missing fields).
 	- md5 password hashing. preferably verlihub compatible.
+	- fix the results queueing. store the size of the largest pm queue,
+		but not the messages.
 
 Large changes:
 	- rebuild proto_nmdc_flush_cache()
 		use generic cache elements of 1->N, 1->(N-1) and 1->1 nature.
-	- move all token parsing to nmdc_token.c (Is this worth it?)
 	- split off timers in esocket.c, export them genericly
 	- consider adding the chunked approach FarCry suggested for the nicklistcache
 	- command line parameters.

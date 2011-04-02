@@ -21,7 +21,7 @@ extern buffer_t *rebuild_myinfo (user_t * u, buffer_t * b);
 
 #ifdef ZLINES
 
-extern buffer_t *zline (buffer_t *);
+extern int zline (buffer_t *, buffer_t **, buffer_t **);
 extern buffer_t *zunline (buffer_t * input);
 
 #endif

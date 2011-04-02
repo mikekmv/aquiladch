@@ -14,6 +14,12 @@
 #include <errno.h>
 #include <stdarg.h>
 
+#ifdef DEBUG
+#define BF_VERIFY(x) bf_verify(x)
+#else
+#define BF_VERIFY(x) /* x */
+#endif
+
 typedef struct buffer_stats {
   unsigned long long peak;
   unsigned long long size;
@@ -47,6 +53,7 @@ extern buffer_t *bf_alloc (unsigned long size);
 extern void bf_free (buffer_t * buffer);
 extern void bf_free_single (buffer_t * buffer);
 extern void bf_claim (buffer_t * buffer);
+extern void bf_verify (buffer_t *buffer);
 
 extern int bf_append_raw (buffer_t ** buffer, unsigned char *data, unsigned long size);
 extern int bf_append (buffer_t ** buffer, buffer_t * b);

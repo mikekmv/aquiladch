@@ -85,6 +85,8 @@ inline void searchlist_update (searchlist_t * list, searchlist_entry_t * entry)
   entry->prev = list->last;
   entry->prev->next = entry;
   list->last = entry;
+  if (!list->first)
+    list->first = entry;
 }
 
 inline void searchlist_purge (searchlist_t * list, struct user *user)

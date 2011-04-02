@@ -27,12 +27,15 @@ void hash_init (hashlist_t * list)
 {
   dlhashlist_init (&list->nick, SERVER_HASH_ENTRIES);
   dlhashlist_init (&list->ip, SERVER_HASH_ENTRIES);
+  list->count = 0;
 }
 
-void hash_deluser (hashlist_entry_t * entry)
+void hash_deluser (hashlist_t * list, hashlist_entry_t * entry)
 {
   dllist_del (&entry->nick);
   dllist_del (&entry->ip);
+  --list->count;
+
 }
 
 /* i choose append so it doesn't influence "to top" handling */
@@ -58,6 +61,8 @@ unsigned int hash_adduser (hashlist_t * list, user_t * u)
   h &= SERVER_HASH_MASK;
 
   dllist_append (dllist_bucket (&list->ip, h), (dllist_entry_t *) & entry->ip);
+
+  ++list->count;
 
   return 0;
 }

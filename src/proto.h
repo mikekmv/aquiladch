@@ -89,6 +89,9 @@ typedef struct user {
   /* cache data */
   buffer_t *MyINFO;
 
+  /* pointer for protocol private data */
+  void *pdata;
+
   /* back linking pointer for parent */
   void *parent;
 } user_t;

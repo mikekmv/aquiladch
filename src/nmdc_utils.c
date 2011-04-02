@@ -330,19 +330,26 @@ int parse_tag (char *desc, user_t * user)
 #define Z_TEXT Z_ASCII
 #endif
 
-buffer_t *zline (buffer_t * input)
+int zline (buffer_t * input, buffer_t ** zpipe, buffer_t ** zline)
 {
   z_stream stream;
   unsigned char *w, *o, *e;
   buffer_t *output, *work;
 
+  if (zpipe)
+    *zpipe = input;
+  if (zline)
+    *zline = input;
+
   if (bf_used (input) < ZLINES_THRESHOLD)
-    return input;
+    return 0;
 
   /* prepare work buffer */
   work = bf_alloc (bf_used (input) + 64);
   if (!work)
-    return input;
+    return 0;
+
+  bf_printf (work, "$ZOn|");
 
   /* init zlib struct */
   memset (&stream, 0, sizeof (stream));
@@ -356,16 +363,16 @@ buffer_t *zline (buffer_t * input)
   stream.next_in = input->s;
   stream.avail_in = bf_used (input);
 
-  stream.next_out = work->s;
-  stream.avail_out = work->size;
+  stream.next_out = work->e;
+  stream.avail_out = bf_unused (work);
 
   /* compress */
   if (deflate (&stream, Z_FINISH) != Z_STREAM_END) {
     deflateEnd (&stream);
     bf_free (work);
-    return input;
+    return 0;
   }
-  work->e = work->s + stream.total_out;
+  work->e += stream.total_out;
 
   /* cleanup zlib */
   deflateEnd (&stream);
@@ -373,20 +380,32 @@ buffer_t *zline (buffer_t * input)
   /* size increased. we won't use this. */
   if (bf_used (work) >= bf_used (input)) {
     bf_free (work);
-    return input;
+    return 0;
+  }
+
+  if (zpipe) {
+    *zpipe = work;
+    bf_claim (work);
+  }
+
+  /* if don't need to create a zline buffer, exit now */
+  if (!zline) {
+    bf_free (work);
+    return 1;
   }
 
   /* allocate output buffer */
   output = bf_alloc (bf_used (input) + 4);
   if (!output) {
     bf_free (work);
-    return input;
+    return 0;
   }
+
 
   /* build Zline. escape the zblob */
   bf_strcat (output, "$Z ");
-  for (w = work->s, o = output->e, e = output->buffer + output->size; (w < work->e) && (o < e);
-       w++, o++) {
+  for (w = work->s + 5 /* $ZOn| */ , o = output->e, e = output->buffer + output->size;
+       (w < work->e) && (o < e); w++, o++) {
     switch (*w) {
       case '\\':
 	*o++ = '\\';
@@ -404,14 +423,17 @@ buffer_t *zline (buffer_t * input)
   bf_free (work);
 
   if (o >= e) {
+    bf_free (work);
     bf_free (output);
-    return input;
+    return 0;
   }
 
   output->e = o;
   bf_strcat (output, "|");
 
-  return output;
+  *zline = output;
+
+  return 1;
 }
 
 buffer_t *zunline (buffer_t * input)

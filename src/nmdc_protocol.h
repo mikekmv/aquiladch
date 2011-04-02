@@ -23,7 +23,8 @@
 #define NMDC_SUPPORTS_QuickList	16	/* NOT SUPPORTED ! deprecated. */
 #define NMDC_SUPPORTS_TTHSearch	32	/* client can handle TTH searches */
 
-#define NMDC_SUPPORTS_ZLines		2048	/* */
+#define NMDC_SUPPORTS_ZPipe		1024	/* */
+#define NMDC_SUPPORTS_ZLine		2048	/* */
 
 
 /* define extra size of nicklist infobuffer. when this extra space is full, 
@@ -64,6 +65,7 @@ typedef struct {
   /*
    *
    */
+  unsigned long ZpipeSupporters;
   unsigned long ZlineSupporters;
 
   /*
@@ -77,8 +79,10 @@ typedef struct {
   buffer_t *infolist;
   buffer_t *hellolist;
 #ifdef ZLINES
-  buffer_t *infolistz;
-  buffer_t *nicklistz;
+  buffer_t *infolistzline;
+  buffer_t *nicklistzline;
+  buffer_t *infolistzpipe;
+  buffer_t *nicklistzpipe;
 #endif
   buffer_t *infolistupdate;
   unsigned long length_estimate;
@@ -103,6 +107,11 @@ typedef struct ratelimiting {
 } ratelimiting_t;
 
 extern ratelimiting_t rates;
+
+typedef struct nmdc_user {
+  cache_element_t privatemessages;
+  cache_element_t results;
+} nmdc_user_t;
 
 typedef struct {
   unsigned long cacherebuild;	/* rebuild of nick list cache */
@@ -140,6 +149,7 @@ typedef struct {
   unsigned long ctmbadtarget;
   unsigned long rctmoverflow;
   unsigned long rctmbadtarget;
+  unsigned long rctmbadsource;
   unsigned long pmoverflow;
   unsigned long pmoutevent;
   unsigned long pmbadtarget;

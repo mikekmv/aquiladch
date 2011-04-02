@@ -246,14 +246,23 @@ int nicklistcache_rebuild (struct timeval now)
   bf_free (cache.hellolist);
   bf_free (cache.infolistupdate);
 #ifdef ZLINES
-  if (cache.infolistz != cache.infolist)
-    bf_free (cache.infolistz);
+  if (cache.infolistzpipe != cache.infolist)
+    bf_free (cache.infolistzpipe);
   else
-    cache.infolistz = NULL;
-  if (cache.nicklistz != cache.nicklist)
-    bf_free (cache.nicklistz);
+    cache.infolistzpipe = NULL;
+  if (cache.infolistzline != cache.infolist)
+    bf_free (cache.infolistzline);
   else
-    cache.nicklistz = NULL;
+    cache.infolistzline = NULL;
+
+  if (cache.nicklistzpipe != cache.nicklist)
+    bf_free (cache.nicklistzpipe);
+  else
+    cache.nicklistzpipe = NULL;
+  if (cache.nicklistzline != cache.nicklist)
+    bf_free (cache.nicklistzline);
+  else
+    cache.nicklistzline = NULL;
 #endif
 
   cache.nicklist = bf_alloc (cache.length_estimate + 32);
@@ -284,8 +293,10 @@ int nicklistcache_rebuild (struct timeval now)
   cache.lastrebuild = now.tv_sec;
 
 #ifdef ZLINES
-  cache.infolistz = zline (cache.infolist);
-  cache.nicklistz = zline (cache.nicklist);
+  zline (cache.infolist, cache.ZpipeSupporters ? &cache.infolistzpipe : NULL,
+	 cache.ZlineSupporters ? &cache.infolistzline : NULL);
+  zline (cache.nicklist, cache.ZpipeSupporters ? &cache.nicklistzpipe : NULL,
+	 cache.ZlineSupporters ? &cache.nicklistzline : NULL);
 #endif
 
   return 0;
@@ -307,8 +318,10 @@ int nicklistcache_sendnicklist (user_t * target)
    */
   if (!(target->supports & NMDC_SUPPORTS_NoHello)) {
 #ifdef ZLINES
-    if (target->supports & NMDC_SUPPORTS_ZLines) {
-      server_write (target->parent, cache.nicklistz);
+    if (target->supports & NMDC_SUPPORTS_ZPipe) {
+      server_write (target->parent, cache.nicklistzpipe);
+    } else if (target->supports & NMDC_SUPPORTS_ZLine) {
+      server_write (target->parent, cache.nicklistzline);
     } else {
       server_write (target->parent, cache.nicklist);
     }
@@ -326,8 +339,10 @@ int nicklistcache_sendnicklist (user_t * target)
   /* clients that support NoGetINFO get a infolist and a infolistupdate, other get a  hello list update */
   if (target->supports & NMDC_SUPPORTS_NoGetINFO) {
 #ifdef ZLINES
-    if (target->supports & NMDC_SUPPORTS_ZLines) {
-      server_write (target->parent, cache.infolistz);
+    if (target->supports & NMDC_SUPPORTS_ZPipe) {
+      server_write (target->parent, cache.infolistzpipe);
+    } else if (target->supports & NMDC_SUPPORTS_ZLine) {
+      server_write (target->parent, cache.infolistzline);
     } else {
       server_write (target->parent, cache.infolist);
     }
@@ -376,7 +391,9 @@ int proto_nmdc_user_delrobot (user_t * u)
   string_list_purge (&cache.asearch.messages, u);
   string_list_purge (&cache.psearch.messages, u);
   string_list_purge (&cache.results.messages, u);
+  string_list_purge (&((nmdc_user_t *) u->pdata)->results.messages, u);
   string_list_purge (&cache.privatemessages.messages, u);
+  string_list_purge (&((nmdc_user_t *) u->pdata)->privatemessages.messages, u);
 
   buf = bf_alloc (8 + NICKLENGTH);
   bf_strcat (buf, "$Quit ");
@@ -390,7 +407,7 @@ int proto_nmdc_user_delrobot (user_t * u)
   plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
   nicklistcache_deluser (u);
-  hash_deluser (&u->hash);
+  hash_deluser (&hashlist, &u->hash);
 
   if (u->MyINFO) {
     bf_free (u->MyINFO);
@@ -538,6 +555,7 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
   }
 
   cache_queue (cache.privatemessages, target, buf);
+  cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
   target->MessageCnt++;
   target->CacheException++;
 
@@ -603,6 +621,10 @@ user_t *proto_nmdc_user_alloc (void *priv)
   init_bucket (&user->rate_getinfo, now.tv_sec);
   init_bucket (&user->rate_downloads, now.tv_sec);
 
+  /* protocol private data */
+  user->pdata = malloc (sizeof (nmdc_user_t));
+  memset (user->pdata, 0, sizeof (nmdc_user_t));
+
   /* add user to the list... */
   user->next = userlist;
   if (user->next)
@@ -620,6 +642,11 @@ user_t *proto_nmdc_user_alloc (void *priv)
 
 int proto_nmdc_user_free (user_t * user)
 {
+
+  /* free protocol private data */
+  free (user->pdata);
+  user->pdata = NULL;
+
   /* remove from the current user list */
   if (user->next)
     user->next->prev = user->prev;
@@ -658,7 +685,9 @@ int proto_nmdc_user_disconnect (user_t * u)
     string_list_purge (&cache.asearch.messages, u);
     string_list_purge (&cache.psearch.messages, u);
     string_list_purge (&cache.results.messages, u);
+    string_list_clear (&((nmdc_user_t *) u->pdata)->results.messages);
     string_list_purge (&cache.privatemessages.messages, u);
+    string_list_clear (&((nmdc_user_t *) u->pdata)->privatemessages.messages);
 
     buf = bf_alloc (8 + NICKLENGTH);
 
@@ -672,7 +701,7 @@ int proto_nmdc_user_disconnect (user_t * u)
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
     nicklistcache_deluser (u);
-    hash_deluser (&u->hash);
+    hash_deluser (&hashlist, &u->hash);
   } else {
     /* if the returned user has same nick, but differnt user pointer, this is legal */
     ASSERT (u != hash_find_nick (&hashlist, u->nick, strlen (u->nick)));
@@ -686,7 +715,7 @@ int proto_nmdc_user_disconnect (user_t * u)
 
   searchlist_clear (&u->searchlist);
 
-  if (u->supports & NMDC_SUPPORTS_ZLines) {
+  if (u->supports & NMDC_SUPPORTS_ZLine) {
     cache.ZlineSupporters--;
   }
 
@@ -900,8 +929,13 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 	    }
 	    break;
 	  case 'Z':
+	    if (!strncmp (k, "ZPipe", 5)) {
+	      u->supports |= NMDC_SUPPORTS_ZPipe;
+	      cache.ZpipeSupporters++;
+	      continue;
+	    }
 	    if (!strncmp (k, "ZLine", 5)) {
-	      u->supports |= NMDC_SUPPORTS_ZLines;
+	      u->supports |= NMDC_SUPPORTS_ZLine;
 	      cache.ZlineSupporters++;
 	      continue;
 	    }
@@ -1496,6 +1530,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	    searchlist_del (&u->searchlist, u->searchlist.first);
 
 	  searchlist_add (&u->searchlist, u, ss);
+
+	  bf_free (ss);
 	}
 
 	/* TODO verify nick, mode and IP */
@@ -1583,6 +1619,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	/* queue search result with the correct user */
 	cache_queue (cache.results, t, b);
+	cache_queue (((nmdc_user_t *) u->pdata)->results, t, b);
 	t->ResultCnt++;
 	t->CacheException++;
 
@@ -1618,6 +1655,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	if (!t)
 	  break;
 
+	cache_queue (((nmdc_user_t *) u->pdata)->privatemessages, u, t->MyINFO);
 	cache_queue (cache.privatemessages, u, t->MyINFO);
 	u->MessageCnt++;
 	u->CacheException++;
@@ -1684,6 +1722,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  /* queue search result with the correct user
 	   * \0 termination should not be necessary
 	   */
+	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
 	  cache_queue (cache.privatemessages, t, b);
 	  t->MessageCnt++;
 	  t->CacheException++;
@@ -1703,6 +1742,17 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	/* check quota */
 	if (!get_token (&rates.downloads, &u->rate_downloads, now.tv_sec)) {
 	  nmdc_stats.rctmoverflow++;
+	  break;
+	}
+
+	/* check target */
+	n = c = tkn->argument;
+	for (; *c && (*c != ' '); c++);
+	l = c - n;
+
+	if (strncasecmp (u->nick, tkn->argument, l)) {
+	  DPRINTF ("RCTM: FAKED source, user %s\n", u->nick);
+	  nmdc_stats.rctmbadsource++;
 	  break;
 	}
 
@@ -1738,6 +1788,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  /* queue search result with the correct user
 	   * \0 termination should not be necessary
 	   */
+	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
 	  cache_queue (cache.privatemessages, t, b);
 	  t->MessageCnt++;
 	  t->CacheException++;
@@ -1813,6 +1864,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  /* queue search result with the correct user 
 	   * \0 termination should not be necessary
 	   */
+	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
 	  cache_queue (cache.privatemessages, t, b);
 	  t->MessageCnt++;
 	  t->CacheException++;
@@ -2089,8 +2141,10 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 	*t++ = '|';
       }
     }
+    /* add passive results */
     if (res && u->ResultCnt) {
-      for (le = cache.results.messages.first; le && u->ResultCnt; le = le->next) {
+      for (le = ((nmdc_user_t *) u->pdata)->results.messages.first; le && u->ResultCnt;
+	   le = le->next) {
 	if (le->user != u)
 	  continue;
 
@@ -2105,13 +2159,13 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 	u->ResultCnt--;
 	u->CacheException--;
       }
+      cache_clear (((nmdc_user_t *) u->pdata)->results);
     }
   }
-  /* add pms results */
+  /* add messages results */
   if (pm && u->MessageCnt) {
-    for (le = cache.privatemessages.messages.first; le && u->MessageCnt; le = le->next) {
-      if (le->user != u)
-	continue;
+    for (le = ((nmdc_user_t *) u->pdata)->privatemessages.messages.first; le && u->MessageCnt;
+	 le = le->next) {
       /* data and length */
       b = (buffer_t *) le->data;
       l = bf_used (b);
@@ -2123,6 +2177,7 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
       u->MessageCnt--;
       u->CacheException--;
     }
+    cache_clear (((nmdc_user_t *) u->pdata)->privatemessages);
   }
   return t - buffer;
 }
@@ -2164,7 +2219,8 @@ void proto_nmdc_flush_cache ()
   unsigned long deadline;
 
 #ifdef ZLINES
-  buffer_t *buf_zpassive = NULL, *buf_zactive = NULL;
+  buffer_t *buf_zlinepassive = NULL, *buf_zlineactive = NULL;
+  buffer_t *buf_zpipepassive = NULL, *buf_zpipeactive = NULL;
 #endif
 
   /*
@@ -2235,9 +2291,11 @@ void proto_nmdc_flush_cache ()
   prs = proto_nmdc_add_element (&cache.presearch, buf_presearch, now.tv_sec);
 
 #ifdef ZLINES
-  if (cache.ZlineSupporters > 0) {
-    buf_zpassive = zline (buf_passive);
-    buf_zactive = zline (buf_active);
+  if ((cache.ZlineSupporters > 0) || (cache.ZpipeSupporters > 0)) {
+    zline (buf_passive, cache.ZpipeSupporters ? &buf_zpipepassive : NULL,
+	   cache.ZlineSupporters ? &buf_zlinepassive : NULL);
+    zline (buf_active, cache.ZpipeSupporters ? &buf_zpipeactive : NULL,
+	   cache.ZlineSupporters ? &buf_zlineactive : NULL);
   }
 #endif
 
@@ -2260,54 +2318,66 @@ void proto_nmdc_flush_cache ()
   /*
    * write out buffers 
    */
-  for (u = userlist; u; u = n) {
-    n = u->next;
-    if (u->state != PROTO_STATE_ONLINE)
-      continue;
-    /* get buffer */
-    if (u->CacheException) {
-      /* we need to copy this buffer cuz it could be buffered during write
-         and it is changed at every call to proto_nmdc_build_buffer */
-      b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
-      b->e += proto_nmdc_build_buffer (b->e, u, as, ps, ch, pm, res);
 
-      if (bf_used (b))
-	if (server_write (u->parent, b) > 0)
-	  server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+  /* if there are *any* users, search a filled bucket in the nick hashlist 
+   * and use that as a starting point for the cache flush.  */
+  if (userlist) {
+    for (u = userlist; u; u = n) {
+      n = u->next;
 
-      bf_free (b);
+      if (u->state != PROTO_STATE_ONLINE)
+	continue;
 
-      u->CacheException = 0;
-    } else {
-#ifdef ZLINES
-      if (u->supports & NMDC_SUPPORTS_ZLines) {
-	b = (u->active ? buf_zactive : buf_zpassive);
+      /* get buffer */
+      if (u->CacheException) {
+	/* we need to copy this buffer cuz it could be buffered during write
+	   and it is changed at every call to proto_nmdc_build_buffer */
+	b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
+	b->e += proto_nmdc_build_buffer (b->e, u, as, ps, ch, pm, res);
+
+	if (bf_used (b))
+	  if (server_write (u->parent, b) > 0)
+	    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+
+	bf_free (b);
+
+	u->CacheException = 0;
       } else {
-	b = (u->active ? buf_active : buf_passive);
-      }
-#else
-      b = (u->active ? buf_active : buf_passive);
-#endif
-      if (bf_used (b))
-	if (server_write (u->parent, b) > 0)
-	  server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
-    }
-    /* send extra OP buffer */
-    if (miuo && u->op)
-      server_write (u->parent, buf_op);
-    /* write out researches to recent clients */
-    if (ars || (u->active && prs)) {
-      if (u->joinstamp > deadline) {
-	server_write (u->parent, (u->active ? buf_aresearch : buf_presearch));
-      }
-    }
-  }
-
 #ifdef ZLINES
-  if (buf_zpassive && (buf_zpassive != buf_passive))
-    bf_free (buf_zpassive);
-  if (buf_zactive && (buf_zactive != buf_active))
-    bf_free (buf_zactive);
+	if (u->supports & NMDC_SUPPORTS_ZPipe) {
+	  b = (u->active ? buf_zpipeactive : buf_zpipepassive);
+	} else if (u->supports & NMDC_SUPPORTS_ZLine) {
+	  b = (u->active ? buf_zlineactive : buf_zlinepassive);
+	} else {
+	  b = (u->active ? buf_active : buf_passive);
+	}
+#else
+	b = (u->active ? buf_active : buf_passive);
+#endif
+	if (bf_used (b))
+	  if (server_write (u->parent, b) > 0)
+	    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+      }
+      /* send extra OP buffer */
+      if (miuo && u->op)
+	server_write (u->parent, buf_op);
+      /* write out researches to recent clients */
+      if (ars || (u->active && prs)) {
+	if (u->joinstamp > deadline) {
+	  server_write (u->parent, (u->active ? buf_aresearch : buf_presearch));
+	}
+      }
+    };
+  }
+#ifdef ZLINES
+  if (buf_zpipepassive && (buf_zpipepassive != buf_passive))
+    bf_free (buf_zpipepassive);
+  if (buf_zpipeactive && (buf_zpipeactive != buf_active))
+    bf_free (buf_zpipeactive);
+  if (buf_zlinepassive && (buf_zlinepassive != buf_passive))
+    bf_free (buf_zlinepassive);
+  if (buf_zlineactive && (buf_zlineactive != buf_active))
+    bf_free (buf_zlineactive);
 #endif
 
   bf_free (buf_passive);

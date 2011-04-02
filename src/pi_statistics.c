@@ -434,6 +434,7 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " ctmbadtarget : %lu\n", nmdc_stats.ctmbadtarget);
   bf_printf (output, " rctmoverflow : %lu\n", nmdc_stats.rctmoverflow);
   bf_printf (output, " rctmbadtarget : %lu\n", nmdc_stats.rctmbadtarget);
+  bf_printf (output, " rctmbadsource : %lu\n", nmdc_stats.rctmbadsource);
   bf_printf (output, " pmoverflow : %lu\n", nmdc_stats.pmoverflow);
   bf_printf (output, " pmoutevent : %lu\n", nmdc_stats.pmoutevent);
   bf_printf (output, " pmbadtarget : %lu\n", nmdc_stats.pmbadtarget);
