@@ -178,6 +178,9 @@ int nicklistcache_adduser (user_t * u)
   bf_strcat (cache.infolistupdate, "|");
   bf_printf (cache.hellolist, "$Hello %s|", u->nick);
 
+  BF_VERIFY (cache.infolistupdate);
+  BF_VERIFY (cache.hellolist);
+
   return 0;
 }
 
@@ -199,6 +202,8 @@ int nicklistcache_updateuser (user_t * u, buffer_t * new)
 
   bf_strncat (cache.infolistupdate, new->s, l);
   bf_strcat (cache.infolistupdate, "|");
+
+  BF_VERIFY (cache.infolistupdate);
 
   return 0;
 }
@@ -228,6 +233,9 @@ int nicklistcache_deluser (user_t * u)
 
   bf_printf (cache.infolistupdate, "$Quit %s|", u->nick);
   bf_printf (cache.hellolist, "$Quit %s|", u->nick);
+
+  BF_VERIFY (cache.infolistupdate);
+  BF_VERIFY (cache.hellolist);
 
   return 0;
 }
@@ -298,6 +306,14 @@ int nicklistcache_rebuild (struct timeval now)
   zline (cache.nicklist, cache.ZpipeSupporters ? &cache.nicklistzpipe : NULL,
 	 cache.ZlineSupporters ? &cache.nicklistzline : NULL);
 #endif
+
+  BF_VERIFY (cache.infolist);
+  BF_VERIFY (cache.infolistzline);
+  BF_VERIFY (cache.infolistzpipe);
+  BF_VERIFY (cache.nicklist);
+  BF_VERIFY (cache.nicklistzline);
+  BF_VERIFY (cache.nicklistzpipe);
+  BF_VERIFY (cache.oplist);
 
   return 0;
 }
@@ -1090,6 +1106,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       u->rights = config.DefaultRights;
 
     /* success! */
+    BF_VERIFY (output);
     retval = server_write (u->parent, output);
     u->state = PROTO_STATE_HELLO;
     server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
@@ -1155,6 +1172,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 
     u->state = PROTO_STATE_HELLO;
     server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
+
     retval = server_write (u->parent, output);
 
     /* DPRINTF (" - User %s greeted.\n", u->nick); */
@@ -1619,7 +1637,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	/* queue search result with the correct user */
 	cache_queue (cache.results, t, b);
-	cache_queue (((nmdc_user_t *) u->pdata)->results, t, b);
+	cache_queue (((nmdc_user_t *) t->pdata)->results, u, b);
 	t->ResultCnt++;
 	t->CacheException++;
 
@@ -2290,6 +2308,9 @@ void proto_nmdc_flush_cache ()
   ars = proto_nmdc_add_element (&cache.aresearch, buf_aresearch, now.tv_sec);
   prs = proto_nmdc_add_element (&cache.presearch, buf_presearch, now.tv_sec);
 
+  BF_VERIFY (buf_active);
+  BF_VERIFY (buf_passive);
+
 #ifdef ZLINES
   if ((cache.ZlineSupporters > 0) || (cache.ZpipeSupporters > 0)) {
     zline (buf_passive, cache.ZpipeSupporters ? &buf_zpipepassive : NULL,
@@ -2298,6 +2319,11 @@ void proto_nmdc_flush_cache ()
 	   cache.ZlineSupporters ? &buf_zlineactive : NULL);
   }
 #endif
+
+  BF_VERIFY (buf_zpipeactive);
+  BF_VERIFY (buf_zlineactive);
+  BF_VERIFY (buf_zpipepassive);
+  BF_VERIFY (buf_zlinepassive);
 
   if (mi)
     nmdc_stats.cache_myinfo += cache.myinfo.length + cache.myinfo.messages.count;

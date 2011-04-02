@@ -145,7 +145,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 aqpasswd_SOURCES = aqpasswd.c
 aqpasswd_LDADD = -lcrypt
-EXTRA_DIST = aqdtinstall.in
+EXTRA_DIST = aqdtinstall.in verli_import
 noinst_SCRIPTS = aqdtinstall
 CLEANFILES = aqdtinstall
 all: all-am

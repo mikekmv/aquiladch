@@ -20,7 +20,8 @@
 buffer_stats_t bufferstats;
 buffer_t static_buf;
 
-void bf_verify (buffer_t *buffer) {
+void bf_verify (buffer_t * buffer)
+{
   ASSERT (buffer->refcnt > 0);
   ASSERT (buffer->e <= (buffer->buffer + buffer->size));
 }

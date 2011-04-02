@@ -1,7 +1,8 @@
 This is the Aquila Changelog.
 
 
-0.1.8-pre6:
+0.1.8-pre7:
+	Fixed bug in passive search handling.
 	Added ZPipe handling
 	Moved to userbased stringstorage iso global list.
 	Verify RCTM source nick.

@@ -15,7 +15,7 @@
 #include <stdarg.h>
 
 #ifdef DEBUG
-#define BF_VERIFY(x) bf_verify(x)
+#define BF_VERIFY(x) if (x) bf_verify(x)
 #else
 #define BF_VERIFY(x) /* x */
 #endif
