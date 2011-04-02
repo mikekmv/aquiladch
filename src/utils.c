@@ -23,6 +23,7 @@ unsigned char *format_size (unsigned long long size)
   double output;
 
   i = 0;
+  output = size;
   while (((size >> 10) > 0) && (i < 5)) {
     i++;
     output = size;

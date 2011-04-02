@@ -367,15 +367,6 @@ int proto_nmdc_user_delrobot (user_t * u)
 {
   buffer_t *buf;
 
-  buf = bf_alloc (8 + NICKLENGTH);
-  bf_strcat (buf, "$Quit ");
-  bf_strcat (buf, u->nick);
-  bf_strcat (buf, "|");
-
-  cache_queue (cache.quit, u, buf);
-
-  bf_free (buf);
-
   /* clear the user from all the relevant caches: not chat and not quit */
   string_list_purge (&cache.myinfo.messages, u);
   string_list_purge (&cache.myinfoupdate.messages, u);
@@ -384,6 +375,15 @@ int proto_nmdc_user_delrobot (user_t * u)
   string_list_purge (&cache.psearch.messages, u);
   string_list_purge (&cache.results.messages, u);
   string_list_purge (&cache.privatemessages.messages, u);
+
+  buf = bf_alloc (8 + NICKLENGTH);
+  bf_strcat (buf, "$Quit ");
+  bf_strcat (buf, u->nick);
+  bf_strcat (buf, "|");
+
+  cache_queue (cache.myinfo, u, buf);
+
+  bf_free (buf);
 
   plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
@@ -648,16 +648,6 @@ int proto_nmdc_user_disconnect (user_t * u)
     return 0;
 
   if (u->state == PROTO_STATE_ONLINE) {
-    buf = bf_alloc (8 + NICKLENGTH);
-
-    bf_strcat (buf, "$Quit ");
-    bf_strcat (buf, u->nick);
-
-    cache_queue (cache.quit, u, buf);
-
-    bf_free (buf);
-
-    /* clear the user from all the relevant caches: not chat and not quit */
     string_list_purge (&cache.myinfo.messages, u);
     string_list_purge (&cache.myinfoupdate.messages, u);
     string_list_purge (&cache.myinfoupdateop.messages, u);
@@ -665,6 +655,15 @@ int proto_nmdc_user_disconnect (user_t * u)
     string_list_purge (&cache.psearch.messages, u);
     string_list_purge (&cache.results.messages, u);
     string_list_purge (&cache.privatemessages.messages, u);
+
+    buf = bf_alloc (8 + NICKLENGTH);
+
+    bf_strcat (buf, "$Quit ");
+    bf_strcat (buf, u->nick);
+
+    cache_queue (cache.myinfo, u, buf);
+
+    bf_free (buf);
 
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
@@ -1803,6 +1802,10 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	if (!target)
 	  break;
 
+	/* check if this users doesn't have more rights */
+	if (target->op && (target->rights & ~u->rights))
+	  break;
+
 	/* find "Where:" token */
 	if (strncmp (++c, "Where", 5))
 	  break;
@@ -2099,7 +2102,7 @@ void proto_nmdc_flush_cache ()
   user_t *u, *n;
   buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op;
   unsigned int psl, asl, l;
-  unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, q = 0, res = 0, miuo = 0;
+  unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0;
   struct timeval now;
 
 #ifdef ZLINES
@@ -2112,7 +2115,6 @@ void proto_nmdc_flush_cache ()
 
   /* calculate lengths: always worst case. */
   l = cache.chat.length + cache.chat.messages.count;
-  l += cache.quit.length + cache.quit.messages.count;
   l += cache.myinfo.length + cache.myinfo.messages.count;
   l += cache.myinfoupdate.length + cache.myinfoupdate.messages.count;
   psl = l + cache.psearch.length + cache.psearch.messages.count;
@@ -2133,7 +2135,6 @@ void proto_nmdc_flush_cache ()
   miuo = proto_nmdc_add_element (&cache.myinfoupdateop, buf_op, now.tv_sec);
 
   /* Exception buffer */
-  q = proto_nmdc_add_element (&cache.quit, buf_exception, now.tv_sec);
   mi = proto_nmdc_add_element (&cache.myinfo, buf_exception, now.tv_sec);
   miu = proto_nmdc_add_element (&cache.myinfoupdate, buf_exception, now.tv_sec);
 
@@ -2175,8 +2176,6 @@ void proto_nmdc_flush_cache ()
   }
 #endif
 
-  if (q)
-    nmdc_stats.cache_quit += cache.quit.length + cache.quit.messages.count;
   if (mi)
     nmdc_stats.cache_myinfo += cache.myinfo.length + cache.myinfo.messages.count;
   if (miu)
@@ -2259,8 +2258,6 @@ void proto_nmdc_flush_cache ()
     cache_clear (cache.results);
   if (pm)
     cache_clear (cache.privatemessages);
-  if (q)
-    cache_clear (cache.quit);
 
   plugin_send_event (NULL, PLUGIN_EVENT_CACHEFLUSH, NULL);
 }
@@ -2408,7 +2405,6 @@ int proto_nmdc_init ()
   init_bucket_type (&cache.psearch.timertype, 30, 1, 1);
   init_bucket_type (&cache.results.timertype, 20, 1, 1);
   init_bucket_type (&cache.privatemessages.timertype, 1, 1, 1);
-  init_bucket_type (&cache.quit.timertype, 10, 1, 1);
 
   gettimeofday (&now, NULL);
 
@@ -2420,7 +2416,6 @@ int proto_nmdc_init ()
   init_bucket (&cache.psearch.timer, now.tv_sec);
   init_bucket (&cache.results.timer, now.tv_sec);
   init_bucket (&cache.privatemessages.timer, now.tv_sec);
-  init_bucket (&cache.quit.timer, now.tv_sec);
 
   config_register ("cache.chat.period", CFG_ELEM_ULONG, &cache.chat.timertype.period,
 		   "Period of chat cache flush. This controls how often chat messages are sent to users. Keep this low.");
@@ -2438,8 +2433,6 @@ int proto_nmdc_init ()
 		   "Period of search results cache flush. This controls how often search results are sent to passive users.");
   config_register ("cache.pm.period", CFG_ELEM_ULONG, &cache.privatemessages.timertype.period,
 		   "Period of private messages cache flush. This controls how often private messages are sent to users. Keep this low.");
-  config_register ("cache.quit.period", CFG_ELEM_ULONG, &cache.quit.timertype.period,
-		   "Period of quit cache flush. This controls how often quit messages are sent to users.");
 
   cloning = DEFAULT_CLONING;
   chatmaxlength = DEFAULT_MAXCHATLENGTH;

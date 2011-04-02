@@ -251,7 +251,9 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
       break;
 
   /* execute handler */
-  if ((cmd != list) && (!cmd->req_cap || ((user->rights & cmd->req_cap) == cmd->req_cap))) {
+  if ((cmd != list)
+      && (!cmd->req_cap || ((user->rights & cmd->req_cap) == cmd->req_cap)
+	  || (user->rights & CAP_OWNER))) {
     buffer_t *output = bf_alloc (10240);
 
     cmd->handler (user, output, priv, argc, argv);

@@ -40,6 +40,21 @@ struct timeval savetime;
 unsigned long handler_say (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
 			   unsigned char **argv)
 {
+  unsigned int i;
+  buffer_t *buf;
+
+  /* build message */
+  buf = bf_alloc (10240);
+  *buf->e = '\0';
+  for (i = 1; i < argc; i++)
+    bf_printf (buf, " %s", argv[i]);
+  if (*buf->s == ' ')
+    buf->s++;
+
+  /* make hubsec say it */
+  plugin_user_say (NULL, buf);
+
+  bf_free (buf);
   return 0;
 }
 
@@ -638,7 +653,7 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
   if (argc < 2) {
     bf_printf (output, "Available commands:\n");
     for (cmd = cmd_sorted.onext; cmd != &cmd_sorted; cmd = cmd->onext)
-      if ((user->rights & cmd->req_cap) || !cmd->req_cap)
+      if ((user->rights & cmd->req_cap) || !cmd->req_cap || (user->rights & CAP_OWNER))
 	bf_printf (output, "%s: %s\n", cmd->name, cmd->help);
 
     bf_printf (output, "Commands are preceded with ! or +\n");
@@ -693,16 +708,18 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
   }
 
   /* verify if the user can actually assign these extra rights... */
-  if (cap && (!(user->rights & CAP_INHERIT))) {
-    bf_printf (output, "You are not allowed to assign rights.\n");
-    goto leave;
-  }
-  if (cap & ~user->rights) {
-    bf_printf (output, "You are not allowed to assign this group: ");
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 cap & ~user->rights);
-    bf_strcat (output, "\n");
-    goto leave;
+  if (!(user->rights & CAP_OWNER)) {
+    if (cap && (!(user->rights & CAP_INHERIT))) {
+      bf_printf (output, "You are not allowed to assign rights.\n");
+      goto leave;
+    }
+    if (cap & ~user->rights) {
+      bf_printf (output, "You are not allowed to assign this group: ");
+      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			   cap & ~user->rights);
+      bf_strcat (output, "\n");
+      goto leave;
+    }
   }
   account_type_add (argv[1], cap);
 
@@ -735,24 +752,26 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
     command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
 
   /* verify if the user can actually assign these extra rights... */
-  if (cap && (!(user->rights & CAP_INHERIT))) {
-    bf_printf (output, "You are not allowed to assign rights.\n");
-    goto leave;
-  }
-  if (cap & ~user->rights) {
-    bf_printf (output, "You are not allowed to assign this group: ");
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 cap & ~user->rights);
-    bf_strcat (output, "\n");
-    goto leave;
-  }
+  if (!(user->rights & CAP_OWNER)) {
+    if (cap && (!(user->rights & CAP_INHERIT))) {
+      bf_printf (output, "You are not allowed to assign rights.\n");
+      goto leave;
+    }
+    if (cap & ~user->rights) {
+      bf_printf (output, "You are not allowed to assign this group: ");
+      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			   cap & ~user->rights);
+      bf_strcat (output, "\n");
+      goto leave;
+    }
 
-  if (ncap & ~user->rights) {
-    bf_printf (output, "You are not allowed to remove the following rights from this group: ");
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 ncap & ~user->rights);
-    bf_strcat (output, "\n");
-    goto leave;
+    if (ncap & ~user->rights) {
+      bf_printf (output, "You are not allowed to remove the following rights from this group: ");
+      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			   ncap & ~user->rights);
+      bf_strcat (output, "\n");
+      goto leave;
+    }
   }
 
   type->rights |= cap;
@@ -775,6 +794,8 @@ unsigned long handler_groupdel (plugin_user_t * user, buffer_t * output, void *p
     bf_printf (output, "Usage: %s <group>", argv[0]);
     return 0;
   }
+
+
 
   if (!(type = account_type_find (argv[1]))) {
     bf_printf (output, "Group %s does not exist.\n", argv[1]);
@@ -876,23 +897,25 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   if (argc > 3)
     command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 3, &cap, &ncap);
 
-  /* verify the user can assign users to this group */
-  if (type->rights & ~user->rights) {
-    bf_printf (output, "You are not allowed to assign a user to this group.\n");
-    goto leave;
-  }
+  if (!(user->rights & CAP_OWNER)) {
+    /* verify the user can assign users to this group */
+    if (type->rights & ~user->rights) {
+      bf_printf (output, "You are not allowed to assign a user to this group.\n");
+      goto leave;
+    }
 
-  /* verify if the user can actually assign these extra rights... */
-  if (cap && (!(user->rights & CAP_INHERIT))) {
-    bf_printf (output, "You are not allowed to assign a user extra rights.\n");
-    goto leave;
-  }
-  if (cap & ~user->rights) {
-    bf_printf (output, "You are not allowed to assign this user: ");
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 cap & ~user->rights);
-    bf_strcat (output, "\n");
-    goto leave;
+    /* verify if the user can actually assign these extra rights... */
+    if (cap && (!(user->rights & CAP_INHERIT))) {
+      bf_printf (output, "You are not allowed to assign a user extra rights.\n");
+      goto leave;
+    }
+    if (cap & ~user->rights) {
+      bf_printf (output, "You are not allowed to assign this user: ");
+      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			   cap & ~user->rights);
+      bf_strcat (output, "\n");
+      goto leave;
+    }
   }
 
   account = account_add (type, argv[1]);
@@ -955,19 +978,21 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
     command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
 
   /* verify if the user can actually assign these extra rights... */
-  if (cap & ~user->rights) {
-    bf_printf (output, "You are not allowed to assign this user: ");
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 cap & ~user->rights);
-    bf_strcat (output, "\n");
-    goto leave;
-  }
-  if (ncap & ~user->rights) {
-    bf_printf (output, "You are not allowed to touch: ");
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 ncap & ~user->rights);
-    bf_strcat (output, "\n");
-    goto leave;
+  if (!(user->rights & CAP_OWNER)) {
+    if (cap & ~user->rights) {
+      bf_printf (output, "You are not allowed to assign this user: ");
+      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			   cap & ~user->rights);
+      bf_strcat (output, "\n");
+      goto leave;
+    }
+    if (ncap & ~user->rights) {
+      bf_printf (output, "You are not allowed to touch: ");
+      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			   ncap & ~user->rights);
+      bf_strcat (output, "\n");
+      goto leave;
+    }
   }
 
   account->rights |= cap;
@@ -999,6 +1024,7 @@ unsigned long handler_userdel (plugin_user_t * user, buffer_t * output, void *pr
 			       unsigned int argc, unsigned char **argv)
 {
   account_t *account;
+  unsigned long cap = 0;
 
   if (argc < 2) {
     bf_printf (output, "Usage: %s <nick>", argv[0]);
@@ -1009,7 +1035,12 @@ unsigned long handler_userdel (plugin_user_t * user, buffer_t * output, void *pr
     bf_printf (output, "User account %s does not exist.\n", argv[1]);
     goto leave;
   }
-
+  if (!(user->rights & CAP_OWNER)) {
+    cap = account->rights | account->classp->rights;
+    if (cap & ~user->rights) {
+      bf_printf (output, "You are not allowed to delete user %s.\n", argv[1]);
+    }
+  }
   account_del (account);
   bf_printf (output, "User account %s deleted.\n", argv[1]);
   if (plugin_user_find (argv[1]))
@@ -1080,9 +1111,11 @@ unsigned long handler_usergroup (plugin_user_t * user, buffer_t * output, void *
     return 0;
   }
 
-  if (group->rights & ~user->rights) {
-    bf_printf (output, "You are not allowed to assign a user to this group.\n");
-    return 0;
+  if (!(user->rights & CAP_OWNER)) {
+    if (group->rights & ~user->rights) {
+      bf_printf (output, "You are not allowed to assign a user to this group.\n");
+      return 0;
+    }
   }
 
   /* move to new group */
@@ -1471,7 +1504,7 @@ int builtincmd_init ()
   config_register ("kicknobanmayban",  CFG_ELEM_UINT,   &KickNoBanMayBan,  "If set, then a user without the ban right can use _ban_ to ban anyway. The maximum time can be set with kickmaxbantime.");
 
 
-  /* command_register ("say",      &handler_say,  CAP_SAY,   "Make the HubSec say something."); */
+  command_register ("say",        &handler_say,  	 CAP_SAY,     "Make the HubSec say something.");
   command_register ("shutdown",	  &handler_shutdown,     CAP_ADMIN,   "Shut the hub down.");
   command_register ("report",     &handler_report,       0,           "Send a report to the OPs.");
   command_register ("version",    &handler_version,      0,           "Displays the Aquila version.");

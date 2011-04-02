@@ -1,6 +1,14 @@
 This is the Aquila Changelog.
 
-0.1.8-pre1:
+
+0.1.8-pre3:
+	Fixed userlist problem. There should no longer be "invisible users".
+	You can no longer redirect users higher than you.
+	Added say command again.
+	Added many rights fixes:
+		- the owner right now overrides all restrictions.
+		- user with the user right can no longer delete accounts 
+                   of users with more rights.
 	Added sharemin formatting. Not ideal, but it should work.
 
 0.1.7:

@@ -58,7 +58,6 @@ typedef struct {
   cache_element_t psearch;	/* passive search list */
   cache_element_t results;	/* results */
   cache_element_t privatemessages;	/* privatemessages */
-  cache_element_t quit;		/* quit list */
 
   /*
    *

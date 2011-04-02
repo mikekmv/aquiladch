@@ -287,7 +287,6 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
   add_elem (buf, cache.psearch, now.tv_sec);
   add_elem (buf, cache.results, now.tv_sec);
   add_elem (buf, cache.privatemessages, now.tv_sec);
-  add_elem (buf, cache.quit, now.tv_sec);
 
   bf_printf (buf, "Total Count: %lu, Total Memory: %lu\n", totallines, totalmem);
 
@@ -439,7 +438,6 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " pmbadsource : %lu\n", nmdc_stats.pmbadsource);
   bf_printf (output, " pminevent : %lu\n", nmdc_stats.pminevent);
   bf_printf (output, " botinfo : %lu\n", nmdc_stats.botinfo);
-  bf_printf (output, " cache_quit : %lu\n", nmdc_stats.cache_quit);
   bf_printf (output, " cache_myinfo : %lu\n", nmdc_stats.cache_myinfo);
   bf_printf (output, " cache_myinfoupdate : %lu\n", nmdc_stats.cache_myinfoupdate);
   bf_printf (output, " cache_chat : %lu\n", nmdc_stats.cache_chat);
