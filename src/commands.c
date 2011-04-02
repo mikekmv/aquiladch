@@ -70,9 +70,11 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
 	if (argv[i][0] != '-') {
 	  bf_printf (buf, "Added %s.\n", flags[j].name);
 	  *flag |= flags[j].flag;
+	  *nflag &= ~flags[j].flag;
 	} else {
 	  bf_printf (buf, "Removed %s.\n", flags[j].name);
 	  *nflag |= flags[j].flag;
+	  *flag &= ~flags[j].flag;
 	}
 	break;
       }
@@ -85,7 +87,7 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
 }
 
 
-
+/* FIXME check for duplicates */
 int command_register (unsigned char *name, command_handler_t * handler, unsigned long cap,
 		      unsigned char *help)
 {
@@ -97,6 +99,7 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
   memset (cmd, 0, sizeof (command_t));
 
   strncpy (cmd->name, name, COMMAND_MAX_LENGTH);
+  cmd->name[COMMAND_MAX_LENGTH - 1] = 0;
   cmd->handler = handler;
 
   cmd->next = list->next;

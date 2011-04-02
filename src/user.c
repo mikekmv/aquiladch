@@ -36,6 +36,7 @@ account_type_t *account_type_add (unsigned char *name, unsigned long rights)
   t = malloc (sizeof (account_type_t));
   memset (t, 0, sizeof (account_type_t));
   strncpy (t->name, name, NICKLENGTH);
+  t->name[NICKLENGTH - 1] = 0;
   t->rights = rights;
   t->id = type_ids++;
 
@@ -94,6 +95,7 @@ account_t *account_add (account_type_t * type, unsigned char *nick)
   a = malloc (sizeof (account_t));
   memset (a, 0, sizeof (account_t));
   strncpy (a->nick, nick, NICKLENGTH);
+  a->nick[NICKLENGTH - 1] = 0;
   a->rights = 0;
   a->id = account_ids++;
 
@@ -120,7 +122,7 @@ int account_pwd_set (account_t * account, unsigned char *pwd)
   salt[1] = ((random () % 46) + 45);
   salt[2] = 0;
 
-  strcpy (account->passwd, crypt (pwd, salt));
+  strncpy (account->passwd, crypt (pwd, salt), NICKLENGTH);
 
   return 0;
 }
@@ -235,10 +237,11 @@ unsigned int accounts_load (const unsigned char *filename)
 	  if (t->id == a->class)
 	    break;
 
-	if (t)
-	  t->refcnt++;
+	if (!t)
+	  break;
 
-	ASSERT (t);
+	t->refcnt++;
+
 	a->classp = t;
 	if (a->id >= account_ids)
 	  account_ids = t->id + 1;

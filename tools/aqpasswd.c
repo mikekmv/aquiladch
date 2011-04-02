@@ -23,7 +23,7 @@ int main (int argc, char **argv)
   unsigned char salt[3];
   FILE *fp;
 
-  if (argc < 3) {
+  if (argc < 4) {
     printf ("%s <filename> <user> <passwd>\n", argv[0]);
     return 0;
   }

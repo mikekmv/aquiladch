@@ -39,7 +39,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
 	TODO depcomp install-sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/herrno.m4 \
+	$(top_srcdir)/m4/sockinttypes.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -71,6 +72,7 @@ distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 ALLOW_EPOLL = @ALLOW_EPOLL@
+ALLOW_LUA = @ALLOW_LUA@
 ALLOW_POLL = @ALLOW_POLL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -96,6 +98,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GCC_CFLAGS = @GCC_CFLAGS@
 GDB = @GDB@
+GETADDRINFO_FALSE = @GETADDRINFO_FALSE@
+GETADDRINFO_TRUE = @GETADDRINFO_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -104,6 +108,9 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
+LUALIB = @LUALIB@
+LUA_FALSE = @LUA_FALSE@
+LUA_TRUE = @LUA_TRUE@
 MAKEINFO = @MAKEINFO@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -149,8 +156,9 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRA_DIST = TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README doc/aquila-manual.txt config.h.in
+EXTRA_DIST = TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README doc/aquila-manual.txt config.h.in depcomp install-sh missing
 SUBDIRS = src tools
+ACLOCAL_AMFLAGS = -I m4
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -342,7 +350,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/doc
+	$(mkdir_p) $(distdir)/doc $(distdir)/m4
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

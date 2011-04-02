@@ -29,6 +29,7 @@ banlist_client_entry_t *banlist_client_add (banlist_client_t * list, unsigned ch
   /* init */
   dllist_init (&b->dllist);
   strncpy (b->client, client, NICKLENGTH);
+  b->client[NICKLENGTH - 1] = 0;
   b->minVersion = minVersion;
   b->maxVersion = maxVersion;
   b->message = reason;

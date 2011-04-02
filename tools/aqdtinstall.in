@@ -62,7 +62,7 @@ do
 		--dry-run)
 			ECHO='echo - ';
 			;;
-	esac
+	esac;
 	shift;
 done;
 
@@ -129,23 +129,24 @@ fi;
 # Determine linux flavour
 #
 
-if [ -f /etc/gentoo-release ]
+if [ -f /etc/gentoo-release ];
 then
 	FLAVOUR=gentoo
 	INSTALLDT="emerge daemontools"
-	if [ -z "${SERVICE}" ]
+	if [ -z "${SERVICE}" ];
 	then
 		SERVICE="/service"
 	fi
 	RCDT="rc-update add svscan default"
 	RCSTART="/etc/init.d/svscan start"
-else if [ -f /etc/debian_version ]
+else if [ -f /etc/debian_version ];
 then
 	FLAVOUR=debian
-else if [ -f /etc/redhat_release ]
+else if [ -f /etc/redhat_release ];
+then
 	FLAVOUR=redhat
 else
-	if [ ! -n "${force}" ]
+	if [ ! -n "${force}" ];
 	then
 		echo "Unsupported linux flavour, please report:"
 		echo "  * name of distribution"
@@ -160,15 +161,17 @@ else
 		echo "Forcing installation of daemontools from source."
 	fi;
 fi
+fi
+fi
 
-if [ -d ${SERVICE} ]
+if [ -d ${SERVICE} ];
 then
 	echo Daemontools Installed.
 else
-	if [ "${FLAVOUR}" = "gentoo" ]
+	if [ "${FLAVOUR}" = "gentoo" ];
 	then
 		${ECHO} ${INSTALLDT}
-	else if [ "${FLAVOUR}" = "debian" ]
+	else if [ "${FLAVOUR}" = "debian" ];
 	then
 		echo "You can download and install the daemontools packages from"
 		echo "    http://smarden.sunsite.dk/pape/Debian/daemontools.html"
@@ -188,6 +191,7 @@ else
 		cd ..
 		package/install
 		SERVICE=/service
+	fi;
 	fi;
 fi
 

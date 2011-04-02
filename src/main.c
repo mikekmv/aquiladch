@@ -84,7 +84,11 @@ int main (int argc, char **argv)
   pi_trigger_init ();
   pi_chatlog_init ();
   pi_statbot_init ();
-
+#ifdef ALLOW_LUA
+#ifdef HAVE_LUA_H
+  pi_lua_init ();
+#endif
+#endif
   plugin_config_load ();
 
   /* add lowest member of the statistices */

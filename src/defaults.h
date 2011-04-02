@@ -76,6 +76,8 @@
 #define DEFAULT_MAXSRLENGTH		512
 #define DEFAULT_CLONING			0
 
+#define DEFAULT_MAXLUASCRIPTS		25
+
 #ifdef DEBUG
 #include "stacktrace.h"
 #define DPRINTF	printf

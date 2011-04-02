@@ -178,6 +178,21 @@ unsigned int plugin_user_zombie (plugin_user_t * user)
   return 0;
 }
 
+unsigned int plugin_user_unzombie (plugin_user_t * user)
+{
+  user_t *u;
+
+  if (!user)
+    return 0;
+
+  u = ((plugin_private_t *) user->private)->parent;
+
+  user->flags &= !PROTO_FLAG_ZOMBIE;
+  u->flags &= !PROTO_FLAG_ZOMBIE;
+
+  return 0;
+}
+
 unsigned int plugin_unban (unsigned char *nick)
 {
   if (!nick)
@@ -379,7 +394,7 @@ unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message)
     message->e--;
   }
   /* too much trouble otherwise FIXME huh ??? */
-  ASSERT (u->state == PROTO_STATE_VIRTUAL);
+  //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return ((plugin_private_t *) u->plugin_priv)->proto->chat_main (u, message);
 }
 
@@ -405,8 +420,7 @@ unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buf
     return 0;
 
   /* too much trouble otherwise FIXME huh ??? */
-  ASSERT (u->state == PROTO_STATE_VIRTUAL);
-
+  //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return ((plugin_private_t *) u->plugin_priv)->proto->chat_send (u, t, message);
 }
 
@@ -435,7 +449,7 @@ unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plug
   }
 
   /* too much trouble otherwise */
-  ASSERT (u->state == PROTO_STATE_VIRTUAL);
+  //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return direct ? ((plugin_private_t *) target->private)->proto->chat_priv_direct (u, t, s, message)
     : ((plugin_private_t *) target->private)->proto->chat_priv (u, t, s, message);
 }
@@ -611,6 +625,7 @@ plugin_t *plugin_register (const char *name)
 
   memset (plugin, 0, sizeof (plugin_t));
   strncpy ((char *) plugin->name, name, PLUGIN_NAME_LENGTH);
+  ((char *) plugin->name)[PLUGIN_NAME_LENGTH - 1] = 0;
 
   plugin->id = pluginIDs++;
 

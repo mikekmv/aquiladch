@@ -103,6 +103,7 @@ int proto_nmdc_user_delrobot (user_t * u);
 
 int proto_nmdc_user_chat_all (user_t * u, buffer_t * message);
 int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message);
+int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message);
 int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t * message);
 int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, buffer_t * message);
 
@@ -136,6 +137,7 @@ proto_t nmdc_proto = {
 	
 	chat_main:		proto_nmdc_user_chat_all,
 	chat_send:		proto_nmdc_user_send,
+	chat_send_direct:	proto_nmdc_user_send_direct,
 	chat_priv:		proto_nmdc_user_priv,
 	chat_priv_direct:	proto_nmdc_user_priv_direct,
 	
@@ -465,6 +467,7 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
   bf_printf (tmpbuf, "$ $%c$$0$", 1);
 
   strncpy (u->nick, nick, NICKLENGTH);
+  u->nick[NICKLENGTH - 1] = 0;
   u->MyINFO = bf_copy (tmpbuf, 0);
   bf_free (tmpbuf);
 
@@ -526,6 +529,27 @@ int proto_nmdc_user_chat_all (user_t * u, buffer_t * message)
 }
 
 int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
+{
+  buffer_t *buf;
+
+  if (target->state == PROTO_STATE_DISCONNECTED)
+    return EINVAL;
+
+  buf = bf_alloc (32 + NICKLENGTH + bf_used (message));
+
+  proto_nmdc_user_say (u, buf, message);
+
+  cache_count (cache.privatemessages, target, buf);
+  cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
+  target->MessageCnt++;
+  target->CacheException++;
+
+  bf_free (buf);
+
+  return 0;
+}
+
+int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message)
 {
   buffer_t *buf;
 
@@ -842,26 +866,26 @@ int proto_nmdc_user_exists (user_t * u, buffer_t * output, token_t * tkn)
 
   /* nick already used ? */
   if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
-    /* same nick from same IP ? */
-    if (existing_user->ipaddress != u->ipaddress) {
-      /* if not, refuse nick */
-      bf_strcat (output, "$ValidateDenide ");
-      bf_strcat (output, u->nick);
-      bf_strcat (output, "|");
-      retval = server_write (u->parent, output);
-      proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
-      nmdc_stats.usednick++;
-      retval = 1;
-    } else {
-      /* if so, disconnect previous user. */
-      proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
-      server_write (existing_user->parent, output);
-      server_disconnect_user (existing_user->parent);
-      /* reset output buffer. */
-      output->s = output->buffer;
-      *output->s = '\0';
-      /* continue as normal */
-    }
+    /* same nick from same IP ? 
+       if (existing_user->ipaddress != u->ipaddress) {
+       // if not, refuse nick
+       bf_strcat (output, "$ValidateDenide ");
+       bf_strcat (output, u->nick);
+       bf_strcat (output, "|");
+       retval = server_write (u->parent, output);
+       proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+       nmdc_stats.usednick++;
+       retval = 1;
+       } else { */
+    /* if so, disconnect previous user. */
+    proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+    server_write (existing_user->parent, output);
+    server_disconnect_user (existing_user->parent);
+    /* reset output buffer. */
+    output->s = output->buffer;
+    *output->s = '\0';
+    /* continue as normal */
+    /*} */
   }
   return retval;
 }
@@ -1055,6 +1079,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
   /* nick already used ? */
   do {
     strncpy (u->nick, tkn->argument, NICKLENGTH);
+    u->nick[NICKLENGTH - 1] = 0;
     if (proto_nmdc_user_exists (u, output, tkn)) {
       retval = -1;
       break;
@@ -1698,7 +1723,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
     case TOKEN_GETNICKLIST:
       /* check quota */
       if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec)) {
-	proto_nmdc_user_warn (u, &now, "Userlist request denied.", researchmininterval);
+	proto_nmdc_user_warn (u, &now, "Userlist request denied. Maximum 1 reload per %ds.",
+			      researchmininterval);
 	break;
       }
 
@@ -1912,11 +1938,32 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	for (c++; *c && (*c != ' '); c++);
 
 	/* find end of from Nick */
-	n = c;
+	n = ++c;
 	for (c++; *c && (*c != ' '); c++);
 	l = c - n;
 
-	if (!strncmp (u->nick, n, l)) {
+	if (strncmp (u->nick, n, l)) {
+	  bf_printf (output, "Bad From: nick. No faking.");
+	  retval = server_write (u->parent, output);
+	  server_disconnect_user (u->parent);
+	  nmdc_stats.pmbadsource++;
+	  retval = -1;
+	  break;
+	};
+
+	/* find $ */
+	for (c++; *c && (*c != '$'); c++);
+	c++;
+	if (*c != '<')
+	  break;
+	c++;
+
+	/* find end of from Nick */
+	n = c;
+	for (c++; *c && (*c != '>'); c++);
+	l = c - n;
+
+	if (strncmp (u->nick, n, l)) {
 	  bf_printf (output, "Bad From: nick. No faking.");
 	  retval = server_write (u->parent, output);
 	  server_disconnect_user (u->parent);
@@ -2566,7 +2613,8 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
       break;
     }
     bf_free (b);
-    ASSERT (user->state != PROTO_STATE_DISCONNECTED);
+    if (user->state == PROTO_STATE_DISCONNECTED)
+      break;
   }
 
   /* destroy freelist */

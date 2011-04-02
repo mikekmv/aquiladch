@@ -124,6 +124,7 @@ extern unsigned int plugin_unban_ip (unsigned long ip);
 extern unsigned int plugin_unban_ip_hard (unsigned long ip);
 extern unsigned int plugin_unban_nick (unsigned char *nick);
 extern unsigned int plugin_user_zombie (plugin_user_t * user);
+extern unsigned int plugin_user_unzombie (plugin_user_t * user);
 
 extern unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick);
 extern unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip);

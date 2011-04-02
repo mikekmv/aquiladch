@@ -165,6 +165,7 @@ trigger_t *trigger_create (unsigned char *name, unsigned long type, unsigned cha
   memset (trigger, 0, sizeof (trigger_t));
 
   strncpy (trigger->name, name, TRIGGER_NAME_LENGTH);
+  trigger->name[TRIGGER_NAME_LENGTH - 1] = 0;
   trigger->type = type;
 
   switch (type) {

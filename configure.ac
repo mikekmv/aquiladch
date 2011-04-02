@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.8]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.9-pre5]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -62,6 +62,17 @@ AC_ARG_ENABLE(poll,
 	[ALLOW_POLL=-DALLOW_POLL])
 AC_SUBST(ALLOW_POLL)
 
+# Allow lua support
+AC_ARG_ENABLE(lua,
+	AC_HELP_STRING([--enable-lua],[Support LUA if available (default ON).]),
+	[case "$enableval" in
+	  yes|true) ALLOW_LUA=-DALLOW_LUA ;;
+	  no|false) unset ALLOW_LUA ;;
+	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-lua);;
+	esac],
+	[ALLOW_LUA=-DALLOW_LUA])
+AC_SUBST(ALLOW_LUA)
+
 # Checks for programs.
 AC_PROG_CC
 
@@ -85,10 +96,20 @@ else
 	AC_CHECK_LIB([z], [deflate], [ZLIB=-lz])
 fi
 AC_SUBST(ZLIB)
-	
+
+if test "${ALLOW_LUA}" = "" ;
+then
+	unset LUALIB
+else
+	# that -lm -ldl is soooo going to backfire :S
+	AC_CHECK_LIB([lua], [lua_open], [LUALIB="-llua -llualib -lm -ldl"])
+fi
+AC_SUBST(LUALIB)
+AM_CONDITIONAL(LUA, test "${LUALIB}" != "" )
+
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h netinet/tcp.h inttypes.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h crypt.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h netinet/tcp.h inttypes.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h crypt.h string.h memory.h stdlib.h])
 
 # if epoll is enables, check for the header
 if test "${ALLOW_EPOLL}" != "" ;
@@ -100,6 +121,11 @@ fi
 if test "${ALLOW_POLL}" != "" ;
 then
 	AC_CHECK_HEADERS([sys/poll.h])
+fi
+
+if test "${ALLOW_LUA}" != "" ;
+then
+	AC_CHECK_HEADERS([lua.h])
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -115,7 +141,18 @@ AC_FUNC_MEMCMP
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_FUNC_STAT
-AC_CHECK_FUNCS([gettimeofday inet_ntoa memset select socket strcasecmp strchr strdup strerror strncasecmp strstr strtol])
+AC_CHECK_FUNCS([gettimeofday inet_ntoa memset select socket strcasecmp strchr strdup strerror strncasecmp strstr strtol memcpy strcasestr])
+AC_REPLACE_FUNCS(memset)
+
+AC_TYPE_SOCKLEN_T
+AC_TYPE_IN_PORT_T
+AC_DECL_H_ERRNO
+
+AC_CHECK_FUNCS(getaddrinfo getnameinfo)
+if test "$ac_cv_func_getaddrinfo$ac_cv_func_getnameinfo" != yesyes ; then
+	AC_LIBOBJ(getaddrinfo)
+fi
+AM_CONDITIONAL(GETADDRINFO, test "$ac_cv_func_getaddrinfo$ac_cv_func_getnameinfo" != yesyes)
 
 # if epoll is enabled, check for the function
 if test "${ALLOW_EPOLL}" != "" ;

@@ -37,6 +37,7 @@ banlist_nick_entry_t *banlist_nick_add (banlist_nick_t * list, unsigned char *ni
   /* init */
   dllist_init (&b->dllist);
   strncpy (b->nick, nick, NICKLENGTH);
+  b->nick[NICKLENGTH - 1] = 0;
   b->message = reason;
   bf_claim (reason);
   b->expire = expire;

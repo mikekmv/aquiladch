@@ -1,5 +1,24 @@
 This is the Aquila Changelog.
 
+0.1.9:
+	removed assert, allowing kicking of self.
+	fixed bug in help. Can no longer see any commands that aren't available.
+	added LUA support... reasonably tested!
+		- can't assign rights for commands yet
+	added unzombie command	
+	added protocol proto_send_direct (which was old proto_send)
+	rights parsing now obeys last setting for a right. 
+		 -cap cap = cap
+		cap -cap  = -cap
+	user with correct passwd can replace ghost even when using a different IP
+	check third nick in PMs too. Security.
+	fixed bugs in pm source verification.
+	Force \0 termination of all strncpy's.
+	Fixed bug in aqpasswd (thanks BSOD2600 for reporting)
+	Ported to work on cygwin, thank you to BSOD2600 for testing.
+		included code from Motoyuki Kasahara, see README.getaddrinfo
+	IP right-click on ban: Curse and Cyber_Ninja ( IP is now clickable after a kick or ban )
+	fix no autojoin in chatroom module
 
 0.1.8:
 	CAP_SPAM now also excempts from chat rates. This allows for !kicks to be gives in large groups.

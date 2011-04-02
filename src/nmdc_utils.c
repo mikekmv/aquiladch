@@ -242,6 +242,7 @@ int parse_tag (char *desc, user_t * user)
   int i;
 
   strncpy (tmpbuf, desc, 2048);
+  tmpbuf[2047] = 0;
 
   /* $MyINFO $ALL Jove yes... i cannot type. I can Dream though...<DCGUI V:0.3.3,M:A,H:1,S:5>$ $DSL.$email$0$ */
 
@@ -274,6 +275,7 @@ int parse_tag (char *desc, user_t * user)
   if (!s)
     return -1;
   strncpy (user->client, t, 64);
+  user->client[63] = 0;
 
   /* client version */
   t = strsep (&s, ":");		/* V: */
@@ -283,6 +285,7 @@ int parse_tag (char *desc, user_t * user)
   if (!s)
     return -1;
   strncpy (user->versionstring, t, 64);
+  user->versionstring[63] = 0;
   sscanf (t, "%lf", &user->version);
 
   /* client mode */

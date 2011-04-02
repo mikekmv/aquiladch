@@ -68,6 +68,10 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#if !defined(HAVE_GETADDRINFO) || !defined(HAVE_GETNAMEINFO)
+# include "getaddrinfo.h"
+#endif
+
 #include "rbt.h"
 
 #ifdef USE_EPOLL

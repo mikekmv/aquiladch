@@ -122,6 +122,7 @@ typedef struct {
 
   int (*chat_main) (user_t *, buffer_t *);
   int (*chat_send) (user_t *, user_t *, buffer_t *);
+  int (*chat_send_direct) (user_t *, user_t *, buffer_t *);
   int (*chat_priv) (user_t *, user_t *, user_t *, buffer_t *);
   int (*chat_priv_direct) (user_t *, user_t *, user_t *, buffer_t *);
 

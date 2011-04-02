@@ -264,11 +264,12 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
 	continue;
       }
       if (!strcmp (argv[counter], "autorights")) {
-	roomflags |= CHATROOM_FLAG_AUTOJOIN_REG;
+	roomflags |= CHATROOM_FLAG_AUTOJOIN_RIGHTS;
 	bf_printf (output, "Room will autojoin users with sufficient rights.\n");
 	counter++;
 	continue;
       }
+
       if (!strcmp (argv[counter], "rights"))
 	break;
       bf_printf (output, "Ignoring unknown argument %s\n", argv[counter++]);
@@ -286,6 +287,9 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
 			   roomrights);
       bf_strcat (output, "\n");
     }
+
+    if (!(roomflags & (CHATROOM_FLAG_AUTOJOIN_REG | CHATROOM_FLAG_AUTOJOIN_RIGHTS)))
+      roomflags |= CHATROOM_FLAG_AUTOJOIN_NONE;
   }
 
   if (!chatroom_new

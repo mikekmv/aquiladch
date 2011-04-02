@@ -21,7 +21,6 @@
 #endif
 #include <arpa/inet.h>
 
-
 #include "defaults.h"
 #include "builtincmd.h"
 #include "plugin.h"
@@ -36,6 +35,31 @@ unsigned long KickMaxBanTime;
 unsigned int KickNoBanMayBan;
 
 struct timeval savetime;
+
+#ifndef HAVE_STRCASESTR
+
+#include <ctype.h>
+
+char *strcasestr (char *haystack, char *needle)
+{
+  if (!*needle)
+    return NULL;
+
+  for (; *haystack; haystack++) {
+    if (tolower (*haystack) == tolower (*needle)) {
+      char *h, *n;
+
+      for (h = haystack, n = needle; *h && *n; h++, n++) {
+	if (tolower (*h) != tolower (*n))
+	  break;
+      }
+      if (!*n)
+	return haystack;
+    }
+  }
+  return NULL;
+}
+#endif
 
 /* say command */
 unsigned long handler_say (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
@@ -210,7 +234,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
 
   /* kick the user */
   ip.s_addr = target->ipaddress;
-  bf_printf (output, "Kicked user %s (ip %s) because: %.*s", target->nick, inet_ntoa (ip),
+  bf_printf (output, "Kicked user %s ( ip %s ) because: %.*s", target->nick, inet_ntoa (ip),
 	     bf_used (buf), buf->s);
 
   /* permban the user if the kick string contains _BAN_. */
@@ -338,6 +362,29 @@ unsigned long handler_zombie (plugin_user_t * user, buffer_t * output, void *pri
   plugin_user_zombie (zombie);
 
   bf_printf (output, "User %s's putrid flesh stinks up the place...", argv[1]);
+
+  return 0;
+}
+
+unsigned long handler_unzombie (plugin_user_t * user, buffer_t * output, void *priv,
+				unsigned int argc, unsigned char **argv)
+{
+  plugin_user_t *zombie;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    return 0;
+  }
+
+  zombie = plugin_user_find (argv[1]);
+  if (!zombie) {
+    bf_printf (output, "User %s not found.", argv[1]);
+    return 0;
+  }
+
+  plugin_user_unzombie (zombie);
+
+  bf_printf (output, "User %s's putrid flesh is miraculously restored...", argv[1]);
 
   return 0;
 }
@@ -679,7 +726,8 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
   if (argc < 2) {
     bf_printf (output, "Available commands:\n");
     for (cmd = cmd_sorted.onext; cmd != &cmd_sorted; cmd = cmd->onext)
-      if ((user->rights & cmd->req_cap) || !cmd->req_cap || (user->rights & CAP_OWNER))
+      if (((user->rights & cmd->req_cap) == cmd->req_cap) || !cmd->req_cap
+	  || (user->rights & CAP_OWNER))
 	bf_printf (output, "%s: %s\n", cmd->name, cmd->help);
 
     bf_printf (output, "Commands are preceded with ! or +\n");
@@ -692,6 +740,11 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
     for (cmd = list->next; cmd != list; cmd = cmd->next)
       if (!strcmp (cmd->name, argv[j]))
 	break;
+
+    if (!
+	(((user->rights & cmd->req_cap) == cmd->req_cap) || !cmd->req_cap
+	 || (user->rights & CAP_OWNER)))
+      continue;
 
     if (cmd) {
       bf_printf (output, "%s: %s\n", cmd->name, cmd->help);
@@ -916,7 +969,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
     goto leave;
   }
   if (!(type = account_type_find (argv[2]))) {
-    bf_printf (output, "Group %s does not exists.\n", argv[2]);
+    bf_printf (output, "Group %s does not exist.\n", argv[2]);
     goto leave;
   }
 
@@ -1209,7 +1262,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
 			     unsigned int argc, unsigned char **argv)
 {
   account_t *account = NULL;
-  unsigned char passwd[PASSWDLENGTH];
+  unsigned char passwd[PASSWDLENGTH + 1];
   plugin_user_t *target;
   unsigned int i;
   buffer_t *message;
@@ -1243,7 +1296,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
     target = user;
   }
 
-  for (i = 0; i < (PASSWDLENGTH - 1); i++) {
+  for (i = 0; i < (PASSWDLENGTH); i++) {
     passwd[i] = (33 + (random () % 90));
   }
   passwd[i] = '\0';
@@ -1557,6 +1610,7 @@ int builtincmd_init ()
   command_register ("baniphard",  &handler_banhard,      CAP_BANHARD, "Hardban an IP.");
   command_register ("unbaniphard",&handler_unbanip_hard, CAP_BANHARD, "Unhardban an IP.");
   command_register ("zombie",     &handler_zombie,       CAP_KICK,    "Zombie a user. Can't talk or pm.");
+  command_register ("unzombie",   &handler_unzombie,     CAP_KICK,    "Unzombie a user. Can talk or pm again.");
   command_register ("whoip",      &handler_whoip,        CAP_KICK,    "Returns the user using the IP.");
 
   command_register ("massall",	  &handler_massall,    CAP_ADMIN,     "Send a private message to all users.");
