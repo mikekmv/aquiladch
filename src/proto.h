@@ -72,13 +72,15 @@ typedef struct user {
   void *plugin_priv;
 
   /* rate limiting counters */
+  leaky_bucket_t rate_warnings;
   leaky_bucket_t rate_chat;
   leaky_bucket_t rate_search;
   leaky_bucket_t rate_myinfo;
   leaky_bucket_t rate_getnicklist;
   leaky_bucket_t rate_getinfo;
   leaky_bucket_t rate_downloads;
-  leaky_bucket_t rate_psresults;
+  leaky_bucket_t rate_psresults_in;
+  leaky_bucket_t rate_psresults_out;
 
   /* cache counters */
   unsigned int ChatCnt, SearchCnt, ResultCnt, MessageCnt;

@@ -47,6 +47,14 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am__aquila_SOURCES_DIST = buffer.c esocket.c stringlist.c rbt.c \
+	utils.c hash.c dllist.c leakybucket.c config.c hub.c \
+	core_config.c hashlist.c user.c banlist.c banlistnick.c \
+	banlistclient.c plugin.c commands.c builtincmd.c cap.c \
+	nmdc_token.c nmdc_protocol.c nmdc_utils.c nmdc.c pi_user.c \
+	pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c \
+	pi_statbot.c pi_iplog.c main.c searchlist.c stacktrace.c
+@DEBUG_TRUE@am__objects_1 = stacktrace.$(OBJEXT)
 am_aquila_OBJECTS = buffer.$(OBJEXT) esocket.$(OBJEXT) \
 	stringlist.$(OBJEXT) rbt.$(OBJEXT) utils.$(OBJEXT) \
 	hash.$(OBJEXT) dllist.$(OBJEXT) leakybucket.$(OBJEXT) \
@@ -58,7 +66,8 @@ am_aquila_OBJECTS = buffer.$(OBJEXT) esocket.$(OBJEXT) \
 	nmdc_utils.$(OBJEXT) nmdc.$(OBJEXT) pi_user.$(OBJEXT) \
 	pi_statistics.$(OBJEXT) pi_chatroom.$(OBJEXT) \
 	pi_trigger.$(OBJEXT) pi_chatlog.$(OBJEXT) pi_statbot.$(OBJEXT) \
-	pi_iplog.$(OBJEXT) main.$(OBJEXT) searchlist.$(OBJEXT)
+	pi_iplog.$(OBJEXT) main.$(OBJEXT) searchlist.$(OBJEXT) \
+	$(am__objects_1)
 aquila_OBJECTS = $(am_aquila_OBJECTS)
 aquila_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -69,7 +78,7 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(aquila_SOURCES)
-DIST_SOURCES = $(aquila_SOURCES)
+DIST_SOURCES = $(am__aquila_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -89,7 +98,8 @@ CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DEBUG = @DEBUG@
+DEBUG_FALSE = @DEBUG_FALSE@
+DEBUG_TRUE = @DEBUG_TRUE@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
@@ -152,10 +162,15 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-AM_CFLAGS = @DEBUG@ @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@
-EXTRA_DIST = buffer.h banlist.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h banlistnick.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h
+@DEBUG_FALSE@DEBUG_CFLAGS = 
+@DEBUG_TRUE@DEBUG_CFLAGS = -DDEBUG
+@DEBUG_FALSE@DEBUG_FILES = 
+@DEBUG_TRUE@DEBUG_FILES = stacktrace.c
+AM_CFLAGS = $(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@
+EXTRA_DIST = buffer.h banlist.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h banlistnick.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h
 CLEANFILES = .indent
-aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c hashlist.c user.c banlist.c banlistnick.c banlistclient.c plugin.c commands.c builtincmd.c cap.c nmdc_token.c nmdc_protocol.c nmdc_utils.c nmdc.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c main.c searchlist.c
+STACKTRACEFILES = stacktrace.c
+aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c hashlist.c user.c banlist.c banlistnick.c banlistclient.c plugin.c commands.c builtincmd.c cap.c nmdc_token.c nmdc_protocol.c nmdc_utils.c nmdc.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c main.c searchlist.c $(DEBUG_FILES)
 aquila_LDADD = @ZLIB@
 all: all-am
 
@@ -253,6 +268,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rbt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/searchlist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stacktrace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@

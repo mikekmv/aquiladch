@@ -12,8 +12,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <assert.h>
-#define ASSERT assert
+#include "defaults.h"
 
 #include "buffer.h"
 
@@ -432,4 +431,13 @@ buffer_t *bf_buffer (unsigned char *text)
   static_buf.refcnt = 1;
 
   return &static_buf;
+}
+
+int bf_memcpy (buffer_t * buffer, void *data, size_t length)
+{
+  size_t l = length < bf_unused (buffer) ? length : bf_unused (buffer);
+
+  memcpy (buffer->e, data, l);
+  buffer->e += l;
+  return l;
 }

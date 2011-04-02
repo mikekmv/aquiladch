@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.8-pre8]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.8-pre9]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -14,16 +14,16 @@ AC_CHECK_TOOL(GDB, [gdb], [gdb])
 AC_ARG_ENABLE(debug,
 	AC_HELP_STRING([--enable-debug],[Turn on debugging (default OFF)]),
 	[case "$enableval" in
-	  yes|true) DEBUG=-DDEBUG
+	  yes|true) debug=true
 		 ;;
-	  no|false)  unset DEBUG 
+	  no|false) debug=false
 	  	 ;;
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-debug);;
 	esac],
-	[unset DEBUG])
-AC_SUBST(DEBUG)
+	[unset debug])
+AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
-if test "${DEBUG}" != "" ;
+if test x$debug = xtrue
 then
 	CFLAGS="-g${GDB} -O0"
 fi

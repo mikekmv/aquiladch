@@ -32,8 +32,7 @@
 /* local hub cache */
 
 /* global redir stats */
-unsigned long users = 0;
-unsigned long refused = 0;
+unsigned long buffering = 0;
 
 /* banlist */
 banlist_t hardbanlist, softbanlist;
@@ -211,11 +210,11 @@ int server_write (client_t * cl, buffer_t * b)
     //  esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
 
     /* if we are still below max buffer per user, queue buffer */
-    if (cl->outgoing.size < DEFAULT_MAX_OUTGOINGSIZE) {
+    if ((cl->outgoing.size - cl->offset) < DEFAULT_MAX_OUTGOINGSIZE) {
       string_list_add (&cl->outgoing, cl->user, b);
       DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count,
 	       cl->outgoing.size, cl->user->nick);
-      if (cl->outgoing.size >= DEFAULT_MAX_OUTGOINGSIZE)
+      if ((cl->outgoing.size - cl->offset) >= DEFAULT_MAX_OUTGOINGSIZE)
 	esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
     }
 
@@ -260,10 +259,11 @@ int server_write (client_t * cl, buffer_t * b)
     cl->offset = w;
     esocket_addevents (s, ESOCKET_EVENT_OUT);
     esocket_settimeout (s,
-			(cl->outgoing.size <
+			((cl->outgoing.size - cl->offset) <
 			 DEFAULT_MAX_OUTGOINGSIZE) ? PROTO_TIMEOUT_BUFFERING :
 			PROTO_TIMEOUT_OVERFLOW);
     DPRINTF (" %p Starting to buffer... %lu\n", cl->user, cl->outgoing.size);
+    buffering++;
   };
 
   return t;
@@ -286,6 +286,9 @@ int server_disconnect_user (client_t * cl)
     cl->es = NULL;
     close (s);
   }
+
+  if (cl->outgoing.count)
+    buffering--;
 
   /* clear buffered output buffers */
   string_list_clear (&cl->outgoing);
@@ -343,6 +346,7 @@ int server_handle_output (esocket_t * es)
 
       /* store "next" pointer and free buffer memory */
       n = b->next;
+      cl->outgoing.count -= bf_used (b);
       bf_free_single (b);
     }
     e->data = b;
@@ -371,6 +375,7 @@ int server_handle_output (esocket_t * es)
     esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
     esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
   }
+  buffering--;
   return 0;
 }
 

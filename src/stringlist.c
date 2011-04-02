@@ -13,6 +13,7 @@
 #include <string.h>
 #endif
 #include "stringlist.h"
+
 inline void string_list_init (string_list_t * list)
 {
   list->first = NULL;

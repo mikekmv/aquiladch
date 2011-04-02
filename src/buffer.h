@@ -15,7 +15,7 @@
 #include <stdarg.h>
 
 #ifdef DEBUG
-#define BF_VERIFY(x) if (x) bf_verify(x)
+#define BF_VERIFY(x) if (x) {ASSERT (x->refcnt > 0); ASSERT (x->e <= (x->buffer + x->size)); }
 #else
 #define BF_VERIFY(x) /* x */
 #endif
@@ -75,5 +75,6 @@ extern int bf_vprintf (buffer_t * dst, const char *format, va_list ap);
 extern unsigned long bf_size (buffer_t * src);
 
 extern buffer_t *bf_buffer (unsigned char *text);
+extern int bf_memcpy (buffer_t *buffer, void *data, size_t length);
 
 #endif

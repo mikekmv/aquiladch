@@ -34,6 +34,7 @@
 #define HUBOWNER "Unknown"
 
 #define NICKLENGTH  64
+#define PASSWDLENGTH 8
 #define BUFSIZE 65536
 #define MAX_TOKEN_SIZE 65535
 
@@ -76,8 +77,10 @@
 #define DEFAULT_CLONING			0
 
 #ifdef DEBUG
+#include "stacktrace.h"
 #define DPRINTF	printf
-#define ASSERT assert
+//#define ASSERT assert
+#define ASSERT(expr) ( (void)( (expr) ? 0 : CrashHandler(-1)) )
 #else
 #define DPRINTF(x...) /* x */
 #define ASSERT(x...) /* x */

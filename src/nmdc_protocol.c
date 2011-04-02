@@ -623,12 +623,16 @@ user_t *proto_nmdc_user_alloc (void *priv)
   user->state = PROTO_STATE_INIT;
   user->parent = priv;
 
+  init_bucket (&user->rate_warnings, now.tv_sec);
   init_bucket (&user->rate_chat, now.tv_sec);
   init_bucket (&user->rate_search, now.tv_sec);
   init_bucket (&user->rate_myinfo, now.tv_sec);
   init_bucket (&user->rate_getnicklist, now.tv_sec);
   init_bucket (&user->rate_getinfo, now.tv_sec);
   init_bucket (&user->rate_downloads, now.tv_sec);
+
+  /* warnings start with a full token load ! */
+  user->rate_warnings.tokens = rates.warnings.burst;
 
   /* protocol private data */
   user->pdata = malloc (sizeof (nmdc_user_t));
@@ -793,6 +797,33 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
   nmdc_stats.forcemove--;
 
   return proto_nmdc_user_forcemove (u, config.Redirect, message);
+}
+
+int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *message, ...)
+{
+  buffer_t *buf;
+  va_list ap;
+
+  if (!get_token (&rates.warnings, &u->rate_warnings, now->tv_sec)) {
+    return 0;
+  }
+
+  buf = bf_alloc (1024);
+
+  bf_strcat (buf, "<");
+  bf_strcat (buf, HubSec->nick);
+  bf_strcat (buf, "> WARNING: ");
+
+  va_start (ap, message);
+  bf_vprintf (buf, message, ap);
+  va_end (ap);
+
+  bf_strcat (buf, "|");
+
+  server_write (u->parent, buf);
+  bf_free (buf);
+
+  return 1;
 }
 
 /******************************************************************************\
@@ -1323,6 +1354,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	/* check quota */
 	if (!get_token (&rates.chat, &u->rate_chat, now.tv_sec)) {
+	  proto_nmdc_user_warn (u, &now, "Think before you talk and don't spam.");
 	  nmdc_stats.chatoverflow++;
 	  break;
 	}
@@ -1448,7 +1480,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	u->MyINFO = new;
 
 	/* ops get the full tag immediately */
-	string_list_purge (&cache.myinfoupdateop.messages, u);
+	cache_purge (cache.myinfoupdateop, u);
 	cache_queue (cache.myinfoupdateop, u, b);
 
 	/* check quota */
@@ -1486,6 +1518,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	/* check quota */
 	if (!get_token (&rates.search, &u->rate_search, now.tv_sec)) {
+	  proto_nmdc_user_warn (u, &now, "Searches are limited to %u every %u seconds.",
+				rates.search.refill, rates.search.period);
 	  nmdc_stats.searchoverflow++;
 	  break;
 	}
@@ -1505,6 +1539,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  if (!strcmp (e->data->s, c)) {
 	    /* was the search outside the minimum interval ? */
 	    if ((now.tv_sec - e->timestamp) < researchmininterval) {
+	      proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
+				    researchmininterval);
 	      /* no. restore search token and drop search */
 	      u->rate_search.tokens++;
 	      drop = 1;
@@ -1513,6 +1549,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	    }
 	    /* was it done within the re-search period ? */
 	    if (deadline < e->timestamp) {
+	      //proto_nmdc_user_warn (u, &now, "Searches repeated within %u seconds are only send to users joined within that period.", researchperiod);
 	      /* if so, only search recent users */
 	      /* queue in re-searchqueue */
 	      cache_queue (cache.aresearch, u, b);
@@ -1572,7 +1609,9 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	user_t *t;
 
 	/* check quota */
-	if (!get_token (&rates.psresults, &u->rate_psresults, now.tv_sec)) {
+	if (!get_token (&rates.psresults_out, &u->rate_psresults_out, now.tv_sec)) {
+	  proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
+				researchmininterval);
 	  nmdc_stats.sroverflow++;
 	  break;
 	}
@@ -1628,9 +1667,20 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	if (!(t->rights & CAP_SEARCH))
 	  break;
 
+	/* check quota */
+	if (!get_token (&rates.psresults_in, &t->rate_psresults_in, now.tv_sec)) {
+	  nmdc_stats.sroverflow++;
+	  break;
+	}
+
 	/* search result for a robot?? */
 	if (t->state == PROTO_STATE_VIRTUAL) {
-	  nmdc_stats.srrobot++;
+	  ++nmdc_stats.srrobot;
+	  break;
+	}
+
+	if (t->state != PROTO_STATE_ONLINE) {
+	  ++nmdc_stats.srnodest;
 	  break;
 	}
 
@@ -1644,8 +1694,10 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
       }
     case TOKEN_GETNICKLIST:
       /* check quota */
-      if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec))
+      if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec)) {
+	proto_nmdc_user_warn (u, &now, "Userlist request denied.", researchmininterval);
 	break;
+      }
 
       nicklistcache_sendnicklist (u);
       break;
@@ -1819,14 +1871,17 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	unsigned char *c, *n;
 	user_t *t;
 
-	if (!(u->rights & (CAP_PM | CAP_PMOP)))
+	if (!(u->rights & (CAP_PM | CAP_PMOP))) {
+	  proto_nmdc_user_warn (u, &now, "You are not allowed to send private messages.");
 	  break;
+	}
 
 	if (u->flags & PROTO_FLAG_ZOMBIE)
 	  break;
 
 	/* check quota */
 	if (!get_token (&rates.chat, &u->rate_chat, now.tv_sec)) {
+	  proto_nmdc_user_warn (u, &now, "Don't send private messages so fast.");
 	  nmdc_stats.pmoverflow++;
 	  break;
 	}
@@ -1868,9 +1923,10 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	};
 
 	/* do not send if only PMOP and target is not an OP */
-	if ((!(u->rights & CAP_PM)) && (!t->op))
+	if ((!(u->rights & CAP_PM)) && (!t->op)) {
+	  proto_nmdc_user_warn (u, &now, "Sorry, you can only send private messages to operators.");
 	  break;
-
+	}
 	if (plugin_send_event (t->plugin_priv, PLUGIN_EVENT_PM_IN, b) != PLUGIN_RETVAL_CONTINUE) {
 	  nmdc_stats.pminevent++;
 	  break;
@@ -2092,17 +2148,18 @@ int proto_nmdc_handle_token (user_t * u, buffer_t * b)
 **                                                                            **
 \******************************************************************************/
 
-unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigned int as,
+unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned int as,
 				      unsigned int ps, unsigned int ch, unsigned int pm,
 				      unsigned int res)
 {
-  buffer_t *b;
+  buffer_t *b = NULL;
   unsigned long l;
-  unsigned char *t;
+  unsigned char *t, *e;
   string_list_entry_t *le;
 
   ASSERT ((u->ChatCnt + u->SearchCnt + u->ResultCnt + u->MessageCnt) == u->CacheException);
-  t = buffer;
+  t = buffer->e;
+  e = buffer->buffer + buffer->size;
   if (ch) {
     /* skip all chat messages until the last send message of the user */
     le = cache.chat.messages.first;
@@ -2119,14 +2176,12 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
       b = le->data;
       l = bf_used (b);
 
-      /* copy data */
       memcpy (t, b->s, l);
       t += l;
       *t++ = '|';
     };
     ASSERT (!u->ChatCnt);
     u->CacheException -= u->ChatCnt;
-    u->ChatCnt = 0;
   };
 
   if (u->active) {
@@ -2166,24 +2221,25 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
       u->CacheException -= u->SearchCnt;
       u->SearchCnt = 0;
     }
-    /* add passive results */
-    if (res && u->ResultCnt) {
-      ASSERT (u->ResultCnt == ((nmdc_user_t *) u->pdata)->results.messages.count);
-      for (le = ((nmdc_user_t *) u->pdata)->results.messages.first; le; le = le->next) {
+  }
+  /* add passive results */
+  if (res && u->ResultCnt) {
+    ASSERT (u->ResultCnt == ((nmdc_user_t *) u->pdata)->results.messages.count);
+    for (le = ((nmdc_user_t *) u->pdata)->results.messages.first; le; le = le->next) {
 
-	/* data and length */
-	b = le->data;
-	l = bf_used (b);
+      /* data and length */
+      b = le->data;
+      l = bf_used (b);
 
-	/* copy data */
-	memcpy (t, b->s, l);
-	t += l;
-	*t++ = '|';
-	u->ResultCnt--;
-	u->CacheException--;
-      }
-      cache_clear ((((nmdc_user_t *) u->pdata)->results));
+      /* copy data */
+      memcpy (t, b->s, l);
+      t += l;
+      *t++ = '|';
+      u->ResultCnt--;
+      u->CacheException--;
     }
+    ASSERT (!u->ResultCnt);
+    cache_clear ((((nmdc_user_t *) u->pdata)->results));
   }
   /* add messages results */
   if (pm && u->MessageCnt) {
@@ -2200,9 +2256,13 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
       u->MessageCnt--;
       u->CacheException--;
     }
+    ASSERT (!u->MessageCnt);
     cache_clear ((((nmdc_user_t *) u->pdata)->privatemessages));
   }
-  return t - buffer;
+  ASSERT (t <= e);
+  ASSERT (t >= buffer->e);
+  buffer->e = t;
+  return bf_used (buffer);
 }
 
 inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, unsigned long now)
@@ -2356,6 +2416,15 @@ void proto_nmdc_flush_cache ()
   if (res)
     nmdc_stats.cache_results += cache.results.length + cache.results.messages.count;
 
+  DPRINTF
+    ("///////////////////////////// Cache Flush \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"
+     " Chat %d (%lu), MyINFO %d (%lu), MyINFOupdate %d (%lu), as %d (%lu), ps %d (%lu), res %d\n",
+     ch, cache.chat.length + cache.chat.messages.count, mi,
+     cache.myinfo.length + cache.myinfo.messages.count, miu,
+     cache.myinfoupdate.length + cache.myinfoupdate.messages.count, as,
+     cache.asearch.length + cache.asearch.messages.count, ps,
+     cache.psearch.length + cache.psearch.messages.count, res);
+
   /*
    * write out buffers 
    */
@@ -2369,14 +2438,24 @@ void proto_nmdc_flush_cache ()
       if (u->state != PROTO_STATE_ONLINE)
 	continue;
 
+      ASSERT ((u->ChatCnt + u->SearchCnt + u->ResultCnt + u->MessageCnt) == u->CacheException);
+
       /* get buffer -- only create exception buffer if really, really necessary */
       if (u->CacheException
-	  && ((u->SearchCnt && (as || ps)) || (u->ChatCnt && ch) || (u->ResultCnt && res)
+	  && ((u->SearchCnt && (u->active ? as : ps)) || (u->ChatCnt && ch) || (u->ResultCnt && res)
 	      || (u->MessageCnt && pm))) {
 	/* we need to copy this buffer cuz it could be buffered during write
 	   and it is changed at every call to proto_nmdc_build_buffer */
+	DPRINTF (" Exception (%p): res (%lu, %lu) [%d], pm (%lu, %lu), buf (%lu / %lu)\n", u,
+		 cache.results.length + cache.results.messages.count,
+		 ((nmdc_user_t *) u->pdata)->results.length +
+		 ((nmdc_user_t *) u->pdata)->results.messages.count, u->ResultCnt,
+		 cache.privatemessages.length + cache.privatemessages.messages.count,
+		 ((nmdc_user_t *) u->pdata)->privatemessages.length +
+		 ((nmdc_user_t *) u->pdata)->privatemessages.messages.count,
+		 bf_used (buf_exception), buf_exception->size);
 	b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
-	b->e += proto_nmdc_build_buffer (b->e, u, as, ps, ch, pm, res);
+	proto_nmdc_build_buffer (b, u, as, ps, ch, pm, res);
 	BF_VERIFY (b);
 
 	if (bf_used (b))
@@ -2449,6 +2528,9 @@ void proto_nmdc_flush_cache ()
     cache_clear (cache.results);
   if (pm)
     cache_clear (cache.privatemessages);
+
+  DPRINTF
+    ("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ end cache flush /////////////////////////////\n");
 
   plugin_send_event (NULL, PLUGIN_EVENT_CACHEFLUSH, NULL);
 }
@@ -2549,7 +2631,9 @@ int proto_nmdc_init ()
   init_bucket_type (&rates.getinfo, 1, 10, 10);
   init_bucket_type (&rates.downloads, 5, 6, 1);
   init_bucket_type (&rates.connects, 1, 10, 10);
-  init_bucket_type (&rates.psresults, 15, 100, 25);
+  init_bucket_type (&rates.psresults_in, 15, 100, 25);
+  init_bucket_type (&rates.psresults_out, 15, 50, 25);
+  init_bucket_type (&rates.warnings, 120, 10, 1);
 
   config_register ("rate.chat.period", CFG_ELEM_ULONG, &rates.chat.period,
 		   "Period of chat messages. This controls how often a user can send a chat message. Keep this low.");
@@ -2581,12 +2665,27 @@ int proto_nmdc_init ()
 		   "Burst of connects. This controls how many new user connects can be saved up in idle time. Keep this low.");
   config_register ("rate.connect.refill", CFG_ELEM_ULONG, &rates.connects.refill,
 		   "Refill of connects. This controls how many new user connects are added each time the counter resets. Keep this low.");
-  config_register ("rate.results.period", CFG_ELEM_ULONG, &rates.psresults.period,
-		   "Period of passive search results. This controls how often the passive search results counter is refreshed. Keep this low.");
-  config_register ("rate.results.burst", CFG_ELEM_ULONG, &rates.psresults.burst,
-		   "Burst of passive search results. This controls how many passive search results can be saved up in idle time. Keep this low.");
-  config_register ("rate.results.refill", CFG_ELEM_ULONG, &rates.psresults.refill,
-		   "Refill of passive search results. This controls how many passive search results are added each time the counter resets. Keep this low.");
+
+  config_register ("rate.results_in.period", CFG_ELEM_ULONG, &rates.psresults_in.period,
+		   "Period of passive search results. This controls how often the incoming passive search results counter is refreshed. Keep this low.");
+  config_register ("rate.results_in.burst", CFG_ELEM_ULONG, &rates.psresults_in.burst,
+		   "Burst of passive search results. This controls how many incoming passive search results can be saved up in idle time. Keep this low.");
+  config_register ("rate.results_in.refill", CFG_ELEM_ULONG, &rates.psresults_in.refill,
+		   "Refill of passive search results. This controls how many incoming passive search results are added each time the counter resets. Keep this low.");
+
+  config_register ("rate.results_out.period", CFG_ELEM_ULONG, &rates.psresults_out.period,
+		   "Period of passive search results. This controls how often the outgoing passive search results counter is refreshed. Keep this low.");
+  config_register ("rate.results_out.burst", CFG_ELEM_ULONG, &rates.psresults_out.burst,
+		   "Burst of passive search results. This controls how many outgoing passive search results can be saved up in idle time. Keep this reasonably high.");
+  config_register ("rate.results_out.refill", CFG_ELEM_ULONG, &rates.psresults_out.refill,
+		   "Refill of passive search results. This controls how many outgoing passive search results are added each time the counter resets. Keep this reasonably high.");
+
+  config_register ("rate.warnings.period", CFG_ELEM_ULONG, &rates.warnings.period,
+		   "Period of user warnings. This controls how often a warning is send to user that overstep limits.");
+  config_register ("rate.warnings.refill", CFG_ELEM_ULONG, &rates.warnings.refill,
+		   "Period of user warnings. This controls how many warning a user gets within the period.");
+  config_register ("rate.warnings.burst", CFG_ELEM_ULONG, &rates.warnings.burst,
+		   "Period of user warnings. This controls how many warnings a user that overstep limits can save up.");
 
   /* cache stuff */
   memset ((void *) &cache, 0, sizeof (cache_t));

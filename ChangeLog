@@ -1,7 +1,23 @@
 This is the Aquila Changelog.
 
 
-0.1.8-pre8:
+0.1.8-pre9:
+	Fixed crash. Active users can now receive passive search results.
+	Added DEBUG warning in !statcpu command.
+	Added check for online status before sending search result to user.
+	Added more cache flush debugging info.
+	Fixed bug in hub.c buffer size accounting.
+	Fixed message when disabling reporting.
+	Added crash handler (stacktracing).
+	Added password length parameter. Default is now 8 iso 64.
+	Added both incoming and outgoing results counters. 
+	Add warnings for overstepping various boundaries + warnings rate counter.
+	Fixed a few bugs in pi_statistics.c
+	Changed output queueing mechanism.
+	Added buffering user counter.
+	Changed some pi_statistics.c functions to using output iso local buffer.
+	Added !crash function.
+
 	Fix CAP_TAG: do not drop user and do not leak memory.
 	Fixed double free in zline()
 	Added some checking in stringlist

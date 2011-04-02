@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
@@ -122,6 +123,13 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
     return 0;
   }
 
+  /* find config value */
+  reporttarget = config_find ("ReportTarget");
+  if (!reporttarget) {
+    bf_printf (output, "Report could not be sent. Reporting is disabled.");
+    return 0;
+  }
+
   tgt = plugin_user_find (argv[1]);
   if (tgt) {
     target.s_addr = tgt->ipaddress;
@@ -140,12 +148,6 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
   if (*buf->s == ' ')
     buf->s++;
 
-  /* find config value */
-  reporttarget = config_find ("ReportTarget");
-  if (!reporttarget) {
-    bf_printf (output, "Report could not be sent: not configured properly.");
-    return 0;
-  }
 
   /* extract user */
   tgt = plugin_user_find (*reporttarget->val.v_string);
@@ -1207,7 +1209,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
 			     unsigned int argc, unsigned char **argv)
 {
   account_t *account = NULL;
-  unsigned char passwd[NICKLENGTH];
+  unsigned char passwd[PASSWDLENGTH];
   plugin_user_t *target;
   unsigned int i;
   buffer_t *message;
@@ -1241,18 +1243,18 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
     target = user;
   }
 
-  for (i = 0; i < (NICKLENGTH - 1); i++) {
+  for (i = 0; i < (PASSWDLENGTH - 1); i++) {
     passwd[i] = (33 + (random () % 90));
   }
   passwd[i] = '\0';
 
   if (target) {
     message = bf_alloc (1024);
-    bf_printf (message, "Your password was reset. It is now\n%*s\n", NICKLENGTH - 1, passwd);
+    bf_printf (message, "Your password was reset. It is now\n%*s\n", PASSWDLENGTH - 1, passwd);
     plugin_user_priv (NULL, target, NULL, message, 1);
     bf_free (message);
   } else {
-    bf_printf (output, "The password of %s was reset. It is now\n%*s\n", argv[1], NICKLENGTH - 1,
+    bf_printf (output, "The password of %s was reset. It is now\n%*s\n", argv[1], PASSWDLENGTH - 1,
 	       passwd);
   }
 
@@ -1260,6 +1262,17 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
   account_pwd_set (account, passwd);
   bf_printf (output, "Password set.\n");
 leave:
+  return 0;
+}
+
+unsigned long handler_crash (plugin_user_t * user, buffer_t * output, void *priv,
+			     unsigned int argc, unsigned char **argv)
+{
+  int test = 0;
+
+  /* boom */
+  *((char *) NULL) = test;
+
   return 0;
 }
 
@@ -1571,6 +1584,7 @@ int builtincmd_init ()
   
   command_register ("passwd",     &handler_passwd,	0,            "Change your password.");
   command_register ("pwgen",      &handler_pwgen,	0,            "Let " HUBSOFT_NAME " generate a random password.");
+  command_register ("crash",      &handler_crash,	CAP_OWNER,    "Let " HUBSOFT_NAME " CRASH!.");
 
   gettimeofday (&savetime, NULL);
   

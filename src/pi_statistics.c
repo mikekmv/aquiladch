@@ -268,33 +268,38 @@ unsigned long pi_statistics_event_cacheflush (plugin_user_t * user, void *dummy,
 
 extern cache_t cache;
 
+#define bfz_used(buf) (buf ? bf_used(buf) : 0)
+
 #define add_elem(buf, name, now) { bf_printf (buf, #name ": count: %lu size: %lu, next: %ld\n", name.messages.count, name.length, name.timertype.period + name.timer.timestamp - now); totalmem += name.length;totallines += name.messages.count; }
 unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * output, void *dummy,
 					       unsigned int argc, unsigned char **argv)
 {
-  buffer_t *buf;
   unsigned long totalmem = 0;
   unsigned long totallines = 0;
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  buf = bf_alloc (1024);
-  add_elem (buf, cache.chat, now.tv_sec);
-  add_elem (buf, cache.myinfo, now.tv_sec);
-  add_elem (buf, cache.myinfoupdate, now.tv_sec);
-  add_elem (buf, cache.myinfoupdateop, now.tv_sec);
-  add_elem (buf, cache.asearch, now.tv_sec);
-  add_elem (buf, cache.psearch, now.tv_sec);
-  add_elem (buf, cache.aresearch, now.tv_sec);
-  add_elem (buf, cache.presearch, now.tv_sec);
-  add_elem (buf, cache.results, now.tv_sec);
-  add_elem (buf, cache.privatemessages, now.tv_sec);
+  add_elem (output, cache.chat, now.tv_sec);
+  add_elem (output, cache.myinfo, now.tv_sec);
+  add_elem (output, cache.myinfoupdate, now.tv_sec);
+  add_elem (output, cache.myinfoupdateop, now.tv_sec);
+  add_elem (output, cache.asearch, now.tv_sec);
+  add_elem (output, cache.psearch, now.tv_sec);
+  add_elem (output, cache.aresearch, now.tv_sec);
+  add_elem (output, cache.presearch, now.tv_sec);
+  add_elem (output, cache.results, now.tv_sec);
+  add_elem (output, cache.privatemessages, now.tv_sec);
 
-  bf_printf (buf, "Total Count: %lu, Total Memory: %lu\n", totallines, totalmem);
+  bf_printf (output, "Total Count: %lu, Total Memory: %lu\n", totallines, totalmem);
 
-  plugin_user_sayto (NULL, user, buf);
-
-  bf_free (buf);
+  bf_printf (output, "ZPipe users: %lu, ZLine users: %lu\n\n", cache.ZpipeSupporters,
+	     cache.ZlineSupporters);
+  bf_printf (output, "Nicklist cache (last updated %lu seconds ago).\n",
+	     now.tv_sec - cache.lastrebuild);
+  bf_printf (output, "  Nicklist length %lu (zpipe %lu, zline %lu)\n", bf_used (cache.nicklist),
+	     bfz_used (cache.nicklistzpipe), bfz_used (cache.nicklistzline));
+  bf_printf (output, "  Infolist length %lu (zpipe %lu, zline %lu)\n", bf_used (cache.infolist),
+	     bfz_used (cache.infolistzpipe), bfz_used (cache.infolistzline));
 
   return 0;
 }
@@ -302,32 +307,21 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
 unsigned long pi_statistics_handler_statbw (plugin_user_t * user, buffer_t * output, void *dummy,
 					    unsigned int argc, unsigned char **argv)
 {
-  buffer_t *buf;
-
-  buf = bf_alloc (1024);
-
-  bandwidth_printf (buf);
-
-  plugin_user_sayto (NULL, user, buf);
-
-  bf_free (buf);
-
+  bandwidth_printf (output);
+#ifdef DEBUG
+  bf_printf (output, "Warning: DEBUG build, cpu measurements highly inaccurate.\n");
+#endif
   return 0;
 }
 
+extern unsigned long buffering;
 unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t * output,
 						void *dummy, unsigned int argc,
 						unsigned char **argv)
 {
-  buffer_t *buf;
-
-  buf = bf_alloc (1024);
-
-  bf_printf (buf, "Allocated size: %llu (max: %llu)\n", bufferstats.size, bufferstats.peak);
-  bf_printf (buf, "Allocated buffers: %lu (max %lu)\n", bufferstats.count, bufferstats.max);
-  plugin_user_sayto (NULL, user, buf);
-
-  bf_free (buf);
+  bf_printf (output, "Allocated size: %llu (max: %llu)\n", bufferstats.size, bufferstats.peak);
+  bf_printf (output, "Allocated buffers: %lu (max %lu)\n", bufferstats.count, bufferstats.max);
+  bf_printf (output, " Users having buffered output: %lu\n", buffering);
 
   return 0;
 }
@@ -335,27 +329,21 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
 unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
-  buffer_t *buf;
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  buf = bf_alloc (1024);
 
   timersub (&now, &boottime, &now);
 
-  bf_printf (buf, "CPU Usage over last: \n");
+  bf_printf (output, "CPU Usage over last: \n");
   if (now.tv_sec > 3600)
-    bf_printf (buf, "hour %2.2f%%\n", cpu_calculate (3600));
+    bf_printf (output, "hour %2.2f%%\n", cpu_calculate (3600));
   if (now.tv_sec > 60)
-    bf_printf (buf, "minute %2.2f%%\n", cpu_calculate (60));
+    bf_printf (output, "minute %2.2f%%\n", cpu_calculate (60));
   if (now.tv_sec > 10)
-    bf_printf (buf, "10s  %2.2f%%\n", cpu_calculate (10));
+    bf_printf (output, "10s  %2.2f%%\n", cpu_calculate (10));
   if (now.tv_sec > 1)
-    bf_printf (buf, "1s   %2.2f%%\n", cpu_calculate (1));
-
-  plugin_user_sayto (NULL, user, buf);
-
-  bf_free (buf);
+    bf_printf (output, "1s   %2.2f%%\n", cpu_calculate (1));
 
   return 0;
 }
@@ -364,19 +352,13 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
-  buffer_t *buf;
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  buf = bf_alloc (1024);
 
-  bf_printf (buf, "Memory Usage:\n");
-  bf_printf (buf, "Resident: %lu\n", procstats[0][current[0]].ps.ru_maxrss);
-  bf_printf (buf, "Shared: %lu\n", procstats[0][current[0]].ps.ru_idrss);
-
-  plugin_user_sayto (NULL, user, buf);
-
-  bf_free (buf);
+  bf_printf (output, "Memory Usage:\n");
+  bf_printf (output, "Resident: %lu\n", procstats[0][current[0]].ps.ru_maxrss);
+  bf_printf (output, "Shared: %lu\n", procstats[0][current[0]].ps.ru_idrss);
 
   return 0;
 }

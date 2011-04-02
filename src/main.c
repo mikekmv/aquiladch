@@ -26,6 +26,10 @@
 /* FIXME: for nmdc_proto.cache_flush */
 #include "nmdc_protocol.h"
 
+#ifdef DEBUG
+#include "stacktrace.h"
+#endif
+
 /* global data */
 
 struct timeval boottime;
@@ -48,6 +52,21 @@ int main (int argc, char **argv)
   sigemptyset (&set);
   sigaddset (&set, SIGPIPE);
   sigprocmask (SIG_BLOCK, &set, NULL);
+
+#ifdef DEBUG
+  /* add stacktrace handler */
+  {
+    struct sigaction sact;
+
+    StackTraceInit (argv[0], -1);
+
+    sigemptyset (&sact.sa_mask);
+    sact.sa_flags = 0;
+    sact.sa_handler = CrashHandler;
+    sigaction (SIGSEGV, &sact, NULL);
+    sigaction (SIGBUS, &sact, NULL);
+  }
+#endif
 
   /* initialize the global configuration */
   config_init ();
