@@ -56,6 +56,8 @@ typedef struct {
   cache_element_t myinfoupdateop;	/* my info update messages for ops. not shortened and immediate */
   cache_element_t asearch;	/* active search list */
   cache_element_t psearch;	/* passive search list */
+  cache_element_t aresearch;	/* active search list */
+  cache_element_t presearch;	/* passive search list */
   cache_element_t results;	/* results */
   cache_element_t privatemessages;	/* privatemessages */
 
@@ -91,6 +93,7 @@ typedef struct {
 typedef struct ratelimiting {
   leaky_bucket_type_t chat;
   leaky_bucket_type_t search;
+  leaky_bucket_type_t research;
   leaky_bucket_type_t myinfo;
   leaky_bucket_type_t getnicklist;
   leaky_bucket_type_t getinfo;

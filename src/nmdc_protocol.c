@@ -12,6 +12,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <time.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
@@ -65,6 +66,7 @@ unsigned int cloning;
 unsigned int chatmaxlength;
 unsigned int searchmaxlength;
 unsigned int srmaxlength;
+unsigned int researchmininterval, researchperiod, researchmaxcount;
 
 /* special users */
 user_t *HubSec;
@@ -609,6 +611,8 @@ user_t *proto_nmdc_user_alloc (void *priv)
 
   userlist = user;
 
+  searchlist_init (&user->searchlist);
+
   nmdc_stats.userjoin++;
 
   return user;
@@ -679,6 +683,8 @@ int proto_nmdc_user_disconnect (user_t * u)
     bf_free (u->MyINFO);
     u->MyINFO = NULL;
   }
+
+  searchlist_clear (&u->searchlist);
 
   if (u->supports & NMDC_SUPPORTS_ZLines) {
     cache.ZlineSupporters--;
@@ -1205,6 +1211,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 
     u->state = PROTO_STATE_ONLINE;
     server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+    time (&u->joinstamp);
 
     /* add user to nicklist cache */
     nicklistcache_adduser (u);
@@ -1373,6 +1380,9 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 	}
 
+	/* update plugin info */
+	plugin_update_user (u);
+
 	/* send new info event */
 	if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_INFOUPDATE, b) !=
 	    PLUGIN_RETVAL_CONTINUE) {
@@ -1383,9 +1393,6 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  retval = -1;
 	  break;
 	}
-
-	/* update plugin info */
-	plugin_update_user (u);
 
 	/* update the tag */
 	nicklistcache_updateuser (u, new);
@@ -1423,36 +1430,89 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	break;
       }
     case TOKEN_SEARCH:
-      if (!(u->rights & CAP_SEARCH))
-	break;
+      {
+	searchlist_entry_t *e = NULL;
+	buffer_t *ss = NULL;
+	char *c = NULL;
+	unsigned long deadline = now.tv_sec - researchperiod;
+	unsigned int drop = 0;
 
-      /* check quota */
-      if (!get_token (&rates.search, &u->rate_search, now.tv_sec)) {
-	nmdc_stats.searchoverflow++;
-	break;
+	if (!(u->rights & CAP_SEARCH))
+	  break;
+
+	/* check quota */
+	if (!get_token (&rates.search, &u->rate_search, now.tv_sec)) {
+	  nmdc_stats.searchoverflow++;
+	  break;
+	}
+
+	/* drop all seach message that are too long */
+	if ((bf_size (b) > searchmaxlength) && (!(u->rights & CAP_SPAM))) {
+	  nmdc_stats.searchtoolong++;
+	  break;
+	}
+
+	/* Do research handling */
+	for (c = tkn->argument; *c != ' '; c++);
+	c++;
+
+	for (e = u->searchlist.last; e; e = e->prev) {
+	  /* see if search is cached */
+	  if (!strcmp (e->data->s, c)) {
+	    /* was the search outside the minimum interval ? */
+	    if ((now.tv_sec - e->timestamp) < researchmininterval) {
+	      /* no. restore search token and drop search */
+	      u->rate_search.tokens++;
+	      drop = 1;
+	      //DPRINTF ("Dropped research\n");
+	      break;
+	    }
+	    /* was it done within the re-search period ? */
+	    if (deadline < e->timestamp) {
+	      /* if so, only search recent users */
+	      /* queue in re-searchqueue */
+	      cache_queue (cache.aresearch, u, b);
+	      if (u->active) {
+		cache_queue (cache.presearch, u, b);
+	      }
+	      drop = 1;
+	      //DPRINTF ("Doing RESEARCH\n");
+	    }
+	    searchlist_update (&u->searchlist, e);
+	    break;
+	  }
+	}
+	if (drop)
+	  break;
+
+	/* if search wasn't cached, cache it */
+	if (!e) {
+	  //DPRINTF ("New Search\n");
+	  ss = bf_alloc (strlen (c) + 1);
+	  bf_printf (ss, "%s", c);
+
+	  /* if necessary, prune searchlist */
+	  while (u->searchlist.count >= researchmaxcount)
+	    searchlist_del (&u->searchlist, u->searchlist.first);
+
+	  searchlist_add (&u->searchlist, u, ss);
+	}
+
+	/* TODO verify nick, mode and IP */
+	if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_SEARCH, b) != PLUGIN_RETVAL_CONTINUE) {
+	  nmdc_stats.searchevent++;
+	  break;
+	}
+
+	/* mark user as "special" */
+	u->SearchCnt++;
+	u->CacheException++;
+
+	cache_queue (cache.asearch, u, b);
+	if (u->active) {
+	  cache_queue (cache.psearch, u, b);
+	}
       }
-
-      /* drop all seach message that are too long */
-      if ((bf_size (b) > searchmaxlength) && (!(u->rights & CAP_SPAM))) {
-	nmdc_stats.searchtoolong++;
-	break;
-      }
-
-      /* TODO verify nick, mode and IP */
-      if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_SEARCH, b) != PLUGIN_RETVAL_CONTINUE) {
-	nmdc_stats.searchevent++;
-	break;
-      }
-
-      /* mark user as "special" */
-      u->SearchCnt++;
-      u->CacheException++;
-
-      cache_queue (cache.asearch, u, b);
-      if (u->active) {
-	cache_queue (cache.psearch, u, b);
-      }
-
       break;
     case TOKEN_SR:
       {
@@ -2097,10 +2157,11 @@ void proto_nmdc_flush_cache ()
 {
   buffer_t *b;
   user_t *u, *n;
-  buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op;
+  buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op, *buf_aresearch, *buf_presearch;
   unsigned int psl, asl, l;
-  unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0;
+  unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0, ars = 0, prs = 0;
   struct timeval now;
+  unsigned long deadline;
 
 #ifdef ZLINES
   buffer_t *buf_zpassive = NULL, *buf_zactive = NULL;
@@ -2126,7 +2187,11 @@ void proto_nmdc_flush_cache ()
 	      cache.privatemessages.length + cache.privatemessages.messages.count);
   buf_op = bf_alloc (cache.myinfoupdateop.length + cache.myinfoupdateop.messages.count);
 
+  buf_aresearch = bf_alloc (cache.aresearch.length + cache.aresearch.messages.count);
+  buf_presearch = bf_alloc (cache.presearch.length + cache.presearch.messages.count);
+
   gettimeofday (&now, NULL);
+  deadline = now.tv_sec - researchperiod;
 
   /* operator buffer */
   miuo = proto_nmdc_add_element (&cache.myinfoupdateop, buf_op, now.tv_sec);
@@ -2165,6 +2230,9 @@ void proto_nmdc_flush_cache ()
   if (cache.results.messages.count
       && get_token (&cache.results.timertype, &cache.results.timer, now.tv_sec))
     res = 1;
+
+  ars = proto_nmdc_add_element (&cache.aresearch, buf_aresearch, now.tv_sec);
+  prs = proto_nmdc_add_element (&cache.presearch, buf_presearch, now.tv_sec);
 
 #ifdef ZLINES
   if (cache.ZlineSupporters > 0) {
@@ -2227,6 +2295,12 @@ void proto_nmdc_flush_cache ()
     /* send extra OP buffer */
     if (miuo && u->op)
       server_write (u->parent, buf_op);
+    /* write out researches to recent clients */
+    if (ars || (u->active && prs)) {
+      if (u->joinstamp > deadline) {
+	server_write (u->parent, (u->active ? buf_aresearch : buf_presearch));
+      }
+    }
   }
 
 #ifdef ZLINES
@@ -2240,6 +2314,8 @@ void proto_nmdc_flush_cache ()
   bf_free (buf_active);
   bf_free (buf_exception);
   bf_free (buf_op);
+  bf_free (buf_aresearch);
+  bf_free (buf_presearch);
 
   if (ch)
     cache_clear (cache.chat);
@@ -2253,6 +2329,10 @@ void proto_nmdc_flush_cache ()
     cache_clear (cache.psearch);
   if (as)
     cache_clear (cache.asearch);
+  if (prs)
+    cache_clear (cache.presearch);
+  if (ars)
+    cache_clear (cache.aresearch);
   if (res)
     cache_clear (cache.results);
   if (pm)
@@ -2402,6 +2482,8 @@ int proto_nmdc_init ()
   init_bucket_type (&cache.myinfoupdateop.timertype, 1, 1, 1);
   init_bucket_type (&cache.asearch.timertype, 30, 1, 1);
   init_bucket_type (&cache.psearch.timertype, 30, 1, 1);
+  init_bucket_type (&cache.aresearch.timertype, 30, 1, 1);
+  init_bucket_type (&cache.presearch.timertype, 30, 1, 1);
   init_bucket_type (&cache.results.timertype, 20, 1, 1);
   init_bucket_type (&cache.privatemessages.timertype, 1, 1, 1);
 
@@ -2413,6 +2495,8 @@ int proto_nmdc_init ()
   init_bucket (&cache.myinfoupdateop.timer, now.tv_sec);
   init_bucket (&cache.asearch.timer, now.tv_sec);
   init_bucket (&cache.psearch.timer, now.tv_sec);
+  init_bucket (&cache.aresearch.timer, now.tv_sec);
+  init_bucket (&cache.presearch.timer, now.tv_sec);
   init_bucket (&cache.results.timer, now.tv_sec);
   init_bucket (&cache.privatemessages.timer, now.tv_sec);
 
@@ -2433,10 +2517,20 @@ int proto_nmdc_init ()
   config_register ("cache.pm.period", CFG_ELEM_ULONG, &cache.privatemessages.timertype.period,
 		   "Period of private messages cache flush. This controls how often private messages are sent to users. Keep this low.");
 
+  config_register ("cache.activeresearch.period", CFG_ELEM_ULONG, &cache.aresearch.timertype.period,
+		   "Period of active repeated search cache flush. This controls how often search messages are sent to active users.");
+  config_register ("cache.passiveresearch.period", CFG_ELEM_ULONG,
+		   &cache.presearch.timertype.period,
+		   "Period of passive repeated search cache flush. This controls how often search messages are sent to passive users.");
+
   cloning = DEFAULT_CLONING;
   chatmaxlength = DEFAULT_MAXCHATLENGTH;
   searchmaxlength = DEFAULT_MAXSEARCHLENGTH;
   srmaxlength = DEFAULT_MAXSRLENGTH;
+  researchmininterval = 60;
+  researchperiod = 1200;
+  researchmaxcount = 5;
+
   config_register ("hub.allowcloning", CFG_ELEM_UINT, &cloning,
 		   "Allow multiple users from the same IP address.");
   config_register ("nmdc.maxchatlength", CFG_ELEM_UINT, &chatmaxlength,
@@ -2445,6 +2539,13 @@ int proto_nmdc_init ()
 		   "Maximum length of a search message.");
   config_register ("nmdc.maxsrlength", CFG_ELEM_UINT, &srmaxlength,
 		   "Maximum length of a search result");
+
+  config_register ("nmdc.researchinterval", CFG_ELEM_UINT, &researchmininterval,
+		   "Minimum time before a re-search is considered valid.");
+  config_register ("nmdc.researchperiod", CFG_ELEM_UINT, &researchperiod,
+		   "Period during which a search is considered a re-search.");
+  config_register ("nmdc.researchmaxcount", CFG_ELEM_UINT, &researchmaxcount,
+		   "Maximum number of searches cached.");
 
   /* further inits */
   memset (&hashlist, 0, sizeof (hashlist));

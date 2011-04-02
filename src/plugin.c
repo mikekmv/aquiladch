@@ -79,6 +79,17 @@ plugin_user_t *plugin_user_find (unsigned char *name)
   return &((plugin_private_t *) u->plugin_priv)->user;
 }
 
+plugin_user_t *plugin_user_find_ip (unsigned long ip)
+{
+  user_t *u;
+
+  u = hash_find_ip (&hashlist, ip);
+  if (!u)
+    return NULL;
+
+  return &((plugin_private_t *) u->plugin_priv)->user;
+}
+
 /******************************* UTILITIES: KICK/BAN **************************************/
 
 unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message)

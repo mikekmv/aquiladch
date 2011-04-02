@@ -340,6 +340,30 @@ unsigned long handler_zombie (plugin_user_t * user, buffer_t * output, void *pri
   return 0;
 }
 
+unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv,
+			     unsigned int argc, unsigned char **argv)
+{
+  struct in_addr ip;
+  plugin_user_t *tgt;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <ip>", argv[0]);
+    return 0;
+  };
+
+  if (inet_aton (argv[1], &ip)) {
+    if ((tgt = plugin_user_find_ip (ip.s_addr))) {
+      bf_printf (output, "User %s is using IP %s", tgt->nick, inet_ntoa (ip));
+    } else {
+      bf_printf (output, "No one using IP %s found.", inet_ntoa (ip));
+    }
+  } else {
+    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);
+  }
+
+  return 0;
+}
+
 unsigned long handler_unban (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
 			     unsigned char **argv)
 {
@@ -1521,6 +1545,7 @@ int builtincmd_init ()
   command_register ("baniphard",  &handler_banhard,      CAP_BANHARD, "Hardban an IP.");
   command_register ("unbaniphard",&handler_unbanip_hard, CAP_BANHARD, "Unhardban an IP.");
   command_register ("zombie",     &handler_zombie,       CAP_KICK,    "Zombie a user. Can't talk or pm.");
+  command_register ("whoip",      &handler_whoip,        CAP_KICK,    "Returns the user using the IP.");
 
   command_register ("massall",	  &handler_massall,    CAP_ADMIN,     "Send a private message to all users.");
 

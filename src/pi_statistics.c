@@ -285,6 +285,8 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
   add_elem (buf, cache.myinfoupdateop, now.tv_sec);
   add_elem (buf, cache.asearch, now.tv_sec);
   add_elem (buf, cache.psearch, now.tv_sec);
+  add_elem (buf, cache.aresearch, now.tv_sec);
+  add_elem (buf, cache.presearch, now.tv_sec);
   add_elem (buf, cache.results, now.tv_sec);
   add_elem (buf, cache.privatemessages, now.tv_sec);
 

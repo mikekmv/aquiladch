@@ -1,8 +1,16 @@
 This is the Aquila Changelog.
 
 
-0.1.8-pre4:
+0.1.8-pre5:
+	Added repeated search handling.
+		Aquila caches a configurable number of searches. If those
+		searches are repeated too soon, those are dropped. If they
+		are repeated within a configurable period, only users that
+		joined in this period are searched.
+	Fixed MyINFO update share checking.
 	Added iplog module
+	Fix time out issues. Dead connections should now be timed out correctly. 
+	Disable Naggle on user connections: we do our own queueing. TEST
 	Fixed bug in pi_trigger.c: text rules are now correctly printed.
 	Fix some stuff in aqdtinstall
 	Owner right is now printed.

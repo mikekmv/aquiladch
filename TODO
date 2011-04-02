@@ -26,4 +26,3 @@ Plugins:
 Ideas:
 	- if i ever implement something of a congestion measure, i could add
 		cache_rebuild  to the "when i got time" list 
-	
