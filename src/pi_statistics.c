@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
@@ -25,7 +27,6 @@
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
-#include "hub.h"
 #include "proto.h"
 #include "utils.h"
 #include "nmdc_protocol.h"
@@ -69,7 +70,8 @@ typedef struct procstat {
   struct timeval tv;
 } procstat_t;
 
-procstat_t procstats[PROCSTAT_LEVELS][PROCSTAT_MEASUREMENTS];
+procstat_t procstat_boot;
+procstat_t procstats[PROCSTAT_LEVELS][PROCSTAT_MEASUREMENTS + 1];
 unsigned int current[PROCSTAT_LEVELS];
 
 /************************* CPU FUNCTIONS ******************************************/
@@ -78,7 +80,11 @@ void cpu_init ()
 {
   memset (&procstats, 0, sizeof (procstats));
   memset (&current, 0, sizeof (current));
+  memset (&procstat_boot, 0, sizeof (procstat_t));
   getrusage (RUSAGE_SELF, &(procstats[0][0].ps));
+  gettimeofday (&(procstats[0][0].tv), NULL);
+  procstat_boot = procstats[0][0];
+  procstats[2][0] = procstats[1][0] = procstats[0][0];
 }
 
 unsigned int cpu_measure ()
@@ -86,40 +92,25 @@ unsigned int cpu_measure ()
   int i;
 
   current[0]++;
-
-  if (current[PROCSTAT_LEVELS - 1] == (PROCSTAT_MEASUREMENTS - 1))
-    current[PROCSTAT_LEVELS - 1] = 0;
-
   getrusage (RUSAGE_SELF, &(procstats[0][current[0]].ps));
   gettimeofday (&(procstats[0][current[0]].tv), NULL);
-  for (i = 0; (current[i] == (PROCSTAT_MEASUREMENTS - 1)) && (i < PROCSTAT_LEVELS); i++) {
+  for (i = 0; (current[i] == (PROCSTAT_MEASUREMENTS)) && (i < PROCSTAT_LEVELS); i++) {
+    if (i < (PROCSTAT_LEVELS - 1)) {
+      current[i + 1]++;
+      procstats[i + 1][current[i + 1]] = procstats[i][PROCSTAT_MEASUREMENTS];
+    }
     current[i] = 0;
-    if (i == (PROCSTAT_LEVELS - 1))
-      break;
-    current[i + 1]++;
-    procstats[i + 1][current[i + 1]] = procstats[i][PROCSTAT_MEASUREMENTS - 1];
+    procstats[i][0] = procstats[i][PROCSTAT_MEASUREMENTS];
   }
+
   return 0;
 }
 
 #define TV_TO_MSEC(tv) ((tv.tv_sec*1000)+(tv.tv_usec/1000))
 
-float cpu_calculate (int time)
+float cpu_calc (procstat_t * old, procstat_t * new)
 {
-  int level, scale;
-  unsigned long used, real;
-  procstat_t *old, *new;
-
-  /* determine scale */
-  level = 0;
-  while (time >= PROCSTAT_MEASUREMENTS) {
-    level++;
-    time /= PROCSTAT_MEASUREMENTS;
-    scale *= PROCSTAT_MEASUREMENTS;
-  }
-  old =
-    &(procstats[level][(current[level] - time + PROCSTAT_MEASUREMENTS) % PROCSTAT_MEASUREMENTS]);
-  new = &(procstats[0][current[0]]);
+  long used, real;
 
   /* we aren't up that long yet */
   if (!old->tv.tv_sec)
@@ -133,7 +124,46 @@ float cpu_calculate (int time)
   real = TV_TO_MSEC (new->tv);
   real -= TV_TO_MSEC (old->tv);
 
-  return (100 * (float) used) / (float) real;
+  return (100.0 * (float) used) / (float) real;
+}
+
+float cpu_calculate (int seconds)
+{
+  int level = seconds % PROCSTAT_MEASUREMENTS;
+
+  if (procstats[level][(current[level] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0) {
+    return cpu_calc (&procstats[level][(current[level] - 1) % PROCSTAT_MEASUREMENTS],
+		     &procstats[0][current[0]]);
+  } else {
+    return 0.0;
+  }
+}
+
+int cpu_printf (buffer_t * buf)
+{
+
+  time_t now;
+
+  time (&now);
+
+  bf_printf (buf, "\nCpu Statistics at %s", ctime (&now));
+
+  if (procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
+    bf_printf (buf, " last hour %2.2f%%\n",
+	       cpu_calc (&procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS],
+			 &procstats[0][current[0]]));
+  if (procstats[1][(current[1] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
+    bf_printf (buf, " last minute %2.2f%%\n",
+	       cpu_calc (&procstats[1][(current[1] - 1) % PROCSTAT_MEASUREMENTS],
+			 &procstats[0][current[0]]));
+  if (procstats[0][(current[0] - 5) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
+    bf_printf (buf, " last 5 seconds %2.2f%%\n\n",
+	       cpu_calc (&procstats[0][(current[0] - 5) % PROCSTAT_MEASUREMENTS],
+			 &procstats[0][current[0]]));
+
+  bf_printf (buf, "Since boot %2.2f%%\n", cpu_calc (&procstat_boot, &procstats[0][current[0]]));
+
+  return 0;
 }
 
 /************************* BW FUNCTIONS ******************************************/
@@ -235,28 +265,19 @@ unsigned int bandwidth_printf (buffer_t * buf)
   lvl = &stats.bandwidth[0];
   elem = &lvl->probes[lvl->current ? lvl->current - 1 : STATS_NUM_MEASUREMENTS];
 
-  out =
-    (8 * (double) elem->BytesSend) / ((double) elem->stamp.tv_sec * 1000 +
-				      (double) elem->stamp.tv_usec / 1000);
-  in =
-    (8 * (double) elem->BytesReceived) / ((double) elem->stamp.tv_sec * 1000 +
-					  (double) elem->stamp.tv_usec / 1000);
+  out = (8 * (double) elem->BytesSend) / ((double) TV_TO_MSEC (elem->stamp));
+  in = (8 * (double) elem->BytesReceived) / ((double) TV_TO_MSEC (elem->stamp));
 
-  retval +=
-    bf_printf (buf, "In last %lu ms: In %f kbps, Out %f kbps\n",
-	       (elem->stamp.tv_sec * 1000 + elem->stamp.tv_usec / 1000), in, out);
+  retval += bf_printf (buf, "In last %lu ms: In %f kbps, Out %f kbps\n",
+		       TV_TO_MSEC (elem->stamp), in, out);
 
   for (i = 0; i < STATS_NUM_LEVELS; i++) {
     lvl = &stats.bandwidth[i];
     elem = &lvl->probes[lvl->current ? lvl->current - 1 : STATS_NUM_MEASUREMENTS];
 
     if (timerisset (&lvl->TotalTime)) {
-      out =
-	(8000 * (double) lvl->TotalBytesSend) / ((double) lvl->TotalTime.tv_sec * 1000 +
-						 (double) lvl->TotalTime.tv_usec / 1000);
-      in =
-	(8000 * (double) lvl->TotalBytesReceived) / ((double) lvl->TotalTime.tv_sec * 1000 +
-						     (double) lvl->TotalTime.tv_usec / 1000);
+      out = (8000 * (double) lvl->TotalBytesSend) / ((double) TV_TO_MSEC (lvl->TotalTime));
+      in = (8000 * (double) lvl->TotalBytesReceived) / ((double) TV_TO_MSEC (lvl->TotalTime));
 
       retval +=
 	bf_printf (buf, "Average over %d seconds: In %f kbps, Out %f kbps\n", lvl->TotalTime.tv_sec,
@@ -343,22 +364,7 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
 unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
-  timersub (&now, &boottime, &now);
-
-  bf_printf (output, "CPU Usage over last: \n");
-  if (now.tv_sec > 3600)
-    bf_printf (output, "hour %2.2f%%\n", cpu_calculate (3600));
-  if (now.tv_sec > 60)
-    bf_printf (output, "minute %2.2f%%\n", cpu_calculate (60));
-  if (now.tv_sec > 10)
-    bf_printf (output, "10s  %2.2f%%\n", cpu_calculate (10));
-  if (now.tv_sec > 1)
-    bf_printf (output, "1s   %2.2f%%\n", cpu_calculate (1));
-
+  cpu_printf (output);
   return 0;
 }
 
@@ -451,6 +457,8 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
 int pi_statistics_init ()
 {
 
+  memset (&procstats, 0, sizeof (procstats));
+  memset (&current, 0, sizeof (current));
   memset (&stats, 0, sizeof (statistics_t));
   bandwidth_init ();
   cpu_init ();

@@ -48,6 +48,7 @@ int core_config_init ()
   config.MaxShareLength       = DEFAULT_MAXSHARELENGTH;
   
   config.Redirect            = strdup (DEFAULT_REDIRECT);
+  config.KickBanRedirect     = strdup (DEFAULT_REDIRECT);
   config.defaultKickPeriod   = DEFAULT_KICKPERIOD;
   
   config.DefaultRights = CAP_DEFAULT;
@@ -69,6 +70,7 @@ int core_config_init ()
   config_register ("tag.MaxShareLength", CFG_ELEM_UINT,   &config.MaxShareLength,  "Maximum length of the users sharesize field.");
   
   config_register ("Redirect",           CFG_ELEM_STRING, &config.Redirect,        "Redirection target.");
+  config_register ("KickBanRedirect",    CFG_ELEM_STRING, &config.KickBanRedirect, "Redirection target in case of kick or ban.");
   config_register ("KickAutoBanLength",  CFG_ELEM_ULONG,  &config.defaultKickPeriod, "Length of automatic temporary ban after a kick.");
 
 

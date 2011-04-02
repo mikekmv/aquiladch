@@ -142,6 +142,9 @@ then
 else if [ -f /etc/debian_version ];
 then
 	FLAVOUR=debian
+	INSTALLDT="apt-get install daemontools"
+	SERVICE="/service"
+	RCSTART="/command/svscanboot&"
 else if [ -f /etc/redhat_release ];
 then
 	FLAVOUR=redhat
@@ -171,13 +174,18 @@ else
 	if [ "${FLAVOUR}" = "gentoo" ];
 	then
 		${ECHO} ${INSTALLDT}
-	else if [ "${FLAVOUR}" = "debian" ];
-	then
-		echo "You can download and install the daemontools packages from"
-		echo "    http://smarden.sunsite.dk/pape/Debian/daemontools.html"
-		echo "or use --force to install from source (not recommended)."
-		exit;
-	else
+	else 
+		if [ "${force}" != "1" ];
+		then
+			if [ "${FLAVOUR}" = "debian" ];
+			then
+				echo "You can download and install the daemontools packages from"
+				echo "    http://smarden.sunsite.dk/pape/Debian/daemontools.html"
+				echo "or use --force to install from source (not recommended)."
+				exit;
+			fi
+		fi
+
 		echo Installing daemontools from source.
 		mkdir /package
 		chmod 1755 /package
@@ -192,16 +200,15 @@ else
 		package/install
 		SERVICE=/service
 	fi;
-	fi;
 fi
 
 echo "Creating user..."
 ${ECHO} groupadd ${GROUP}
-${ECHO} useradd -g ${GROUP} -M -s ${USERSHELL} ${USER}
+${ECHO} useradd -g ${GROUP} -s ${USERSHELL} ${USER}
 
 echo "Creating directories..."
 ${ECHO} mkdir -p --verbose ${HOME}/
-${ECHO} mkdir -p --verbose ${HOME}/supervice
+${ECHO} mkdir -p --verbose ${HOME}/supervise
 ${ECHO} mkdir -p --verbose ${HOME}/log
 ${ECHO} mkdir -p --verbose ${HOME}/log/supervise
 ${ECHO} mkdir -p --verbose ${HOME}/log/main
@@ -251,8 +258,15 @@ Do not forget:
  * to add a link from the main service directory to the aquila service 
    directory:
         ln -s ${HOME} ${SERVICE}/aquila
+EOF
+if test "${RCDT}" != ""
+then
+cat <<EOF
  * Add daemontools to standard system boot up:
         ${RCDT}
+EOF
+fi
+cat <<EOF
 
 If you have done the above two things, Aquila will be automatically started at 
 system boot and restarted should it crash.

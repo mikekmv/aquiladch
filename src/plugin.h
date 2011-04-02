@@ -53,6 +53,7 @@
 /* keep these the same as the flags in proto.h */
 #define PLUGIN_FLAG_HUBSEC               1
 #define PLUGIN_FLAG_REGISTERED           2
+#define PLUGIN_FLAG_ZOMBIE	         4
 
 typedef struct plugin plugin_t;
 
@@ -83,6 +84,7 @@ extern int plugin_unregister (plugin_t *);
 
 /* request generic callback per event */
 extern int plugin_request (plugin_t *, unsigned long event, plugin_event_handler_t *);
+extern int plugin_ignore (plugin_t *, unsigned long event, plugin_event_handler_t *);
 
 /* this stores or releases the private pointer of a plugin. */
 extern int plugin_claim (plugin_t *, plugin_user_t *, void *);
@@ -117,6 +119,9 @@ extern unsigned int plugin_user_ban (plugin_user_t * user, buffer_t * message,
 				     unsigned long period);
 extern unsigned int plugin_user_unban (plugin_user_t * user);
 
+extern unsigned int plugin_user_raw (plugin_user_t * tgt, buffer_t * message);
+extern unsigned int plugin_user_raw_all (buffer_t * message);
+
 extern unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message);
 extern unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target,
 				       buffer_t * message);
@@ -126,12 +131,12 @@ extern unsigned int plugin_user_printf (plugin_user_t * user, const char *format
 extern unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message);
 extern unsigned int plugin_user_forcemove (plugin_user_t * user, unsigned char *destination,
 					   buffer_t * message);
-extern unsigned int plugin_ban_ip (unsigned long ip, buffer_t * message, unsigned long period);
-extern unsigned int plugin_ban_ip_hard (unsigned long ip, buffer_t * message, unsigned long period);
+extern unsigned int plugin_ban_ip (unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
+extern unsigned int plugin_ban_ip_hard (unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
 extern unsigned int plugin_ban_nick (unsigned char *nick, buffer_t * message, unsigned long period);
 extern unsigned int plugin_unban (unsigned char *nick);
-extern unsigned int plugin_unban_ip (unsigned long ip);
-extern unsigned int plugin_unban_ip_hard (unsigned long ip);
+extern unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask);
+extern unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask);
 extern unsigned int plugin_unban_nick (unsigned char *nick);
 extern unsigned int plugin_user_zombie (plugin_user_t * user);
 extern unsigned int plugin_user_unzombie (plugin_user_t * user);

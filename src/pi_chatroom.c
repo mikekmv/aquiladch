@@ -17,6 +17,7 @@
  *  
  */
 
+#include "hub.h"
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -24,7 +25,6 @@
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
-#include "hub.h"
 #include "proto.h"
 
 /*********************************************************************************************/
@@ -477,16 +477,16 @@ unsigned long pi_chatroom_event_pm (plugin_user_t * user, void *dummy, unsigned 
 
       /* exit if the room is private. */
       if (room->flags & CHATROOM_FLAG_PRIVATE)
-	return PLUGIN_RETVAL_CONTINUE;
+	goto leave;
 
       /* does he have the necessary rights? */
       if (!((user->rights & room->rights) == room->rights))
-	return PLUGIN_RETVAL_CONTINUE;
+	goto leave;
 
       /* if so, add him. */
       member = chatroom_member_add (room, source);
       if (!member)
-	return PLUGIN_RETVAL_CONTINUE;
+	goto leave;
     }
   }
 

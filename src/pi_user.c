@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -25,7 +27,6 @@
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
-#include "hub.h"
 #include "banlistclient.h"
 #include "utils.h"
 
@@ -77,11 +78,11 @@ unsigned long pi_user_handler_userstat (plugin_user_t * user, buffer_t * output,
 	     " Peak             %lu\n"
 	     " Dropped          %lu\n"
 	     " Buffering        %lu\n",
-	     buffering,
 	     user_unregistered_current, user_unregistered_max,
 	     user_registered_current, user_registered_max,
 	     user_op_current, user_op_max,
-	     users_total, user_unregistered_max + user_registered_max, users_peak, users_dropped);
+	     users_total, user_unregistered_max + user_registered_max, users_peak, users_dropped,
+	     buffering);
 
   return 0;
 }
@@ -164,7 +165,7 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
 
   /* check if client is accepted */
   if ((cl = banlist_client_find (&clientbanlist, user->client, user->version))
-      && (!(user->flags & CAP_TAG))) {
+      && (!(user->rights & CAP_TAG))) {
     plugin_user_printf (user, "Sorry, this client is not accepted because: %*s\n",
 			bf_used (cl->message), cl->message->s);
     goto drop;

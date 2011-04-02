@@ -1,3 +1,4 @@
+
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
@@ -34,12 +35,16 @@
 #include <sys/poll.h>
 #endif
 
-#define ASSERT assert
+#ifndef ASSERT
+#  define ASSERT assert
+#endif
 
-#ifdef DEBUG
-#define DPRINTF printf
-#else
-#define DPRINTF(...)
+#ifndef DPRINTF
+#  ifdef DEBUG
+#     define DPRINTF printf
+#  else
+#    define DPRINTF(...)
+#  endif
 #endif
 
 esocket_t *freelist = NULL;
@@ -251,7 +256,7 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
     return 0;
   }
 
-  /* if timer is valid already, just set the reset time... 
+  /* if timer is valid already and the new time is later than the old, just set the reset time... 
    * it will be handled when the timer expires 
    */
   if (s->tovalid) {
@@ -262,9 +267,15 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
       s->reset.tv_sec++;
       s->reset.tv_usec -= 1000000;
     }
-    s->resetvalid = 1;
 
-    return 0;
+    /* new time is later than the old */
+    if (timercmp (&s->reset, &s->to, >=)) {
+      s->resetvalid = 1;
+
+      return 0;
+    } else {
+      esocket_deltimeout (s);
+    }
   }
 
   gettimeofday (&s->to, NULL);

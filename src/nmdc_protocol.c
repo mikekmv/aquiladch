@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -29,7 +31,6 @@
 #  include <netinet/in.h>
 #endif
 
-#include "hub.h"
 #include "hash.h"
 #include "user.h"
 #include "config.h"
@@ -118,6 +119,8 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message);
 int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message);
 int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t * message);
 int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, buffer_t * message);
+int proto_nmdc_user_raw (user_t * target, buffer_t * message);
+int proto_nmdc_user_raw_all (buffer_t * message);
 
 /******************************************************************************\
 **                                                                            **
@@ -152,6 +155,8 @@ proto_t nmdc_proto = {
 	chat_send_direct:	proto_nmdc_user_send_direct,
 	chat_priv:		proto_nmdc_user_priv,
 	chat_priv_direct:	proto_nmdc_user_priv_direct,
+	raw_send:		proto_nmdc_user_raw,
+	raw_send_all:		proto_nmdc_user_raw_all,
 	
 	name:			"NMDC"
 };
@@ -666,6 +671,38 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
   return 0;
 }
 
+int proto_nmdc_user_raw (user_t * target, buffer_t * message)
+{
+  buffer_t *buf;
+
+  if (target->state == PROTO_STATE_DISCONNECTED)
+    return EINVAL;
+
+  buf = bf_copy (message, 0);
+
+  cache_count (cache.privatemessages, target, buf);
+  cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, target, buf);
+  target->MessageCnt++;
+  target->CacheException++;
+
+  bf_free (buf);
+
+  return 0;
+}
+
+int proto_nmdc_user_raw_all (buffer_t * message)
+{
+  buffer_t *buf;
+
+  buf = bf_copy (message, 0);
+
+  cache_queue (cache.chat, HubSec, buf);
+
+  bf_free (buf);
+
+  return 0;
+}
+
 /******************************************************************************\
 **                                                                            **
 **                             USER HANDLING                                  **
@@ -820,9 +857,11 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   if (message)
     proto_nmdc_user_say (HubSec, b, message);
 
-  bf_strcat (b, "$ForceMove ");
-  bf_strcat (b, destination);
-  bf_strcat (b, "|");
+  if (destination && *destination) {
+    bf_strcat (b, "$ForceMove ");
+    bf_strcat (b, destination);
+    bf_strcat (b, "|");
+  }
 
   server_write (u->parent, b);
   bf_free (b);
@@ -1177,7 +1216,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
       retval = server_write (u->parent, output);
-      proto_nmdc_user_redirect (u, bf_buffer ("Banned."));
+      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
       retval = -1;
       nmdc_stats.softban++;
       break;
@@ -1197,7 +1236,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
       retval = server_write (u->parent, output);
-      proto_nmdc_user_redirect (u, bf_buffer ("Banned."));
+      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
       retval = -1;
       nmdc_stats.nickban++;
       break;
@@ -1285,7 +1324,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
       retval = server_write (u->parent, output);
-      proto_nmdc_user_redirect (u, bf_buffer ("Banned."));
+      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
       retval = -1;
       nmdc_stats.nickban++;
       break;
@@ -2014,7 +2053,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	/* check quota */
-	if (!get_token (&rates.chat, &u->rate_chat, now.tv_sec)) {
+	if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
 	  proto_nmdc_user_warn (u, &now, "Don't send private messages so fast.");
 	  nmdc_stats.pmoverflow++;
 	  break;
@@ -2205,12 +2244,12 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	bf_printf (output, "You were kicked.");
-	banlist_add (&softbanlist, target->ipaddress, output,
+	banlist_add (&softbanlist, target->ipaddress, 0xFFFFFFFF, output,
 		     now.tv_sec + config.defaultKickPeriod);
 	banlist_nick_add (&nickbanlist, target->nick, output,
 			  now.tv_sec + config.defaultKickPeriod);
 
-	retval = proto_nmdc_user_redirect (target, output);
+	retval = proto_nmdc_user_forcemove (target, config.KickBanRedirect, output);
 	break;
       }
     case TOKEN_BOTINFO:

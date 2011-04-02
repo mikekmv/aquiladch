@@ -135,6 +135,8 @@ typedef struct {
   int (*chat_send_direct) (user_t *, user_t *, buffer_t *);
   int (*chat_priv) (user_t *, user_t *, user_t *, buffer_t *);
   int (*chat_priv_direct) (user_t *, user_t *, user_t *, buffer_t *);
+  int (*raw_send) (user_t *, buffer_t *);
+  int (*raw_send_all) (buffer_t *);
 
   unsigned char *name;
 } proto_t;

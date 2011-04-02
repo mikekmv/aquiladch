@@ -95,6 +95,7 @@ GCC_CFLAGS = @GCC_CFLAGS@
 GDB = @GDB@
 GETADDRINFO_FALSE = @GETADDRINFO_FALSE@
 GETADDRINFO_TRUE = @GETADDRINFO_TRUE@
+GPROF = @GPROF@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -105,6 +106,7 @@ LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
 LUALIB = @LUALIB@
 LUA_FALSE = @LUA_FALSE@
+LUA_INCLUDES = @LUA_INCLUDES@
 LUA_TRUE = @LUA_TRUE@
 MAKEINFO = @MAKEINFO@
 OBJEXT = @OBJEXT@
@@ -123,6 +125,7 @@ ZLIB = @ZLIB@
 ZLINE = @ZLINE@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_GDB = @ac_ct_GDB@
+ac_ct_GPROF = @ac_ct_GPROF@
 ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
@@ -409,7 +412,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 aqdtinstall: aqdtinstall.in
 	rm -rf $(@).tmp
-	sed -e 's,@exec_prefix\@,$(prefix),g' $< > ${@}.tmp
+	sed -e 's,@exec_prefix\@,$(prefix),g' ${@}.in > ${@}.tmp
 	chmod +x ${@}.tmp
 	mv ${@}.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

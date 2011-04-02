@@ -1,6 +1,42 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	KickBanRedirect support was incomplete. (Reported maksalaatikko)
+	statbot fixed. was broken by cpu stats changes. (reported Blade)
+	Redid cpu stats again.
+	if redirection address is empty, user is just dropped (request FleetCommand).
+	Fixed permission error in configset with settings caps
+	Fixed statcpu
+	Fixed memleak in pi_chatroom.c
+	Added IP range bans.
+	CAP_SPAM now unlimits PMs too.
+	Fixed type-punned warning.
+	depend selection of -p or -pg on presence of gprof, not gcc
+	LUA command handlers now get 2 parameters: first is the nick the second a table with all command arguments.
+	!hublist command now requires CAP_CONFIG
+	Fixed tools/Makefile.am to support none-GNU make. (reported plop)
+	added configure target --enable-profiler
+	Added fix so we can access user even in PreLogin state. NOT MT SAFE.
+	Fix UserIsRegistered and UserIsZombie (report and fix FleetCommand)
+	Fix crash when loading lua.conf when registered scripts do not exist. (reported FleetCommand)
+	Fix a few bugs in aqdtinstall
+	Updating configure.ac: make lua stuff behave correctly.
+	LUA: only register for events if one of the scripts demands it
+	Added check for LUA version >= 5.0.x.
+	Fixed bunch of warnings on cygwin builds.
+	Fixed printing of rights in LUA
+	Moved all hub.h includes to prevent warnings on Cygwin builds
+	Fixed building pi_hublist.c under cygwin
+	Bugfix for events without user parameter.
+	Added printing of parsing errors during load.
+	Added expanded proto and plugin to support lua RawToNick and RawToAll
+	Fixed bug in timer reset. Should reschedule timer if the new time is earlier than the original time.
+	A string returned by a lua functions is used as command output
+	Fixed CAP_TAG overrides client bans. (reported maksalaatikko)
+	Added warn command
+	Added seperate KickBanRedirect
+	fixed bug in statusers
+
 	added release target to makefile
 	added OP nick in ban message.
 	defaultbanmessage: this message will be send to ALL banned users by default. (suggestion maksalaatikko)
@@ -14,6 +50,7 @@ This is the Aquila Changelog.
 	Fixed --disable-zline option
 	Nickbans now work for registered users.
 	Fixed yet another bug in a command handler.
+
 	Fixed problem with double nicks. (Reported by Cyber_Ninja)
 		- crash when using nick of chatroom
 		- disconnect any other user.

@@ -17,6 +17,7 @@
  *  
  */
 
+#include "hub.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +27,6 @@
 #include "proto.h"
 #include "config.h"
 #include "user.h"
-#include "hub.h"
 #include "plugin_int.h"
 #include "builtincmd.h"
 #include "commands.h"

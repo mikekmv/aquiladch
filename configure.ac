@@ -2,13 +2,27 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.9-pre8]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.9-pre9]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
 
 # check for gdb
 AC_CHECK_TOOL(GDB, [gdb], [gdb])
+AC_CHECK_TOOL(GPROF, [gprof], [gprof])
+
+# Checks for programs.
+AC_PROG_CC
+
+if test "${GCC}" = "yes" ;
+then
+	GCC_VERSION=`gcc --version | head -n 1 | cut -d ' ' -f 3`
+	case $GCC_VERSION in
+	3.3.*)  GCC_CFLAGS="-Wall -W -Wno-unused-parameter" ;;
+	3.4.*)	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter" ;;
+	esac
+fi
+AC_SUBST(GCC_CFLAGS)
 
 # add arguments
 AC_ARG_ENABLE(debug,
@@ -23,11 +37,35 @@ AC_ARG_ENABLE(debug,
 	[unset debug])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
-if test x$debug = xtrue
+sCFLAGS=""
+AC_ARG_ENABLE(profiler,
+	AC_HELP_STRING([--enable-profiler],[Turn on profiling (default OFF)]),
+	[case "$enableval" in
+	  yes|true) 
+	  	if test "${GPROF}" = "gprof"
+	  	then
+		  	sCFLAGS="${sCFLAGS} -pg"
+		else
+			sCFLAGS="${sCFLAGS} -p"
+		fi
+		 ;;
+	  no|false) 
+	  	 ;;
+	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-profiler);;
+	esac],
+	[])
+
+if test x$debug = xtrue;
 then
-	CFLAGS="-g${GDB} -O0"
-fi
+	sCFLAGS="${sCFLAGS} -g${GDB} -O0"
+fi;
+
+if test "${sCFLAGS}" != ""
+then
+	CFLAGS="${sCFLAGS}"
+fi;
 AC_SUBST(CFLAGS)
+
 
 # Add zline argument
 AC_ARG_ENABLE(zline,
@@ -71,20 +109,39 @@ AC_ARG_ENABLE(lua,
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-lua);;
 	esac],
 	[ALLOW_LUA=-DALLOW_LUA])
-AC_SUBST(ALLOW_LUA)
 
-# Checks for programs.
-AC_PROG_CC
+AC_ARG_WITH([lua-prefix],
+            [AS_HELP_STRING([--with-lua-prefix=DIR],
+                            [Lua files are in DIR])])
+AC_ARG_WITH([lua-includes],
+            [AS_HELP_STRING([--with-lua-includes=DIR],
+                            [Lua include files are in DIR])])
+AC_ARG_WITH([lua-libraries],
+            [AS_HELP_STRING([--with-lua-libraries=DIR],
+                            [Lua library files are in DIR])])
+AC_ARG_WITH([lua-suffix],
+            [AS_HELP_STRING([--with-lua-suffix=ARG],
+                            [Lua binary and library files are suffixed with
+                             ARG])])
 
-if test "${GCC}" = "yes" ;
-then
-	GCC_VERSION=`gcc --version | head -n 1 | cut -d ' ' -f 3`
-	case $GCC_VERSION in
-	3.3.*)  GCC_CFLAGS="-Wall -W -Wno-unused-parameter" ;;
-	3.4.*)	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter" ;;
-	esac
+if test "x$with_lua_prefix" = x; then
+    lua_search_path="$PATH"
+else
+    lua_search_path="$with_lua_prefix/bin"
 fi
-AC_SUBST(GCC_CFLAGS)
+
+if test "x$with_lua_includes" != x; then
+    LUA_INCLUDES="-I$with_lua_includes"
+elif test "x$with_lua_prefix" != x; then
+    LUA_INCLUDES="-I$with_lua_prefix/include"
+fi
+
+if test "x$with_lua_libraries" != x; then
+    LUA_LIBS="-L$with_lua_libraries"
+elif test "x$with_lua_prefix" != x; then
+    LUA_LIBS="-L$with_lua_prefix/lib"
+fi
+
 
 # Checks for libraries.
 AC_CHECK_LIB(crypt, crypt)
@@ -97,15 +154,10 @@ else
 fi
 AC_SUBST(ZLIB)
 
-if test "${ALLOW_LUA}" = "" ;
+if test "${ZLIB}" = "" ;
 then
-	unset LUALIB
-else
-	# that -lm -ldl is soooo going to backfire :S
-	AC_CHECK_LIB([lua], [lua_open], [LUALIB="-llua -llualib -lm -ldl"])
+	unset ZLINE
 fi
-AC_SUBST(LUALIB)
-AM_CONDITIONAL(LUA, test "${LUALIB}" != "" )
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -123,10 +175,67 @@ then
 	AC_CHECK_HEADERS([sys/poll.h])
 fi
 
+dnl if test "${ALLOW_LUA}" != "" ;
+dnl then
+dnl 	AC_CHECK_HEADERS([lua.h lualib.h])
+dnl fi
+
 if test "${ALLOW_LUA}" != "" ;
 then
-	AC_CHECK_HEADERS([lua.h])
+
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+AC_CHECK_HEADERS([lua.h lualib.h])
+CPPFLAGS="$save_CPPFLAGS"
+
+AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
+AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
+AC_CHECK_LIB([lua$with_lua_suffix],
+             [lua_call],
+             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix -llualib$with_lua_suffix $lua_extra_libs"],
+             [],
+             [$LUA_LIBS $lua_extra_libs])
+
+AC_MSG_CHECKING([for liblua version 5.0.x ])
+save_CPPFLAGS="$CPPFLAGS"
+save_LIBS="$LIBS"
+CPPFLAGS="$PPCFLAGS $LUA_INCLUDES"
+LIBS="$LIBS $LUA_LIBS"
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+
+#include <lua.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+int main()
+{
+    printf("(found %s)... ", LUA_VERSION);
+    if(strstr (LUA_VERSION, "5.0"))
+        exit(EXIT_SUCCESS);
+    exit(EXIT_FAILURE);
+}
+
+]])],
+              [AC_MSG_RESULT([yes])],
+              [AC_MSG_RESULT([no])
+               unset LUA_LIBS])
+
+CPPFLAGS="$save_CPPFLAGS"
+LIBS="$save_LIBS"
+
 fi
+
+LUALIB=${LUA_LIBS}
+AC_SUBST(LUALIB)
+AC_SUBST(LUA_INCLUDES)
+AM_CONDITIONAL(LUA, test "${LUALIB}" != "" )
+
+if test "${LUALIB}" == ""
+then
+	unset ALLOW_LUA
+fi
+AC_SUBST(ALLOW_LUA)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

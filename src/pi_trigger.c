@@ -638,8 +638,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     return 0;
   }
 
-  command_flags_parse ((command_flag_t *) & Capabilities, output, argc, argv, capstart, &cap,
-		       &ncap);
+  command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, capstart, &cap, &ncap);
   cap &= ~ncap;
 
   r = trigger_rule_create (t, type, cap, arg, help);
@@ -652,7 +651,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   return 0;
 
 printhelp:
-  bf_printf (output, "Usage: %s <name> <type> [<arg> <help>] [<cap>]\n"
+  bf_printf (output, "Usage: %s <name> <type> [<arg>] <help> [<cap>]\n"
 	     "   name: name of the trigger\n"
 	     "   type: one of:\n"
 	     "      - login   : the trigger will be triggered on user login, provide capabilties after type\n"
@@ -701,13 +700,13 @@ unsigned int rule_show (buffer_t * buf, trigger_rule_t * rule)
   switch (rule->type) {
     case TRIGGER_RULE_COMMAND:
       bf_printf (buf, "  Rule %lu type command %s, cap ", rule->id, rule->arg);
-      command_flags_print ((command_flag_t *) & Capabilities, buf, rule->cap);
+      command_flags_print ((command_flag_t *) Capabilities, buf, rule->cap);
       bf_strcat (buf, "\n");
       break;
 
     case TRIGGER_RULE_LOGIN:
       bf_printf (buf, "  Rule %lu type login, cap ", rule->id);
-      command_flags_print ((command_flag_t *) & Capabilities, buf, rule->cap);
+      command_flags_print ((command_flag_t *) Capabilities, buf, rule->cap);
       bf_strcat (buf, "\n");
       break;
   }

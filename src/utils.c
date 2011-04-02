@@ -20,6 +20,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
+
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+#include <arpa/inet.h>
 
 #include "buffer.h"
 #include "utils.h"
@@ -137,4 +143,59 @@ unsigned long time_parse (unsigned char *string)
     total += reg;
 
   return total;
+}
+
+unsigned char *print_ip (struct in_addr ip, struct in_addr netmask)
+{
+  unsigned char *t;
+  static unsigned char buffer[256];
+
+  t = buffer;
+  t += snprintf (buffer, 255, "%s", inet_ntoa (ip));
+  if (netmask.s_addr != 0xFFFFFFFF) {
+    snprintf (t, 255 - (t - buffer), ":%s", inet_ntoa (netmask));
+  };
+
+  return buffer;
+}
+
+unsigned long parse_ip (unsigned char *text, struct in_addr *ip, struct in_addr *netmask)
+{
+  unsigned char *work;
+  unsigned int retval = 1;
+  unsigned char *elem;
+
+  work = strdup (text);
+
+  elem = strtok (work, ":/");
+  if (elem) {
+    retval = inet_aton (elem, ip);
+    if (!retval)
+      goto leave;
+  }
+  elem = strtok (NULL, ":/");
+  if (elem) {
+    if (text[(elem - work - 1)] == ':') {
+      retval = inet_aton (elem, netmask);
+      if (!retval)
+	goto leave;
+    } else {
+      long i = strtol (elem, NULL, 10);
+
+      if ((i < 0) || (i > 31)) {
+	retval = 0;
+	goto leave;
+      }
+      netmask->s_addr = 0;
+      for (; i; --i)
+	netmask->s_addr = (netmask->s_addr >> 1) | 0x80000000;
+
+      netmask->s_addr = ntohl (netmask->s_addr);
+    }
+  } else {
+    netmask->s_addr = 0xFFFFFFFF;
+  }
+leave:
+  free (work);
+  return retval;
 }

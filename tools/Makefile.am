@@ -10,6 +10,7 @@ CLEANFILES = aqdtinstall
 
 aqdtinstall: aqdtinstall.in
 	rm -rf $(@).tmp
-	sed -e 's,@exec_prefix\@,$(prefix),g' $< > ${@}.tmp
+	sed -e 's,@exec_prefix\@,$(prefix),g' ${@}.in > ${@}.tmp
 	chmod +x ${@}.tmp
 	mv ${@}.tmp $@
+

@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -26,7 +28,6 @@
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
-#include "hub.h"
 #include "banlistclient.h"
 #include "utils.h"
 #include "defaults.h"

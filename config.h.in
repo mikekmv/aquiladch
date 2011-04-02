@@ -33,6 +33,9 @@
 /* Define to 1 if you have the <linux/eventpoll.h> header file. */
 #undef HAVE_LINUX_EVENTPOLL_H
 
+/* Define to 1 if you have the <lualib.h> header file. */
+#undef HAVE_LUALIB_H
+
 /* Define to 1 if you have the <lua.h> header file. */
 #undef HAVE_LUA_H
 

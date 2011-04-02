@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -24,7 +26,6 @@
 #include <assert.h>
 #endif
 
-#include "hub.h"
 #include "core_config.h"
 #include "nmdc_utils.h"
 #include "cap.h"

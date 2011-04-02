@@ -20,11 +20,12 @@
 #ifndef _HUB_H_
 #define _HUB_H_
 
+#include "esocket.h"
+
 #include <arpa/inet.h>
 
 #include "config.h"
 #include "buffer.h"
-#include "esocket.h"
 #include "proto.h"
 #include "stringlist.h"
 #include "banlist.h"

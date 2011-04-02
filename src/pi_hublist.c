@@ -27,13 +27,12 @@
 #include "commands.h"
 #include "plugin.h"
 
-#define PI_HUBLIST_BUFFER_SIZE 	4096
+#include "../config.h"
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
 
-//struct pi_hublist_context {
-//  struct pi_huglist_context *next, *prev;
-//  
-//  esocket_t *es;
-//} pi_hublist_context_t;
+#define PI_HUBLIST_BUFFER_SIZE 	4096
 
 unsigned char *pi_hublist_lists;
 
@@ -241,7 +240,7 @@ int pi_hublist_handle_error (esocket_t * s)
 
   buf = bf_alloc (10240);
 
-  bf_printf (buf, "Hublist update ERROR: %s: Timed out.\n", (char *) s->context);
+  bf_printf (buf, "Hublist update ERROR: %s: %s.\n", (char *) s->context, strerror (s->error));
   plugin_report (buf);
   DPRINTF ("%s", buf->s);
 
@@ -337,7 +336,7 @@ int pi_hublist_init ()
   config_register ("hublist.interval", CFG_ELEM_ULONG, &pi_hublist_interval,
 		   "Interval of hublist updates.");
 
-  command_register ("hublist", &pi_hublist_handler_hublist, 0, "Register at hublists.");
+  command_register ("hublist", &pi_hublist_handler_hublist, CAP_CONFIG, "Register at hublists.");
 
   return 0;
 };

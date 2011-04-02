@@ -1,16 +1,18 @@
 
 Develstatus:
+	- some right to avoid rates
+	- HubTopic
+	- add some directory locks. no two aquila instances from the same configs...
+	- check on doubly loaded scripts
 	- Possibility to ban prefixes and ip-ranges. (suggestion maksalaatikko)
 	- Fix the crash if the clock is set back...
 	- add nick checking for insane chars as spaces  ( $|<>:?*"/\)
 	- split up proto_nmdc_state_online
-	- seperate kick redirect address
 	- event handler.
 		- add events for user creation and deletion. (Why??)
 	- add anti-flooder module (not for 0.1)
 	- SSL (not for 0.1)
 	- ADC (future)
-	- !warn command
 	- redo tag parsing, make it more flexible. (allow missing fields).
 	- md5 password hashing. preferably verlihub compatible.
 	- !topic

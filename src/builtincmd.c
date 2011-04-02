@@ -93,6 +93,42 @@ unsigned long handler_say (plugin_user_t * user, buffer_t * output, void *priv, 
   return 0;
 }
 
+unsigned long handler_warn (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
+			    unsigned char **argv)
+{
+  unsigned int i;
+  buffer_t *buf;
+  plugin_user_t *tgt;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <nick> <warning>", argv[0]);
+    return 0;
+  }
+
+  /* find target */
+  tgt = plugin_user_find (argv[1]);
+  if (!tgt) {
+    bf_printf (output, "User %s not found.", argv[1]);
+    return 0;
+  }
+
+  /* build message */
+  buf = bf_alloc (10240);
+  *buf->e = '\0';
+  bf_printf (buf, "%s is WARNING you: ", user->nick);
+  for (i = 2; i < argc; i++)
+    bf_printf (buf, " %s", argv[i]);
+  if (*buf->s == ' ')
+    buf->s++;
+
+  /* make hubsec say it */
+  plugin_user_sayto (NULL, tgt, buf);
+
+  bf_free (buf);
+
+  return 0;
+}
+
 /* say command */
 unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *priv,
 				unsigned int argc, unsigned char **argv)
@@ -332,7 +368,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
 	  bf_printf (output, "\nBanning user forever");
 	}
 	plugin_ban_nick (target->nick, buf, total);
-	plugin_ban_ip (target->ipaddress, buf, total);
+	plugin_ban_ip (target->ipaddress, 0xFFFFFFFF, buf, total);
       } else {
 	bf_printf (output, "\nSorry. You cannot ban users for longer than ");
 	time_print (output, KickMaxBanTime);
@@ -443,18 +479,18 @@ unsigned long handler_unban (plugin_user_t * user, buffer_t * output, void *priv
 unsigned long handler_unbanip (plugin_user_t * user, buffer_t * output, void *priv,
 			       unsigned int argc, unsigned char **argv)
 {
-  struct in_addr ip;
+  struct in_addr ip, netmask;
 
   if (argc < 2) {
     bf_printf (output, "Usage: %s <ip>", argv[0]);
     return 0;
   };
 
-  if (inet_aton (argv[1], &ip)) {
-    if (plugin_unban_ip (ip.s_addr)) {
-      bf_printf (output, "IP %s unbanned.", inet_ntoa (ip));
+  if (parse_ip (argv[1], &ip, &netmask)) {
+    if (plugin_unban_ip (ip.s_addr, netmask.s_addr)) {
+      bf_printf (output, "IP %s unbanned.", print_ip (ip, netmask));
     } else {
-      bf_printf (output, "No ban for IP %s found.", inet_ntoa (ip));
+      bf_printf (output, "No ban for IP %s found.", print_ip (ip, netmask));
     }
   } else {
     bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);
@@ -466,18 +502,18 @@ unsigned long handler_unbanip (plugin_user_t * user, buffer_t * output, void *pr
 unsigned long handler_unbanip_hard (plugin_user_t * user, buffer_t * output, void *priv,
 				    unsigned int argc, unsigned char **argv)
 {
-  struct in_addr ip;
+  struct in_addr ip, netmask;
 
   if (argc < 2) {
     bf_printf (output, "Usage: %s <ip>", argv[0]);
     return 0;
   };
 
-  if (inet_aton (argv[1], &ip)) {
-    if (plugin_unban_ip_hard (ip.s_addr)) {
-      bf_printf (output, "IP %s unbanned.", inet_ntoa (ip));
+  if (parse_ip (argv[1], &ip, &netmask)) {
+    if (plugin_unban_ip_hard (ip.s_addr, netmask.s_addr)) {
+      bf_printf (output, "IP %s unbanned.", print_ip (ip, netmask));
     } else {
-      bf_printf (output, "No ban for IP %s found.", inet_ntoa (ip));
+      bf_printf (output, "No ban for IP %s found.", print_ip (ip, netmask));
     }
   } else {
     bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);
@@ -493,7 +529,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
   unsigned long period = 0;
   buffer_t *buf;
   plugin_user_t *target;
-  struct in_addr ip;
+  struct in_addr ip, netmask;
 
   if (argc < 2) {
     bf_printf (output, "Usage: %s <ip/nick> [<period>] <reason>", argv[0]);
@@ -524,12 +560,13 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
     }
     plugin_user_banip (target, buf, period);
   } else {
-    if (inet_aton (argv[1], &ip)) {
-      plugin_ban_ip (ip.s_addr, buf, period);
+    if (parse_ip (argv[1], &ip, &netmask)) {
+      plugin_ban_ip (ip.s_addr, netmask.s_addr, buf, period);
       if (!period) {
-	bf_printf (output, "IP Banning %s forever: %.*s.", inet_ntoa (ip), bf_used (buf), buf->s);
+	bf_printf (output, "IP Banning %s forever: %.*s.", print_ip (ip, netmask), bf_used (buf),
+		   buf->s);
       } else {
-	bf_printf (output, "IP Banning %s for ", inet_ntoa (ip));
+	bf_printf (output, "IP Banning %s for ", print_ip (ip, netmask));
 	time_print (output, period);
 	bf_printf (output, ": %.*s", bf_used (buf), buf->s);
       }
@@ -651,7 +688,7 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
   unsigned long period = 0;
   buffer_t *buf;
   plugin_user_t *target;
-  struct in_addr ip;
+  struct in_addr ip, netmask;
 
   if (argc < 2) {
     bf_printf (output, "Usage: %s <ip/nick> [<period>] <reason>", argv[0]);
@@ -680,16 +717,16 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
     }
     plugin_user_banip_hard (target, buf, period);
   } else {
-    if (inet_aton (argv[1], &ip)) {
+    if (parse_ip (argv[1], &ip, &netmask)) {
       if (!period) {
-	bf_printf (output, "HARD Banning ip %s forever: %.*s", inet_ntoa (ip), bf_used (buf),
-		   buf->s);
+	bf_printf (output, "HARD Banning ip %s forever: %.*s", print_ip (ip, netmask),
+		   bf_used (buf), buf->s);
       } else {
-	bf_printf (output, "HARD Banning ip %s for ", inet_ntoa (ip));
+	bf_printf (output, "HARD Banning ip %s for ", print_ip (ip, netmask));
 	time_print (output, period);
 	bf_printf (output, "%lus: %.*s", bf_used (buf), buf->s);
       }
-      plugin_ban_ip_hard (ip.s_addr, buf, period);
+      plugin_ban_ip_hard (ip.s_addr, netmask.s_addr, buf, period);
     } else {
       bf_printf (output, "User not found or ip address not valid: %s\n", argv[1]);
     }
@@ -1482,19 +1519,21 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	break;
       }
       command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
-      if (cap & ~user->rights) {
-	bf_printf (output, "You are not allowed to assign: ");
-	command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			     cap & ~user->rights);
-	bf_strcat (output, "\n");
-	break;
-      }
-      if (ncap & ~user->rights) {
-	bf_printf (output, "You are not allowed to remove: ");
-	command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			     ncap & ~user->rights);
-	bf_strcat (output, "\n");
-	break;
+      if (!(user->rights & CAP_OWNER)) {
+	if (cap & ~user->rights) {
+	  bf_printf (output, "You are not allowed to assign: ");
+	  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			       cap & ~user->rights);
+	  bf_strcat (output, "\n");
+	  break;
+	}
+	if (ncap & ~user->rights) {
+	  bf_printf (output, "You are not allowed to remove: ");
+	  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
+			       ncap & ~user->rights);
+	  bf_strcat (output, "\n");
+	  break;
+	}
       }
       *elem->val.v_cap |= cap;
       *elem->val.v_cap &= ~ncap;
@@ -1608,6 +1647,7 @@ int builtincmd_init ()
 
 
   command_register ("say",        &handler_say,  	 CAP_SAY,     "Make the HubSec say something.");
+  command_register ("warn",       &handler_warn,  	 CAP_KEY,     "Make the HubSec warn user.");
   command_register ("shutdown",	  &handler_shutdown,     CAP_ADMIN,   "Shut the hub down.");
   command_register ("report",     &handler_report,       0,           "Send a report to the OPs.");
   command_register ("version",    &handler_version,      0,           "Displays the Aquila version.");

@@ -16,12 +16,12 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
+#include "hub.h"
 
 #include <string.h>
 
 #include "proto.h"
 #include "config.h"
-#include "hub.h"
 #include "nmdc_protocol.h"
 
 int nmdc_init ()

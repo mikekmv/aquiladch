@@ -40,19 +40,24 @@ typedef struct banlist {
   dllist_entry_t dllist;
 
   uint32_t ip;
+  uint32_t netmask;
   buffer_t *message;
   time_t expire;
 } banlist_entry_t;
 
-typedef dllist_t banlist_t;
+typedef struct {
+  dllist_t list;
+  unsigned long netmask_inuse[33];
+} banlist_t;
 
-extern banlist_entry_t *banlist_add (banlist_t * list, uint32_t ip, buffer_t * reason,
+extern banlist_entry_t *banlist_add (banlist_t * list, uint32_t ip, uint32_t netmask, buffer_t * reason,
 				     unsigned long expire);
 
 extern unsigned int banlist_del (banlist_t * list, banlist_entry_t *);
-extern unsigned int banlist_del_byip (banlist_t * list, uint32_t ip);
+extern unsigned int banlist_del_byip (banlist_t * list, uint32_t ip, uint32_t netmask);
 
 extern banlist_entry_t *banlist_find (banlist_t * list, uint32_t ip);
+extern banlist_entry_t *banlist_find_net (banlist_t * list, uint32_t ip, uint32_t netmask);
 
 extern unsigned int banlist_cleanup (banlist_t * list);
 

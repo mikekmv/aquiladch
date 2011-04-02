@@ -60,6 +60,11 @@ const unsigned char *pi_lua_eventnames[] = {
 };
 
 
+/* this is a dirty trick so we can find the user pointer even before the user is hashed... 
+ *  THIS WILL BACKFIRE WITH MULTITHREADING!
+ */
+plugin_user_t *pi_lua_eventuser;
+
 unsigned char *pi_lua_savefile;
 
 plugin_t *plugin_lua = NULL;
@@ -77,6 +82,15 @@ typedef struct lua_context {
 lua_context_t lua_list;
 
 unsigned int plugin_lua_close (unsigned char *name);
+
+unsigned long long pi_lua_eventmap;
+
+
+unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
+				    unsigned long event, buffer_t * token);
+
+
+#define PLUGIN_USER_FIND(arg) 	( (pi_lua_eventuser && !strcmp(arg, pi_lua_eventuser->nick)) ? pi_lua_eventuser : plugin_user_find (arg) )
 
 /******************************* LUA INTERFACE *******************************************/
 
@@ -256,7 +270,7 @@ int pi_lua_getuserip (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -275,7 +289,7 @@ int pi_lua_getuserclient (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -291,7 +305,7 @@ int pi_lua_getuserclientversion (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -307,7 +321,7 @@ int pi_lua_getusershare (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -323,7 +337,7 @@ int pi_lua_getusersharenum (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -339,7 +353,7 @@ int pi_lua_getuserslots (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -355,7 +369,7 @@ int pi_lua_getuserhubs (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -376,7 +390,7 @@ int pi_lua_userisop (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -392,7 +406,7 @@ int pi_lua_userisactive (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
@@ -408,12 +422,12 @@ int pi_lua_userisregistered (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
   } else {
-    lua_pushboolean (lua, user->flags & 2);
+    lua_pushboolean (lua, (user->flags & PLUGIN_FLAG_REGISTERED));
   }
 
   return 1;
@@ -424,12 +438,12 @@ int pi_lua_useriszombie (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *user;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
   } else {
-    lua_pushboolean (lua, user->flags & 4);
+    lua_pushboolean (lua, (user->flags & PLUGIN_FLAG_ZOMBIE));
   }
 
   return 1;
@@ -442,14 +456,14 @@ int pi_lua_getuserrights (lua_State * lua)
   plugin_user_t *user;
   buffer_t *b;
 
-  user = plugin_user_find (nick);
+  user = PLUGIN_USER_FIND (nick);
 
   if (!user) {
     lua_pushnil (lua);
   } else {
     b = bf_alloc (10240);
-    command_flags_print ((command_flag_t *) Capabilities, b, user->rights);
-    lua_pushstring (lua, b->s);
+    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, user->rights);
+    lua_pushlstring (lua, b->s, bf_used (b));
     bf_free (b);
   }
 
@@ -674,12 +688,12 @@ int pi_lua_banip (lua_State * lua)
   unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
   unsigned long period;
-  struct in_addr ia;
+  struct in_addr ia, netmask;
 
   period = time_parse (periodstring);
 
 
-  if (!inet_aton (ip, &ia)) {
+  if (!parse_ip (ip, &ia, &netmask)) {
     lua_pushstring (lua, "Not a valid IP address.\n");
     lua_error (lua);
   }
@@ -687,7 +701,7 @@ int pi_lua_banip (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_ban_ip (ia.s_addr, b, period);
+  plugin_ban_ip (ia.s_addr, netmask.s_addr, b, period);
 
   bf_free (b);
 
@@ -703,12 +717,12 @@ int pi_lua_banip_hard (lua_State * lua)
   unsigned char *periodstring = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
   unsigned long period;
-  struct in_addr ia;
+  struct in_addr ia, netmask;
 
   period = time_parse (periodstring);
 
 
-  if (!inet_aton (ip, &ia)) {
+  if (!parse_ip (ip, &ia, &netmask)) {
     lua_pushstring (lua, "Not a valid IP address.\n");
     lua_error (lua);
   }
@@ -716,7 +730,7 @@ int pi_lua_banip_hard (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_ban_ip_hard (ia.s_addr, b, period);
+  plugin_ban_ip_hard (ia.s_addr, netmask.s_addr, b, period);
 
   bf_free (b);
 
@@ -746,14 +760,14 @@ int pi_lua_unbannick (lua_State * lua)
 int pi_lua_unbanip (lua_State * lua)
 {
   unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
-  struct in_addr ia;
+  struct in_addr ia, netmask;
 
-  if (!inet_aton (ip, &ia)) {
+  if (!parse_ip (ip, &ia, &netmask)) {
     lua_pushstring (lua, "Not a valid IP address.\n");
     lua_error (lua);
   }
 
-  lua_pushboolean (lua, plugin_unban_ip (ia.s_addr));
+  lua_pushboolean (lua, plugin_unban_ip (ia.s_addr, netmask.s_addr));
 
   return 1;
 }
@@ -761,14 +775,14 @@ int pi_lua_unbanip (lua_State * lua)
 int pi_lua_unbanip_hard (lua_State * lua)
 {
   unsigned char *ip = (unsigned char *) luaL_checkstring (lua, 1);
-  struct in_addr ia;
+  struct in_addr ia, netmask;
 
-  if (!inet_aton (ip, &ia)) {
+  if (!parse_ip (ip, &ia, &netmask)) {
     lua_pushstring (lua, "Not a valid IP address.\n");
     lua_error (lua);
   }
 
-  lua_pushboolean (lua, plugin_unban_ip_hard (ia.s_addr));
+  lua_pushboolean (lua, plugin_unban_ip_hard (ia.s_addr, netmask.s_addr));
 
   return 1;
 }
@@ -879,11 +893,6 @@ int pi_lua_sendtoall (lua_State * lua)
 
   u = plugin_user_find (nick);
 
-  if (!u) {
-    lua_pushboolean (lua, 0);
-    return 1;
-  }
-
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
@@ -905,7 +914,7 @@ int pi_lua_sendtonick (lua_State * lua)
   s = plugin_user_find (src);
   /* s can be NULL, wil become hubsec */
 
-  d = plugin_user_find (dest);
+  d = PLUGIN_USER_FIND (dest);
   if (!d) {
     lua_pushboolean (lua, 0);
     return 1;
@@ -959,7 +968,7 @@ int pi_lua_sendpmtonick (lua_State * lua)
   s = plugin_user_find (src);
   /* s can be NULL, wil become hubsec */
 
-  d = plugin_user_find (dest);
+  d = PLUGIN_USER_FIND (dest);
   if (!d) {
     lua_pushboolean (lua, 0);
     return 1;
@@ -969,6 +978,44 @@ int pi_lua_sendpmtonick (lua_State * lua)
   bf_printf (b, "%s", message);
 
   lua_pushboolean (lua, plugin_user_priv (s, d, s, b, 1));
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_rawtonick (lua_State * lua)
+{
+  buffer_t *b;
+  plugin_user_t *d;
+  unsigned char *dest = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
+
+  d = PLUGIN_USER_FIND (dest);
+  if (!d) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  lua_pushboolean (lua, plugin_user_raw (d, b));
+
+  bf_free (b);
+
+  return 1;
+}
+
+int pi_lua_rawtoall (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 1);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  lua_pushboolean (lua, plugin_user_raw_all (b));
 
   bf_free (b);
 
@@ -1165,13 +1212,25 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
   lua_pushstring (ctx->lua, ctx->name);
   lua_gettable (ctx->lua, LUA_GLOBALSINDEX);
 
-  /* push arguments */
+  /* push arguments 
+     lua_pushstring (ctx->lua, user->nick);
+     for (i = 1; i < argc; i++)
+     lua_pushstring (ctx->lua, argv[i]);
+   */
+
+
+  /* push nick argument */
   lua_pushstring (ctx->lua, user->nick);
-  for (i = 1; i < argc; i++)
+  /* push command arguments as table */
+  lua_newtable (ctx->lua);
+  for (i = 0; i < argc; i++) {
+    lua_pushnumber (ctx->lua, i);
     lua_pushstring (ctx->lua, argv[i]);
+    lua_settable (ctx->lua, -3);
+  }
 
   /* call funtion. */
-  result = lua_pcall (ctx->lua, argc, 1, 0);
+  result = lua_pcall (ctx->lua, 2, 1, 0);
   if (result) {
     unsigned char *error = (unsigned char *) luaL_checkstring (ctx->lua, 1);
     buffer_t *buf;
@@ -1185,6 +1244,14 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
     plugin_report (buf);
 
     bf_free (buf);
+  } else {
+    /* retrieve return value */
+    if (lua_isstring (ctx->lua, -1)) {
+      unsigned char *retval = (unsigned char *) lua_tostring (ctx->lua, -1);
+
+      bf_printf (output, "%s", retval);
+    }
+    lua_remove (ctx->lua, -1);
   }
 
   return 0;
@@ -1305,8 +1372,8 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
 
   {"UserIsOP", pi_lua_userisop,},
   {"UserIsActive", pi_lua_userisactive,},
-  {"UserIsRegistered", pi_lua_userisactive,},
-  {"UserIsZombie", pi_lua_userisactive,},
+  {"UserIsRegistered", pi_lua_userisregistered,},
+  {"UserIsZombie", pi_lua_useriszombie,},
 
   /* kick and ban functions */
   {"UserKick", pi_lua_user_kick,},
@@ -1334,6 +1401,9 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"ChatToNick", pi_lua_sendtonick,},
   {"PMToAll", pi_lua_sendpmtoall,},
   {"PMToNick", pi_lua_sendpmtonick,},
+
+  {"RawToNick", pi_lua_rawtonick,},
+  {"RawToAll", pi_lua_rawtoall,},
 
   /* account management */
   {"GroupCreate", pi_lua_group_create,},
@@ -1406,7 +1476,7 @@ static void openlualibs (lua_State * l)
 }
 
 /******************************************************************************************
- *  LUA scrpit handling utilities
+ *  LUA script handling utilities
  */
 
 unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
@@ -1426,8 +1496,13 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
   // load the file
   result = luaL_loadfile (l, name);
-  if (result)
+  if (result) {
+    unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
+
+    bf_printf (output, "LUA ERROR: %s\n", error);
+
     goto error;
+  }
 
   result = lua_pcall (l, 0, LUA_MULTRET, 0);
   if (result) {
@@ -1459,9 +1534,20 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
     lua_gettable (ctx->l, LUA_GLOBALSINDEX);
     if (!lua_isnil (ctx->l, -1)) {
       ctx->eventmap |= (1 << i);
+      /* if not register yet, now register the event handler for this event */
+      if (!(pi_lua_eventmap & (1 << i))) {
+	plugin_request (plugin_lua, i, (plugin_event_handler_t *) & pi_lua_event_handler);
+	pi_lua_eventmap |= (1 << i);
+      }
     }
     lua_remove (ctx->l, -1);
   }
+
+  /* add global variables */
+  /* hub version */
+  lua_pushstring (ctx->l, "AquilaVersion");
+  lua_pushstring (ctx->l, AQUILA_VERSION);
+  lua_settable (ctx->l, LUA_GLOBALSINDEX);
 
   /* reset stack */
   lua_settop (l, 0);
@@ -1475,7 +1561,9 @@ error:
 
 unsigned int pi_lua_close (unsigned char *name)
 {
-  lua_context_t *ctx;
+  unsigned long i;
+  unsigned long long eventmap;
+  lua_context_t *ctx, *ctx2;
 
   for (ctx = lua_list.next; ctx != &lua_list; ctx = ctx->next) {
     if (strcmp (name, ctx->name))
@@ -1489,8 +1577,26 @@ unsigned int pi_lua_close (unsigned char *name)
     ctx->next->prev = ctx->prev;
     ctx->prev->next = ctx->next;
 
-    free (ctx);
+    /* get a list of all events in use */
+    eventmap = 0LL;
+    for (ctx2 = lua_list.next; ctx2 != &lua_list; ctx2 = ctx2->next) {
+      eventmap |= ctx2->eventmap;
+    }
 
+    /* determine events only used by this script */
+    ASSERT ((pi_lua_eventmap & ~eventmap) == (ctx->eventmap & ~eventmap));
+    eventmap = ctx->eventmap & ~eventmap;
+
+    /* free those events */
+    for (i = 0; pi_lua_eventnames[i] != NULL; i++) {
+      if (eventmap & (1 << i)) {
+	pi_lua_eventmap &= ~(1 << i);
+	plugin_ignore (plugin_lua, i, (plugin_event_handler_t *) & pi_lua_event_handler);
+      }
+    }
+
+    /* free the context */
+    free (ctx);
     lua_ctx_cnt--;
 
     return 1;
@@ -1571,6 +1677,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
   int result = PLUGIN_RETVAL_CONTINUE;
   lua_context_t *ctx;
 
+  pi_lua_eventuser = user;
   for (ctx = lua_list.next; (ctx != &lua_list) && (!result); ctx = ctx->next) {
     /* script doesn't have event handler */
     if (!(ctx->eventmap & (1 << event)))
@@ -1589,7 +1696,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
     lua_gettable (ctx->l, LUA_GLOBALSINDEX);
 
     /* push arguments */
-    lua_pushstring (ctx->l, user->nick);
+    lua_pushstring (ctx->l, (user ? user->nick : (unsigned char *) ""));
     lua_pushstring (ctx->l, (token ? token->s : (unsigned char *) ""));
 
     /* call funtion. */
@@ -1607,6 +1714,9 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
       plugin_report (buf);
 
       bf_free (buf);
+
+      /* do not drop message if handler failed */
+      result = PLUGIN_RETVAL_CONTINUE;
     }
 
     /* retrieve return value */
@@ -1615,6 +1725,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
       lua_remove (ctx->l, -1);
     }
   }
+  pi_lua_eventuser = NULL;
 
   return result;
 }
@@ -1644,11 +1755,22 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
   unsigned int i;
   FILE *fp;
   unsigned char buffer[10240];
+  lua_context_t *ctx;
+  buffer_t *buf;
 
+  /* unload all scripts */
+  ctx = lua_list.next;
+  while (ctx != &lua_list) {
+    pi_lua_close (ctx->name);
+    ctx = lua_list.next;
+  }
+
+  /* load scripts */
   fp = fopen (pi_lua_savefile, "r+");
   if (!fp)
     return PLUGIN_RETVAL_CONTINUE;
 
+  buf = bf_alloc (10240);
   fgets (buffer, sizeof (buffer), fp);
   while (!feof (fp)) {
     for (i = 0; buffer[i] && buffer[i] != '\n' && (i < sizeof (buffer)); i++);
@@ -1657,10 +1779,14 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
     if (buffer[i] == '\n')
       buffer[i] = '\0';
 
-    pi_lua_load (output, buffer);
+    pi_lua_load (buf, buffer);
+    if (bf_used (buf)) {
+      plugin_report (buf);
+      bf_clear (buf);
+    }
     fgets (buffer, sizeof (buffer), fp);
   }
-
+  bf_free (buf);
   fclose (fp);
 
   return PLUGIN_RETVAL_CONTINUE;
@@ -1671,9 +1797,9 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
 
 int pi_lua_init ()
 {
-  int i;
-
   pi_lua_savefile = strdup ("lua.conf");
+  pi_lua_eventmap = 0;
+  pi_lua_eventuser = NULL;
 
   lua_list.next = &lua_list;
   lua_list.prev = &lua_list;
@@ -1691,10 +1817,6 @@ int pi_lua_init ()
 
   plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
   plugin_request (plugin_lua, PLUGIN_EVENT_SAVE, (plugin_event_handler_t *) & pi_lua_event_save);
-
-  /* lua event handlers */
-  for (i = 0; pi_lua_eventnames[i] != NULL; i++)
-    plugin_request (plugin_lua, i, (plugin_event_handler_t *) & pi_lua_event_handler);
 
   command_register ("luastat", &handler_luastat, CAP_CONFIG, "Show lua stats.");
   command_register ("luaload", &handler_luaload, CAP_CONFIG, "Load a lua script.");

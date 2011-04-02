@@ -47,6 +47,7 @@ typedef struct {
 
   /* more settings */
   unsigned char *Redirect;
+  unsigned char *KickBanRedirect;
 } config_t;
 
 extern config_t config;

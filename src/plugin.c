@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include "plugin_int.h"
 #include <sys/types.h>
 #include <string.h>
@@ -26,7 +28,6 @@
 #  include <netinet/in.h>
 #endif
 
-#include "hub.h"
 #include "banlist.h"
 #include "banlistnick.h"
 #include "user.h"
@@ -38,6 +39,8 @@ unsigned char *HardBanFile;
 unsigned char *SoftBanFile;
 unsigned char *NickBanFile;
 unsigned char *AccountsFile;
+
+unsigned char *KickBanRedirect;
 
 extern user_t *HubSec;
 extern hashlist_t hashlist;
@@ -131,10 +134,12 @@ unsigned int plugin_user_kick (plugin_user_t * user, buffer_t * message)
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_add (&softbanlist, u->ipaddress, message, now.tv_sec + config.defaultKickPeriod);
+  banlist_add (&softbanlist, u->ipaddress, 0xffffffff, message,
+	       now.tv_sec + config.defaultKickPeriod);
   banlist_nick_add (&nickbanlist, u->nick, message, now.tv_sec + config.defaultKickPeriod);
 
-  return ((plugin_private_t *) user->private)->proto->user_redirect (u, message);
+  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
+								      message);
 }
 
 unsigned int plugin_user_banip (plugin_user_t * user, buffer_t * message, unsigned long period)
@@ -151,8 +156,9 @@ unsigned int plugin_user_banip (plugin_user_t * user, buffer_t * message, unsign
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_add (&softbanlist, u->ipaddress, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_redirect (u, message);
+  banlist_add (&softbanlist, u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
+  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
+								      message);
 }
 
 unsigned int plugin_user_unban (plugin_user_t * user)
@@ -211,18 +217,19 @@ unsigned int plugin_unban (unsigned char *nick)
   return banlist_nick_del_bynick (&nickbanlist, nick);
 }
 
-unsigned int plugin_ban_ip (unsigned long ip, buffer_t * message, unsigned long period)
+unsigned int plugin_ban_ip (unsigned long ip, unsigned long netmask, buffer_t * message,
+			    unsigned long period)
 {
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  banlist_add (&softbanlist, ip, message, period ? now.tv_sec + period : 0);
+  banlist_add (&softbanlist, ip, netmask, message, period ? now.tv_sec + period : 0);
   return 0;
 }
 
-unsigned int plugin_unban_ip (unsigned long ip)
+unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask)
 {
-  return banlist_del_byip (&softbanlist, ip);
+  return banlist_del_byip (&softbanlist, ip, netmask);
 }
 
 unsigned int plugin_ban_nick (unsigned char *nick, buffer_t * message, unsigned long period)
@@ -240,18 +247,19 @@ unsigned int plugin_unban_nick (unsigned char *nick)
   return 0;
 }
 
-unsigned int plugin_unban_ip_hard (unsigned long ip)
+unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask)
 {
-  banlist_del_byip (&hardbanlist, ip);
+  banlist_del_byip (&hardbanlist, ip, netmask);
   return 0;
 }
 
-unsigned int plugin_ban_ip_hard (unsigned long ip, buffer_t * message, unsigned long period)
+unsigned int plugin_ban_ip_hard (unsigned long ip, unsigned long netmask, buffer_t * message,
+				 unsigned long period)
 {
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  banlist_add (&hardbanlist, ip, message, period ? now.tv_sec + period : 0);
+  banlist_add (&hardbanlist, ip, netmask, message, period ? now.tv_sec + period : 0);
   return 0;
 }
 
@@ -269,8 +277,9 @@ unsigned int plugin_user_banip_hard (plugin_user_t * user, buffer_t * message, u
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_add (&hardbanlist, u->ipaddress, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_redirect (u, message);
+  banlist_add (&hardbanlist, u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
+  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
+								      message);
 }
 
 unsigned int plugin_user_bannick (plugin_user_t * user, buffer_t * message, unsigned long period)
@@ -288,7 +297,8 @@ unsigned int plugin_user_bannick (plugin_user_t * user, buffer_t * message, unsi
 
   gettimeofday (&now, NULL);
   banlist_nick_add (&nickbanlist, u->nick, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_redirect (u, message);
+  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
+								      message);
 }
 
 unsigned int plugin_user_ban (plugin_user_t * user, buffer_t * message, unsigned long period)
@@ -306,8 +316,9 @@ unsigned int plugin_user_ban (plugin_user_t * user, buffer_t * message, unsigned
 
   gettimeofday (&now, NULL);
   banlist_nick_add (&nickbanlist, u->nick, message, period ? now.tv_sec + period : 0);
-  banlist_add (&softbanlist, u->ipaddress, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_redirect (u, message);
+  banlist_add (&softbanlist, u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
+  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
+								      message);
 }
 
 unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
@@ -332,7 +343,7 @@ unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
 unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
 {
   struct timeval now;
-  struct in_addr ipa;
+  struct in_addr ipa, netmask;
   banlist_entry_t *ie;
 
   ie = banlist_find (&softbanlist, ip);
@@ -340,12 +351,13 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
     return 0;
 
   gettimeofday (&now, NULL);
-  ipa.s_addr = ip;
+  ipa.s_addr = ie->ip;
+  netmask.s_addr = ie->netmask;
   if (ie->expire) {
-    return bf_printf (buf, "Found IP ban for %s for %lus because: %.*s", inet_ntoa (ipa),
+    return bf_printf (buf, "Found IP ban for %s for %lus because: %.*s", print_ip (ipa, netmask),
 		      ie->expire - now.tv_sec, bf_used (ie->message), ie->message->s);
   } else {
-    return bf_printf (buf, "Found permanent ban for %s because: %.*s", inet_ntoa (ipa),
+    return bf_printf (buf, "Found permanent ban for %s because: %.*s", print_ip (ipa, netmask),
 		      bf_used (ie->message), ie->message->s);
   }
 }
@@ -406,6 +418,36 @@ unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message)
   /* too much trouble otherwise FIXME huh ??? */
   //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return ((plugin_private_t *) u->plugin_priv)->proto->chat_main (u, message);
+}
+
+unsigned int plugin_user_raw (plugin_user_t * tgt, buffer_t * message)
+{
+  user_t *u;
+
+  if (!tgt)
+    return 0;
+
+  u = ((plugin_private_t *) tgt->private)->parent;
+
+  /* delete trailing \n */
+  if (bf_used (message) && (message->s[bf_used (message) - 1] == '\n')) {
+    message->s[bf_used (message) - 1] = '\0';
+    message->e--;
+  }
+
+  return ((plugin_private_t *) u->plugin_priv)->proto->raw_send (u, message);
+}
+
+
+unsigned int plugin_user_raw_all (buffer_t * message)
+{
+  /* delete trailing \n */
+  if (bf_used (message) && (message->s[bf_used (message) - 1] == '\n')) {
+    message->s[bf_used (message) - 1] = '\0';
+    message->e--;
+  }
+
+  return ((plugin_private_t *) HubSec->plugin_priv)->proto->raw_send_all (message);
 }
 
 unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buffer_t * message)
@@ -568,13 +610,13 @@ int plugin_request (plugin_t * plugin, unsigned long event, plugin_event_handler
   return 0;
 }
 
-int plugin_ignore (plugin_t * plugin, unsigned long event)
+int plugin_ignore (plugin_t * plugin, unsigned long event, plugin_event_handler_t * handler)
 {
   plugin_event_request_t *request;
 
   for (request = manager->eventhandles[event].next; request != &manager->eventhandles[event];
        request = request->next)
-    if (request->plugin == plugin)
+    if ((request->plugin == plugin) && (request->handler == handler))
       break;
 
   if (!request)

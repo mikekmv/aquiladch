@@ -17,6 +17,8 @@
  *  
  */
 
+#include "hub.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -35,7 +37,6 @@
 
 #include "core_config.h"
 
-#include "hub.h"
 
 #define HUB_INPUTBUFFER_SIZE	4096
 
