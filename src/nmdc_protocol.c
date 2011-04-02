@@ -1356,7 +1356,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	/* check quota */
-	if (!get_token (&rates.chat, &u->rate_chat, now.tv_sec)) {
+	if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
 	  proto_nmdc_user_warn (u, &now, "Think before you talk and don't spam.");
 	  nmdc_stats.chatoverflow++;
 	  break;

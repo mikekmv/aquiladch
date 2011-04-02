@@ -1,7 +1,8 @@
 This is the Aquila Changelog.
 
 
-0.1.8-pre10:
+0.1.8:
+	CAP_SPAM now also excempts from chat rates. This allows for !kicks to be gives in large groups.
 	Moved !crash command to DEBUG build only.
 	Start a user with full search quota to prevent autosearches from triggering warnings.
 	Decrease the right counter in hub.c
