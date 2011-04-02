@@ -626,6 +626,7 @@ int proto_nmdc_user_free (user_t * user)
     userlist = user->next;
   };
 
+  user->parent = NULL;
   user->next = freelist;
   freelist = user;
 
@@ -913,8 +914,8 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 #endif
 		 "|");
 
-      retval = server_write (u->parent, output);
       server_settimeout (u->parent, PROTO_TIMEOUT_SENDLOCK);
+      retval = server_write (u->parent, output);
       break;
     case TOKEN_KEY:
       {
@@ -992,9 +993,9 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	u->flags |= PROTO_FLAG_REGISTERED;
 
 	bf_strcat (output, "$GetPass|");
-	retval = server_write (u->parent, output);
 	u->state = PROTO_STATE_WAITPASS;
 	server_settimeout (u->parent, PROTO_TIMEOUT_WAITPASS);
+	retval = server_write (u->parent, output);
 	break;
       } else {
 	proto_nmdc_user_say_string (HubSec, output,
@@ -1116,9 +1117,9 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 			   bf_buffer
 			   ("Your account priviliges will not be awarded until you set a password."));
 
-    retval = server_write (u->parent, output);
     u->state = PROTO_STATE_HELLO;
     server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
+    retval = server_write (u->parent, output);
 
     /* DPRINTF (" - User %s greeted.\n", u->nick); */
   } while (0);
@@ -2095,7 +2096,7 @@ inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, unsig
 void proto_nmdc_flush_cache ()
 {
   buffer_t *b;
-  user_t *u;
+  user_t *u, *n;
   buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op;
   unsigned int psl, asl, l;
   unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, q = 0, res = 0, miuo = 0;
@@ -2195,7 +2196,8 @@ void proto_nmdc_flush_cache ()
   /*
    * write out buffers 
    */
-  for (u = userlist; u; u = u->next) {
+  for (u = userlist; u; u = n) {
+    n = u->next;
     if (u->state != PROTO_STATE_ONLINE)
       continue;
     /* get buffer */
@@ -2282,8 +2284,11 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
     /* process it and free memory */
     errno = 0;			/* make sure this is reset otherwise errno check will cause crashes */
     if (proto_nmdc_handle_token (user, b) < 0) {
-      if (errno == EPIPE)
-	server_disconnect_user (user->parent);
+      /* This should never happen! On an EPIPE, server_write should do this.
+         if (errno == EPIPE)
+         server_disconnect_user (user->parent);
+       */
+      ASSERT (!((errno == EPIPE) && user->parent));
       bf_free (b);
       break;
     }

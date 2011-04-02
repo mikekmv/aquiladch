@@ -18,6 +18,8 @@
 #include "hub.h"
 #include "banlistclient.h"
 
+#include "esocket.h"
+
 #define PI_USER_CLIENTBANFILE "clientbanlist.conf"
 
 typedef struct slotratio {
@@ -324,19 +326,37 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
   if ((elem->name[0] != 'u') || strncasecmp (elem->name, "userlimit", 9))
     return PLUGIN_RETVAL_CONTINUE;
 
+  buf = bf_alloc (1024);
+
   getrlimit (RLIMIT_NOFILE, &limit);
 
   if (limit.rlim_cur < (user_unregistered_max + user_registered_max + user_op_max)) {
-    buf = bf_alloc (1024);
 
     bf_printf (buf,
 	       "WARNING: resourcelimit for this process allows a absolute maximum of %lu users, currently %lu are configured.\n",
 	       limit.rlim_cur, (user_unregistered_max + user_registered_max));
 
-    plugin_user_sayto (NULL, user, buf);
-
-    bf_free (buf);
   };
+
+#ifndef USE_EPOLL
+#ifndef USE_POLL
+  if ((user_unregistered_max + user_registered_max + user_op_max) >= (FD_SETSIZE - 5)) {
+    bf_printf (buf,
+	       "WARNING: You are using an Aquila version based on select(). This limits the effective maximum size of your hub to %u. Going over this limit may crash your hub.\n",
+	       (FD_SETSIZE - 5));
+  }
+#else
+  if ((user_unregistered_max + user_registered_max + user_op_max) >= 5000) {
+    bf_printf (buf,
+	       "WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n",
+	       (FD_SETSIZE - 5));
+  }
+#endif
+#endif
+
+  plugin_user_sayto (NULL, user, buf);
+
+  bf_free (buf);
 
   return PLUGIN_RETVAL_CONTINUE;
 }

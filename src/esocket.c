@@ -20,6 +20,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifdef POLL
+#include <sys/poll.h>
+#endif
+
 #define ASSERT assert
 
 #ifdef DEBUG
@@ -87,9 +91,9 @@ unsigned int esocket_add_type (esocket_handler_t * h, unsigned int events, input
 
 unsigned int esocket_setevents (esocket_t * s, unsigned int events)
 {
+#ifdef USE_EPOLL
   esocket_handler_t *h = s->handler;
 
-#ifdef USE_EPOLL
   if (events != s->events) {
     struct epoll_event ee;
 
@@ -100,6 +104,10 @@ unsigned int esocket_setevents (esocket_t * s, unsigned int events)
     s->events = events;
   }
 #else
+#ifdef POLL
+  s->events = events;
+#else
+  esocket_handler_t *h = s->handler;
   unsigned int e = ~s->events & events;
 
   if (e & ESOCKET_EVENT_IN) {
@@ -131,6 +139,7 @@ unsigned int esocket_setevents (esocket_t * s, unsigned int events)
 
   s->events = events;
 #endif
+#endif
   return 0;
 }
 
@@ -150,6 +159,9 @@ unsigned int esocket_addevents (esocket_t * s, unsigned int events)
     s->events = ee.events;
   }
 #else
+#ifdef POLL
+  s->events |= events;
+#else
   unsigned int e = ~s->events & events;
 
   if (e & ESOCKET_EVENT_IN) {
@@ -165,6 +177,7 @@ unsigned int esocket_addevents (esocket_t * s, unsigned int events)
     h->ne++;
   };
   s->events |= events;
+#endif
 #endif
   return 0;
 }
@@ -185,6 +198,9 @@ unsigned int esocket_clearevents (esocket_t * s, unsigned int events)
     s->events = ee.events;
   }
 #else
+#ifdef POLL
+  s->events = s->events & ~events;
+#else
   unsigned int e = s->events & events;
 
   if (e & ESOCKET_EVENT_IN) {
@@ -201,6 +217,8 @@ unsigned int esocket_clearevents (esocket_t * s, unsigned int events)
   };
   s->events &= ~events;
 #endif
+#endif
+
   return 0;
 }
 
@@ -257,6 +275,10 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 #ifdef USE_EPOLL
   uint32_t events = 0;
 #endif
+#ifdef POLL
+  uint32_t events = 0;
+#endif
+
   esocket_handler_t *h = s->handler;
 
   if (s->state == newstate)
@@ -270,8 +292,12 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTING:
       /* remove the wait for connect" */
 #ifndef USE_EPOLL
+#ifndef POLL
       FD_CLR (s->socket, &h->output);
       h->no--;
+#else
+      events &= ~POLLOUT;
+#endif
 #else
       events &= ~EPOLLOUT;
 #endif
@@ -279,6 +305,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTED:
       /* remove according to requested callbacks */
 #ifndef USE_EPOLL
+#ifndef POLL
       if (esocket_hasevent (s, ESOCKET_EVENT_IN)) {
 	FD_CLR (s->socket, &h->input);
 	h->ni--;
@@ -291,6 +318,9 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 	FD_CLR (s->socket, &h->error);
 	h->ne--;
       };
+#else
+      events &= ~s->events;
+#endif
 #else
       events &= ~s->events;
 #endif
@@ -311,8 +341,12 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTING:
       /* add to wait for connect */
 #ifndef USE_EPOLL
+#ifdef POLL
+      events |= POLLOUT;
+#else
       FD_SET (s->socket, &h->output);
       h->no++;
+#endif
 #else
       events |= EPOLLOUT;
 #endif
@@ -320,6 +354,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTED:
       /* add according to requested callbacks */
 #ifndef USE_EPOLL
+#ifndef POLL
       s->events = h->types[s->type].default_events;
       if (esocket_hasevent (s, ESOCKET_EVENT_IN)) {
 	FD_SET (s->socket, &h->input);
@@ -333,6 +368,9 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 	FD_SET (s->socket, &h->error);
 	h->ne++;
       };
+#else
+      events |= h->types[s->type].default_events;
+#endif
 #else
       events |= h->types[s->type].default_events;
 #endif
@@ -365,6 +403,13 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   if (type >= h->curtypes)
     return NULL;
 
+#ifndef USE_EPOLL
+#ifndef USE_POLL
+  if (s > 1024)
+    return NULL;
+#endif
+#endif
+
   socket = malloc (sizeof (esocket_t));
   if (!socket)
     return NULL;
@@ -391,8 +436,12 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   esocket_update_state (socket, state);
 
 #ifndef USE_EPOLL
+#ifndef POLL
   if (h->n <= s)
     h->n = s + 1;
+#else
+  ++(h->n);
+#endif
 #endif
 
   return socket;
@@ -439,8 +488,12 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
     return s;
 
 #ifndef USE_EPOLL
+#ifndef POLL
   if (h->n <= fd)
     h->n = fd + 1;
+#else
+  ++(h->n);
+#endif
 #endif
 
   return s;
@@ -451,6 +504,7 @@ unsigned int esocket_close (esocket_t * s)
   esocket_update_state (s, SOCKSTATE_INIT);
   close (s->socket);
   s->socket = -1;
+  s->handler->n--;
 
   if (s->tovalid)
     esocket_deltimeout (s);
@@ -461,6 +515,9 @@ unsigned int esocket_close (esocket_t * s)
 unsigned int esocket_connect (esocket_t * s, char *address, unsigned int port)
 {
   int err;
+
+  if (s->addr)
+    freeaddrinfo (s->addr);
 
   if ((err = getaddrinfo (address, NULL, NULL, &s->addr))) {
     return err;
@@ -514,6 +571,7 @@ unsigned int esocket_remove_socket (esocket_t * s)
   s->state = SOCKSTATE_FREED;
 
 #ifndef USE_EPOLL
+#ifndef POLL
   /* recalculate fd upperlimit for select */
   max = 0;
   for (s = h->sockets; s; s = s->next)
@@ -521,6 +579,9 @@ unsigned int esocket_remove_socket (esocket_t * s)
       max = s->socket;
 
   h->n = max + 1;
+#else
+  --(h->n);
+#endif
 #endif
 
   /* free memory 
@@ -587,6 +648,12 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
 }
 
 #ifndef USE_EPOLL
+#ifndef POLL
+/************************************************************************
+**
+**                             EPOLL
+**
+************************************************************************/
 unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 {
   int num;
@@ -689,6 +756,110 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   return 0;
 }
 #else
+/************************************************************************
+**
+**                             POLL()
+**
+************************************************************************/
+
+unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
+{
+  int i, n;
+  struct pollfd *pfd, *pfdi;
+  esocket_t *s, **l, **li;
+  struct timeval now;
+
+  pfd = malloc (sizeof (struct pollfd) * h->n);
+  l = malloc (sizeof (esocket_t *) * h->n);
+
+  s = h->sockets;
+  for (i = 0, pfdi = pfd, li = l; i < h->n; ++i, ++pfdi, ++li) {
+    pfdi->fd = s->socket;
+    pfdi->events = s->events;
+    *li = s;
+    s = s->next;
+  };
+
+  n = poll (pfd, h->n, to->tv_sec * 1000 + to->tv_usec / 1000);
+
+  for (i = 0, pfdi = pfd, li = i; i < h->n; ++i, ++pfdi, ++li) {
+    if (!pfdi->revents)
+      continue;
+
+    s = *l;
+    if (pfdi->revents & (POLLERR | POLLHUP | POLLNVAL)) {
+      s->to = now;
+      if (h->types[s->type].error)
+	h->types[s->type].error (s);
+      if (s->state == SOCKSTATE_FREED)
+	continue;
+      if (s->socket < 0)
+	continue;
+    } else if (pfdi->revents & POLLIN) {
+      s->to = now;
+      if (h->types[s->type].input)
+	h->types[s->type].input (s);
+      if (s->state == SOCKSTATE_FREED)
+	continue;
+      if (s->socket < 0)
+	continue;
+    } else if (pfdi->revents & POLLOUT) {
+      s->to = now;
+      switch (s->state) {
+	case SOCKSTATE_CONNECTED:
+	  if (h->types[s->type].output)
+	    h->types[s->type].output (s);
+	  break;
+	case SOCKSTATE_CONNECTING:
+	  {
+	    int err;
+	    unsigned int len;
+
+	    len = sizeof (s->error);
+	    err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
+	    assert (!err);
+	    esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
+	    if (h->types[s->type].error)
+	      h->types[s->type].error (s);
+	  }
+	  break;
+	case SOCKSTATE_FREED:
+	default:
+	  assert (0);
+      }
+      if (s->state == SOCKSTATE_FREED)
+	continue;
+      if (s->socket < 0)
+	continue;
+    }
+  }
+
+  free (pfd);
+  free (l);
+
+  /* timer stuff */
+  if (h->timercnt)
+    esocket_checktimers (h);
+
+  /* clear freelist */
+  while (freelist) {
+    s = freelist;
+    freelist = s->next;
+    if (s->addr) {
+      freeaddrinfo (s->addr);
+      s = NULL;
+    }
+    free (s);
+  }
+  return 0;
+}
+#endif
+#else
+/************************************************************************
+**
+**                             select
+**
+************************************************************************/
 
 unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 {

@@ -20,7 +20,7 @@
  *     but if this isn't there, the kernel does not have epoll support) and 
  *     epoll_wait in the libc
  */
-#ifndef USE_EPOLL
+#ifdef ALLOW_EPOLL
 # ifdef HAVE_SYS_EPOLL_H
 #  ifdef HAVE_EPOLL_WAIT
 #    ifdef HAVE_LINUX_EVENTPOLL_H
@@ -28,6 +28,28 @@
 #    endif
 #  endif
 # endif
+#endif
+
+/*
+ * Decide if we want to use poll().
+ */
+
+#ifndef USE_EPOLL
+#  ifdef ALLOW_POLL
+#    define POLL
+#  endif
+#endif
+
+/*
+ * Fallback to select(). Warn if not possible.
+ */
+
+#ifndef USE_EPOLL
+#  ifndef POLL
+#    ifndef HAVE_SELECT
+#      warning "You are missing epoll, poll and select. This code will not work."
+#    endif
+#  endif
 #endif
 
 #include <sys/types.h>
@@ -126,15 +148,17 @@ typedef struct esockethandler {
   unsigned long timercnt;
 
 #ifndef USE_EPOLL
+#ifndef POLL
   fd_set input;
   fd_set output;
   fd_set error;
 
   int ni, no, ne;
-  int n;
+#endif
 #else
   int epfd;
 #endif
+  int n;
 
   struct timeval toval;
 } esocket_handler_t;

@@ -47,6 +47,9 @@ int server_handle_output (esocket_t * es);
 /* only reset timeouts if we aren't already in a buffering state */
 int server_settimeout (client_t * cl, unsigned long timeout)
 {
+  if (!cl)
+    return 0;
+
   if (!cl->outgoing.count)
     return esocket_settimeout (cl->es, timeout);
   return 0;
@@ -140,6 +143,11 @@ int accept_new_user (esocket_t * s)
 
   /* user connection refused. */
   if (!cl->user) {
+    int l;
+    char buffer[256];
+
+    l = snprintf (buffer, 256, "<" HUBSOFT_NAME "> This hub is too busy, please try again later.|");
+    write (r, buffer, l);
     shutdown (r, SHUT_RDWR);
     close (r);
 
@@ -152,6 +160,19 @@ int accept_new_user (esocket_t * s)
   cl->es =
     esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED,
 			(unsigned long long) cl);
+  
+  if (!cl->es) {
+    int l;
+    char buffer[256];
+
+    l = snprintf (buffer, 256, "<" HUBSOFT_NAME "> This hub is too busy, please try again later.|");
+    write (r, buffer, l);
+    shutdown (r, SHUT_RDWR);
+    close (r);
+
+    free (cl);
+    return -1;
+  }
   esocket_settimeout (cl->es, PROTO_TIMEOUT_INIT);
 
   DPRINTF (" Accepted %s user from %s\n", cl->proto->name, inet_ntoa (client_address.sin_addr));
@@ -167,6 +188,9 @@ int server_write (client_t * cl, buffer_t * b)
   esocket_t *s = cl->es;
   long l, w, t;
   buffer_t *e;
+
+  if (!cl)
+    return 0;
 
   /* if data is queued, queue this after it */
   if (cl->outgoing.count) {
@@ -230,6 +254,9 @@ int server_write (client_t * cl, buffer_t * b)
 int server_disconnect_user (client_t * cl)
 {
   int s;
+
+  if (!cl)
+    return 0;
 
   /* first disconnect on protocol level: parting messages can be written */
   cl->proto->user_disconnect (cl->user);

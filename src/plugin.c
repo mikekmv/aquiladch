@@ -83,7 +83,6 @@ plugin_user_t *plugin_user_find (unsigned char *name)
 
 unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message)
 {
-  struct timeval now;
   user_t *u;
 
   if (!user)

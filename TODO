@@ -8,6 +8,7 @@ Develstatus:
 	- hublist support
 	- !warn command
 	- redo tag parsing, make it more flexible. (allow missing fields).
+	- md5 password hashing. preferably verlihub compatible.
 
 Large changes:
 	- rebuild proto_nmdc_flush_cache()

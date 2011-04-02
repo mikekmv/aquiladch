@@ -10,6 +10,8 @@
 #ifndef _NMDC_H_
 #define _NMDC_H_
 
-extern int nmdc_register ();
+extern int nmdc_init ();
+extern int nmdc_setup (esocket_handler_t * h);
+
 
 #endif

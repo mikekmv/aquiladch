@@ -1,5 +1,20 @@
 This is the Aquila Changelog.
 
+0.1.4:
+	Added target dtinstall
+	Added message when user is refused because of join limit.
+	aqdtinstall updated.
+		- added command line arguments
+		- added generic daemontools install
+	All server_ functions can now be safely called with a NULL for
+		client_t *.
+	Fixed a few mistakes in nmdc_protocol.c that could cause a crash
+		when getting an EPIPE.
+	Added some warning to pi_user.c when settings userlimits.
+	Added support for poll() in configure
+	Added support for poll() in esocket
+	Fixed some changelog mistakes.
+
 0.1.3:
 	Added !pwgen. This will generate a 63 byte random passwd for yourself
 		or a user.
@@ -7,10 +22,9 @@ This is the Aquila Changelog.
 		of his new reg and told to set a passwd and log in again. 
 		OP is notified of this.
 	Slot rule fix. If a hub allows 0 slots, do not check users with 0 slots.
-		(Thank you Friz.cZ)
 	Added drop command. Identical to kick except it does not redirect.
 	Added aqdtinstall script. Daemontools install script.
-	Fixed kick in !ruleadd when no help message (Thank you Io)
+	Fixed crash in !ruleadd when no help message (Thank you Friz.cZ)
 	Added fix for possible crash with corrupt search result.                                                          
 	Expanded server_add_port to add support for addresses.
 	Added Fix to hashlist to protect against overlong nicklengths

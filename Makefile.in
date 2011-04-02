@@ -70,6 +70,8 @@ GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
+ALLOW_EPOLL = @ALLOW_EPOLL@
+ALLOW_POLL = @ALLOW_POLL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
@@ -113,7 +115,6 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-USE_EPOLL = @USE_EPOLL@
 VERSION = @VERSION@
 ZLIB = @ZLIB@
 ZLINE = @ZLINE@
@@ -578,6 +579,9 @@ uninstall-info: uninstall-info-recursive
 commit:
 	make -C src indent
 	svn commit
+
+dtinstall: install
+	tools/aqdtinstall
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

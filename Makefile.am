@@ -5,3 +5,6 @@ SUBDIRS = src tools
 commit:
 	make -C src indent
 	svn commit
+
+dtinstall: install
+	tools/aqdtinstall

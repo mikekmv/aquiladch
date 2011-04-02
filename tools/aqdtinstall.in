@@ -1,0 +1,233 @@
+#!/bin/bash
+
+#
+# Settings
+#
+PREFIX=@exec_prefix@
+
+DEFAULT_USER="aquila"
+DEFAULT_GROUP="aquila"
+DEFAULT_SHELL="/bin/false"
+DEFAULT_HOME="/home/${DEFAULT_USER}"
+
+CONFIGFILES="accounts.conf chatroom.conf clientbanlist.conf hardban.conf hub.conf nickban.conf softban.conf trigger.conf"
+
+unset USER
+unset GROUP
+unset HOME
+unset USERSHELL
+unset ECHO
+unset dohelp
+unset force
+unset verbose
+
+while [ -n "$1" ];
+do
+	option=$1;
+	case $option in
+		-u|--user)
+			USER=$2;
+			shift;
+			;;
+		-g|--group)
+			GROUP=$2;
+			shift;
+			;;
+		-d|--directory)
+			HOME=$2;
+			shift;
+			;;
+		-s|--shell)
+			USERSHELL=$2;
+			shift;
+			;;
+		-p|--prefix)
+			PREFIX=$2;
+			shift;
+			;;
+		-f|--force)
+			force=1;
+			;;
+		-v|--verbose)
+			verbose=1;
+			;;
+		-h|--help)
+			verbose=1;
+			dohelp=1;
+			;;
+		--dry-run)
+			ECHO='echo - ';
+			;;
+	esac
+	shift;
+done;
+
+if [ ! -n "${USER}" ];
+then
+	USER=${DEFAULT_USER}
+fi
+
+if [ ! -n "${GROUP}" ];
+then
+	GROUP=${DEFAULT_GROUP}
+fi
+
+if [ ! -n "${HOME}" ];
+then
+	HOME="/home/${USER}"
+fi;
+
+if [ ! -n "${USERSHELL}" ];
+then
+	USERSHELL=/bin/false
+fi;
+
+if [ -n "${dohelp}" ];
+then
+	echo `basename ${0}`": Install Aquila with Daemontools support."
+	echo " User related options: These control the settings related to the user that will run Aquila."
+	echo " -u, --user <user>                : user name.           (default: ${DEFAULT_USER})"
+	echo " -g, --group <group>              : user group.          (default: ${DEFAULT_GROUP})"
+	echo " -s, --shell <shell>              : user shell.          (default: ${DEFAULT_SHELL})"
+	echo " -d, --directory <home directory> : user home directory. (default: ${DEFAULT_HOME})"
+	echo "                In this directory comes the daemontools service files."
+	echo
+	echo " Generic options."
+	echo " -h, --help			: This help"
+	echo " -v, --verbose			: Verbose. Print settings."
+	echo
+fi;
+
+if [ -n "${verbose}" ];
+then
+	echo "Settings:"
+	echo "  USER:GROUP " ${USER}:${GROUP}
+	echo "  HOME       " ${HOME}
+	echo "  USERSHELL  " ${USERSHELL}
+	echo "  PREFIX     " ${PREFIX}
+	if [ -n "${force}" ];
+	then
+		echo "  Forcing install."
+	fi;
+fi;
+
+if [ -n "${dohelp}" ];
+then
+	exit;
+fi;
+
+#
+# Determine linux flavour
+#
+
+if [ -f /etc/gentoo-releaset ]
+then
+	FLAVOUR=gentoo
+	INSTALLDT="emerge daemontools"
+	SERVICE=/service
+	RCDT="rc-update add svscan default"
+	RCSTART="/etc/init.d/svscan start"
+else
+	if [ ! -n "${force}" ]
+	then
+		echo "Unsupported linux flavour, please report:"
+		echo "  * name of distribution"
+		echo "  * the name of the release file (most likely /etc/<distribution>-release)"
+		echo "  * command to install daemontools package"
+		echo "  * the default service directory of the daemontools package"
+		echo "  * the command to add daemontools to the boot up sequence"
+		echo " Use --force to force daemontools installation from source."
+		echo "Thank you."
+		exit;
+	else
+		echo "Forcing installation of daemontools from source."
+	fi;
+fi
+
+if [ -d ${SERVICE}t ]
+then
+	echo Daemontools Installed.
+else
+	if [ -n "${FLAVOUR}" ];
+	then
+		${ECHO} ${INSTALLDT}
+	else
+		echo Installing daemontools from source.
+		mkdir /package
+		chmod 1755 /package
+		cd /package
+		wget http://cr.yp.to/daemontools/daemontools-0.76.tar.gz
+		tar zxvf daemontools-0.76.tar.gz
+		rm -f daemontools-0.76.tar.gz
+		cd admin/daemontools-0.76/src
+		wget http://www.qmailrocks.org/downloads/patches/daemontools-0.76.errno.patch
+		patch < daemontools-0.76.errno.patch
+		cd ..
+		package/install
+	fi;
+fi
+
+echo "Creating user..."
+${ECHO} groupadd ${GROUP}
+${ECHO} useradd -g ${GROUP} -M -s ${USERSHELL} ${USER}
+
+echo "Creating directories..."
+${ECHO} mkdir -p --verbose ${HOME}/
+${ECHO} mkdir -p --verbose ${HOME}/supervice
+${ECHO} mkdir -p --verbose ${HOME}/log
+${ECHO} mkdir -p --verbose ${HOME}/log/supervise
+${ECHO} mkdir -p --verbose ${HOME}/log/main
+
+${ECHO} chown -R root:root ${HOME}/
+${ECHO} chown aquila:aquila ${HOME}/log/main
+
+echo "Creating config files..."
+for i in ${CONFIGFILES};
+do
+	${ECHO} touch ${HOME}/$i
+	${ECHO} chown aquila:aquila ${HOME}/$i
+done;
+
+echo "Creating run files..."
+# installing run files
+if [ ! -n "${ECHO}" ];
+then
+
+cat > ${HOME}/run <<EOF
+#!/bin/sh
+
+ulimit -n 4096
+ulimit -c 20971510
+exec setuidgid ${USER} ${PREFIX}/bin/aquila 2>&1
+EOF
+
+cat > ${HOME}/log/run <<EOF
+#!/bin/sh
+exec setuidgid ${USER} multilog t s9999999 ./main
+EOF
+
+else
+	echo " creating" ${HOME}/run
+	echo " creating" ${HOME}/log/run
+fi;
+
+#making run files executable.
+${ECHO} chmod a+x ${HOME}/run
+${ECHO} chmod a+x ${HOME}/log/run
+
+#warning user.
+echo
+cat <<EOF
+Aquila Daemontools service directory installed in ${HOME}
+Do not forget:
+ * to add a link from the main service directory to the aquila service 
+   directory:
+        ln -s ${HOME} ${SERVICE}/aquila
+ * Add daemontools to standard system boot up:
+        ${RCDT}
+
+If you have done the above two things, Aquila will be automatically started at 
+system boot and restarted should it crash.
+To start the service now, do:
+        ${RCSTART}
+EOF
