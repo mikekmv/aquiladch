@@ -1,6 +1,19 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	added release target to makefile
+	added OP nick in ban message.
+	defaultbanmessage: this message will be send to ALL banned users by default. (suggestion maksalaatikko)
+	added message flushing before disconnect. This should display any messages send by plugings.
+	CAP_TAG overrides client bans. (suggestion maksalaatikko)
+	expanded statuser
+	added right nosrchlimit (request maksalaatikko)
+	send unmodified user MyINFO to ops at user login too. (reported maksalaatikko)
+	assign the share and tag right to any user without a password if their account has it. (suggestion maksalaatikko)
+	drop empty chatlines and useless spaces at the end.
+	Fixed --disable-zline option
+	Nickbans now work for registered users.
+	Fixed yet another bug in a command handler.
 	Fixed problem with double nicks. (Reported by Cyber_Ninja)
 		- crash when using nick of chatroom
 		- disconnect any other user.

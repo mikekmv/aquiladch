@@ -231,7 +231,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
   /* rebuild reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "You were kicked because: ");
+  bf_printf (buf, "You were kicked by %s because: ", user->nick);
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -300,7 +300,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
   /* rebuild reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "You were dropped because: ");
+  bf_printf (buf, "You were dropped by %s because: ", user->nick);
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -507,6 +507,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
     period = time_parse (argv[2]);
   }
 
+  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -563,6 +564,7 @@ unsigned long handler_bannick (plugin_user_t * user, buffer_t * output, void *pr
   /* build reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
+  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -612,6 +614,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
 
   buf = bf_alloc (1024);
   *buf->e = '\0';
+  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -660,6 +663,7 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
 
   buf = bf_alloc (1024);
   *buf->e = '\0';
+  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 

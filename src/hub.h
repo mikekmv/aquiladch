@@ -56,6 +56,7 @@ typedef struct client {
 extern unsigned long users;
 
 /*  banlists */
+extern unsigned long buffering;
 extern banlist_t hardbanlist, softbanlist;
 extern banlist_nick_t nickbanlist;
 

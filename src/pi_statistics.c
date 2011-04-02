@@ -306,11 +306,15 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
 	     cache.ZlineSupporters);
   bf_printf (output, "Nicklist cache (last updated %lu seconds ago).\n",
 	     now.tv_sec - cache.lastrebuild);
+#ifdef ZLINES
   bf_printf (output, "  Nicklist length %lu (zpipe %lu, zline %lu)\n", bf_used (cache.nicklist),
 	     bfz_used (cache.nicklistzpipe), bfz_used (cache.nicklistzline));
   bf_printf (output, "  Infolist length %lu (zpipe %lu, zline %lu)\n", bf_used (cache.infolist),
 	     bfz_used (cache.infolistzpipe), bfz_used (cache.infolistzline));
-
+#else
+  bf_printf (output, "  Nicklist length %lu\n", bf_used (cache.nicklist));
+  bf_printf (output, "  Infolist length %lu\n", bf_used (cache.infolist));
+#endif
   return 0;
 }
 

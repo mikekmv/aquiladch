@@ -52,6 +52,7 @@ cap_array_t Capabilities[] = {
 	{"sharehide",	CAP_SHAREHIDE,	"This hides the share of the user for all excepts ops."},
 	{"shareblock",	CAP_SHAREBLOCK,	"This blocks everyone from downloading from this user. Only works for active users."},
 	{"spam",	CAP_SPAM,	"Users with this right can post messages as large as they want."},
+	{"nosrchlimit", CAP_NOSRCHLIMIT,"Users with this right are not subject to search limitations."},
 	{0, 0, 0}
 };
 /* *INDENT-ON* */

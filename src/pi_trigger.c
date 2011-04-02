@@ -435,7 +435,8 @@ int trigger_load (unsigned char *file)
   unsigned char name[TRIGGER_NAME_LENGTH];
   unsigned char cmd[TRIGGER_NAME_LENGTH];
   unsigned long type, flags, cap;
-  int offset, i;
+  int offset;
+  unsigned int i;
 
   trigger_t *trigger;
   trigger_rule_t *rule;
@@ -670,12 +671,11 @@ unsigned long pi_trigger_handler_ruledel (plugin_user_t * user, buffer_t * outpu
   trigger_rule_t *r;
   unsigned long id;
 
-  if (argc < 2) {
+  if (argc < 3) {
     bf_printf (output, "Usage: %s <name> <id>\n"
 	       "   name: name of the trigger\n" "   id  : ID of the rule\n", argv[0]);
     return 0;
   }
-
 
   if (!(t = trigger_find (argv[1]))) {
     bf_printf (output, "Triggername %s doesn't exist.", argv[1]);

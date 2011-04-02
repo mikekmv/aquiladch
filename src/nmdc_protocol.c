@@ -78,6 +78,8 @@ unsigned int searchmaxlength;
 unsigned int srmaxlength;
 unsigned int researchmininterval, researchperiod, researchmaxcount;
 
+unsigned char *defaultbanmessage = NULL;
+
 /* special users */
 user_t *HubSec;
 
@@ -499,6 +501,35 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
 **                                                                            **
 \******************************************************************************/
 
+unsigned int proto_nmdc_user_flush (user_t * u)
+{
+  buffer_t *b = NULL, *buffer;
+  string_list_entry_t *le;
+
+  if (u->state == PROTO_STATE_DISCONNECTED)
+    return 0;
+  if (u->state == PROTO_STATE_VIRTUAL)
+    return 0;
+
+  buffer = bf_alloc (10240);
+
+  for (le = ((nmdc_user_t *) u->pdata)->privatemessages.messages.first; le; le = le->next) {
+    /* data and length */
+    b = le->data;
+    bf_strncat (buffer, b->s, bf_used (b));
+    bf_strcat (buffer, "|");
+
+    u->MessageCnt--;
+    u->CacheException--;
+  }
+  cache_clear ((((nmdc_user_t *) u->pdata)->privatemessages));
+
+  server_write (u->parent, buffer);
+
+  bf_free (buffer);
+
+  return 0;
+}
 
 __inline__ int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message)
 {
@@ -588,7 +619,8 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
   bf_strncat (buf, message->s, bf_used (message));
-  bf_strcat (buf, "|");
+  if (buf->e[-1] != '|')
+    bf_strcat (buf, "|");
 
   if (target->state == PROTO_STATE_VIRTUAL) {
     plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
@@ -780,6 +812,9 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   DPRINTF ("Redirecting user %s to %s because %.*s\n", u->nick, destination,
 	   (int) bf_used (message), message->s);
 
+  if (u->MessageCnt)
+    proto_nmdc_user_flush (u);
+
   b = bf_alloc (265 + NICKLENGTH + bf_used (message) + strlen (destination));
 
   if (message)
@@ -806,6 +841,9 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
 
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
+
+  if (u->MessageCnt)
+    proto_nmdc_user_flush (u);
 
   b = bf_alloc (265 + bf_used (message));
 
@@ -1084,6 +1122,9 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	retval = server_write (u->parent, output);
 	break;
       } else {
+	/* assign CAP_SHARE and CAP_TAG anyway */
+	u->rights =
+	  config.DefaultRights | ((a->rights | a->classp->rights) & (CAP_SHARE | CAP_TAG));
 	proto_nmdc_user_say_string (HubSec, output,
 				    "Your account priviliges will not be awarded until you set a password.");
       }
@@ -1132,6 +1173,9 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       bf_strcat (output, "> You have been banned because: ");
       bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
+      if (defaultbanmessage && strlen (defaultbanmessage)) {
+	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
+      }
       retval = server_write (u->parent, output);
       proto_nmdc_user_redirect (u, bf_buffer ("Banned."));
       retval = -1;
@@ -1149,12 +1193,16 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       bf_strcat (output, "> You have been banned because: ");
       bf_strncat (output, nban->message->s, bf_used (nban->message));
       bf_strcat (output, "|");
+      if (defaultbanmessage && strlen (defaultbanmessage)) {
+	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
+      }
       retval = server_write (u->parent, output);
       proto_nmdc_user_redirect (u, bf_buffer ("Banned."));
       retval = -1;
       nmdc_stats.nickban++;
       break;
     }
+
 
     if (!u->rights)
       u->rights = config.DefaultRights;
@@ -1186,6 +1234,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
   account_type_t *t;
   buffer_t *output;
   user_t *existing_user;
+  banlist_nick_entry_t *nban;
 
   if (tkn->type != TOKEN_MYPASS)
     return 0;
@@ -1221,6 +1270,26 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       u->rights = a->rights | t->rights;
       u->op = ((u->rights & CAP_KEY) != 0);
     };
+
+    /* nickban ? not for owner offcourse */
+    nban = banlist_nick_find (&nickbanlist, u->nick);
+    if (nban && (!(u->rights & CAP_OWNER))) {
+      DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
+	       (unsigned int) bf_used (nban->message), nban->message->s);
+      bf_strcat (output, "<");
+      bf_strcat (output, HubSec->nick);
+      bf_strcat (output, "> You have been banned because: ");
+      bf_strncat (output, nban->message->s, bf_used (nban->message));
+      bf_strcat (output, "|");
+      if (defaultbanmessage && strlen (defaultbanmessage)) {
+	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
+      }
+      retval = server_write (u->parent, output);
+      proto_nmdc_user_redirect (u, bf_buffer ("Banned."));
+      retval = -1;
+      nmdc_stats.nickban++;
+      break;
+    }
 
     /* welcome user */
     if (u->op)
@@ -1347,6 +1416,9 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     /* send it to the users */
     cache_queue (cache.myinfo, u, u->MyINFO);
 
+    /* ops get the full tag immediately -- it means the ops get all MYINFOs double though */
+    cache_queue (cache.myinfoupdateop, u, b);
+
     /* if this new user is an OP send an updated OpList */
     if (u->op)
       nicklistcache_sendoplist (u);
@@ -1428,6 +1500,15 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 	}
 
+	/* drop any trailing spaces */
+	while (b->e[-1] == ' ')
+	  b->e--;
+	*b->e = '\0';
+
+	/* drop empty strings */
+	if ((b->s + strlen (u->nick) + 2) == b->e)
+	  break;
+
 	/* call plugin first. it can force us to drop the message */
 	if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_CHAT, b) != PLUGIN_RETVAL_CONTINUE) {
 	  nmdc_stats.chatevent++;
@@ -1451,7 +1532,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  bf_strcat (buf, "|");
 	}
 	/* add string to send */
-	bf_strcat (buf, b->s);
+	bf_strncat (buf, b->s, bf_used (b));
 	bf_strcat (buf, "|");
 	retval = server_write (u->parent, buf);
 
@@ -1568,7 +1649,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	/* check quota */
-	if (!get_token (&rates.search, &u->rate_search, now.tv_sec)) {
+	if (!get_token (&rates.search, &u->rate_search, now.tv_sec)
+	    && (!(u->rights & CAP_NOSRCHLIMIT))) {
 	  proto_nmdc_user_warn (u, &now, "Searches are limited to %u every %u seconds.",
 				rates.search.refill, rates.search.period);
 	  nmdc_stats.searchoverflow++;
@@ -2821,6 +2903,7 @@ int proto_nmdc_init ()
   researchmininterval = 60;
   researchperiod = 1200;
   researchmaxcount = 5;
+  defaultbanmessage = strdup ("");
 
   config_register ("hub.allowcloning", CFG_ELEM_UINT, &cloning,
 		   "Allow multiple users from the same IP address.");
@@ -2837,6 +2920,9 @@ int proto_nmdc_init ()
 		   "Period during which a search is considered a re-search.");
   config_register ("nmdc.researchmaxcount", CFG_ELEM_UINT, &researchmaxcount,
 		   "Maximum number of searches cached.");
+
+  config_register ("nmdc.defaultbanmessage", CFG_ELEM_STRING, &defaultbanmessage,
+		   "This message is send to all banned users when they try to join.");
 
   /* further inits */
   memset (&hashlist, 0, sizeof (hashlist));
