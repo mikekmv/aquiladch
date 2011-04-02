@@ -248,30 +248,26 @@ int nicklistcache_rebuild (struct timeval now)
   nmdc_stats.cacherebuild++;
 
   DPRINTF (" Rebuilding cache\n");
-  bf_free (cache.nicklist);
-  bf_free (cache.oplist);
-  bf_free (cache.infolist);
-  bf_free (cache.hellolist);
-  bf_free (cache.infolistupdate);
 #ifdef ZLINES
   if (cache.infolistzpipe != cache.infolist)
     bf_free (cache.infolistzpipe);
-  else
-    cache.infolistzpipe = NULL;
+  cache.infolistzpipe = NULL;
   if (cache.infolistzline != cache.infolist)
     bf_free (cache.infolistzline);
-  else
-    cache.infolistzline = NULL;
+  cache.infolistzline = NULL;
 
   if (cache.nicklistzpipe != cache.nicklist)
     bf_free (cache.nicklistzpipe);
-  else
-    cache.nicklistzpipe = NULL;
+  cache.nicklistzpipe = NULL;
   if (cache.nicklistzline != cache.nicklist)
     bf_free (cache.nicklistzline);
-  else
-    cache.nicklistzline = NULL;
+  cache.nicklistzline = NULL;
 #endif
+  bf_free (cache.nicklist);
+  bf_free (cache.oplist);
+  bf_free (cache.infolist);
+  bf_free (cache.infolistupdate);
+  bf_free (cache.hellolist);
 
   cache.nicklist = bf_alloc (cache.length_estimate + 32);
   s = cache.nicklist->buffer;
@@ -384,8 +380,9 @@ int nicklistcache_sendoplist (user_t * target)
   target->SearchCnt++;
   target->CacheException++;
 
-  cache_queue (cache.asearch, target, cache.oplist);
-  cache_queue (cache.psearch, target, cache.oplist);
+  /* we set the user to NULL so we don't get deleted by a search from this user */
+  cache_queue (cache.asearch, NULL, cache.oplist);
+  cache_queue (cache.psearch, NULL, cache.oplist);
 
   return 0;
 }
@@ -406,10 +403,6 @@ int proto_nmdc_user_delrobot (user_t * u)
   string_list_purge (&cache.myinfoupdateop.messages, u);
   string_list_purge (&cache.asearch.messages, u);
   string_list_purge (&cache.psearch.messages, u);
-  string_list_purge (&cache.results.messages, u);
-  string_list_purge (&((nmdc_user_t *) u->pdata)->results.messages, u);
-  string_list_purge (&cache.privatemessages.messages, u);
-  string_list_purge (&((nmdc_user_t *) u->pdata)->privatemessages.messages, u);
 
   buf = bf_alloc (8 + NICKLENGTH);
   bf_strcat (buf, "$Quit ");
@@ -570,7 +563,7 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
     return 0;
   }
 
-  cache_queue (cache.privatemessages, target, buf);
+  cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
   target->MessageCnt++;
   target->CacheException++;
@@ -659,10 +652,6 @@ user_t *proto_nmdc_user_alloc (void *priv)
 int proto_nmdc_user_free (user_t * user)
 {
 
-  /* free protocol private data */
-  free (user->pdata);
-  user->pdata = NULL;
-
   /* remove from the current user list */
   if (user->next)
     user->next->prev = user->prev;
@@ -700,9 +689,7 @@ int proto_nmdc_user_disconnect (user_t * u)
     string_list_purge (&cache.myinfoupdateop.messages, u);
     string_list_purge (&cache.asearch.messages, u);
     string_list_purge (&cache.psearch.messages, u);
-    string_list_purge (&cache.results.messages, u);
     string_list_clear (&((nmdc_user_t *) u->pdata)->results.messages);
-    string_list_purge (&cache.privatemessages.messages, u);
     string_list_clear (&((nmdc_user_t *) u->pdata)->privatemessages.messages);
 
     buf = bf_alloc (8 + NICKLENGTH);
@@ -947,12 +934,16 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 	  case 'Z':
 	    if (!strncmp (k, "ZPipe", 5)) {
 	      u->supports |= NMDC_SUPPORTS_ZPipe;
-	      cache.ZpipeSupporters++;
+	      /* if thisis the first zpipe user, we need to do a cache rebuild to build the zpipe buffer */
+	      if (!cache.ZpipeSupporters++)
+		cache.needrebuild = 1;
 	      continue;
 	    }
 	    if (!strncmp (k, "ZLine", 5)) {
 	      u->supports |= NMDC_SUPPORTS_ZLine;
-	      cache.ZlineSupporters++;
+	      /* if thisis the first zline user, we need to do a cache rebuild to build the zline buffer */
+	      if (!cache.ZlineSupporters++)
+		cache.needrebuild = 1;
 	      continue;
 	    }
 	    break;
@@ -1413,13 +1404,13 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 				   bf_buffer ("WARNING: You should use a client that uses tags!"));
 	      retval = server_write (u->parent, output);
 	      u->active = 0;
+	      goto accept_anyway;
 	    } else {
 	      proto_nmdc_user_redirect (u,
 					bf_buffer
 					("This hub requires tags, please upgrade to a client that supports them."));
 	      retval = -1;
 	      nmdc_stats.notags++;
-	      break;
 	    }
 	    if (new)
 	      bf_free (new);
@@ -1431,6 +1422,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  nmdc_stats.badmyinfo++;
 	  break;
 	}
+      accept_anyway:
 
 	/* update plugin info */
 	plugin_update_user (u);
@@ -1558,6 +1550,11 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 	}
 
+	/* if there is still a search cached from this user, delete it. */
+	cache_purge (cache.asearch, u);
+	if (u->active)
+	  cache_purge (cache.psearch, u);
+
 	/* mark user as "special" */
 	u->SearchCnt++;
 	u->CacheException++;
@@ -1608,8 +1605,10 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	while ((*c != 5) && (c > b->s))
 	  --c;
 	/* no \5 found */
-	if (*c != 5)
+	if (*c != 5) {
+	  ++nmdc_stats.srnodest;
 	  break;
+	}
 	*c++ = '\0';
 	l = b->e - c;
 	b->e = c - 1;
@@ -1636,7 +1635,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	}
 
 	/* queue search result with the correct user */
-	cache_queue (cache.results, t, b);
+	cache_count (cache.results, t, b);
 	cache_queue (((nmdc_user_t *) t->pdata)->results, u, b);
 	t->ResultCnt++;
 	t->CacheException++;
@@ -1674,7 +1673,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	cache_queue (((nmdc_user_t *) u->pdata)->privatemessages, u, t->MyINFO);
-	cache_queue (cache.privatemessages, u, t->MyINFO);
+	cache_count (cache.privatemessages, u, t->MyINFO);
 	u->MessageCnt++;
 	u->CacheException++;
 
@@ -1741,7 +1740,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	   * \0 termination should not be necessary
 	   */
 	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-	  cache_queue (cache.privatemessages, t, b);
+	  cache_count (cache.privatemessages, t, b);
 	  t->MessageCnt++;
 	  t->CacheException++;
 	};
@@ -1807,7 +1806,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	   * \0 termination should not be necessary
 	   */
 	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-	  cache_queue (cache.privatemessages, t, b);
+	  cache_count (cache.privatemessages, t, b);
 	  t->MessageCnt++;
 	  t->CacheException++;
 	}
@@ -1883,7 +1882,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	   * \0 termination should not be necessary
 	   */
 	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-	  cache_queue (cache.privatemessages, t, b);
+	  cache_count (cache.privatemessages, t, b);
 	  t->MessageCnt++;
 	  t->CacheException++;
 	}
@@ -2102,16 +2101,17 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
   unsigned char *t;
   string_list_entry_t *le;
 
-
+  ASSERT ((u->ChatCnt + u->SearchCnt + u->ResultCnt + u->MessageCnt) == u->CacheException);
   t = buffer;
   if (ch) {
     /* skip all chat messages until the last send message of the user */
     le = cache.chat.messages.first;
     if (u->ChatCnt) {
       for (le = cache.chat.messages.first; le && u->ChatCnt; le = le->next)
-	if (le->user == u)
+	if (le->user == u) {
 	  u->ChatCnt--;
-      u->CacheException--;
+	  u->CacheException--;
+	}
     };
     /* append the other chat messages */
     for (; le; le = le->next) {
@@ -2124,6 +2124,9 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
       t += l;
       *t++ = '|';
     };
+    ASSERT (!u->ChatCnt);
+    u->CacheException -= u->ChatCnt;
+    u->ChatCnt = 0;
   };
 
   if (u->active) {
@@ -2141,6 +2144,8 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 	t += l;
 	*t++ = '|';
       }
+      u->CacheException -= u->SearchCnt;
+      u->SearchCnt = 0;
     }
   } else {
     /* complete buffers */
@@ -2158,16 +2163,16 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 	t += l;
 	*t++ = '|';
       }
+      u->CacheException -= u->SearchCnt;
+      u->SearchCnt = 0;
     }
     /* add passive results */
     if (res && u->ResultCnt) {
-      for (le = ((nmdc_user_t *) u->pdata)->results.messages.first; le && u->ResultCnt;
-	   le = le->next) {
-	if (le->user != u)
-	  continue;
+      ASSERT (u->ResultCnt == ((nmdc_user_t *) u->pdata)->results.messages.count);
+      for (le = ((nmdc_user_t *) u->pdata)->results.messages.first; le; le = le->next) {
 
 	/* data and length */
-	b = (buffer_t *) le->data;
+	b = le->data;
 	l = bf_used (b);
 
 	/* copy data */
@@ -2177,15 +2182,15 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
 	u->ResultCnt--;
 	u->CacheException--;
       }
-      cache_clear (((nmdc_user_t *) u->pdata)->results);
+      cache_clear ((((nmdc_user_t *) u->pdata)->results));
     }
   }
   /* add messages results */
   if (pm && u->MessageCnt) {
-    for (le = ((nmdc_user_t *) u->pdata)->privatemessages.messages.first; le && u->MessageCnt;
-	 le = le->next) {
+    ASSERT (u->MessageCnt == ((nmdc_user_t *) u->pdata)->privatemessages.messages.count);
+    for (le = ((nmdc_user_t *) u->pdata)->privatemessages.messages.first; le; le = le->next) {
       /* data and length */
-      b = (buffer_t *) le->data;
+      b = le->data;
       l = bf_used (b);
 
       /* copy data */
@@ -2195,7 +2200,7 @@ unsigned int proto_nmdc_build_buffer (unsigned char *buffer, user_t * u, unsigne
       u->MessageCnt--;
       u->CacheException--;
     }
-    cache_clear (((nmdc_user_t *) u->pdata)->privatemessages);
+    cache_clear ((((nmdc_user_t *) u->pdata)->privatemessages));
   }
   return t - buffer;
 }
@@ -2220,6 +2225,7 @@ inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, unsig
       *t++ = '|';
     }
     buf->e = t;
+    BF_VERIFY (buf);
     return 1;
   }
 
@@ -2231,7 +2237,7 @@ void proto_nmdc_flush_cache ()
   buffer_t *b;
   user_t *u, *n;
   buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op, *buf_aresearch, *buf_presearch;
-  unsigned int psl, asl, l;
+  unsigned int psl, asl, l, t;
   unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0, ars = 0, prs = 0;
   struct timeval now;
   unsigned long deadline;
@@ -2274,26 +2280,33 @@ void proto_nmdc_flush_cache ()
   mi = proto_nmdc_add_element (&cache.myinfo, buf_exception, now.tv_sec);
   miu = proto_nmdc_add_element (&cache.myinfoupdate, buf_exception, now.tv_sec);
 
+  ASSERT (bf_used (buf_exception) <= (l - cache.chat.length + cache.chat.messages.count));
+
   /* copy identical part to passive buffer */
-  l = bf_used (buf_exception);
-  if (l) {
-    memcpy (buf_passive->s, buf_exception->s, l);
-    buf_passive->e += l;
+  t = bf_used (buf_exception);
+  if (t) {
+    memcpy (buf_passive->s, buf_exception->s, t);
+    buf_passive->e += t;
   }
 
   /* add chat messages */
   ch = proto_nmdc_add_element (&cache.chat, buf_passive, now.tv_sec);
 
+  ASSERT (bf_used (buf_passive) <= l);
+
   /* copy identical part to active buffer too */
-  l = bf_used (buf_passive);
-  if (l) {
-    memcpy (buf_active->s, buf_passive->s, l);
-    buf_active->e += l;
+  t = bf_used (buf_passive);
+  if (t) {
+    memcpy (buf_active->s, buf_passive->s, t);
+    buf_active->e += t;
   }
 
   /* at the end, add the passive and active search messages */
   ps = proto_nmdc_add_element (&cache.psearch, buf_passive, now.tv_sec);
   as = proto_nmdc_add_element (&cache.asearch, buf_active, now.tv_sec);
+
+  ASSERT (bf_used (buf_passive) <= psl);
+  ASSERT (bf_used (buf_active) <= asl);
 
   /* check to see if we need to send pms */
   if (cache.privatemessages.messages.count
@@ -2310,6 +2323,8 @@ void proto_nmdc_flush_cache ()
 
   BF_VERIFY (buf_active);
   BF_VERIFY (buf_passive);
+  BF_VERIFY (buf_aresearch);
+  BF_VERIFY (buf_presearch);
 
 #ifdef ZLINES
   if ((cache.ZlineSupporters > 0) || (cache.ZpipeSupporters > 0)) {
@@ -2354,20 +2369,21 @@ void proto_nmdc_flush_cache ()
       if (u->state != PROTO_STATE_ONLINE)
 	continue;
 
-      /* get buffer */
-      if (u->CacheException) {
+      /* get buffer -- only create exception buffer if really, really necessary */
+      if (u->CacheException
+	  && ((u->SearchCnt && (as || ps)) || (u->ChatCnt && ch) || (u->ResultCnt && res)
+	      || (u->MessageCnt && pm))) {
 	/* we need to copy this buffer cuz it could be buffered during write
 	   and it is changed at every call to proto_nmdc_build_buffer */
 	b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
 	b->e += proto_nmdc_build_buffer (b->e, u, as, ps, ch, pm, res);
+	BF_VERIFY (b);
 
 	if (bf_used (b))
 	  if (server_write (u->parent, b) > 0)
 	    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
 
 	bf_free (b);
-
-	u->CacheException = 0;
       } else {
 #ifdef ZLINES
 	if (u->supports & NMDC_SUPPORTS_ZPipe) {
@@ -2476,6 +2492,10 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
     freelist = freelist->next;
     if (o->plugin_priv)
       plugin_del_user ((plugin_private_t **) & o->plugin_priv);
+    /* free protocol private data */
+    if (o->pdata)
+      free (o->pdata);
+
     free (o);
   }
   return 0;

@@ -423,7 +423,6 @@ int zline (buffer_t * input, buffer_t ** zpipe, buffer_t ** zline)
   bf_free (work);
 
   if (o >= e) {
-    bf_free (work);
     bf_free (output);
     return 0;
   }

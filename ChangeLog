@@ -1,7 +1,23 @@
 This is the Aquila Changelog.
 
 
-0.1.8-pre7:
+0.1.8-pre8:
+	Fix CAP_TAG: do not drop user and do not leak memory.
+	Fixed double free in zline()
+	Added some checking in stringlist
+	Fixed illegal ref in pi_trigger.c
+	Reduced hub to processing 1024 events at a time
+	Fix free bug in cache rebuilding.
+	Don't queue OpList with a source user to prevent purging.
+	Don't purge cache.results and cache.messages on user exit. no longer useful.
+	Force cache rebuild on first zpipe/zline user.
+	Purge searches still cached if a new one is queued.
+	No longer queue messages in global list, just count them.
+	Fix bugs in exception buffer creation. Keep exception counters consistent.
+	Delete protocol specific data in freelist with other memory.
+	Make the cache_* functions use bf_size iso bf_used.
+	Change timeout behaviour of queueing to be consistent.
+
 	Fixed bug in passive search handling.
 	Added ZPipe handling
 	Moved to userbased stringstorage iso global list.

@@ -26,6 +26,7 @@
 #define PROTO_STATE_DISCONNECTED 6	/* user is disconnected */
 #define PROTO_STATE_VIRTUAL	  7	/* this is a "fake" user, for robots */
 
+/* everything in ms */
 #define PROTO_TIMEOUT_INIT		5000	/* initial creation state */
 #define PROTO_TIMEOUT_SENDLOCK 		5000	/* waiting for user $Key */
 #define PROTO_TIMEOUT_WAITNICK		5000	/* waiting for user $ValidateNick */

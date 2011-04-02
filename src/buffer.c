@@ -32,6 +32,7 @@ buffer_t *bf_alloc (unsigned long size)
 
   /* alloc buffer */
   b = malloc (size + sizeof (buffer_t));
+  ASSERT (b);
   if (!b)
     return NULL;
 
@@ -43,6 +44,10 @@ buffer_t *bf_alloc (unsigned long size)
   b->e = b->s;
   b->size = size;
   b->refcnt = 1;
+
+#ifdef DEBUG
+  b->magic = 0xA55AB33F;
+#endif
 
   bufferstats.size += size;
   if (bufferstats.size > bufferstats.peak)
@@ -62,7 +67,9 @@ void bf_free (buffer_t * buffer)
   ASSERT (buffer != &static_buf);
   ASSERT (buffer->refcnt > 0);
   ASSERT (buffer->e <= (buffer->buffer + buffer->size));
-
+#ifdef DEBUG
+  ASSERT (buffer->magic == 0xA55AB33F);
+#endif
   bf_free (buffer->next);
 
   /* if there is still a refcnt, do not free the memory */
@@ -77,7 +84,6 @@ void bf_free (buffer_t * buffer)
   bufferstats.count--;
 
   free (buffer);
-
 }
 
 void bf_free_single (buffer_t * buffer)

@@ -39,6 +39,7 @@
 
 #define DEFAULT_MAX_OUTGOINGBUFFERS 10
 #define DEFAULT_MAX_OUTGOINGSIZE    100*1024
+#define DEFAULT_OUTGOINGTHRESHOLD   1000
 
 #define DEFAULT_PORT	      411
 #define DEFAULT_IP	      0L
@@ -78,8 +79,8 @@
 #define DPRINTF	printf
 #define ASSERT assert
 #else
-#define DPRINTF(...)
-#define ASSERT(...)
+#define DPRINTF(x...) /* x */
+#define ASSERT(x...) /* x */
 #endif
 
 #endif /* _DEFAULTS_H_ */

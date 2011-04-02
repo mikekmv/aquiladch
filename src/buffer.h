@@ -41,6 +41,9 @@ typedef struct buffer {
    *e;				/* pointer to the first unused byte */
   unsigned long size;		/* allocation size of the buffer */
   unsigned int refcnt;		/* reference counter of the buffer */
+#ifdef DEBUG
+  unsigned long magic;
+#endif
 } buffer_t;
 
 extern buffer_stats_t bufferstats;

@@ -907,9 +907,9 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   uint32_t activity;
   esocket_t *s;
   struct timeval now;
-  struct epoll_event events[ESOCKET_MAX_FDS];
+  struct epoll_event events[ESOCKET_ASK_FDS];
 
-  num = epoll_wait (h->epfd, events, ESOCKET_MAX_FDS, to->tv_sec * 1000 + to->tv_usec / 1000);
+  num = epoll_wait (h->epfd, events, ESOCKET_ASK_FDS, to->tv_sec * 1000 + to->tv_usec / 1000);
   if (num < 0) {
     perror ("ESocket: epoll_wait: ");
     return -1;

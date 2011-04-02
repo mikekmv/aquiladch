@@ -9,8 +9,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef DEBUG
+#include <string.h>
+#endif
 #include "stringlist.h"
-
 inline void string_list_init (string_list_t * list)
 {
   list->first = NULL;
@@ -59,6 +61,9 @@ inline void string_list_del (string_list_t * list, string_list_entry_t * entry)
     list->size -= bf_size (entry->data);
     bf_free (entry->data);
   }
+#ifdef DEBUG
+  memset (entry, 0xA5, sizeof (string_list_entry_t));
+#endif
 
   free (entry);
   list->count--;

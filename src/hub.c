@@ -118,8 +118,10 @@ int accept_new_user (esocket_t * s)
   memset (&client_address, 0, l = sizeof (client_address));
   r = accept (s->socket, (struct sockaddr *) &client_address, &l);
 
-  if (r == -1)
+  if (r == -1) {
+    perror ("accept:");
     return -1;
+  }
 
   /* FIXME: test. we disable naggle: we do our own queueing! */
   if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
@@ -314,6 +316,7 @@ int server_handle_output (esocket_t * es)
   w = 0;
   t = 0;
   b = NULL;
+
   /* write out as much data as possible */
   for (e = cl->outgoing.first; e; e = cl->outgoing.first) {
     for (b = e->data; b; b = n) {
@@ -352,10 +355,10 @@ int server_handle_output (esocket_t * es)
   if (b) {
     if (w > 0)
       cl->offset += w;
-    if (t > (cl->outgoing.size / 10))
+    if (t > DEFAULT_OUTGOINGTHRESHOLD)
       esocket_settimeout (cl->es,
-			  (cl->outgoing.count <
-			   50) ? PROTO_TIMEOUT_BUFFERING : PROTO_TIMEOUT_OVERFLOW);
+			  (cl->outgoing.size > DEFAULT_MAX_OUTGOINGSIZE) ?
+			  PROTO_TIMEOUT_BUFFERING : PROTO_TIMEOUT_OVERFLOW);
 
     DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu)\n", t, cl->outgoing.count,
 	     cl->outgoing.size, cl->offset);

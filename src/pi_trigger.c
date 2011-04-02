@@ -274,7 +274,8 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
     r->trigger->usecnt++;
 
     trigger_verify (r->trigger);
-    bf_printf (output, "%*s", bf_used (r->trigger->text), r->trigger->text->s);
+    if (bf_used (r->trigger->text))
+      bf_printf (output, "%*s", bf_used (r->trigger->text), r->trigger->text->s);
     break;
   };
 
