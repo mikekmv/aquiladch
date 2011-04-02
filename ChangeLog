@@ -1,5 +1,9 @@
 This is the Aquila Changelog.
 
+0.1.7:
+	Fixed security issue. No longer possible to use !usergroup to jump
+	to owner group.
+
 0.1.6:
 	Enabled drop command. It was implemented, but registered.
 	Fixed a few bugs in the poll() implementation. It should now

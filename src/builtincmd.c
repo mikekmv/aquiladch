@@ -1080,6 +1080,11 @@ unsigned long handler_usergroup (plugin_user_t * user, buffer_t * output, void *
     return 0;
   }
 
+  if (group->rights & ~user->rights) {
+    bf_printf (output, "You are not allowed to assign a user to this group.\n");
+    return 0;
+  }
+
   /* move to new group */
   old = account->classp;
   account->class = group->id;
