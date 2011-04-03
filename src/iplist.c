@@ -119,8 +119,8 @@ int iplist_init (iplist_t * list)
   list->mem = malloc (sizeof (iplistentry_t) * iplist_size);
   memset (list->mem, 0, sizeof (iplistentry_t) * iplist_size);
 
-  for (entry = list->mem, i = 0; i < iplist_size; i++)
-    entry->next = ++entry;
+  for (entry = list->mem, i = 0; i < iplist_size; i++, entry++)
+    entry->next = (entry + 1);
   (--entry)->next = NULL;
   list->freelist = list->mem;
 };

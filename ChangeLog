@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Changed default to 8096 ips for anti-portblocker.
 	Added !statconn with portblocker stats.
 	Improved port blocker protection. Dynamic hashlist. 
 	Protection against port blockers.
