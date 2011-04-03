@@ -186,7 +186,8 @@ unsigned int account_del (account_t * a)
   account_count--;
 
   t = account_type_find_byid (a->class);
-  t->refcnt--;
+  if (t)
+    t->refcnt--;
 
   if (a->next)
     a->next->prev = a->prev;
@@ -201,6 +202,17 @@ unsigned int account_del (account_t * a)
   return 0;
 }
 
+unsigned int accounts_clear ()
+{
+  while (accounts)
+    account_del (accounts);
+
+  while (accountTypes)
+    account_type_del (accountTypes);
+
+  return 0;
+}
+
 unsigned int accounts_load (const unsigned char *filename)
 {
   FILE *fp;
@@ -211,6 +223,8 @@ unsigned int accounts_load (const unsigned char *filename)
   fp = fopen (filename, "r");
   if (!fp)
     return errno;
+
+  accounts_clear ();
 
   fgets (buffer, 1024, fp);
   while (!feof (fp)) {

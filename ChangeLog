@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
 0.1.10:
+	Fix release target to work in all branches.
+	Fix possible crash on account load.
 	Fix chatroom del and OP rejoin bugs.
 
 0.1.10-pre4:

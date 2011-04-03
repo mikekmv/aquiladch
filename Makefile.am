@@ -18,6 +18,8 @@ CYGWIN_FTP = ftp://ftp.easynet.be/cygwin/release/
 
 ACLOCAL_AMFLAGS = -I m4
 
+CURRENTURL = $(shell svn info | grep URL | cut -c 6-)
+
 commit: 
 	make -C src indent
 	make -C po update-po
@@ -37,7 +39,7 @@ commitlog:
 	@rm -f CommitMessage
 
 release: commit dist
-	svn copy svn://gw/aquila/trunk/aquila svn://gw/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
+	svn copy ${CURRENTURL} svn://gw/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
 	@echo Release ${VERSION}
 	@echo File: aquila-${VERSION}.tar.gz
 
