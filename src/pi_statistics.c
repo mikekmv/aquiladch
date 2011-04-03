@@ -404,14 +404,64 @@ unsigned long pi_statistics_handler_statbw (plugin_user_t * user, buffer_t * out
   return 0;
 }
 
+#include "hub.h"
+#include "nmdc_local.h"
 extern unsigned long buffering;
 unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t * output,
 						void *dummy, unsigned int argc,
 						unsigned char **argv)
 {
+  client_t *cl;
+  user_t *u;
+  unsigned long count;
+  unsigned long long bufs, total, rest;
+
   bf_printf (output, "Allocated size: %llu (max: %llu)\n", bufferstats.size, bufferstats.peak);
   bf_printf (output, "Allocated buffers: %lu (max %lu)\n", bufferstats.count, bufferstats.max);
   bf_printf (output, " Users having buffered output: %lu\n", buffering);
+
+  count = 0;
+  bufs = 0;
+  total = 0;
+  rest = 0;
+  bf_printf (output, "\nBuffering clients:\n");
+  for (u = userlist; u; u = u->next) {
+    cl = (client_t *) u->parent;
+
+    if (!cl) {
+      if (u->state == PROTO_STATE_VIRTUAL)
+	continue;
+      bf_printf (output, "Real user %s without socket?\n", u->nick);
+      continue;
+    }
+    if (!cl->outgoing.count)
+      continue;
+
+    if (bf_unused (output) < 256) {
+      buffer_t *b = bf_alloc (10000);
+
+      bf_append (&output, b);
+      output = b;
+    }
+
+    bf_printf (output, " %s (online: ", u->nick);
+    time_print (output, now.tv_sec - u->joinstamp);
+    bf_printf (output, "%s), %lu buffers, total %lu, offset %lu, credit %lu\n", cl->outgoing.count,
+	       cl->outgoing.size, cl->offset, cl->credit);
+    bufs += cl->outgoing.count;
+    total += cl->outgoing.size;
+    rest += (cl->outgoing.size - cl->offset);
+
+    count++;
+  }
+  /* free up some room for the totals */
+  if (!count)
+    bf_printf (output, " None.\n");
+
+  bf_printf (output,
+	     "\n Total found: %lu\n Total bytes queued %lu\n Average bufs %lu\n Average bytes queued %lu\n Average bytes to write %lu\n",
+	     count, total, count ? bufs / count : 0, count ? total / count : 0,
+	     count ? rest / count : 0);
 
   return 0;
 }
@@ -443,22 +493,25 @@ extern unsigned long cachelist_count;
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
-  struct mallinfo mi;
-
-  mi = mallinfo ();
 
   bf_printf (output, "Memory Usage:\n");
 
 #if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
-  bf_printf (output, "GNU LibC memory statistics:\n");
-  bf_printf (output, " Total heap     : %lu (%s)\n", mi.arena, format_size (mi.arena));
-  bf_printf (output, " # Free chunks    : %lu\n", mi.ordblks);
-  bf_printf (output, " # Fastbin blocks : %lu\n", mi.smblks);
-  bf_printf (output, " Total alloced space : %lu (%s)\n", mi.uordblks, format_size (mi.uordblks));
-  bf_printf (output, " Total free space    : %lu (%s)\n", mi.fordblks, format_size (mi.fordblks));
-  bf_printf (output, " keepcost : %lu (%s)\n", mi.keepcost, format_size (mi.keepcost));
-  bf_printf (output, " # MMAP regions : %lu\n", mi.hblks);
-  bf_printf (output, " MMAP space     : %lu (%s)\n\n", mi.hblkhd, format_size (mi.hblkhd));
+  if (1) {
+    struct mallinfo mi;
+
+    mi = mallinfo ();
+
+    bf_printf (output, "GNU LibC memory statistics:\n");
+    bf_printf (output, " Total heap     : %lu (%s)\n", mi.arena, format_size (mi.arena));
+    bf_printf (output, " # Free chunks    : %lu\n", mi.ordblks);
+    bf_printf (output, " # Fastbin blocks : %lu\n", mi.smblks);
+    bf_printf (output, " Total alloced space : %lu (%s)\n", mi.uordblks, format_size (mi.uordblks));
+    bf_printf (output, " Total free space    : %lu (%s)\n", mi.fordblks, format_size (mi.fordblks));
+    bf_printf (output, " keepcost : %lu (%s)\n", mi.keepcost, format_size (mi.keepcost));
+    bf_printf (output, " # MMAP regions : %lu\n", mi.hblks);
+    bf_printf (output, " MMAP space     : %lu (%s)\n\n", mi.hblkhd, format_size (mi.hblkhd));
+  }
 #endif
 
   bf_printf (output, HUBSOFT_NAME " stats:\n");
@@ -558,7 +611,8 @@ int pi_statistics_init ()
   plugin_stats = plugin_register ("stats");
   plugin_request (plugin_stats, PLUGIN_EVENT_CACHEFLUSH, &pi_statistics_event_cacheflush);
 
-  command_register ("statbuffer", &pi_statistics_handler_statbuffer, 0, "Show buffer stats.");
+  command_register ("statbuffer", &pi_statistics_handler_statbuffer, CAP_ADMIN,
+		    "Show buffer stats.");
   command_register ("statcache", &pi_statistics_handler_statcache, 0, "Show cache stats.");
   command_register ("statbw", &pi_statistics_handler_statbw, 0, "Show cache stats.");
   command_register ("statcpu", &pi_statistics_handler_statcpu, 0, "Show cpu usage stats.");

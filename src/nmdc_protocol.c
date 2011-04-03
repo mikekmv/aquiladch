@@ -217,7 +217,7 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 	unsigned int i, j;
 	unsigned char c;
 
-	j = unescape_string (tkn->argument, strlen (tkn->argument));
+	j = nmdc_string_unescape (tkn->argument, strlen (tkn->argument));
 	/* validate length */
 	if (j != keylen)
 	  goto broken_key;
@@ -2119,6 +2119,13 @@ void proto_nmdc_flush_cache ()
   if (userlist) {
     for (u = userlist; u; u = n) {
       n = u->next;
+
+#ifdef DEBUG
+      if (u->state == PROTO_STATE_VIRTUAL)
+	continue;
+
+      ASSERT (u->parent);
+#endif
 
       if (u->state != PROTO_STATE_ONLINE)
 	continue;

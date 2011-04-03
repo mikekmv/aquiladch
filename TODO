@@ -1,25 +1,20 @@
 
 Develstatus:
-	- !zombielist preferably with zombying op. (request curse)
-	- stay in prelogin until the userlist is downloaded
 	- create some sort of external statistics support.
-	- don't send filtered MyINFOs to the ops.
 	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files
 	- language suppport
 	- Add some sort of command "context" support. 
 		(allow !help and !leave etc to work in chatrooms)
-	- Fix the crash if the clock is set back...
-	- add nick checking for insane chars as spaces  ( $|<>:?*"/\)
-	- event handler.
-		- add events for user creation and deletion. (Why??)
+	- Fix the crash if the clock is set back... (still crashes??)
+	- add nick checking for insane chars and spaces  ( $|<>:?*"/\)
 	- SSL (not for 0.1)
 	- ADC (future)
 	- redo tag parsing, make it more flexible. (allow missing fields).
-	- md5 password hashing. preferably verlihub compatible.
 	- add a hideuser right?
 
 Large changes:
+	- stay in prelogin until the userlist is downloaded
 	- rebuild proto_nmdc_flush_cache()
 		use generic cache elements of 1->N, 1->(N-1) and 1->1 nature.
 	- split off timers in esocket.c, export them genericly

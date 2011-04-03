@@ -438,6 +438,29 @@ unsigned long handler_zombie (plugin_user_t * user, buffer_t * output, void *pri
   return 0;
 }
 
+unsigned long handler_zombielist (plugin_user_t * user, buffer_t * output, void *priv,
+				  unsigned int argc, unsigned char **argv)
+{
+  plugin_user_t *zombie = NULL;
+  unsigned long count = 0;
+
+  /* send to all users */
+  bf_printf (output, "The hub is infested by the following zombie horde:\n");
+  while (plugin_user_next (&zombie)) {
+    if (!(zombie->flags & PLUGIN_FLAG_ZOMBIE))
+      continue;
+    if ((zombie == user) && (!(zombie->rights & CAP_OWNER)))
+      continue;
+
+    bf_printf (output, "%s\n", zombie->nick);
+    count++;
+  }
+  if (!count)
+    bf_printf (output, "No zombies found!\n");
+
+  return 0;
+}
+
 unsigned long handler_unzombie (plugin_user_t * user, buffer_t * output, void *priv,
 				unsigned int argc, unsigned char **argv)
 {
@@ -1772,6 +1795,7 @@ int builtincmd_init ()
   command_register ("baniphard",  &handler_banhard,      CAP_BANHARD, "Hardban an IP.");
   command_register ("unbaniphard",&handler_unbanip_hard, CAP_BANHARD, "Unhardban an IP.");
   command_register ("zombie",     &handler_zombie,       CAP_KICK,    "Zombie a user. Can't talk or pm.");
+  command_register ("zombielist", &handler_zombielist,   CAP_KICK,    "Show the zombie horde.");
   command_register ("unzombie",   &handler_unzombie,     CAP_KICK,    "Unzombie a user. Can talk or pm again.");
   command_register ("whoip",      &handler_whoip,        CAP_KICK,    "Returns the user using the IP.");
 

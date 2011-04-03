@@ -95,6 +95,8 @@ static int escape_string (buffer_t * output)
   if (bf_unused (output) > 0)
     *output->e = '\0';
 
+  bf_free (tmpbuf);
+
   return bf_used (output);
 }
 

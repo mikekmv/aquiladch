@@ -24,7 +24,7 @@
 /* minimum number of bytes in the buffer before you decide to actually compress it. */
 #define ZLINES_THRESHOLD	100
 
-extern int unescape_string (char *output, unsigned int j);
+extern int nmdc_string_unescape (char *output, unsigned int j);
 extern int parse_tag (char *desc, user_t * user);
 extern buffer_t *rebuild_myinfo (user_t * u, buffer_t * b);
 

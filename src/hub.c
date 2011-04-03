@@ -263,6 +263,7 @@ int server_write (client_t * cl, buffer_t * b)
   if (!cl)
     return 0;
 
+  ASSERT (cl->es);
   if (!(s = cl->es))
     return 0;
 
@@ -294,14 +295,16 @@ int server_write (client_t * cl, buffer_t * b)
   for (e = b; e; e = e->next) {
     l = bf_used (e);
     t += l;
-    w = write (s->socket, e->s, l);
+    w = send (s->socket, e->s, l, 0);
     if (w < 0) {
       DPRINTF ("server_write: write: %s\n", strerror (errno));
       switch (errno) {
 	case EAGAIN:
+	case ENOMEM:
 	  break;
 	case EPIPE:
-	  server_disconnect_user (cl, "Connection closed by peer.");
+	case ECONNRESET:
+	  server_disconnect_user (cl, "Connection closed.");
 	default:
 	  return -1;
       }
@@ -414,15 +417,17 @@ int server_handle_output (esocket_t * es)
     for (b = e->data; b; b = n) {
       /* write data */
       l = bf_used (b) - cl->offset;
-      w = write (es->socket, b->s + cl->offset, l);
+      w = send (es->socket, b->s + cl->offset, l, 0);
       if (w < 0) {
 	switch (errno) {
 	  case EAGAIN:
+	  case ENOMEM:
 	    break;
 	  case EPIPE:
+	  case ECONNRESET:
 	    e->data = b;
 	    buf_mem += cl->outgoing.size;
-	    server_disconnect_user (cl, "Connection closed by peer.");
+	    server_disconnect_user (cl, "Connection closed.");
 	    return -1;
 	  default:
 	    e->data = b;
@@ -500,7 +505,8 @@ int server_handle_input (esocket_t * s)
   for (;;) {
     /* alloc new buffer and read data in it. break loop if no data available */
     b = bf_alloc (HUB_INPUTBUFFER_SIZE);
-    n = read (cl->es->socket, b->s, HUB_INPUTBUFFER_SIZE);
+
+    n = recv (cl->es->socket, b->s, HUB_INPUTBUFFER_SIZE, 0);
     if (n <= 0)
       break;
 

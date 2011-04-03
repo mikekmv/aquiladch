@@ -1,6 +1,13 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Changed error handling in hub.c
+	Rights can now be seperated with , too. 
+		(example: != user.defaultrights chat,search,pmop,dl,tag)
+	Switched to send/recv
+	Expanded !statbuffer... CAP_ADMIN only now.
+	Renamed unescape_string to nmdc_string_unescape
+	Fixed memleak in pi_hublist.c (Thanks PPK!)
 	Fixed bug with banreconnecttime. 0 disables instead of making it infinite.
 	Fixed possible stringlist corruption when error during server_output
 	Added a lot string_list ASSERT code for debug builds.

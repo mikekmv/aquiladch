@@ -268,6 +268,7 @@ int main (int argc, char **argv)
   /* block SIGPIPE */
   sigemptyset (&set);
   sigaddset (&set, SIGPIPE);
+  sigaddset (&set, SIGURG);
   sigprocmask (SIG_BLOCK, &set, NULL);
 
 #ifdef DEBUG

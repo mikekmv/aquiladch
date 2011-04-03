@@ -67,30 +67,43 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
 				  unsigned long *nflag)
 {
   unsigned int i, j;
-  unsigned char *name;
+  unsigned char *name, *arg, *work;
 
   ASSERT (flag && nflag);
   for (i = flagstart; i < argc; i++) {
-    name = argv[i];
-    if ((name[0] == '-') || (name[0]) == '+')
-      name++;
+    work = strdup (argv[i]);
 
-    for (j = 0; flags[j].name; j++) {
-      if (!strcasecmp (flags[j].name, name)) {
-	if (argv[i][0] != '-') {
-	  bf_printf (buf, "Added %s.\n", flags[j].name);
-	  *flag |= flags[j].flag;
-	  *nflag &= ~flags[j].flag;
-	} else {
-	  bf_printf (buf, "Removed %s.\n", flags[j].name);
-	  *nflag |= flags[j].flag;
-	  *flag &= ~flags[j].flag;
+    name = strtok (work, ",");
+
+    while (name) {
+      while (isspace (*name))
+	name++;
+
+      arg = name;
+      if ((name[0] == '-') || (name[0]) == '+')
+	name++;
+
+      for (j = 0; flags[j].name; j++) {
+	if (!strcasecmp (flags[j].name, name)) {
+	  if (arg[0] != '-') {
+	    bf_printf (buf, "Added %s.\n", flags[j].name);
+	    *flag |= flags[j].flag;
+	    *nflag &= ~flags[j].flag;
+	  } else {
+	    bf_printf (buf, "Removed %s.\n", flags[j].name);
+	    *nflag |= flags[j].flag;
+	    *flag &= ~flags[j].flag;
+	  }
+	  break;
 	}
-	break;
       }
+      if (!flags[j].name)
+	bf_printf (buf, "Unknown flag %s.\n", argv[i]);
+
+      name = strtok (NULL, ",");
     }
-    if (!flags[j].name)
-      bf_printf (buf, "Unknown flag %s.\n", argv[i]);
+
+    free (work);
   }
 
   return 0;

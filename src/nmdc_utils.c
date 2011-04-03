@@ -181,7 +181,7 @@ nuke:
 }
 
 
-int unescape_string (char *output, unsigned int j)
+int nmdc_string_unescape (char *output, unsigned int j)
 {
   unsigned int v;
   char *l, *k, *e;
