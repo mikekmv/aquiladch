@@ -106,7 +106,7 @@ char *time_print (unsigned long s)
   if ((hours || minutes || seconds) || (!(weeks || days)))
     total += snprintf (buffer, 512 - total, "%02u:%02u:%02u", hours, minutes, seconds);
 
-  return total;
+  return buffer;
 }
 
 unsigned long time_parse (unsigned char *string)

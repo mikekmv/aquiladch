@@ -120,7 +120,7 @@ msgid ""
 "Sorry. You cannot ban users for longer than %s with a kick."
 msgstr ""
 "\n"
-"Sorry, u kan gebruikers niet langer bannen dan %s met een kick."
+"Sorry, u kan gebruikers niet langer verbannen dan %s met een kick."
 
 #: src/builtincmd.c:342 src/builtincmd.c:407
 msgid ""
@@ -128,7 +128,7 @@ msgid ""
 "Sorry, you cannot ban."
 msgstr ""
 "\n"
-"Sorry, u kan niet bannen."
+"Sorry, u kan niet verbannen."
 
 #: src/builtincmd.c:372
 #, c-format
@@ -147,7 +147,7 @@ msgid ""
 "Sorry. You cannot ban users for longer than %s with a drop."
 msgstr ""
 "\n"
-"Sorry, u kan gebruikers niet langer dan %s bannen met een drop"
+"Sorry, u kan gebruikers niet langer dan %s verbannen met een drop"
 
 #: src/builtincmd.c:427 src/builtincmd.c:473 src/builtincmd.c:532
 #: src/builtincmd.c:1240 src/builtincmd.c:1273 src/pi_user.c:331
@@ -181,174 +181,174 @@ msgstr "Gebruik: %s <ip>"
 #: src/builtincmd.c:506 src/builtincmd.c:515
 #, c-format
 msgid "User %s is using IP %s\n"
-msgstr ""
+msgstr "Gebruiker %s gebruikt IP %s\n"
 
 #: src/builtincmd.c:510 src/builtincmd.c:519
 #, c-format
 msgid "No one using IP %s found."
-msgstr ""
+msgstr "Niemand met IP %s gevonden."
 
 #: src/builtincmd.c:522 src/builtincmd.c:562 src/builtincmd.c:585
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address."
-msgstr ""
+msgstr "Sorry, \"%s\" is geen herkenbaar IP adres."
 
 #: src/builtincmd.c:537
 #, c-format
 msgid "Nick %s unbanned."
-msgstr ""
+msgstr "Naam %s is niet langer verbannen."
 
 #: src/builtincmd.c:539
 #, c-format
 msgid "No ban for nick %s found."
-msgstr ""
+msgstr "Geen verbanning voor naam %s gevonden."
 
 #: src/builtincmd.c:557 src/builtincmd.c:580
 #, c-format
 msgid "IP %s unbanned."
-msgstr ""
+msgstr "IP %s is niet langer verbannen."
 
 #: src/builtincmd.c:559 src/builtincmd.c:582
 #, c-format
 msgid "No ban for IP %s found."
-msgstr ""
+msgstr "Geen verbanning for IP %s gevonden."
 
 #: src/builtincmd.c:601 src/builtincmd.c:769
 #, c-format
 msgid "Usage: %s <ip/nick> [<period>] <reason>"
-msgstr ""
+msgstr "Gebruik: %s <ip/naam> [<periode>] <reden>"
 
 #: src/builtincmd.c:619
 #, c-format
 msgid "IP Banning user %s (ip %s) forever: %.*s"
-msgstr ""
+msgstr "Permanente IP Verbanning voor %s (ip %s): %.*s"
 
 #: src/builtincmd.c:622
 #, c-format
 msgid "IP Banning user %s (ip %s) for %s: %.*s"
-msgstr ""
+msgstr "Tijdelijke IP Verbanning voor %s (ip %s)voor %s: %.*s"
 
 #: src/builtincmd.c:628
 #, c-format
 msgid "User %s offline, found in iplog\n"
-msgstr ""
+msgstr "Gebruiker %s is afwezig, maar gevonden in de iplog.\n"
 
 #: src/builtincmd.c:631
 #, c-format
 msgid "IP Banning %s (ip %s) forever: %.*s."
-msgstr ""
+msgstr "Permanente IP Verbanning voor %s (ip %s): %.*s"
 
 #: src/builtincmd.c:634
 #, c-format
 msgid "IP Banning %s (ip %s) for %s: %.*s"
-msgstr ""
+msgstr "Tijdelijke IP Verbanning voor %s (ip %s) voor %s: %.*s"
 
 #: src/builtincmd.c:641
 #, c-format
 msgid "IP Banning %s forever: %.*s."
-msgstr ""
+msgstr "Permanente IP Verbanning voor %s: %.*s"
 
 #: src/builtincmd.c:644
 #, c-format
 msgid "IP Banning %s for %s: %.*s"
-msgstr ""
+msgstr "IP Verbanning %s voor %s: %.*s"
 
 #: src/builtincmd.c:648
 #, c-format
 msgid "User not found or IP address not valid: %s\n"
-msgstr ""
+msgstr "Gebruiker niet gevonden of IP adres niet geldig: %s\n"
 
 #: src/builtincmd.c:666 src/builtincmd.c:717
 #, c-format
 msgid "Usage: %s <nick> [<period>] <reason>"
-msgstr ""
+msgstr "Gebruik: %s <naam> [<periode>] <reden>"
 
 #: src/builtincmd.c:688
 #, c-format
 msgid "Banned nick %s forever: %.*s"
-msgstr ""
+msgstr "Nick %s permanent verbannen: %.*s"
 
 #: src/builtincmd.c:690
 #, c-format
 msgid "Banned nick %s for %s: %.*s"
-msgstr ""
+msgstr "Nick %s verbannen voor %s: %.*s"
 
 #: src/builtincmd.c:737
 #, c-format
 msgid "User %s not online, found in iplog.\n"
-msgstr ""
+msgstr "Gebruiker %s is afwezig, maar gevonden in de iplog.\n"
 
 #: src/builtincmd.c:746
 #, c-format
 msgid "Banning user %s (ip %s) forever: %.*s"
-msgstr ""
+msgstr "Gebruiker %s (ip %s) permanent verbannen: %.*s"
 
 #: src/builtincmd.c:749
 #, c-format
 msgid "Banning user %s (ip %s) for %s: %.*s"
-msgstr ""
+msgstr "Gebruiker %s (ip %s) verbannen voor %s: %.*s"
 
 #: src/builtincmd.c:785
 #, c-format
 msgid "HARD Banning user %s (ip %s) forever: %.*s"
-msgstr ""
+msgstr "Permanente harde verbanning voor gebruiker %s (ip %s): %.*s"
 
 #: src/builtincmd.c:788
 #, c-format
 msgid "HARD Banning user %s (ip %s) for %s: %.*s"
-msgstr ""
+msgstr "Harde verbanning van gebruiker %s (ip %s) voor %s: %.*s"
 
 #: src/builtincmd.c:795
 #, c-format
 msgid "HARD Banning ip %s forever: %.*s"
-msgstr ""
+msgstr "Permanente harde verbanning van ip %s: %.*s"
 
 #: src/builtincmd.c:798
 #, c-format
 msgid "HARD Banning ip %s for %s: %.*s"
-msgstr ""
+msgstr "Harde verbanning van ip %s voor %s: %.*s"
 
 #: src/builtincmd.c:803
 #, c-format
 msgid "User not found or ip address not valid: %s\n"
-msgstr ""
+msgstr "Gebruiker niet gevonden of IP adres niet geldig: %s\n"
 
 #: src/builtincmd.c:818
 #, c-format
 msgid "Usage: %s [<ip|nick>]"
-msgstr ""
+msgstr "Gebruik: %s [<ip|nick>]"
 
 #: src/builtincmd.c:824
 msgid "No bans found."
-msgstr ""
+msgstr "Geen verbanning gevonden."
 
 #: src/builtincmd.c:829
 #, c-format
 msgid "No IP bans found for %s"
-msgstr ""
+msgstr "Geen IP verbanning gevonden voor %s"
 
 #: src/builtincmd.c:834
 #, c-format
 msgid "No Nick bans found for %s"
-msgstr ""
+msgstr "Geen naam verbanning gevonden voor %s"
 
 #: src/builtincmd.c:855
 msgid "Available commands:\n"
-msgstr ""
+msgstr "Beschikbare commandos:\n"
 
 #: src/builtincmd.c:861
 msgid "Commands are preceded with ! or +\n"
-msgstr ""
+msgstr "Commandos worden voorafggaan door ! of +\n"
 
 #: src/builtincmd.c:880
 #, c-format
 msgid "Command %s not found.\n"
-msgstr ""
+msgstr "Commando %s niet gevonden\n"
 
 #: src/builtincmd.c:899
 #, c-format
 msgid "Usage: %s <group> <rights>...\n"
-msgstr ""
+msgstr "Gebruik: %s <group> <rechten>...\n"
 
 #: src/builtincmd.c:905
 #, c-format
