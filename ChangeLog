@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Fix banlist bugs.
+	Refuse to delete a user as bot.
+	Fix bug when script is unloaded during creation and a bot is deleted.
 	Added warning for download IP mismatches too.
 	Added right locallan that allows exception on the ip check 
 		in searches and ctms for unroutable addresses.

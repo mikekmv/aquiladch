@@ -155,6 +155,9 @@ int proto_nmdc_user_delrobot (user_t * u)
 {
   buffer_t *buf;
 
+  if (u->state != PROTO_STATE_VIRTUAL)
+    return -1;
+
   /* clear the user from all the relevant caches: not chat and not quit */
   string_list_purge (&cache.myinfo.messages, u);
   string_list_purge (&cache.myinfoupdate.messages, u);
@@ -180,6 +183,9 @@ int proto_nmdc_user_delrobot (user_t * u)
     bf_free (u->MyINFO);
     u->MyINFO = NULL;
   }
+
+  if (u->plugin_priv)
+    plugin_del_user ((plugin_private_t **) & u->plugin_priv);
 
   /* remove from the current user list */
   if (u->next)
@@ -930,7 +936,7 @@ int proto_nmdc_init ()
   init_bucket_type (&rates.psresults_in, 15, 100, 25);
   init_bucket_type (&rates.psresults_out, 15, 50, 25);
   init_bucket_type (&rates.warnings, 120, 10, 1);
-  init_bucket_type (&rates.violations, 60, 10, 2);
+  init_bucket_type (&rates.violations, 20, 10, 3);
 
   config_register ("rate.chat.period", CFG_ELEM_ULONG, &rates.chat.period,
 		   "Period of chat messages. This controls how often a user can send a chat message. Keep this low.");

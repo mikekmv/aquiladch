@@ -1345,6 +1345,10 @@ unsigned long pi_lua_robot_event_handler (plugin_user_t * user, void *dummy,
   lua_context_t *ctx;
   lua_robot_context_t *robot = NULL;
 
+  /* weird, but we can't handle this. */
+  if (!user)
+    return result;
+
   for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next) {
     for (robot = ctx->robots.next; robot != &ctx->robots; robot = robot->next) {
       if (robot->robot == user)

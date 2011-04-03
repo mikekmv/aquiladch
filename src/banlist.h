@@ -29,10 +29,11 @@
 # endif
 #endif
 
+#include "defaults.h"
 #include "buffer.h"
 #include "dllist.h"
 
-typedef struct banlist {
+typedef struct banlist_entry {
   dllist_entry_t list_ip;
   dllist_entry_t list_name;
 
@@ -44,7 +45,7 @@ typedef struct banlist {
   time_t expire;
 } banlist_entry_t;
 
-typedef struct {
+typedef struct banlist {
   dllist_t list_ip;
   dllist_t list_name;
   unsigned long netmask_inuse[33];

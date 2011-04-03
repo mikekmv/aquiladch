@@ -913,7 +913,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       /* if no entry in the stringlist yet, exit */
       if (!(entry = string_list_find (&cache.myinfoupdate.messages, u))) {
 	nmdc_stats.myinfooverflow++;
-	retval = proto_nmdc_violation (u, &now);
+	/* retval = proto_nmdc_violation (u, &now); */
 	break;
       }
 
@@ -1173,7 +1173,6 @@ int proto_nmdc_state_online_sr (user_t * u, token_t * tkn, buffer_t * output, bu
     }
 
     /* queue search result with the correct user */
-    //cache_count (cache.results, t, b);
     cache_queue (((nmdc_user_t *) t->pdata)->results, u, b);
     cache_count (results, t);
     t->ResultCnt++;
@@ -1215,7 +1214,6 @@ int proto_nmdc_state_online_getinfo (user_t * u, token_t * tkn, buffer_t * outpu
       break;
 
     cache_queue (((nmdc_user_t *) u->pdata)->privatemessages, u, t->MyINFO);
-    //cache_count (cache.privatemessages, u, t->MyINFO);
     cache_count (privatemessages, u);
     u->MessageCnt++;
     u->CacheException++;
@@ -1297,7 +1295,6 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
        * \0 termination should not be necessary
        */
       cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-      //cache_count (cache.privatemessages, t, b);
       cache_count (privatemessages, t);
       t->MessageCnt++;
       t->CacheException++;
@@ -1368,11 +1365,8 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
       if (t->rate_downloads.tokens <= rates.downloads.burst)
 	t->rate_downloads.tokens++;
 
-      /* queue search result with the correct user
-       * \0 termination should not be necessary
-       */
+      /* queue search result with the correct user */
       cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-      //cache_count (cache.privatemessages, t, b);
       cache_count (privatemessages, t);
       t->MessageCnt++;
       t->CacheException++;
@@ -1486,7 +1480,6 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
        * \0 termination should not be necessary
        */
       cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-      //cache_count (cache.privatemessages, t, b);
       cache_count (privatemessages, t);
       t->MessageCnt++;
       t->CacheException++;
