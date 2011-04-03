@@ -57,6 +57,7 @@ const unsigned char *pi_lua_eventnames[] = {
   "EventLoad",
   "EventSave",
   "EventConfig",
+  "EventDisconnect",
   NULL
 };
 
@@ -159,9 +160,9 @@ int pi_lua_getconfig (lua_State * lua)
 
   elem = config_find (name);
   if (!elem) {
-    // push error message
+    /* push error message */
     lua_pushstring (lua, "Unknown config value.");
-    // flag error, this function never returns.
+    /* flag error, this function never returns. */
     lua_error (lua);
   }
 
@@ -235,9 +236,9 @@ int pi_lua_setconfig (lua_State * lua)
 
   elem = config_find (name);
   if (!elem) {
-    // push error message
+    /* push error message */
     lua_pushstring (lua, "Unknown config value.");
-    // flag error, this function never returns.
+    /* flag error, this function never returns. */
     lua_error (lua);
   }
 
@@ -1617,7 +1618,7 @@ int pi_lua_cmdreg (lua_State * lua)
   pi_lua_command_context_t *ctx;
   unsigned long caps = 0, ncaps = 0;
   unsigned char *cmd = (unsigned char *) luaL_checkstring (lua, 1);
-  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);	// FIXME
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *desc = (unsigned char *) luaL_checkstring (lua, 3);
 
   lua_pushstring (lua, cmd);
@@ -1874,7 +1875,7 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
   openlualibs (l);		/* Load Lua libraries */
   pi_lua_register_functions (l);	/* register lua commands */
 
-  // load the file
+  /* load the file */
   result = luaL_loadfile (l, name);
   if (result) {
     unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
@@ -1883,13 +1884,13 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
     goto error;
   }
-  // alloc and init context
+  /* alloc and init context */
   ctx = malloc (sizeof (lua_context_t));
   ctx->l = l;
   ctx->name = strdup (name);
   ctx->eventmap = 0;
 
-  // add into list  
+  /* add into list */
   ctx->next = &lua_list;
   ctx->prev = lua_list.prev;
   ctx->prev->next = ctx;

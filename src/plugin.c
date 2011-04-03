@@ -86,12 +86,6 @@ unsigned int plugin_report (buffer_t * message)
 {
   user_t *u;
 
-  //config_element_t *target;
-
-  //target = config_find ("reporttarget");
-
-  //u = hash_find_nick (&hashlist, *target->val.v_string, strlen (*target->val.v_string));
-
   if (!*config.SysReportTarget)
     return EINVAL;
 
@@ -132,7 +126,6 @@ plugin_user_t *plugin_user_find_ip (plugin_user_t * last, unsigned long ip)
 {
   user_t *u = last ? ((plugin_private_t *) (last)->private)->parent : NULL;
 
-  //u = hash_find_ip (&hashlist, ip);
   u = hash_find_ip_next (&hashlist, u, ip);
   if (!u)
     return NULL;
@@ -144,7 +137,6 @@ plugin_user_t *plugin_user_find_net (plugin_user_t * last, unsigned long ip, uns
 {
   user_t *u = last ? ((plugin_private_t *) (last)->private)->parent : NULL;
 
-  //u = hash_find_ip (&hashlist, ip);
   u = hash_find_net_next (&hashlist, u, ip, netmask);
   if (!u)
     return NULL;
@@ -570,8 +562,6 @@ unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message)
     message->s[bf_used (message) - 1] = '\0';
     message->e--;
   }
-  /* too much trouble otherwise FIXME huh ??? */
-  //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return ((plugin_private_t *) u->plugin_priv)->proto->chat_main (u, message);
 }
 
@@ -627,8 +617,6 @@ unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buf
   if (t->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  /* too much trouble otherwise FIXME huh ??? */
-  //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return direct ? ((plugin_private_t *) u->plugin_priv)->proto->chat_send_direct (u, t, message) :
     ((plugin_private_t *) u->plugin_priv)->proto->chat_send (u, t, message);
 }
@@ -658,8 +646,6 @@ unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plug
     s = HubSec;
   }
 
-  /* too much trouble otherwise */
-  //ASSERT (u->state == PROTO_STATE_VIRTUAL);
   return direct ? ((plugin_private_t *) target->private)->proto->chat_priv_direct (u, t, s, message)
     : ((plugin_private_t *) target->private)->proto->chat_priv (u, t, s, message);
 }

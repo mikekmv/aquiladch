@@ -182,7 +182,6 @@ user_t *hash_find_net_next (hashlist_t * list, user_t * last, unsigned long ip,
 
   ip &= netmask;
 
-  //lst = dllist_bucket (&list->ip, h);
   dlhashlist_foreach (&list->ip, bucket) {
     lst = dllist_bucket (&list->ip, bucket);
     dllist_foreach (lst, p) {

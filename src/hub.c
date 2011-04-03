@@ -53,7 +53,7 @@ unsigned int es_type_server, es_type_listen;
 
 hub_statistics_t hubstats;
 
-int server_disconnect_user (client_t *);
+int server_disconnect_user (client_t *, char *);
 int server_handle_output (esocket_t * es);
 
 
@@ -274,7 +274,7 @@ int server_write (client_t * cl, buffer_t * b)
 	case EAGAIN:
 	  break;
 	case EPIPE:
-	  server_disconnect_user (cl);
+	  server_disconnect_user (cl, "Connection closed by peer.");
 	default:
 	  return -1;
       }
@@ -326,7 +326,7 @@ int server_write (client_t * cl, buffer_t * b)
   return t;
 }
 
-int server_disconnect_user (client_t * cl)
+int server_disconnect_user (client_t * cl, char *reason)
 {
   int s;
 
@@ -334,7 +334,7 @@ int server_disconnect_user (client_t * cl)
     return 0;
 
   /* first disconnect on protocol level: parting messages can be written */
-  cl->proto->user_disconnect (cl->user);
+  cl->proto->user_disconnect (cl->user, reason);
 
   /* close the real socket */
   if (cl->es) {
@@ -393,7 +393,7 @@ int server_handle_output (esocket_t * es)
 	    break;
 	  case EPIPE:
 	    buf_mem += cl->outgoing.size;
-	    return server_disconnect_user (cl);
+	    return server_disconnect_user (cl, "Connection closed by peer.");
 	  default:
 	    buf_mem += cl->outgoing.size;
 	    return -1;
@@ -485,7 +485,7 @@ int server_handle_input (esocket_t * s)
   }
 
   if ((n <= 0) && first) {
-    server_disconnect_user (cl);
+    server_disconnect_user (cl, "Error on read.");
     return -1;
   }
 
@@ -507,7 +507,7 @@ int server_timeout (esocket_t * s)
   }
 
   DPRINTF ("Timeout user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl);
+  return server_disconnect_user (cl, "Timeout");
 }
 
 int server_error (esocket_t * s)
@@ -515,7 +515,7 @@ int server_error (esocket_t * s)
   client_t *cl = (client_t *) ((unsigned long long) s->context);
 
   DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl);
+  return server_disconnect_user (cl, "Socket error.");
 }
 
 int server_add_port (esocket_handler_t * h, proto_t * proto, unsigned long address, int port)
@@ -548,7 +548,6 @@ int server_init ()
 
   banlist_init (&hardbanlist);
   banlist_init (&softbanlist);
-  //banlist_nick_init (&nickbanlist);
 
   core_config_init ();
 

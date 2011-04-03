@@ -89,7 +89,7 @@ int proto_nmdc_init ();
 int proto_nmdc_handle_token (user_t * u, buffer_t * b);
 int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers);
 void proto_nmdc_flush_cache ();
-int proto_nmdc_user_disconnect (user_t * u);
+int proto_nmdc_user_disconnect (user_t * u, char *reason);
 int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t * message);
 int proto_nmdc_user_redirect (user_t * u, buffer_t * message);
 int proto_nmdc_user_drop (user_t * u, buffer_t * message);
@@ -401,7 +401,8 @@ __inline__ int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message
   bf_strcat (b, "<");
   bf_strcat (b, u->nick);
   bf_strcat (b, "> ");
-  bf_strncat (b, message->s, bf_used (message));
+  for (; message; message = message->next)
+    bf_strncat (b, message->s, bf_used (message));
   if (*(b->e - 1) == '\n')
     b->e--;
   bf_strcat (b, "|");
@@ -449,7 +450,6 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
 
   proto_nmdc_user_say (u, buf, message);
 
-  //cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
   cache_count (privatemessages, target);
   target->MessageCnt++;
@@ -488,7 +488,8 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
   buf = bf_alloc (32 + 3 * NICKLENGTH + bf_used (message));
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
-  bf_strncat (buf, message->s, bf_used (message));
+  for (; message; message = message->next)
+    bf_strncat (buf, message->s, bf_used (message));
   if (*(buf->e - 1) == '\n')
     buf->e--;
   if (buf->e[-1] != '|')
@@ -500,7 +501,6 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
     bf_free (buf);
     return 0;
   }
-  //cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
   cache_count (privatemessages, target);
 
@@ -522,7 +522,8 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
   buf = bf_alloc (32 + 3 * NICKLENGTH + bf_used (message));
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
-  bf_strncat (buf, message->s, bf_used (message));
+  for (; message; message = message->next)
+    bf_strncat (buf, message->s, bf_used (message));
   if (*(buf->e - 1) == '\n')
     buf->e--;
   bf_strcat (buf, "|");
@@ -550,7 +551,6 @@ int proto_nmdc_user_raw (user_t * target, buffer_t * message)
 
   buf = bf_copy (message, 0);
 
-  //cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, target, buf);
   cache_count (privatemessages, target);
 
@@ -664,12 +664,14 @@ user_t *proto_nmdc_user_find (unsigned char *nick)
   return hash_find_nick (&hashlist, nick, strlen (nick));
 }
 
-int proto_nmdc_user_disconnect (user_t * u)
+int proto_nmdc_user_disconnect (user_t * u, char *reason)
 {
   buffer_t *buf;
 
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
+
+  plugin_send_event (u->plugin_priv, PLUGIN_EVENT_DISCONNECT, reason);
 
   /* if user was online, clear out all stale data */
   if (u->state == PROTO_STATE_ONLINE) {
@@ -743,7 +745,7 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   u->flags &= NMDC_FLAG_WASKICKED;
 
   if (u->state != PROTO_STATE_DISCONNECTED)
-    server_disconnect_user (u->parent);
+    server_disconnect_user (u->parent, "User forcemoved.");
 
   nmdc_stats.forcemove++;
 
@@ -771,7 +773,7 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
 
   u->flags &= NMDC_FLAG_WASKICKED;
 
-  server_disconnect_user (u->parent);
+  server_disconnect_user (u->parent, "User dropped");
 
   nmdc_stats.disconnect++;
 
@@ -810,7 +812,7 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
   bf_free (b);
 
   if (u->state != PROTO_STATE_DISCONNECTED)
-    server_disconnect_user (u->parent);
+    server_disconnect_user (u->parent, "User redirected");
 
   nmdc_stats.redirect++;
 
@@ -850,7 +852,7 @@ int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
 
   /* disconnect the user */
   if (u->state != PROTO_STATE_DISCONNECTED)
-    server_disconnect_user (u->parent);
+    server_disconnect_user (u->parent, buf->s);
 
   nmdc_stats.userviolate++;
 

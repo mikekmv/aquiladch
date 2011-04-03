@@ -240,7 +240,7 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
       broken_key:
 	DPRINTF ("ILLEGAL KEY\n");
 	nmdc_stats.brokenkey++;
-	server_disconnect_user (u->parent);
+	server_disconnect_user (u->parent, "Protocol violation: Bad key.");
 	retval = -1;
 	break;
       }
@@ -337,7 +337,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       } else {
 	proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
 	server_write (existing_user->parent, output);
-	server_disconnect_user (existing_user->parent);
+	server_disconnect_user (existing_user->parent, "Reconnecting.");
 	*output->s = '\0';
 	output->e = output->s;
       }
@@ -468,7 +468,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       proto_nmdc_user_say (HubSec, output, bf_buffer ("Bad password."));
       bf_strcat (output, "$BadPass|");
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent);
+      server_disconnect_user (u->parent, "Bad password");
       retval = -1;
       nmdc_stats.badpasswd++;
       /* check password guessing attempts */
@@ -489,7 +489,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
       proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
       server_write (existing_user->parent, output);
-      server_disconnect_user (existing_user->parent);
+      server_disconnect_user (existing_user->parent, "Reconnecting.");
       *output->s = '\0';
       output->e = output->s;
     }
@@ -598,7 +598,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       } else {
 	proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
 	server_write (existing_user->parent, output);
-	server_disconnect_user (existing_user->parent);
+	server_disconnect_user (existing_user->parent, "Reconnecting");
       }
       existing_user = NULL;
     }
@@ -744,8 +744,10 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
   string_list_entry_t *le;
 
   do {
-    if (!(u->rights & CAP_CHAT))
+    if (!(u->rights & CAP_CHAT)) {
+      proto_nmdc_user_warn (u, &now, "You are not allowed to chat.");
       break;
+    }
 
     /* check quota */
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
@@ -757,6 +759,7 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
 
     /* drop all chat message that are too long */
     if ((bf_size (b) > chatmaxlength) && (!(u->rights & CAP_SPAM))) {
+      proto_nmdc_user_warn (u, &now, "Your chat message was too long.");
       nmdc_stats.chattoolong++;
       break;
     }
@@ -935,8 +938,10 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
   deadline = now.tv_sec - researchperiod;
   do {
 
-    if (!(u->rights & CAP_SEARCH))
+    if (!(u->rights & CAP_SEARCH)) {
+      proto_nmdc_user_warn (u, &now, "You are not allowed to search.");
       break;
+    }
 
     /* check quota */
     if (!get_token (u->active ? &rates.asearch : &rates.psearch, &u->rate_search, now.tv_sec)
@@ -955,6 +960,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 
     /* drop all seach message that are too long */
     if ((bf_size (b) > searchmaxlength) && (!(u->rights & CAP_SPAM))) {
+      proto_nmdc_user_warn (u, &now, "Your search message is too long.");
       nmdc_stats.searchtoolong++;
       break;
     }
@@ -1097,7 +1103,6 @@ int proto_nmdc_state_online_sr (user_t * u, token_t * tkn, buffer_t * output, bu
     n = tkn->argument;
 
     /* find end of nick */
-    //for (; *c && (*c != ' ') && (c < b->e); ++c);
     SKIPTOCHAR (c, b->e, ' ');
     l = c - n;
 
@@ -1179,7 +1184,6 @@ int proto_nmdc_state_online_getinfo (user_t * u, token_t * tkn, buffer_t * outpu
     n = tkn->argument;
 
     /* find end of nick */
-    //for (; *c && (*c != ' '); c++);
     SKIPTOCHAR (c, b->e, ' ');
     l = c - n;
 
@@ -1206,9 +1210,11 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
   struct in_addr addr;
 
   do {
-
-    if (!(u->rights & CAP_DL))
+    /* this means a passive user cannot download from a user that isn't allowed to dl */
+    if (!(u->rights & CAP_DL)) {
+      proto_nmdc_user_warn (u, &now, "You are not allowed to download.");
       break;
+    }
 
     /* check quota */
     if (!get_token (&rates.downloads, &u->rate_downloads, now.tv_sec)) {
@@ -1220,7 +1226,6 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
     n = tkn->argument;
 
     /* find end of nick */
-    //for (; *c && (*c != ' '); c++);
     SKIPTOCHAR (c, b->e, ' ');
     l = c - n;
 
@@ -1283,8 +1288,10 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
   user_t *t;
 
   do {
-    if (!(u->rights & CAP_DL))
+    if (!(u->rights & CAP_DL)) {
+      proto_nmdc_user_warn (u, &now, "You are not allowed to download.");
       break;
+    }
 
     /* check quota */
     if (!get_token (&rates.downloads, &u->rate_downloads, now.tv_sec)) {
@@ -1294,7 +1301,6 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
 
     /* check target */
     n = c = tkn->argument;
-    //for (; *c && (*c != ' '); c++);
     SKIPTOCHAR (c, b->e, ' ');
     l = c - n;
 
@@ -1374,7 +1380,6 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     n = tkn->argument;
 
     /* find end of nick */
-    //for (; *c && (*c != ' '); c++);
     SKIPTOCHAR (c, b->e, ' ');
     l = c - n;
 
@@ -1396,7 +1401,7 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     if (strncmp (u->nick, n, l)) {
       bf_printf (output, "Bad From: nick. No faking.");
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent);
+      server_disconnect_user (u->parent, "Attempted PM faking.");
       nmdc_stats.pmbadsource++;
       retval = -1;
       break;
@@ -1417,7 +1422,7 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     if (strncmp (u->nick, n, l)) {
       bf_printf (output, "Bad display nick. No faking.");
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent);
+      server_disconnect_user (u->parent, "Attempted display nick faking");
       nmdc_stats.pmbadsource++;
       retval = -1;
       break;
@@ -1461,14 +1466,15 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
 
   /* unsigned int port; */
   do {
-    if (!(u->rights & CAP_REDIRECT))
+    if (!(u->rights & CAP_REDIRECT)) {
+      proto_nmdc_user_warn (u, &now, "You are not allowed to redirect users.");
       break;
+    }
 
     /* parse argments. */
     c = tkn->argument;
 
     /* find first "$Who:" token */
-    //for (; *c && (*c != '$'); ++c);
     SKIPTOCHAR (c, b->e, '$');
     if (!*c++)
       break;
@@ -1478,14 +1484,12 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
     if (!*c++)
       break;
 
-    //for (; *c && (*c != ':'); c++);
     SKIPTOCHAR (c, b->e, ':');
     if (!*c)
       break;
     who = ++c;
 
     /* terminate string */
-    //for (; *c && (*c != '$'); c++);
     SKIPTOCHAR (c, b->e, '$');
     if (!*c)
       break;
@@ -1503,14 +1507,12 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
     /* find "Where:" token */
     if (strncmp (++c, "Where", 5))
       break;
-    //for (; *c && (*c != ':'); c++);
     SKIPTOCHAR (c, b->e, ':');
     if (!*c)
       break;
     where = ++c;
 
     /* terminate */
-    //for (; *c && (*c != '$'); c++);
     SKIPTOCHAR (c, b->e, '$');
     if (!*c)
       break;
@@ -1519,7 +1521,6 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
     /* find "Msg:" token */
     if (strncmp (c, "Msg", 3))
       break;
-    //for (; *c && (*c != ':'); c++);
     SKIPTOCHAR (c, b->e, ':');
     if (!*c)
       break;
@@ -1573,8 +1574,10 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
   user_t *target;
 
   do {
-    if (!(u->rights & CAP_KICK))
+    if (!(u->rights & CAP_KICK)) {
+      proto_nmdc_user_warn (u, &now, "You are not allowed to kick users.");
       break;
+    }
 
     c = tkn->argument;
     while (*c && *c == ' ')
@@ -1658,8 +1661,6 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
   /* user protocol handling */
   buffer_t *output;
-
-  //unsigned char *k, *l;
 
   output = bf_alloc (2048);
   output->s[0] = '\0';
@@ -1808,7 +1809,6 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
       t += l;
       *t++ = '|';
     };
-    //ASSERT (!u->ChatCnt);
     u->CacheException -= u->ChatCnt;
     u->ChatCnt = 0;
   };

@@ -295,7 +295,6 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
   /* rebuild reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  //bf_printf (buf, "You were kicked by %s because: ", user->nick);
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 

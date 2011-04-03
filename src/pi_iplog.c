@@ -39,7 +39,6 @@ typedef struct iplog_entry {
 
   unsigned char nick[NICKLENGTH];
   uint32_t ip;
-  // unsigned long login; NA
   unsigned long logout;
 } iplog_entry_t;
 

@@ -118,7 +118,7 @@ typedef struct {
   user_t *(*user_alloc) (void *priv);
   int (*user_free) (user_t *);
 
-  int (*user_disconnect) (user_t *);
+  int (*user_disconnect) (user_t *, char *);
 
   int (*user_forcemove) (user_t *, unsigned char *, buffer_t *);
   int (*user_redirect) (user_t *, buffer_t *);

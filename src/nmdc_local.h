@@ -55,7 +55,7 @@ extern int proto_nmdc_init ();
 extern int proto_nmdc_handle_token (user_t * u, buffer_t * b);
 extern int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers);
 extern void proto_nmdc_flush_cache ();
-extern int proto_nmdc_user_disconnect (user_t * u);
+extern int proto_nmdc_user_disconnect (user_t * u, char *);
 extern int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t * message);
 extern int proto_nmdc_user_redirect (user_t * u, buffer_t * message);
 extern int proto_nmdc_user_drop (user_t * u, buffer_t * message);

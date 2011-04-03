@@ -73,14 +73,12 @@ __inline__ unsigned int nicktolower (unsigned char *dest, unsigned char *source)
 {
   unsigned int l, n;
 
-  //*dest = '\0';
   for (l = 0; *source && (l < NICKLENGTH); l++)
     *dest++ = isalpha (*source) ? tolower (*source++) : *source++;
 
   n = l;
   while (n++ < NICKLENGTH)
     *dest++ = '\0';
-  //*dest = '\0';
 
   return l;
 };
@@ -385,8 +383,6 @@ unsigned int banlist_save (banlist_t * list, unsigned char *file)
   unsigned long j;
   banlist_entry_t *e;
   dllist_entry_t *l, *p, *n;
-
-  //banlist_cleanup (list);
 
   fp = fopen (file, "w+");
   if (!fp)

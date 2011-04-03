@@ -67,7 +67,7 @@ extern banlist_t hardbanlist, softbanlist;
 
 extern int server_init ();
 extern int server_setup (esocket_handler_t *);
-extern int server_disconnect_user (client_t *);
+extern int server_disconnect_user (client_t *, char *);
 extern int server_write (client_t *, buffer_t *);
 extern int server_write_credit (client_t *, buffer_t *);
 extern int server_settimeout (client_t * cl, unsigned long timeout);
