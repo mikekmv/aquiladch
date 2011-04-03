@@ -64,11 +64,17 @@ cap_array_t plugin_supports[] = {
 unsigned int plugin_report (buffer_t * message)
 {
   user_t *u;
-  config_element_t *target;
 
-  target = config_find ("reporttarget");
+  //config_element_t *target;
 
-  u = hash_find_nick (&hashlist, *target->val.v_string, strlen (*target->val.v_string));
+  //target = config_find ("reporttarget");
+
+  //u = hash_find_nick (&hashlist, *target->val.v_string, strlen (*target->val.v_string));
+
+  if (!*config.SysReportTarget)
+    return EINVAL;
+
+  u = hash_find_nick (&hashlist, config.SysReportTarget, strlen (config.SysReportTarget));
 
   if (!u)
     return EINVAL;

@@ -47,6 +47,8 @@ typedef struct account {
   time_t	regged;
   time_t	lastlogin;
 
+  unsigned int	badpw;
+
   account_type_t *classp;
 } account_t;
 

@@ -577,34 +577,6 @@ unsigned int trigger_show (buffer_t * buf, trigger_t * trigger)
   return 0;
 }
 
-unsigned long pi_trigger_handler_triggerlist (plugin_user_t * user, buffer_t * output, void *dummy,
-					      unsigned int argc, unsigned char **argv)
-{
-  trigger_t *t;
-  unsigned int count;
-
-  if (argc > 1) {
-    count = 1;
-    while (count < argc) {
-      t = trigger_find (argv[count]);
-      if (!t) {
-	bf_printf (output, "Cannot find trigger %s\n", argv[count]);
-	count++;
-	continue;
-      }
-      trigger_show (output, t);
-      count++;
-    }
-
-    return 0;
-  }
-
-  for (t = triggerList.next; t != &triggerList; t = t->next)
-    trigger_show (output, t);;
-
-  return 0;
-}
-
 unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * output, void *dummy,
 					  unsigned int argc, unsigned char **argv)
 {
@@ -795,11 +767,10 @@ int pi_trigger_init ()
   plugin_request (plugin_trigger, PLUGIN_EVENT_LOGIN, &pi_trigger_login);
 
   command_register ("triggeradd", &pi_trigger_handler_triggeradd, CAP_CONFIG, "Add a trigger.");
-  command_register ("triggerlist", &pi_trigger_handler_triggerlist, CAP_CONFIG, "List triggers.");
+  command_register ("triggerlist", &pi_trigger_handler_rulelist, CAP_CONFIG, "List triggers.");
   command_register ("triggerdel", &pi_trigger_handler_triggerdel, CAP_CONFIG, "Delete a trigger.");
 
   command_register ("ruleadd", &pi_trigger_handler_ruleadd, CAP_CONFIG, "Add a rule.");
-  command_register ("rulelist", &pi_trigger_handler_rulelist, CAP_CONFIG, "List rules.");
   command_register ("ruledel", &pi_trigger_handler_ruledel, CAP_CONFIG, "Delete a rule.");
 
   plugin_request (plugin_trigger, PLUGIN_EVENT_SAVE,

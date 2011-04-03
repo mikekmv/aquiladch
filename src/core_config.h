@@ -49,6 +49,7 @@ typedef struct {
   /* more settings */
   unsigned char *Redirect;
   unsigned char *KickBanRedirect;
+  unsigned char *SysReportTarget;
   
   /* buffering settings */
   unsigned long BufferSoftLimit;
@@ -57,6 +58,9 @@ typedef struct {
 
   unsigned long TimeoutBuffering;
   unsigned long TimeoutOverflow;
+
+  unsigned long PasswdRetry;
+  unsigned long PasswdBantime;
 
 } config_t;
 

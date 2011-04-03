@@ -754,8 +754,6 @@ user_t *proto_nmdc_user_alloc (void *priv)
   /* warnings and searches start with a full token load ! */
   user->rate_warnings.tokens = rates.warnings.burst;
 
-  /* searches start with a full load too to prevent users from getting the warning at login. */
-  user->rate_search.tokens = rates.search.refill;
 
   /* protocol private data */
   user->pdata = malloc (sizeof (nmdc_user_t));
@@ -1185,6 +1183,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     /* does the user have an account ? */
     if ((a = account_find (u->nick))) {
       if (a->passwd[0]) {
+	/* ask for users password */
 	u->flags |= PROTO_FLAG_REGISTERED;
 
 	bf_strcat (output, "$GetPass|");
@@ -1221,6 +1220,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       }
     }
 
+    /* check for cloning */
     if ((!cloning) && (existing_user = hash_find_ip (&hashlist, u->ipaddress))) {
       proto_nmdc_user_redirect (u,
 				bf_buffer
@@ -1257,6 +1257,8 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       }
       retval = server_write (u->parent, output);
       proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
+      nmdc_stats.forcemove--;
+      nmdc_stats.banned++;
       retval = -1;
       nmdc_stats.softban++;
       break;
@@ -1285,6 +1287,8 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       }
       retval = server_write (u->parent, output);
       proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
+      nmdc_stats.forcemove--;
+      nmdc_stats.banned++;
       retval = -1;
       nmdc_stats.nickban++;
       break;
@@ -1334,14 +1338,28 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     /* check password */
     a = account_find (u->nick);
     if (!account_pwd_check (a, tkn->argument)) {
+      if ((ban = banlist_find_bynick (&softbanlist, u->nick)))
+	goto banned;
+
       proto_nmdc_user_say (HubSec, output, bf_buffer ("Bad password."));
       bf_strcat (output, "$BadPass|");
       retval = server_write (u->parent, output);
       server_disconnect_user (u->parent);
       retval = -1;
       nmdc_stats.badpasswd++;
+      /* check password guessing attempts */
+      if (++a->badpw >= config.PasswdRetry) {
+	gettimeofday (&now, NULL);
+	banlist_add (&softbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
+		     bf_buffer ("Password retry overflow."), now.tv_sec + config.PasswdBantime);
+	a->badpw = 0;
+      }
+
       break;
     }
+    /* reset password failure counter */
+    a->badpw = 0;
+
     t = a->classp;
 
     /* check if users exists, if so, redirect old */
@@ -1362,28 +1380,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     /* nickban ? not for owner offcourse */
     ban = banlist_find_bynick (&softbanlist, u->nick);
     if (ban && (!(u->rights & CAP_OWNER))) {
-      DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
-	       (unsigned int) bf_used (ban->message), ban->message->s);
-      bf_strcat (output, "<");
-      bf_strcat (output, HubSec->nick);
-      bf_strcat (output, "> You have been banned by ");
-      bf_strcat (output, ban->op);
-      bf_strcat (output, " because: ");
-      bf_strncat (output, ban->message->s, bf_used (ban->message));
-      bf_strcat (output, "|");
-      if (ban->expire) {
-	gettimeofday (&now, NULL);
-	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
-	time_print (output, ban->expire - now.tv_sec);
-	bf_strcat (output, "|");
-      }
-      if (defaultbanmessage && strlen (defaultbanmessage)) {
-	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
-      }
-      retval = server_write (u->parent, output);
-      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
-      retval = -1;
-      nmdc_stats.nickban++;
+      goto banned;
       break;
     }
 
@@ -1411,6 +1408,35 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
   bf_free (output);
 
   return retval;
+
+banned:
+  DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
+	   (unsigned int) bf_used (ban->message), ban->message->s);
+  bf_strcat (output, "<");
+  bf_strcat (output, HubSec->nick);
+  bf_strcat (output, "> You have been banned by ");
+  bf_strcat (output, ban->op);
+  bf_strcat (output, " because: ");
+  bf_strncat (output, ban->message->s, bf_used (ban->message));
+  bf_strcat (output, "|");
+  if (ban->expire) {
+    gettimeofday (&now, NULL);
+    bf_printf (output, "<%s> Time remaining ", HubSec->nick);
+    time_print (output, ban->expire - now.tv_sec);
+    bf_strcat (output, "|");
+  }
+  if (defaultbanmessage && strlen (defaultbanmessage)) {
+    bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
+  }
+  retval = server_write (u->parent, output);
+  proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
+  nmdc_stats.forcemove--;
+  nmdc_stats.banned++;
+  nmdc_stats.nickban++;
+
+  bf_free (output);
+
+  return -1;
 }
 
 /********************
@@ -1486,6 +1512,10 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       }
     }
     ASSERT (u->MyINFO);
+
+    /* searches start with a full load too to prevent users from getting the warning at login. */
+    u->rate_search.tokens = u->active ? rates.asearch.refill : rates.psearch.refill;
+
 
     /* allocate plugin private stuff */
     plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
@@ -1759,10 +1789,15 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	/* check quota */
-	if (!get_token (&rates.search, &u->rate_search, now.tv_sec)
+	if (!get_token (u->active ? &rates.asearch : &rates.psearch, &u->rate_search, now.tv_sec)
 	    && (!(u->rights & CAP_NOSRCHLIMIT))) {
-	  proto_nmdc_user_warn (u, &now, "Searches are limited to %u every %u seconds.",
-				rates.search.refill, rates.search.period);
+	  if (u->active) {
+	    proto_nmdc_user_warn (u, &now, "Active earches are limited to %u every %u seconds.",
+				  rates.asearch.refill, rates.asearch.period);
+	  } else {
+	    proto_nmdc_user_warn (u, &now, "Passive searches are limited to %u every %u seconds.",
+				  rates.psearch.refill, rates.psearch.period);
+	  }
 	  nmdc_stats.searchoverflow++;
 	  break;
 	}
@@ -2915,7 +2950,8 @@ int proto_nmdc_init ()
   /* rate limiting stuff */
   memset ((void *) &rates, 0, sizeof (ratelimiting_t));
   init_bucket_type (&rates.chat, 2, 3, 1);
-  init_bucket_type (&rates.search, 15, 5, 1);
+  init_bucket_type (&rates.asearch, 15, 5, 1);
+  init_bucket_type (&rates.psearch, 15, 5, 1);
   init_bucket_type (&rates.myinfo, 1800, 1, 1);
   init_bucket_type (&rates.getnicklist, 1200, 1, 1);
   init_bucket_type (&rates.getinfo, 1, 10, 10);
@@ -2929,10 +2965,14 @@ int proto_nmdc_init ()
 		   "Period of chat messages. This controls how often a user can send a chat message. Keep this low.");
   config_register ("rate.chat.burst", CFG_ELEM_ULONG, &rates.chat.burst,
 		   "Burst of chat messages. This controls how many chat messages a user can 'save up'. Keep this low.");
-  config_register ("rate.search.period", CFG_ELEM_ULONG, &rates.search.period,
-		   "Period of searches. This controls how often a user can search. Keep this reasonable.");
-  config_register ("rate.search.burst", CFG_ELEM_ULONG, &rates.search.burst,
-		   "Burst of searches. This controls how many searches a user can 'save up'. Keep this low.");
+  config_register ("rate.activesearch.period", CFG_ELEM_ULONG, &rates.asearch.period,
+		   "Period of searches. This controls how often an active user can search. Keep this reasonable.");
+  config_register ("rate.activesearch.burst", CFG_ELEM_ULONG, &rates.asearch.burst,
+		   "Burst of searches. This controls how many searches an active user can 'save up'. Keep this low.");
+  config_register ("rate.passivesearch.period", CFG_ELEM_ULONG, &rates.psearch.period,
+		   "Period of searches. This controls how often a passive user can search. Keep this reasonable.");
+  config_register ("rate.passivesearch.burst", CFG_ELEM_ULONG, &rates.psearch.burst,
+		   "Burst of searches. This controls how many searches a passive user can 'save up'. Keep this low.");
   config_register ("rate.myinfo.period", CFG_ELEM_ULONG, &rates.myinfo.period,
 		   "Period of MyINFO messages. This controls how often a user can send a MyINFO message. Keep this very high.");
   config_register ("rate.myinfo.burst", CFG_ELEM_ULONG, &rates.myinfo.burst,
@@ -2959,7 +2999,7 @@ int proto_nmdc_init ()
   config_register ("rate.results_in.period", CFG_ELEM_ULONG, &rates.psresults_in.period,
 		   "Period of passive search results. This controls how often the incoming passive search results counter is refreshed. Keep this low.");
   config_register ("rate.results_in.burst", CFG_ELEM_ULONG, &rates.psresults_in.burst,
-		   "Burst of passive search results. This controls how many incoming passive search results can be saved up in idle time. Keep this low.");
+		   "Burst of passive search results. This controls how many incoming passive search results can be saved up in idle time. Keep this equal to the search period.");
   config_register ("rate.results_in.refill", CFG_ELEM_ULONG, &rates.psresults_in.refill,
 		   "Refill of passive search results. This controls how many incoming passive search results are added each time the counter resets. Keep this low.");
 

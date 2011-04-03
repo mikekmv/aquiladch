@@ -25,6 +25,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <limit.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
@@ -235,7 +236,7 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
   plugin_user_priv (NULL, tgt, NULL, buf, 0);
 
   /* return result */
-  bf_printf (output, "Report sent to %s.", tgt->nick);
+  bf_printf (output, "Report sent.");
 
   return 0;
 }
