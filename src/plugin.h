@@ -111,6 +111,7 @@ extern unsigned int plugin_user_next (plugin_user_t ** user);
 /* user management */
 extern plugin_user_t *plugin_user_find (unsigned char *name);
 extern plugin_user_t *plugin_user_find_ip (plugin_user_t *last, unsigned long ip);
+extern plugin_user_t *plugin_user_find_net (plugin_user_t *last, unsigned long ip, unsigned long net);
 extern buffer_t * plugin_user_getmyinfo (plugin_user_t *user);
 
 extern unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message);

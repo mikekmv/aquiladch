@@ -127,6 +127,27 @@ user_t *hash_find_ip (hashlist_t * list, unsigned long ip)
   return NULL;
 }
 
+user_t *hash_find_net (hashlist_t * list, unsigned long ip, unsigned long netmask)
+{
+  dllist_t *p;
+  user_t *u, *lst;
+  uint32_t h;
+
+  ip &= netmask;
+
+  dlhashlist_foreach (&list->ip, h) {
+    lst = dllist_bucket (&list->ip, h);
+    dllist_foreach (lst, p) {
+      u = (user_t *) ((char *) p - sizeof (dllist_t));
+      if ((u->ipaddress & netmask) == ip)
+	return u;
+    }
+  }
+
+  return NULL;
+}
+
+
 user_t *hash_find_ip_next (hashlist_t * list, user_t * last, unsigned long ip)
 {
   dllist_t *p;
@@ -147,6 +168,34 @@ user_t *hash_find_ip_next (hashlist_t * list, user_t * last, unsigned long ip)
     }
     if (u->ipaddress == ip)
       return u;
+  }
+
+  return NULL;
+}
+
+user_t *hash_find_net_next (hashlist_t * list, user_t * last, unsigned long ip,
+			    unsigned long netmask)
+{
+  dllist_t *p;
+  user_t *u, *lst;
+  uint32_t bucket;
+
+  ip &= netmask;
+
+  //lst = dllist_bucket (&list->ip, h);
+  dlhashlist_foreach (&list->ip, bucket) {
+    lst = dllist_bucket (&list->ip, bucket);
+    dllist_foreach (lst, p) {
+      u = (user_t *) ((char *) p - sizeof (dllist_t));
+      if (last) {
+	if (u != last)
+	  continue;
+	last = NULL;
+	continue;
+      }
+      if ((u->ipaddress & netmask) == ip)
+	return u;
+    }
   }
 
   return NULL;

@@ -1,7 +1,5 @@
 
 Develstatus:
-	- add min reconnection prevention
-	- start search buckets empty
 	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files
 	- language suppport
@@ -9,7 +7,6 @@ Develstatus:
 		(allow !help and !leave etc to work in chatrooms)
 	- Fix the crash if the clock is set back...
 	- add nick checking for insane chars as spaces  ( $|<>:?*"/\)
-	- split up proto_nmdc_state_online
 	- event handler.
 		- add events for user creation and deletion. (Why??)
 	- SSL (not for 0.1)
@@ -23,8 +20,6 @@ Large changes:
 		use generic cache elements of 1->N, 1->(N-1) and 1->1 nature.
 	- split off timers in esocket.c, export them genericly
 	- consider adding the chunked approach FarCry suggested for the nicklistcache
-	- command line parameters.
-		- config dir
 
 Ideas:
 	- if i ever implement something of a congestion measure, i could add

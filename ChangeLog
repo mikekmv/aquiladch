@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre1:
+	!whoip now supports networks.
 	!shutdown now sends warning to all users.
 	Fixed random timeout problems.
 	Added function plugin_perror ();

@@ -465,7 +465,7 @@ unsigned long handler_unzombie (plugin_user_t * user, buffer_t * output, void *p
 unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv,
 			     unsigned int argc, unsigned char **argv)
 {
-  struct in_addr ip;
+  struct in_addr ip, netmask, tmp;
   plugin_user_t *tgt;
 
   if (argc < 2) {
@@ -473,14 +473,25 @@ unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv
     return 0;
   };
 
-  if (inet_aton (argv[1], &ip)) {
-    if ((tgt = plugin_user_find_ip (NULL, ip.s_addr))) {
-      do {
-	bf_printf (output, "User %s is using IP %s\n", tgt->nick, inet_ntoa (ip));
-	tgt = plugin_user_find_ip (tgt, ip.s_addr);
-      } while (tgt);
+  if (parse_ip (argv[1], &ip, &netmask)) {
+    if (netmask.s_addr == 0xFFFFFFFF) {
+      /* looking for single IP */
+      if ((tgt = plugin_user_find_ip (NULL, ip.s_addr))) {
+	do {
+	  bf_printf (output, "User %s is using IP %s\n", tgt->nick, inet_ntoa (ip));
+	  tgt = plugin_user_find_ip (tgt, ip.s_addr);
+	} while (tgt);
+      } else
+	bf_printf (output, "No one using IP %s found.", inet_ntoa (ip));
     } else {
-      bf_printf (output, "No one using IP %s found.", inet_ntoa (ip));
+      if ((tgt = plugin_user_find_net (NULL, ip.s_addr, netmask.s_addr))) {
+	do {
+	  tmp.s_addr = tgt->ipaddress;
+	  bf_printf (output, "User %s is using IP %s\n", tgt->nick, inet_ntoa (tmp));
+	  tgt = plugin_user_find_net (tgt, ip.s_addr, netmask.s_addr);
+	} while (tgt);
+      } else
+	bf_printf (output, "No one using IP %s found.", print_ip (ip, netmask));
     }
   } else {
     bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);

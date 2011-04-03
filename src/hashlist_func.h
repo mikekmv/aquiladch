@@ -29,6 +29,7 @@ void hash_deluser (hashlist_t * list, hashlist_entry_t *);
 
 extern user_t *hash_find_nick (hashlist_t * list, unsigned char *n, unsigned int len);
 extern user_t *hash_find_ip (hashlist_t * list, unsigned long ip);
+extern user_t *hash_find_net (hashlist_t * list, unsigned long ip, unsigned long netmask);
 extern user_t *hash_find_ip_next (hashlist_t * list, user_t *last, unsigned long ip);
-
+extern user_t *hash_find_net_next (hashlist_t * list, user_t *last, unsigned long ip, unsigned long netmask);
 #endif /* _HASHLIST_FUNC_H_ */

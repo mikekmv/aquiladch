@@ -140,6 +140,18 @@ plugin_user_t *plugin_user_find_ip (plugin_user_t * last, unsigned long ip)
   return &((plugin_private_t *) u->plugin_priv)->user;
 }
 
+plugin_user_t *plugin_user_find_net (plugin_user_t * last, unsigned long ip, unsigned long netmask)
+{
+  user_t *u = last ? ((plugin_private_t *) (last)->private)->parent : NULL;
+
+  //u = hash_find_ip (&hashlist, ip);
+  u = hash_find_net_next (&hashlist, u, ip, netmask);
+  if (!u)
+    return NULL;
+
+  return &((plugin_private_t *) u->plugin_priv)->user;
+}
+
 buffer_t *plugin_user_getmyinfo (plugin_user_t * user)
 {
   return ((user_t *) ((plugin_private_t *) user->private)->parent)->MyINFO;

@@ -105,6 +105,13 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
   command_t *cmd;
   command_t *list = &cmd_hashtable[hash & COMMAND_HASHMASK];
 
+  for (cmd = list->next; cmd != list; cmd = cmd->next)
+    if (!strcmp (cmd->name, name))
+      break;
+
+  if (cmd != list)
+    return 0;
+
   cmd = malloc (sizeof (command_t));
   memset (cmd, 0, sizeof (command_t));
 
