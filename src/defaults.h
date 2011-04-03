@@ -188,4 +188,6 @@
 #define ASSERT(x...) /* x */
 #endif
 
+#include "gettext.h"
+
 #endif /* _DEFAULTS_H_ */

@@ -843,11 +843,11 @@ int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
   /* if he is only a short time online, this is most likely a spammer and he will be hardbanned */
   buf = bf_alloc (128);
   if ((u->joinstamp - now->tv_sec) < config.ProbationPeriod) {
-    bf_printf (buf, "Rate Probation Violation (Last: %s).", reason);
+    bf_printf (buf, _("Rate Probation Violation (Last: %s)."), reason);
     banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf, 0);
 
   } else {
-    bf_printf (buf, "Rate Violation (Last: %s).", reason);
+    bf_printf (buf, _("Rate Violation (Last: %s)."), reason);
     banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf,
 		 now->tv_sec + config.ViolationBantime);
   }
@@ -866,7 +866,7 @@ int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
   report = bf_alloc (1024);
 
   addr.s_addr = u->ipaddress;
-  bf_printf (report, "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n", u->nick,
+  bf_printf (report, _("Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"), u->nick,
 	     inet_ntoa (addr), bf_used (buf), buf->s, reason);
 
   plugin_report (report);
@@ -888,9 +888,8 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
 
   buf = bf_alloc (10240);
 
-  bf_strcat (buf, "<");
-  bf_strcat (buf, HubSec->nick);
-  bf_strcat (buf, "> WARNING: ");
+  bf_printf (buf, "<%s>", HubSec->nick);
+  bf_printf (buf, _("WARNING: "));
 
   va_start (ap, message);
   bf_vprintf (buf, message, ap);
@@ -920,7 +919,7 @@ int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...)
 
   buf = bf_alloc (10240);
 
-  bf_printf (buf, "WARNING: ");
+  bf_printf (buf, _("WARNING: "));
 
   va_start (ap, message);
   bf_vprintf (buf, message, ap);

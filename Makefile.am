@@ -1,6 +1,9 @@
 
-EXTRA_DIST = TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README doc/aquila-manual.txt config.h.in depcomp install-sh missing
-SUBDIRS = src tools
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
+
+EXTRA_DIST = config.rpath  TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README doc/aquila-manual.txt config.h.in depcomp install-sh missing ABOUT-NLS
+SUBDIRS = po src tools
 
 CYGCRYPT_PACKAGE = crypt/crypt-1.1-1.tar.bz2
 CYGCRYPT_SRC =  $(subst .tar.bz2,-src.tar.bz2,${CYGCRYPT_PACKAGE})

@@ -57,7 +57,7 @@ config_element_t *config_register (unsigned char *name, config_type_t type, void
   elem->name[i] = '\0';
   elem->type = type;
   elem->val.v_ptr = ptr;
-  elem->help = help;
+  elem->help = gettext (help);
 
   hash = SuperFastHash (elem->name, strlen (elem->name)) & CONFIG_HASHMASK;
   elem->next = configlist[hash].next;

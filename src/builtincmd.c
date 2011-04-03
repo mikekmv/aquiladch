@@ -105,21 +105,21 @@ unsigned long handler_warn (plugin_user_t * user, buffer_t * output, void *priv,
   plugin_user_t *tgt;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick> <warning>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <warning>"), argv[0]);
     return 0;
   }
 
   /* find target */
   tgt = plugin_user_find (argv[1]);
   if (!tgt) {
-    bf_printf (output, "User %s not found.", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
   }
 
   /* build message */
   buf = bf_alloc (10240);
   *buf->e = '\0';
-  bf_printf (buf, "%s is WARNING you: ", user->nick);
+  bf_printf (buf, _("%s is WARNING you: "), user->nick);
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
   if (*buf->s == ' ')
@@ -151,7 +151,7 @@ unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *p
     if (*buf->s == ' ')
       buf->s++;
   } else {
-    bf_printf (buf, "Hub shutdown in progress.");
+    bf_printf (buf, _("Hub shutdown in progress."));
   }
 
   /* send to all users */
@@ -169,7 +169,7 @@ unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *p
 unsigned long handler_version (plugin_user_t * user, buffer_t * output, void *priv,
 			       unsigned int argc, unsigned char **argv)
 {
-  bf_printf (output, "This is " HUBSOFT_NAME " Version " AQUILA_VERSION);
+  bf_printf (output, _("This is %s Version %s"), HUBSOFT_NAME, AQUILA_VERSION);
   return 0;
 }
 
@@ -181,7 +181,7 @@ unsigned long handler_massall (plugin_user_t * user, buffer_t * output, void *pr
   plugin_user_t *tgt = NULL;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <message>", argv[0]);
+    bf_printf (output, _("Usage: %s <message>"), argv[0]);
     return 0;
   }
 
@@ -202,7 +202,7 @@ unsigned long handler_massall (plugin_user_t * user, buffer_t * output, void *pr
   bf_free (buf);
 
   /* return result */
-  bf_printf (output, "Message sent to %lu users.", i);
+  bf_printf (output, _("Message sent to %lu users."), i);
 
   return 0;
 }
@@ -215,16 +215,17 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
   plugin_user_t *tgt = NULL;
   config_element_t *reporttarget;
   struct in_addr source, target;
+  char sa[16], da[16];
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick> <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <reason>"), argv[0]);
     return 0;
   }
 
   /* find config value */
   reporttarget = config_find ("ReportTarget");
   if (!reporttarget) {
-    bf_printf (output, "Report could not be sent. Reporting is disabled.");
+    bf_printf (output, _("Report could not be sent. Reporting is disabled."));
     return 0;
   }
 
@@ -239,8 +240,14 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
   /* build message */
   buf = bf_alloc (10240);
   *buf->e = '\0';
-  bf_printf (buf, "User %s (%s) reports ", user->nick, inet_ntoa (source));
-  bf_printf (buf, "%s (%s): ", argv[1], target.s_addr ? inet_ntoa (target) : "not logged in");
+
+  snprintf (sa, 15, "%s", inet_ntoa (source));
+  if (target.s_addr) {
+    snprintf (da, 15, "%s", inet_ntoa (target));
+    bf_printf (buf, _("User %s (%s) reports %s (%s): "), user->nick, sa, argv[1], da);
+  } else
+    bf_printf (buf, _("User %s (%s) reports %s (not logged in): "), user->nick, sa, argv[1]);
+
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
   if (*buf->s == ' ')
@@ -250,9 +257,11 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
   /* extract user */
   tgt = plugin_user_find (*reporttarget->val.v_string);
   if (!tgt) {
-    bf_printf (output, "Report could not be sent, %s not found.",
-	       **reporttarget->val.v_string ? *reporttarget->val.
-	       v_string : (unsigned char *) "target");
+    if (**reporttarget->val.v_string) {
+      bf_printf (output, _("Report could not be sent, %s not found."), *reporttarget->val.v_string);
+    } else {
+      bf_printf (output, _("Report could not be sent, target not found."));
+    }
     return 0;
   }
 
@@ -260,7 +269,7 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
   plugin_user_priv (NULL, tgt, NULL, buf, 0);
 
   /* return result */
-  bf_printf (output, "Report sent.");
+  bf_printf (output, _("Report sent."));
 
   return 0;
 }
@@ -272,7 +281,7 @@ unsigned long handler_myip (plugin_user_t * user, buffer_t * output, void *priv,
 
   ip.s_addr = user->ipaddress;
 
-  bf_printf (output, "Your IP is %s\n", inet_ntoa (ip));
+  bf_printf (output, _("Your IP is %s\n"), inet_ntoa (ip));
 
   return 0;
 }
@@ -288,7 +297,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
   unsigned char *c;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick> <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <reason>"), argv[0]);
     return 0;
   };
 
@@ -301,13 +310,13 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
   /* find target */
   target = plugin_user_find (argv[1]);
   if (!target) {
-    bf_printf (output, "User %s not found.\n", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     goto leave;
   }
 
   /* kick the user */
   ip.s_addr = target->ipaddress;
-  bf_printf (output, "Kicked user %s ( ip %s ) because: %.*s", target->nick, inet_ntoa (ip),
+  bf_printf (output, _("Kicked user %s ( ip %s ) because: %.*s"), target->nick, inet_ntoa (ip),
 	     bf_used (buf), buf->s);
 
   /* permban the user if the kick string contains _BAN_. */
@@ -319,21 +328,18 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
       if ((KickMaxBanTime == 0) || ((KickMaxBanTime > 0) && (total <= KickMaxBanTime))
 	  || (user->rights & CAP_BAN)) {
 	if (total != 0) {
-	  bf_printf (output, "\nBanning user for ");
-	  time_print (output, total);
-	  bf_strcat (output, "\n");
+	  bf_printf (output, _("\nBanning user for %s\n"), time_print (total));
 	} else {
-	  bf_printf (output, "\nBanning user forever");
+	  bf_printf (output, _("\nBanning user forever"));
 	}
 	plugin_user_ban (user, target, buf, total);
 	goto leave;
       } else {
-	bf_printf (output, "\nSorry. You cannot ban users for longer than ");
-	time_print (output, KickMaxBanTime);
-	bf_strcat (output, " with a kick.");
+	bf_printf (output, _("\nSorry. You cannot ban users for longer than %s with a kick."),
+		   time_print (KickMaxBanTime));
       }
     } else {
-      bf_printf (output, "\nSorry, you cannot ban.");
+      bf_printf (output, _("\nSorry, you cannot ban."));
     }
   }
 
@@ -356,27 +362,27 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
   unsigned char *c;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick> <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <reason>"), argv[0]);
     return 0;
   };
 
   /* rebuild reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "You were dropped by %s because: ", user->nick);
+  bf_printf (buf, _("You were dropped by %s because: "), user->nick);
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
   /* find target */
   target = plugin_user_find (argv[1]);
   if (!target) {
-    bf_printf (output, "User %s not found.\n", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     goto leave;
   }
 
   /* kick the user */
   ip.s_addr = target->ipaddress;
-  bf_printf (output, "Dropped user %s (ip %s) because: %.*s", target->nick, inet_ntoa (ip),
+  bf_printf (output, _("Dropped user %s (ip %s) because: %.*s"), target->nick, inet_ntoa (ip),
 	     bf_used (buf), buf->s);
 
   /* permban the user if the kick string contains _BAN_. */
@@ -388,20 +394,17 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
       if ((KickMaxBanTime == 0) || ((KickMaxBanTime > 0) && (total <= KickMaxBanTime))
 	  || (user->rights & CAP_BAN)) {
 	if (total != 0) {
-	  bf_printf (output, "\nBanning user for ");
-	  time_print (output, total);
-	  bf_strcat (output, "\n");
+	  bf_printf (output, _("\nBanning user for %s\n"), time_print (total));
 	} else {
-	  bf_printf (output, "\nBanning user forever");
+	  bf_printf (output, _("\nBanning user forever"));
 	}
 	plugin_user_ban (user, target, buf, total);
       } else {
-	bf_printf (output, "\nSorry. You cannot ban users for longer than ");
-	time_print (output, KickMaxBanTime);
-	bf_strcat (output, " with a kick.");
+	bf_printf (output, _("\nSorry. You cannot ban users for longer than %s with a drop."),
+		   time_print (KickMaxBanTime));
       }
     } else {
-      bf_printf (output, "\nSorry, you cannot ban.");
+      bf_printf (output, _("\nSorry, you cannot ban."));
     }
   }
 
@@ -421,19 +424,19 @@ unsigned long handler_zombie (plugin_user_t * user, buffer_t * output, void *pri
   plugin_user_t *zombie;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick>"), argv[0]);
     return 0;
   }
 
   zombie = plugin_user_find (argv[1]);
   if (!zombie) {
-    bf_printf (output, "User %s not found.", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
   }
 
   plugin_user_zombie (zombie);
 
-  bf_printf (output, "User %s's putrid flesh stinks up the place...", argv[1]);
+  bf_printf (output, _("User %s's putrid flesh stinks up the place..."), argv[1]);
 
   return 0;
 }
@@ -445,7 +448,7 @@ unsigned long handler_zombielist (plugin_user_t * user, buffer_t * output, void 
   unsigned long count = 0;
 
   /* send to all users */
-  bf_printf (output, "The hub is infested by the following zombie horde:\n");
+  bf_printf (output, _("The hub is infested by the following zombie horde:\n"));
   while (plugin_user_next (&zombie)) {
     if (!(zombie->flags & PLUGIN_FLAG_ZOMBIE))
       continue;
@@ -456,7 +459,7 @@ unsigned long handler_zombielist (plugin_user_t * user, buffer_t * output, void 
     count++;
   }
   if (!count)
-    bf_printf (output, "No zombies found!\n");
+    bf_printf (output, _("No zombies found!\n"));
 
   return 0;
 }
@@ -467,19 +470,19 @@ unsigned long handler_unzombie (plugin_user_t * user, buffer_t * output, void *p
   plugin_user_t *zombie;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick>"), argv[0]);
     return 0;
   }
 
   zombie = plugin_user_find (argv[1]);
   if (!zombie) {
-    bf_printf (output, "User %s not found.", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
   }
 
   plugin_user_unzombie (zombie);
 
-  bf_printf (output, "User %s's putrid flesh is miraculously restored...", argv[1]);
+  bf_printf (output, _("User %s's putrid flesh is miraculously restored..."), argv[1]);
 
   return 0;
 }
@@ -491,7 +494,7 @@ unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv
   plugin_user_t *tgt;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <ip>", argv[0]);
+    bf_printf (output, _("Usage: %s <ip>"), argv[0]);
     return 0;
   };
 
@@ -500,23 +503,23 @@ unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv
       /* looking for single IP */
       if ((tgt = plugin_user_find_ip (NULL, ip.s_addr))) {
 	do {
-	  bf_printf (output, "User %s is using IP %s\n", tgt->nick, inet_ntoa (ip));
+	  bf_printf (output, _("User %s is using IP %s\n"), tgt->nick, inet_ntoa (ip));
 	  tgt = plugin_user_find_ip (tgt, ip.s_addr);
 	} while (tgt);
       } else
-	bf_printf (output, "No one using IP %s found.", inet_ntoa (ip));
+	bf_printf (output, _("No one using IP %s found."), inet_ntoa (ip));
     } else {
       if ((tgt = plugin_user_find_net (NULL, ip.s_addr, netmask.s_addr))) {
 	do {
 	  tmp.s_addr = tgt->ipaddress;
-	  bf_printf (output, "User %s is using IP %s\n", tgt->nick, inet_ntoa (tmp));
+	  bf_printf (output, _("User %s is using IP %s\n"), tgt->nick, inet_ntoa (tmp));
 	  tgt = plugin_user_find_net (tgt, ip.s_addr, netmask.s_addr);
 	} while (tgt);
       } else
-	bf_printf (output, "No one using IP %s found.", print_ip (ip, netmask));
+	bf_printf (output, _("No one using IP %s found."), print_ip (ip, netmask));
     }
   } else {
-    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);
+    bf_printf (output, _("Sorry, \"%s\" is not a recognisable IP address."), argv[1]);
   }
 
   return 0;
@@ -526,14 +529,14 @@ unsigned long handler_unban (plugin_user_t * user, buffer_t * output, void *priv
 			     unsigned char **argv)
 {
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick>"), argv[0]);
     return 0;
   }
 
   if (plugin_unban (argv[1])) {
-    bf_printf (output, "Nick %s unbanned.", argv[1]);
+    bf_printf (output, _("Nick %s unbanned."), argv[1]);
   } else {
-    bf_printf (output, "No ban for nick %s found.", argv[1]);
+    bf_printf (output, _("No ban for nick %s found."), argv[1]);
   }
 
   return 0;
@@ -545,18 +548,18 @@ unsigned long handler_unbanip (plugin_user_t * user, buffer_t * output, void *pr
   struct in_addr ip, netmask;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <ip>", argv[0]);
+    bf_printf (output, _("Usage: %s <ip>"), argv[0]);
     return 0;
   };
 
   if (parse_ip (argv[1], &ip, &netmask)) {
     if (plugin_unban_ip (ip.s_addr, netmask.s_addr)) {
-      bf_printf (output, "IP %s unbanned.", print_ip (ip, netmask));
+      bf_printf (output, _("IP %s unbanned."), print_ip (ip, netmask));
     } else {
-      bf_printf (output, "No ban for IP %s found.", print_ip (ip, netmask));
+      bf_printf (output, _("No ban for IP %s found."), print_ip (ip, netmask));
     }
   } else {
-    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);
+    bf_printf (output, _("Sorry, \"%s\" is not a recognisable IP address."), argv[1]);
   }
 
   return 0;
@@ -568,18 +571,18 @@ unsigned long handler_unbanip_hard (plugin_user_t * user, buffer_t * output, voi
   struct in_addr ip, netmask;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <ip>", argv[0]);
+    bf_printf (output, _("Usage: %s <ip>"), argv[0]);
     return 0;
   };
 
   if (parse_ip (argv[1], &ip, &netmask)) {
     if (plugin_unban_ip_hard (ip.s_addr, netmask.s_addr)) {
-      bf_printf (output, "IP %s unbanned.", print_ip (ip, netmask));
+      bf_printf (output, _("IP %s unbanned."), print_ip (ip, netmask));
     } else {
-      bf_printf (output, "No ban for IP %s found.", print_ip (ip, netmask));
+      bf_printf (output, _("No ban for IP %s found."), print_ip (ip, netmask));
     }
   } else {
-    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address.", argv[1]);
+    bf_printf (output, _("Sorry, \"%s\" is not a recognisable IP address."), argv[1]);
   }
 
   return 0;
@@ -595,7 +598,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
   struct in_addr ip, netmask;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <ip/nick> [<period>] <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <ip/nick> [<period>] <reason>"), argv[0]);
     return 0;
   }
 
@@ -613,39 +616,36 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
   if (target) {
     ip.s_addr = target->ipaddress;
     if (!period) {
-      bf_printf (output, "IP Banning user %s (ip %s) forever: %.*s", target->nick, inet_ntoa (ip),
-		 bf_used (buf), buf->s);
+      bf_printf (output, _("IP Banning user %s (ip %s) forever: %.*s"), target->nick,
+		 inet_ntoa (ip), bf_used (buf), buf->s);
     } else {
-      bf_printf (output, "IP Banning user %s (ip %s) for ", target->nick, inet_ntoa (ip));
-      time_print (output, period);
-      bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+      bf_printf (output, _("IP Banning user %s (ip %s) for %s: %.*s"), target->nick, inet_ntoa (ip),
+		 time_print (period), bf_used (buf), buf->s);
     }
     plugin_user_banip (user, target, buf, period);
   } else if (pi_iplog_find (argv[1], &ip.s_addr)) {
     netmask.s_addr = 0xFFFFFFFF;
-    bf_printf (output, "User %s offline, found in iplog\n", argv[1]);
+    bf_printf (output, _("User %s offline, found in iplog\n"), argv[1]);
     plugin_ban_ip (user, ip.s_addr, 0xFFFFFFFF, buf, period);
     if (!period) {
-      bf_printf (output, "IP Banning %s (ip %s) forever: %.*s.", argv[1], print_ip (ip, netmask),
+      bf_printf (output, _("IP Banning %s (ip %s) forever: %.*s."), argv[1], print_ip (ip, netmask),
 		 bf_used (buf), buf->s);
     } else {
-      bf_printf (output, "IP Banning %s (ip %s) for ", argv[1], print_ip (ip, netmask));
-      time_print (output, period);
-      bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+      bf_printf (output, _("IP Banning %s (ip %s) for %s: %.*s"), argv[1], print_ip (ip, netmask),
+		 time_print (period), bf_used (buf), buf->s);
     }
   } else {
     if (parse_ip (argv[1], &ip, &netmask)) {
       plugin_ban_ip (user, ip.s_addr, netmask.s_addr, buf, period);
       if (!period) {
-	bf_printf (output, "IP Banning %s forever: %.*s.", print_ip (ip, netmask), bf_used (buf),
+	bf_printf (output, _("IP Banning %s forever: %.*s."), print_ip (ip, netmask), bf_used (buf),
 		   buf->s);
       } else {
-	bf_printf (output, "IP Banning %s for ", print_ip (ip, netmask));
-	time_print (output, period);
-	bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+	bf_printf (output, _("IP Banning %s for %s: %.*s"), print_ip (ip, netmask),
+		   time_print (period), bf_used (buf), buf->s);
       }
     } else {
-      bf_printf (output, "User not found or IP address not valid: %s\n", argv[1]);
+      bf_printf (output, _("User not found or IP address not valid: %s\n"), argv[1]);
     }
   }
 
@@ -663,7 +663,7 @@ unsigned long handler_bannick (plugin_user_t * user, buffer_t * output, void *pr
   plugin_user_t *target;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick> [<period>] <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> [<period>] <reason>"), argv[0]);
     return 0;
   }
 
@@ -680,16 +680,15 @@ unsigned long handler_bannick (plugin_user_t * user, buffer_t * output, void *pr
   /* find target */
   target = plugin_user_find (argv[1]);
   if (!target) {
-    bf_printf (output, "User %s is not online.", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
   }
 
   /* ban him. */
   if (!period) {
-    bf_printf (output, "Banned nick %s forever: %.*s", argv[1], bf_used (buf), buf->s);
+    bf_printf (output, _("Banned nick %s forever: %.*s"), argv[1], bf_used (buf), buf->s);
   } else {
-    bf_printf (output, "Banned nick %s for ", argv[1]);
-    time_print (output, period);
-    bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+    bf_printf (output, _("Banned nick %s for %s: %.*s"), argv[1], time_print (period),
+	       bf_used (buf), buf->s);
   }
 
   if (target) {
@@ -715,7 +714,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
   unsigned char *nick;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick> [<period>] <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> [<period>] <reason>"), argv[0]);
     return 0;
   }
 
@@ -731,11 +730,11 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
   target = plugin_user_find (argv[1]);
   if (!target) {
     if (!pi_iplog_find (argv[1], &ip.s_addr)) {
-      bf_printf (output, "User %s not found.\n", argv[1]);
+      bf_printf (output, _("User %s not found."), argv[1]);
       goto leave;
     }
     nick = argv[1];
-    bf_printf (output, "User %s not online, found in iplog.\n", argv[1]);
+    bf_printf (output, _("User %s not online, found in iplog.\n"), argv[1]);
     plugin_ban (user, nick, ip.s_addr, 0xFFFFFFFF, buf, period);
   } else {
     ip.s_addr = target->ipaddress;
@@ -744,12 +743,11 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
   }
 
   if (!period) {
-    bf_printf (output, "Banning user %s (ip %s) forever: %.*s", nick, inet_ntoa (ip),
+    bf_printf (output, _("Banning user %s (ip %s) forever: %.*s"), nick, inet_ntoa (ip),
 	       bf_used (buf), buf->s);
   } else {
-    bf_printf (output, "Banning user %s (ip %s) for ", nick, inet_ntoa (ip));
-    time_print (output, period);
-    bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+    bf_printf (output, _("Banning user %s (ip %s) for %s: %.*s"), nick, inet_ntoa (ip),
+	       time_print (period), bf_used (buf), buf->s);
   }
 
 leave:
@@ -768,7 +766,7 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
   struct in_addr ip, netmask;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <ip/nick> [<period>] <reason>", argv[0]);
+    bf_printf (output, _("Usage: %s <ip/nick> [<period>] <reason>"), argv[0]);
     return 0;
   }
 
@@ -784,27 +782,25 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
   if (target) {
     ip.s_addr = target->ipaddress;
     if (!period) {
-      bf_printf (output, "HARD Banning user %s (ip %s) forever: %.*s", target->nick, inet_ntoa (ip),
-		 bf_used (buf), buf->s);
+      bf_printf (output, _("HARD Banning user %s (ip %s) forever: %.*s"), target->nick,
+		 inet_ntoa (ip), bf_used (buf), buf->s);
     } else {
-      bf_printf (output, "HARD Banning user %s (ip %s) for ", target->nick, inet_ntoa (ip));
-      time_print (output, period);
-      bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+      bf_printf (output, _("HARD Banning user %s (ip %s) for %s: %.*s"), target->nick,
+		 inet_ntoa (ip), time_print (period), bf_used (buf), buf->s);
     }
     plugin_user_banip_hard (user, target, buf, period);
   } else {
     if (parse_ip (argv[1], &ip, &netmask)) {
       if (!period) {
-	bf_printf (output, "HARD Banning ip %s forever: %.*s", print_ip (ip, netmask),
+	bf_printf (output, _("HARD Banning ip %s forever: %.*s"), print_ip (ip, netmask),
 		   bf_used (buf), buf->s);
       } else {
-	bf_printf (output, "HARD Banning ip %s for ", print_ip (ip, netmask));
-	time_print (output, period);
-	bf_printf (output, "%lus: %.*s", bf_used (buf), buf->s);
+	bf_printf (output, _("HARD Banning ip %s for %s: %.*s"), print_ip (ip, netmask),
+		   time_print (period), bf_used (buf), buf->s);
       }
       plugin_ban_ip_hard (user, ip.s_addr, netmask.s_addr, buf, period);
     } else {
-      bf_printf (output, "User not found or ip address not valid: %s\n", argv[1]);
+      bf_printf (output, _("User not found or ip address not valid: %s\n"), argv[1]);
     }
   }
 
@@ -819,23 +815,23 @@ unsigned long handler_banlist (plugin_user_t * user, buffer_t * output, void *pr
   struct in_addr ip;
 
   if (argc < 1) {
-    bf_printf (output, "Usage: %s [<ip|nick>]", argv[0]);
+    bf_printf (output, _("Usage: %s [<ip|nick>]"), argv[0]);
     return 0;
   }
 
   if (argc < 2) {
     if (!plugin_banlist (output))
-      bf_printf (output, "No bans.");
+      bf_printf (output, _("No bans found."));
     goto leave;
   }
   if (inet_aton (argv[1], &ip)) {
     if (!plugin_user_findipban (output, ip.s_addr)) {
-      bf_printf (output, "No IP bans found for %s", inet_ntoa (ip));
+      bf_printf (output, _("No IP bans found for %s"), inet_ntoa (ip));
       goto leave;
     }
   } else {
     if (!plugin_user_findnickban (output, argv[1])) {
-      bf_printf (output, "No Nick bans found for %s", argv[1]);
+      bf_printf (output, _("No Nick bans found for %s"), argv[1]);
       goto leave;
     }
   }
@@ -856,13 +852,13 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
   command_t *cmd, *list;
 
   if (argc < 2) {
-    bf_printf (output, "Available commands:\n");
+    bf_printf (output, _("Available commands:\n"));
     for (cmd = cmd_sorted.onext; cmd != &cmd_sorted; cmd = cmd->onext)
       if (((user->rights & cmd->req_cap) == cmd->req_cap) || !cmd->req_cap
 	  || (user->rights & CAP_OWNER))
 	bf_printf (output, "%s: %s\n", cmd->name, cmd->help);
 
-    bf_printf (output, "Commands are preceded with ! or +\n");
+    bf_printf (output, _("Commands are preceded with ! or +\n"));
     return 0;
   }
 
@@ -881,7 +877,7 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
     if (cmd) {
       bf_printf (output, "%s: %s\n", cmd->name, cmd->help);
     } else {
-      bf_printf (output, "Command %s not found.\n", argv[j]);
+      bf_printf (output, _("Command %s not found.\n"), argv[j]);
     }
   }
 
@@ -900,13 +896,13 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
   config_element_t *defaultrights;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <group> <rights>...\n", argv[0]);
+    bf_printf (output, _("Usage: %s <group> <rights>...\n"), argv[0]);
     command_flags_help ((command_flag_t *) Capabilities, output);
     goto leave;
   }
 
   if (account_type_find (argv[1])) {
-    bf_printf (output, "Group %s already exists.\n", argv[1]);
+    bf_printf (output, _("Group %s already exists.\n"), argv[1]);
     goto leave;
   }
 
@@ -921,11 +917,11 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
   /* verify if the user can actually assign these extra rights... */
   if (!(user->rights & CAP_OWNER)) {
     if (cap && (!(user->rights & CAP_INHERIT))) {
-      bf_printf (output, "You are not allowed to assign rights.\n");
+      bf_printf (output, _("You are not allowed to assign rights.\n"));
       goto leave;
     }
     if (cap & ~user->rights) {
-      bf_printf (output, "You are not allowed to assign this group: ");
+      bf_printf (output, _("You are not allowed to assign the following rights to this group: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   cap & ~user->rights);
       bf_strcat (output, "\n");
@@ -934,7 +930,7 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
   }
   account_type_add (argv[1], cap);
 
-  bf_printf (output, "Group %s created with: ", argv[1]);
+  bf_printf (output, _("Group %s created with: "), argv[1]);
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output, cap);
   bf_strcat (output, "\n");
 
@@ -949,13 +945,13 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
   account_type_t *type;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <group> <[+]right/-right>...\n", argv[0]);
+    bf_printf (output, _("Usage: %s <group> <[+]right/-right>...\n"), argv[0]);
     command_flags_help ((command_flag_t *) Capabilities, output);
     goto leave;
   }
 
   if (!(type = account_type_find (argv[1]))) {
-    bf_printf (output, "Group %s does not exist.\n", argv[1]);
+    bf_printf (output, _("Group %s does not exist.\n"), argv[1]);
     goto leave;
   }
 
@@ -965,11 +961,11 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
   /* verify if the user can actually assign these extra rights... */
   if (!(user->rights & CAP_OWNER)) {
     if (cap && (!(user->rights & CAP_INHERIT))) {
-      bf_printf (output, "You are not allowed to assign rights.\n");
+      bf_printf (output, _("You are not allowed to assign rights.\n"));
       goto leave;
     }
     if (cap & ~user->rights) {
-      bf_printf (output, "You are not allowed to assign this group: ");
+      bf_printf (output, _("You are not allowed to assign the following rights to this group: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   cap & ~user->rights);
       bf_strcat (output, "\n");
@@ -977,7 +973,7 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
     }
 
     if (ncap & ~user->rights) {
-      bf_printf (output, "You are not allowed to remove the following rights from this group: ");
+      bf_printf (output, _("You are not allowed to remove the following rights from this group: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   ncap & ~user->rights);
       bf_strcat (output, "\n");
@@ -988,7 +984,7 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
   type->rights |= cap;
   type->rights &= ~ncap;
 
-  bf_printf (output, "Group %s modified. Current rights:", argv[1]);
+  bf_printf (output, _("Group %s modified. Current rights:"), argv[1]);
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output, type->rights);
   bf_strcat (output, "\n");
 
@@ -1002,24 +998,24 @@ unsigned long handler_groupdel (plugin_user_t * user, buffer_t * output, void *p
   account_type_t *type;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <group>", argv[0]);
+    bf_printf (output, _("Usage: %s <group>"), argv[0]);
     return 0;
   }
 
 
 
   if (!(type = account_type_find (argv[1]))) {
-    bf_printf (output, "Group %s does not exist.\n", argv[1]);
+    bf_printf (output, _("Group %s does not exist.\n"), argv[1]);
     goto leave;
   }
 
   if (type->refcnt) {
-    bf_printf (output, "Group %s still has %ld users.\n", argv[1], type->refcnt);
+    bf_printf (output, _("Group %s still has %ld users.\n"), argv[1], type->refcnt);
     goto leave;
   }
 
   account_type_del (type);
-  bf_printf (output, "Group %s deleted.\n", argv[1]);
+  bf_printf (output, _("Group %s deleted.\n"), argv[1]);
 
 leave:
   return 0;
@@ -1061,10 +1057,10 @@ unsigned long handler_userlist (plugin_user_t * user, buffer_t * output, void *p
     for (i = 1; i < argc; i++) {
       type = account_type_find (argv[i]);
       if (!type) {
-	bf_printf (output, "Group %s does not exist.\n", argv[1]);
+	bf_printf (output, _("Group %s does not exist.\n"), argv[1]);
 	continue;
       }
-      bf_printf (output, "Group %s: ", type->name);
+      bf_printf (output, _("Group %s: "), type->name);
       for (cnt = 0, account = accounts; account; account = account->next) {
 	if (account->class == type->id) {
 	  bf_printf (output, "%s,", account->nick);
@@ -1092,16 +1088,16 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   plugin_user_t *target;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <nick> <group> [<rights...>]", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <group> [<rights...>]"), argv[0]);
     return 0;
   }
 
   if (account_find (argv[1])) {
-    bf_printf (output, "User %s already exists.\n", argv[1]);
+    bf_printf (output, _("User %s already exists.\n"), argv[1]);
     goto leave;
   }
   if (!(type = account_type_find (argv[2]))) {
-    bf_printf (output, "Group %s does not exist.\n", argv[2]);
+    bf_printf (output, _("Group %s does not exist.\n"), argv[2]);
     goto leave;
   }
 
@@ -1111,17 +1107,17 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   if (!(user->rights & CAP_OWNER)) {
     /* verify the user can assign users to this group */
     if (type->rights & ~user->rights) {
-      bf_printf (output, "You are not allowed to assign a user to this group.\n");
+      bf_printf (output, _("You are not allowed to assign a user to this group.\n"));
       goto leave;
     }
 
     /* verify if the user can actually assign these extra rights... */
     if (cap && (!(user->rights & CAP_INHERIT))) {
-      bf_printf (output, "You are not allowed to assign a user extra rights.\n");
+      bf_printf (output, _("You are not allowed to assign a user extra rights.\n"));
       goto leave;
     }
     if (cap & ~user->rights) {
-      bf_printf (output, "You are not allowed to assign this user: ");
+      bf_printf (output, _("You are not allowed to assign this user: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   cap & ~user->rights);
       bf_strcat (output, "\n");
@@ -1132,7 +1128,8 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   account = account_add (type, user->nick, argv[1]);
   account->rights |= cap;
 
-  bf_printf (output, "User %s created with group %s.\nCurrent rights:", account->nick, type->name);
+  bf_printf (output, _("User %s created with group %s.\nCurrent rights:"), account->nick,
+	     type->name);
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 		       account->rights | type->rights);
   bf_strcat (output, "\n");
@@ -1145,18 +1142,20 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
     /* warn user */
     message = bf_alloc (1024);
     bf_printf (message,
-	       "You have been registered by %s. Please use !passwd <password> to set a password "
-	       "and relogin to gain your new rights. You have been assigned:\n", user->nick);
+	       _("You have been registered by %s. Please use !passwd <password> to set a password "
+		 "and relogin to gain your new rights. You have been assigned:\n"), user->nick);
     command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), message,
 			 account->rights | type->rights);
     plugin_user_sayto (NULL, target, message, 0);
     bf_free (message);
 
     bf_printf (output,
-	       "User is already logged in. He has been told to set a password and to relogin.\n");
+	       _
+	       ("User is already logged in. He has been told to set a password and to relogin.\n"));
   } else {
     bf_printf (output,
-	       "No user with nickname %s is currently logged in. Please notify the user yourself.\n",
+	       _
+	       ("No user with nickname %s is currently logged in. Please notify the user yourself.\n"),
 	       argv[1]);
   }
 leave:
@@ -1170,18 +1169,18 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
   account_t *account;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <nick> <[+]right/-right>...\n", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <[+]right/-right>...\n"), argv[0]);
     command_flags_help ((command_flag_t *) Capabilities, output);
     goto leave;
   }
 
   if (!(user->rights & CAP_INHERIT)) {
-    bf_printf (output, "You are not allowed to assign a user extra rights.\n");
+    bf_printf (output, _("You are not allowed to assign a user extra rights.\n"));
     goto leave;
   }
 
   if (!(account = account_find (argv[1]))) {
-    bf_printf (output, "User %s not found.\n", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     goto leave;
   }
 
@@ -1191,14 +1190,14 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
   /* verify if the user can actually assign these extra rights... */
   if (!(user->rights & CAP_OWNER)) {
     if (cap & ~user->rights) {
-      bf_printf (output, "You are not allowed to assign this user: ");
+      bf_printf (output, _("You are not allowed to assign the following rights to this user: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   cap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
     if (ncap & ~user->rights) {
-      bf_printf (output, "You are not allowed to touch: ");
+      bf_printf (output, _("You are not allowed to touch: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   ncap & ~user->rights);
       bf_strcat (output, "\n");
@@ -1211,21 +1210,21 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
 
   /* warn if rights could not be successfully deleted. */
   if (account->classp->rights & ncap) {
-    bf_printf (output, "Warning! User %s still has rights ", account->nick);
+    bf_printf (output, _("Warning! User %s is still awarded the following rights by his group:"),
+	       account->nick);
     command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			 ncap & account->classp->rights);
-    bf_printf (output, " from his group!\n");
   }
 
 
-  bf_printf (output, "User %s created with group %s.\nCurrent rights:", account->nick,
+  bf_printf (output, _("User %s created with group %s.\nCurrent rights:"), account->nick,
 	     account->classp->name);
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 		       account->rights | account->classp->rights);
   bf_strcat (output, "\n");
   if (plugin_user_find (argv[1]))
     bf_printf (output,
-	       "User is already logged in. Tell him to rejoin to gain all his new rights.\n");
+	       _("User is already logged in. Tell him to rejoin to gain all his new rights.\n"));
 
 leave:
   return 0;
@@ -1238,25 +1237,26 @@ unsigned long handler_userdel (plugin_user_t * user, buffer_t * output, void *pr
   unsigned long cap = 0;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick>"), argv[0]);
     return 0;
   }
 
   if (!(account = account_find (argv[1]))) {
-    bf_printf (output, "User account %s does not exist.\n", argv[1]);
+    bf_printf (output, _("User account %s does not exist.\n"), argv[1]);
     goto leave;
   }
   if (!(user->rights & CAP_OWNER)) {
     cap = account->rights | account->classp->rights;
     if (cap & ~user->rights) {
-      bf_printf (output, "You are not allowed to delete user %s.\n", argv[1]);
+      bf_printf (output, _("You are not allowed to delete user %s.\n"), argv[1]);
     }
   }
   account_del (account);
-  bf_printf (output, "User account %s deleted.\n", argv[1]);
+  bf_printf (output, _("User account %s deleted.\n"), argv[1]);
   if (plugin_user_find (argv[1]))
     bf_printf (output,
-	       "User is still logged in with all rights of the deleted account. Kick the user to take them away.\n");
+	       _
+	       ("User is still logged in with all rights of the deleted account. Kick the user to take them away.\n"));
 
 leave:
   return 0;
@@ -1270,45 +1270,50 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   plugin_user_t *target;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick>"), argv[0]);
     return 0;
   }
 
   target = plugin_user_find (argv[1]);
   if (!target) {
-    bf_printf (output, "User %s is not online.\n", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
   } else {
-    bf_printf (output, "User information for user %s\n", target->nick);
+    bf_printf (output, _("User information for user %s\n"), target->nick);
   };
 
   if ((account = account_find (argv[1]))) {
-    bf_printf (output, "Group %s, Rights: ", account->classp->name);
+    bf_printf (output, _("Group %s, Rights: "), account->classp->name);
     command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			 account->rights | account->classp->rights);
     bf_strcat (output, "\n");
     if (!account->passwd[0])
-      bf_printf (output, "Users password is NOT set.\n");
-    bf_printf (output, "User was registered by %s on %s", account->op, ctime (&account->regged));
+      bf_printf (output, _("Users password is NOT set.\n"));
+    bf_printf (output, _("User was registered by %s on %s"), account->op, ctime (&account->regged));
     /* eat newline */
     if (output->e[-1] == '\n') {
       output->e[-1] = 0;
       --output->e;
     }
     if (account->lastlogin) {
-      bf_printf (output, ", last login %s\n", ctime (&account->lastlogin));
+      bf_printf (output, _(", last login %s\n"), ctime (&account->lastlogin));
       if (output->e[-2] == '\n')
 	output->e[-2] = '.';
     } else {
-      bf_printf (output, ", never logged in.\n");
+      bf_printf (output, _(", never logged in.\n"));
     }
   }
 
   if (target) {
     in.s_addr = target->ipaddress;
-    bf_printf (output, "Using Client %s version %s\n", target->client, target->versionstring);
-    bf_printf (output, "Client claims to be %s and is sharing %s (%llu bytes)\n",
-	       target->active ? "active" : "passive", format_size (target->share), target->share);
-    bf_printf (output, "IP: %s Hubs: (%u, %u, %u), Slots %u\n", inet_ntoa (in), target->hubs[0],
+    bf_printf (output, _("Using Client %s version %s\n"), target->client, target->versionstring);
+    if (target->active) {
+      bf_printf (output, "Client claims to be active and is sharing %s (%llu bytes)\n",
+		 format_size (target->share), target->share);
+    } else {
+      bf_printf (output, "Client claims to be passive and is sharing %s (%llu bytes)\n",
+		 format_size (target->share), target->share);
+    }
+    bf_printf (output, _("IP: %s Hubs: (%u, %u, %u), Slots %u\n"), inet_ntoa (in), target->hubs[0],
 	       target->hubs[1], target->hubs[2], target->slots);
   };
 
@@ -1322,27 +1327,27 @@ unsigned long handler_usergroup (plugin_user_t * user, buffer_t * output, void *
   account_type_t *group = NULL, *old;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <nick> <group>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <group>"), argv[0]);
     return 0;
   }
 
   if (!(account = account_find (argv[1]))) {
-    bf_printf (output, "User %s not found.", argv[1]);
+    bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
   }
 
   if (!(group = account_type_find (argv[2]))) {
-    bf_printf (output, "User %s not found.", argv[2]);
+    bf_printf (output, _("User %s not found."), argv[2]);
     return 0;
   }
 
   if (!(user->rights & CAP_OWNER)) {
     if (account->classp->rights & ~user->rights) {
-      bf_printf (output, "You are not allowed to remove a user from this group.\n");
+      bf_printf (output, _("You are not allowed to remove a user from this group.\n"));
       return 0;
     }
     if (group->rights & ~user->rights) {
-      bf_printf (output, "You are not allowed to assign a user to this group.\n");
+      bf_printf (output, _("You are not allowed to assign a user to this group.\n"));
       return 0;
     }
   }
@@ -1354,7 +1359,8 @@ unsigned long handler_usergroup (plugin_user_t * user, buffer_t * output, void *
   account->classp = group;
   group->refcnt++;
 
-  bf_printf (output, "Moved user %s from group %s to %s\n", account->nick, old->name, group->name);
+  bf_printf (output, _("Moved user %s from group %s to %s\n"), account->nick, old->name,
+	     group->name);
 
   return 0;
 }
@@ -1368,7 +1374,8 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
 
   if (argc < 2) {
     bf_printf (output,
-	       "Usage: %s [<nick>] <password>\n If no nick is specified, your own password is changed.",
+	       _
+	       ("Usage: %s [<nick>] <password>\n If no nick is specified, your own password is changed."),
 	       argv[0]);
     return 0;
   }
@@ -1376,13 +1383,13 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
   if (argc > 2) {
     account = account_find (argv[1]);
     if (!account) {
-      bf_printf (output, "User %s not found.\n", argv[1]);
+      bf_printf (output, _("User %s not found."), argv[1]);
       goto leave;
     }
     passwd = argv[2];
 
     if (!(user->rights & CAP_USER) || (user->rights <= account->rights)) {
-      bf_printf (output, "You are not allowed to change %s\'s password\n", account->nick);
+      bf_printf (output, _("You are not allowed to change %s\'s password\n"), account->nick);
       goto leave;
     }
   } else {
@@ -1390,18 +1397,20 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
     account = account_find (argv[1]);
     if (account) {
       bf_printf (output,
-		 "The password is unacceptable, please choose another. You specified a known account name as your password.\n");
+		 _
+		 ("The password is unacceptable, please choose another. You specified a known account name as your password.\n"));
       goto leave;
     }
     bad = plugin_user_find (argv[1]);
     if (bad) {
       bf_printf (output,
-		 "The password is unacceptable, please choose another. You specified a logged in username as your password.\n");
+		 _
+		 ("The password is unacceptable, please choose another. You specified a logged in username as your password.\n"));
       goto leave;
     }
     account = account_find (user->nick);
     if (!account) {
-      bf_printf (output, "No account for user %s.\n", user->nick);
+      bf_printf (output, _("No account for user %s.\n"), user->nick);
       goto leave;
     }
   }
@@ -1409,14 +1418,14 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
 
   if ((strlen (passwd) < MinPwdLength) || (!strcmp (passwd, account->passwd))) {
     bf_printf (output,
-	       "The password is unacceptable, please choose another. Minimum length is %d\n",
+	       _("The password is unacceptable, please choose another. Minimum length is %d\n"),
 	       MinPwdLength);
     goto leave;
   }
 
   /* copy the password */
   account_pwd_set (account, passwd);
-  bf_printf (output, "Password set.\n");
+  bf_printf (output, _("Password set.\n"));
 leave:
   return 0;
 }
@@ -1432,7 +1441,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
 
   if ((argc < 1) || (argc > 2)) {
     bf_printf (output,
-	       "Usage: %s [<nick>]\n If no nick is specified, your own password is changed.",
+	       _("Usage: %s [<nick>]\n If no nick is specified, your own password is changed."),
 	       argv[0]);
     return 0;
   }
@@ -1440,12 +1449,12 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
   if (argc > 1) {
     account = account_find (argv[1]);
     if (!account) {
-      bf_printf (output, "User %s not found.\n", argv[1]);
+      bf_printf (output, _("User %s not found."), argv[1]);
       goto leave;
     }
 
     if (!(user->rights & CAP_USER) || (user->rights <= account->rights)) {
-      bf_printf (output, "You are not allowed to change %s\'s password\n", account->nick);
+      bf_printf (output, _("You are not allowed to change %s\'s password\n"), account->nick);
       goto leave;
     }
 
@@ -1453,7 +1462,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
   } else {
     account = account_find (user->nick);
     if (!account) {
-      bf_printf (output, "No account for user %s.\n", user->nick);
+      bf_printf (output, _("No account for user %s.\n"), user->nick);
       goto leave;
     }
     target = user;
@@ -1466,17 +1475,17 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
 
   if (target) {
     message = bf_alloc (1024);
-    bf_printf (message, "Your password was reset. It is now\n%.*s\n", PASSWDLENGTH, passwd);
+    bf_printf (message, _("Your password was reset. It is now\n%.*s\n"), PASSWDLENGTH, passwd);
     plugin_user_priv (NULL, target, NULL, message, 1);
     bf_free (message);
   } else {
-    bf_printf (output, "The password of %s was reset. It is now\n%.*s\n", argv[1], PASSWDLENGTH,
+    bf_printf (output, _("The password of %s was reset. It is now\n%.*s\n"), argv[1], PASSWDLENGTH,
 	       passwd);
   }
 
   /* copy the password */
   account_pwd_set (account, passwd);
-  bf_printf (output, "Password set.\n");
+  bf_printf (output, _("Password set.\n"));
 leave:
   return 0;
 }
@@ -1552,7 +1561,7 @@ int printconfig (buffer_t * buf, config_element_t * elem)
       bf_printf (buf, "%s %s\n", elem->name, format_size (*elem->val.v_ulonglong));
       break;
     default:
-      bf_printf (buf, "%s !Unknown Type!\n", elem->name);
+      bf_printf (buf, _("%s !Unknown Type!\n"), elem->name);
   }
   return 0;
 }
@@ -1570,7 +1579,7 @@ unsigned long handler_configshow (plugin_user_t * user, buffer_t * output, void 
     for (i = 1; i < argc; i++) {
       elem = config_find (argv[i]);
       if (!elem) {
-	bf_printf (output, "Sorry, unknown configuration value %s\n", argv[i]);
+	bf_printf (output, _("Sorry, unknown configuration value %s\n"), argv[i]);
 	continue;
       }
       printconfig (output, elem);
@@ -1593,7 +1602,7 @@ unsigned long handler_confighelp (plugin_user_t * user, buffer_t * output, void 
     for (i = 1; i < argc; i++) {
       elem = config_find (argv[i]);
       if (!elem) {
-	bf_printf (output, "Sorry, unknown configuration value %s\n", argv[i]);
+	bf_printf (output, _("Sorry, unknown configuration value %s\n"), argv[i]);
 	continue;
       }
       bf_printf (output, "%s: %s\n", elem->name, elem->help);
@@ -1610,17 +1619,17 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
   config_element_t *elem;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <setting> <value>", argv[0]);
+    bf_printf (output, _("Usage: %s <setting> <value>"), argv[0]);
     return 0;
   }
 
   elem = config_find (argv[1]);
   if (!elem) {
-    bf_printf (output, "Sorry, unknown configuration value %s\n", argv[1]);
+    bf_printf (output, _("Sorry, unknown configuration value %s\n"), argv[1]);
     goto leave;
   }
 
-  bf_strcat (output, "Old: ");
+  bf_printf (output, "Old: ");
   printconfig (output, elem);
   switch (elem->type) {
     case CFG_ELEM_PTR:
@@ -1637,20 +1646,20 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
       break;
     case CFG_ELEM_CAP:
       if (!(user->rights & CAP_INHERIT)) {
-	bf_printf (output, "You are not allowed to assign rights.\n");
+	bf_printf (output, _("You are not allowed to assign rights.\n"));
 	break;
       }
       command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
       if (!(user->rights & CAP_OWNER)) {
 	if (cap & ~user->rights) {
-	  bf_printf (output, "You are not allowed to assign: ");
+	  bf_printf (output, _("You are not allowed to assign: "));
 	  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			       cap & ~user->rights);
 	  bf_strcat (output, "\n");
 	  break;
 	}
 	if (ncap & ~user->rights) {
-	  bf_printf (output, "You are not allowed to remove: ");
+	  bf_printf (output, _("You are not allowed to remove: "));
 	  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			       ncap & ~user->rights);
 	  bf_strcat (output, "\n");
@@ -1679,7 +1688,7 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	struct in_addr ia;
 
 	if (!inet_aton (argv[2], &ia)) {
-	  bf_printf (output, "\"%s\" is not a valid IP address.\n");
+	  bf_printf (output, _("\"%s\" is not a valid IP address.\n"));
 	  break;
 	}
 	*elem->val.v_ip = ia.s_addr;
@@ -1690,7 +1699,8 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	unsigned long long tmp = parse_size (argv[2]);
 
 	if (tmp > LONG_MAX) {
-	  bf_printf (output, "The maximum value for this element is %s\n", format_size (LONG_MAX));
+	  bf_printf (output, _("The maximum value for this element is %s\n"),
+		     format_size (LONG_MAX));
 	  break;
 	}
 	*elem->val.v_ulong = tmp;
@@ -1700,10 +1710,10 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
       *elem->val.v_ulonglong = parse_size (argv[2]);
       break;
     default:
-      bf_printf (output, "%s !Unknown Type!\n", elem->name);
+      bf_printf (output, _("%s !Unknown Type!\n"), elem->name);
   }
 
-  bf_strcat (output, "New: ");
+  bf_printf (output, "New: ");
   printconfig (output, elem);
 
   plugin_user_event (user, PLUGIN_EVENT_CONFIG, elem);
@@ -1718,7 +1728,7 @@ unsigned long handler_save (plugin_user_t * user, buffer_t * output, void *priv,
 {
   unsigned long retval = plugin_config_save (output);
 
-  bf_printf (output, "All Data saved.");
+  bf_printf (output, _("All Data saved."));
 
   /* reset autosave counter */
   if (AutoSaveInterval)
@@ -1731,7 +1741,7 @@ unsigned long handler_load (plugin_user_t * user, buffer_t * output, void *priv,
 {
   unsigned long retval = plugin_config_load ();
 
-  bf_printf (output, "Data reloaded.");
+  bf_printf (output, _("Data reloaded."));
 
   return retval;
 }
@@ -1747,7 +1757,7 @@ unsigned long handler_autosave (plugin_user_t * user, void *ctxt, unsigned long 
   if (now.tv_sec > (savetime.tv_sec + (time_t) AutoSaveInterval)) {
     savetime = now;
     output = bf_alloc (1024);
-    bf_printf (output, "Errors during autosave:\n");
+    bf_printf (output, _("Errors during autosave:\n"));
     l = bf_used (output);
     plugin_config_save (output);
     if (bf_used (output) != l) {
@@ -1770,62 +1780,62 @@ int builtincmd_init ()
   KickMaxBanTime      = 0;
   KickNoBanMayBan      = 0;
   
-  config_register ("MinPwdLength",     CFG_ELEM_UINT,   &MinPwdLength,     "Minimum length of a password.");
-  config_register ("AutoSaveInterval", CFG_ELEM_ULONG,  &AutoSaveInterval, "Period for autosaving settings, set to 0 to disable.");
-  config_register ("ReportTarget",     CFG_ELEM_STRING, &ReportTarget,     "User to send report to. Can be a chatroom.");
-  config_register ("kickmaxbantime",   CFG_ELEM_ULONG,  &KickMaxBanTime,   "This is the maximum bantime you can give with a kick (and using _ban_). This does not affect someone with the ban right.");
-  config_register ("kicknobanmayban",  CFG_ELEM_UINT,   &KickNoBanMayBan,  "If set, then a user without the ban right can use _ban_ to ban anyway. The maximum time can be set with kickmaxbantime.");
+  config_register ("MinPwdLength",     CFG_ELEM_UINT,   &MinPwdLength,     _("Minimum length of a password."));
+  config_register ("AutoSaveInterval", CFG_ELEM_ULONG,  &AutoSaveInterval, _("Period for autosaving settings, set to 0 to disable."));
+  config_register ("ReportTarget",     CFG_ELEM_STRING, &ReportTarget,     _("User to send report to. Can be a chatroom."));
+  config_register ("kickmaxbantime",   CFG_ELEM_ULONG,  &KickMaxBanTime,   _("This is the maximum bantime you can give with a kick (and using _ban_). This does not affect someone with the ban right."));
+  config_register ("kicknobanmayban",  CFG_ELEM_UINT,   &KickNoBanMayBan,  _("If set, then a user without the ban right can use _ban_ to ban anyway. The maximum time can be set with kickmaxbantime."));
 
 
-  command_register ("say",        &handler_say,  	 CAP_SAY,     "Make the HubSec say something.");
-  command_register ("warn",       &handler_warn,  	 CAP_KEY,     "Make the HubSec warn user.");
-  command_register ("shutdown",	  &handler_shutdown,     CAP_OWNER,   "Shut the hub down.");
-  command_register ("report",     &handler_report,       0,           "Send a report to the OPs.");
-  command_register ("version",    &handler_version,      0,           "Displays the Aquila version.");
-  command_register ("myip",       &handler_myip,         0,           "Shows you your IP address.");
-  command_register ("kick",       &handler_kick,         CAP_KICK,    "Kick a user. Automatic short ban included.");
-  command_register ("drop",       &handler_drop,         CAP_KICK,    "Drop a user. Automatic short ban included.");
-  command_register ("banip",      &handler_banip,        CAP_BAN,     "IP Ban a user by IP address.");
-  command_register ("bannick",    &handler_bannick,      CAP_BAN,     "Nick ban a user by nick.");
-  command_register ("ban",        &handler_ban,          CAP_BAN,     "Ban a user by nick.");
-  command_register ("banlist",    &handler_banlist,      CAP_BAN,     "Show ban by nick/IP.");
-  command_register ("help",       &handler_help,         0,           "Display help message.");
-  command_register ("unban",      &handler_unban,        CAP_BAN,     "Unban a nick.");
-  command_register ("unbanip",    &handler_unbanip,      CAP_BAN,     "Unban an ip.");
-  command_register ("baniphard",  &handler_banhard,      CAP_BANHARD, "Hardban an IP.");
-  command_register ("unbaniphard",&handler_unbanip_hard, CAP_BANHARD, "Unhardban an IP.");
-  command_register ("zombie",     &handler_zombie,       CAP_KICK,    "Zombie a user. Can't talk or pm.");
-  command_register ("zombielist", &handler_zombielist,   CAP_KICK,    "Show the zombie horde.");
-  command_register ("unzombie",   &handler_unzombie,     CAP_KICK,    "Unzombie a user. Can talk or pm again.");
-  command_register ("whoip",      &handler_whoip,        CAP_KICK,    "Returns the user using the IP.");
+  command_register ("say",        &handler_say,  	 CAP_SAY,     _("Make the HubSec say something."));
+  command_register ("warn",       &handler_warn,  	 CAP_KEY,     _("Make the HubSec warn user."));
+  command_register ("shutdown",	  &handler_shutdown,     CAP_OWNER,   _("Shut the hub down."));
+  command_register ("report",     &handler_report,       0,           _("Send a report to the OPs."));
+  command_register ("version",    &handler_version,      0,           _("Displays the Aquila version."));
+  command_register ("myip",       &handler_myip,         0,           _("Shows you your IP address."));
+  command_register ("kick",       &handler_kick,         CAP_KICK,    _("Kick a user. Automatic short ban included."));
+  command_register ("drop",       &handler_drop,         CAP_KICK,    _("Drop a user. Automatic short ban included."));
+  command_register ("banip",      &handler_banip,        CAP_BAN,     _("IP Ban a user by IP address."));
+  command_register ("bannick",    &handler_bannick,      CAP_BAN,     _("Nick ban a user by nick."));
+  command_register ("ban",        &handler_ban,          CAP_BAN,     _("Ban a user by nick."));
+  command_register ("banlist",    &handler_banlist,      CAP_BAN,     _("Show ban by nick/IP."));
+  command_register ("help",       &handler_help,         0,           _("Display help message."));
+  command_register ("unban",      &handler_unban,        CAP_BAN,     _("Unban a nick."));
+  command_register ("unbanip",    &handler_unbanip,      CAP_BAN,     _("Unban an ip."));
+  command_register ("baniphard",  &handler_banhard,      CAP_BANHARD, _("Hardban an IP."));
+  command_register ("unbaniphard",&handler_unbanip_hard, CAP_BANHARD, _("Unhardban an IP."));
+  command_register ("zombie",     &handler_zombie,       CAP_KICK,    _("Zombie a user. Can't talk or pm."));
+  command_register ("zombielist", &handler_zombielist,   CAP_KICK,    _("Show the zombie horde."));
+  command_register ("unzombie",   &handler_unzombie,     CAP_KICK,    _("Unzombie a user. Can talk or pm again."));
+  command_register ("whoip",      &handler_whoip,        CAP_KICK,    _("Returns the user using the IP."));
 
-  command_register ("massall",	  &handler_massall,    CAP_CONFIG,     "Send a private message to all users.");
+  command_register ("massall",	  &handler_massall,    CAP_CONFIG,     _("Send a private message to all users."));
 
-  command_register ("groupadd",   &handler_groupadd,   CAP_GROUP,     "Add a user group.");
-  command_register ("groupdel",   &handler_groupdel,   CAP_GROUP,     "Delete a user group.");
-  command_register ("grouprights",&handler_groupcap,   CAP_GROUP,     "Edit the rights of a user group.");
-  command_register ("grouplist",  &handler_grouplist,  CAP_GROUP,     "List all groups with their rights.");
+  command_register ("groupadd",   &handler_groupadd,   CAP_GROUP,     _("Add a user group."));
+  command_register ("groupdel",   &handler_groupdel,   CAP_GROUP,     _("Delete a user group."));
+  command_register ("grouprights",&handler_groupcap,   CAP_GROUP,     _("Edit the rights of a user group."));
+  command_register ("grouplist",  &handler_grouplist,  CAP_GROUP,     _("List all groups with their rights."));
 
-  command_register ("useradd",    &handler_useradd,    CAP_USER,      "Add a user.");
-  command_register ("userdel",    &handler_userdel,    CAP_USER,      "Delete a user.");
-  command_register ("userrights", &handler_usercap,    CAP_USER|CAP_INHERIT,  "Edit the extra rights of a user.");
-  command_register ("userlist",   &handler_userlist,   CAP_USER,      "List all users of a user group.");
-  command_register ("userinfo",   &handler_userinfo,   CAP_KICK,      "Show information of user.");
-  command_register ("usergroup",  &handler_usergroup,  CAP_USER,      "Move user to new group. Reconnect for change to activate.");
+  command_register ("useradd",    &handler_useradd,    CAP_USER,      _("Add a user."));
+  command_register ("userdel",    &handler_userdel,    CAP_USER,      _("Delete a user."));
+  command_register ("userrights", &handler_usercap,    CAP_USER|CAP_INHERIT,  _("Edit the extra rights of a user."));
+  command_register ("userlist",   &handler_userlist,   CAP_USER,      _("List all users of a user group."));
+  command_register ("userinfo",   &handler_userinfo,   CAP_KICK,      _("Show information of user."));
+  command_register ("usergroup",  &handler_usergroup,  CAP_USER,      _("Move user to new group. Reconnect for change to activate."));
 
-  command_register ("configshow", &handler_configshow, CAP_CONFIG,    "Show configuration.");
-  command_register ("confighelp", &handler_confighelp, CAP_CONFIG,    "Show configuration value help string.");
-  command_register ("configset",  &handler_configset,  CAP_CONFIG,    "Set configuration values.");
-  command_register ("=",     	  &handler_configset,  CAP_CONFIG,    "Set configuration values.");
+  command_register ("configshow", &handler_configshow, CAP_CONFIG,    _("Show configuration."));
+  command_register ("confighelp", &handler_confighelp, CAP_CONFIG,    _("Show configuration value help string."));
+  command_register ("configset",  &handler_configset,  CAP_CONFIG,    _("Set configuration values."));
+  command_register ("=",	      &handler_configset,  CAP_CONFIG,    _("Set configuration values."));
 
-  command_register ("load",       &handler_load,       CAP_CONFIG,    "Reload all data from files. WARNING: All unsaved changes will be discarded.");
-  command_register ("save",       &handler_save,       CAP_CONFIG,    "Save all changes to file. WARNING: All previously saved settings will be lost!");
+  command_register ("load",       &handler_load,       CAP_CONFIG,    _("Reload all data from files. WARNING: All unsaved changes will be discarded."));
+  command_register ("save",       &handler_save,       CAP_CONFIG,    _("Save all changes to file. WARNING: All previously saved settings will be lost!"));
   
-  command_register ("passwd",     &handler_passwd,	0,            "Change your password.");
-  command_register ("pwgen",      &handler_pwgen,	0,            "Let " HUBSOFT_NAME " generate a random password.");
+  command_register ("passwd",     &handler_passwd,	0,            _("Change your password."));
+  command_register ("pwgen",      &handler_pwgen,	0,            _("Let " HUBSOFT_NAME " generate a random password."));
 #ifdef DEBUG
-  command_register ("crash",      &handler_crash,	CAP_OWNER,    "Let " HUBSOFT_NAME " CRASH!.");
-  command_register ("bug",	  &handler_bug,		CAP_OWNER,    "Let " HUBSOFT_NAME " CRASH!.");
+  command_register ("crash",      &handler_crash,	CAP_OWNER,    _("Let " HUBSOFT_NAME " CRASH!."));
+  command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let " HUBSOFT_NAME " CRASH!."));
 #endif
   gettimeofday (&savetime, NULL);
   

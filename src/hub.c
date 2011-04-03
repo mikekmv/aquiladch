@@ -167,7 +167,7 @@ int accept_new_user (esocket_t * s)
 	int l;
 	char buffer[256];
 
-	l = snprintf (buffer, 256, "<" HUBSOFT_NAME "> Don't reconnect so fast.|");
+	l = snprintf (buffer, 256, __ ("<%s> Don't reconnect so fast.|"), HUBSOFT_NAME);
 	write (r, buffer, l);
 	shutdown (r, SHUT_RDWR);
 	close (r);
@@ -182,7 +182,8 @@ int accept_new_user (esocket_t * s)
       char buffer[256];
 
       l =
-	snprintf (buffer, 256, "<" HUBSOFT_NAME "> This hub is too busy, please try again later.|");
+	snprintf (buffer, 256, __ ("<%s> This hub is too busy, please try again later.|"),
+		  HUBSOFT_NAME);
       write (r, buffer, l);
       shutdown (r, SHUT_RDWR);
       close (r);
@@ -205,7 +206,9 @@ int accept_new_user (esocket_t * s)
       char buffer[256];
 
       l =
-	snprintf (buffer, 256, "<" HUBSOFT_NAME "> This hub is too busy, please try again later.|");
+	snprintf (buffer, 256, __ ("<%s> This hub is too busy, please try again later.|"),
+		  HUBSOFT_NAME);
+
       write (r, buffer, l);
       shutdown (r, SHUT_RDWR);
       close (r);
@@ -225,7 +228,9 @@ int accept_new_user (esocket_t * s)
       char buffer[256];
 
       l =
-	snprintf (buffer, 256, "<" HUBSOFT_NAME "> This hub is too busy, please try again later.|");
+	snprintf (buffer, 256, __ ("<%s> This hub is too busy, please try again later.|"),
+		  HUBSOFT_NAME);
+
       write (r, buffer, l);
       shutdown (r, SHUT_RDWR);
       close (r);
@@ -304,7 +309,7 @@ int server_write (client_t * cl, buffer_t * b)
 	  break;
 	case EPIPE:
 	case ECONNRESET:
-	  server_disconnect_user (cl, "Connection closed.");
+	  server_disconnect_user (cl, __ ("Connection closed."));
 	default:
 	  return -1;
       }
@@ -427,7 +432,7 @@ int server_handle_output (esocket_t * es)
 	  case ECONNRESET:
 	    e->data = b;
 	    buf_mem += cl->outgoing.size;
-	    server_disconnect_user (cl, "Connection closed.");
+	    server_disconnect_user (cl, __ ("Connection closed."));
 	    return -1;
 	  default:
 	    e->data = b;
@@ -525,7 +530,7 @@ int server_handle_input (esocket_t * s)
   }
 
   if ((n <= 0) && first) {
-    server_disconnect_user (cl, "Error on read.");
+    server_disconnect_user (cl, __ ("Error on read."));
     return -1;
   }
 
@@ -547,7 +552,7 @@ int server_timeout (esocket_t * s)
   }
 
   DPRINTF ("Timeout user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl, "Timeout");
+  return server_disconnect_user (cl, __ ("Timeout"));
 }
 
 int server_error (esocket_t * s)
@@ -555,7 +560,7 @@ int server_error (esocket_t * s)
   client_t *cl = (client_t *) ((unsigned long long) s->context);
 
   DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl, "Socket error.");
+  return server_disconnect_user (cl, __ ("Socket error."));
 }
 
 int server_add_port (esocket_handler_t * h, proto_t * proto, unsigned long address, int port)

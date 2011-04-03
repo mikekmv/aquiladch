@@ -30,6 +30,8 @@
 #include "buffer.h"
 #include "utils.h"
 
+#include "gettext.h"
+
 const char *units[] = { "Bytes", "Kilobyte", "Megabyte", "Gigabyte", "Terabyte", "Petabyte" };
 
 unsigned char *format_size (unsigned long long size)
@@ -71,8 +73,9 @@ unsigned long long parse_size (unsigned char *token)
   return size * mod;
 }
 
-unsigned int time_print (buffer_t * b, unsigned long s)
+char *time_print (unsigned long s)
 {
+  static char buffer[512];
   unsigned int weeks, days, hours, minutes, seconds, total;
 
   seconds = s % 60;
@@ -86,13 +89,22 @@ unsigned int time_print (buffer_t * b, unsigned long s)
 
   total = 0;
 
-  if (weeks)
-    total += bf_printf (b, "%u week%s, ", weeks, (weeks > 1) ? "s" : "");
-  if (days)
-    total += bf_printf (b, "%u day%s, ", days, (days > 1) ? "s" : "");
-
+  if (weeks) {
+    if (weeks > 1) {
+      total += snprintf (buffer, 512, __ ("%u weeks, "), weeks);
+    } else {
+      total += snprintf (buffer, 512, __ ("%u week, "), weeks);
+    }
+  }
+  if (days) {
+    if (days > 1) {
+      total += snprintf (buffer, 512 - total, __ ("%u days, "), days);
+    } else {
+      total += snprintf (buffer, 512 - total, __ ("%u day, "), days);
+    }
+  }
   if ((hours || minutes || seconds) || (!(weeks || days)))
-    total += bf_printf (b, "%02u:%02u:%02u", hours, minutes, seconds);
+    total += snprintf (buffer, 512 - total, "%02u:%02u:%02u", hours, minutes, seconds);
 
   return total;
 }

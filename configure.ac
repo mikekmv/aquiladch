@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.10-pre3-beta24]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.10-pre3-beta25]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -10,6 +10,8 @@ AC_CONFIG_HEADER([config.h])
 # check for gdb
 AC_CHECK_TOOL(GDB, [gdb], [gdb])
 AC_CHECK_TOOL(GPROF, [gprof], [gprof])
+
+AM_GNU_GETTEXT([external])
 
 # Checks for programs.
 AC_PROG_CC
@@ -192,7 +194,7 @@ AC_SUBST(ZLIB)
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h netinet/tcp.h inttypes.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h crypt.h string.h memory.h stdlib.h malloc.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h netinet/tcp.h inttypes.h stdint.h stdlib.h string.h strings.h sys/socket.h sys/time.h unistd.h crypt.h string.h memory.h stdlib.h malloc.h locale.h])
 
 # if epoll is enables, check for the header
 if test "${ALLOW_EPOLL}" != "" ;
@@ -347,7 +349,7 @@ case "${host}" in
 esac
 AC_SUBST(CYGWIN_LDFLAGS)  
 
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([Makefile po/Makefile.in
                  src/Makefile
                  tools/Makefile])
 
@@ -384,6 +386,14 @@ fi
 
 echo -n "   LUA Support                                       "
 if test "${ALLOW_LUA}" != ""
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   NLS Support                                       "
+if test "${USE_NLS}" == "yes"
 then
 	echo "ENABLED"
 else

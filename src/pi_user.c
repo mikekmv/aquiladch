@@ -74,13 +74,13 @@ slotratio_t slotratios[3];
 unsigned long pi_user_handler_userstat (plugin_user_t * user, buffer_t * output, void *dummy,
 					unsigned int argc, unsigned char **argv)
 {
-  bf_printf (output, "Unregistered users: %lu / %lu\n"
-	     "Registered users:   %lu / %lu\n"
-	     "Operators           %lu / %lu\n"
-	     " Total      %lu / %lu\n"
-	     " Peak             %lu\n"
-	     " Dropped          %lu\n"
-	     " Buffering        %lu\n",
+  bf_printf (output, _("Unregistered users: %lu / %lu\n"
+		       "Registered users:   %lu / %lu\n"
+		       "Operators           %lu / %lu\n"
+		       " Total      %lu / %lu\n"
+		       " Peak             %lu\n"
+		       " Dropped          %lu\n"
+		       " Buffering        %lu\n"),
 	     user_unregistered_current, user_unregistered_max,
 	     user_registered_current, user_registered_max,
 	     user_op_current, user_op_max,
@@ -105,22 +105,22 @@ unsigned long pi_user_check_user (plugin_user_t * user)
   /* check slot and hub requirements */
   if (!(user->rights & CAP_TAG)) {
     if (user->hubs[0] > slotratios[class].maxhub) {
-      plugin_user_printf (user, "Sorry, your class has a maximum of %u hubs.\n",
+      plugin_user_printf (user, _("Sorry, your class has a maximum of %u hubs.\n"),
 			  slotratios[class].maxhub);
       goto drop;
     }
     if (user->hubs[0] < slotratios[class].minhub) {
-      plugin_user_printf (user, "Sorry, your class has a minimum of %u hubs.\n",
+      plugin_user_printf (user, _("Sorry, your class has a minimum of %u hubs.\n"),
 			  slotratios[class].minhub);
       goto drop;
     }
     if (user->slots > slotratios[class].maxslot) {
-      plugin_user_printf (user, "Sorry, your class has a maximum of %u slots.\n",
+      plugin_user_printf (user, _("Sorry, your class has a maximum of %u slots.\n"),
 			  slotratios[class].maxslot);
       goto drop;
     }
     if (user->slots < slotratios[class].minslot) {
-      plugin_user_printf (user, "Sorry, your class has a minimum of %u slots.\n",
+      plugin_user_printf (user, _("Sorry, your class has a minimum of %u slots.\n"),
 			  slotratios[class].minslot);
       goto drop;
     }
@@ -137,20 +137,20 @@ unsigned long pi_user_check_user (plugin_user_t * user)
     if (user->flags & PROTO_FLAG_REGISTERED) {
       if (user->op) {
 	if (user->share < sharereq_op_share) {
-	  plugin_user_printf (user, "Sorry, your class has a minimum share of %s.\n",
+	  plugin_user_printf (user, _("Sorry, your class has a minimum share of %s.\n"),
 			      format_size (sharereq_op_share));
 	  goto drop;
 	}
       } else {
 	if (user->share < sharereq_registered_share) {
-	  plugin_user_printf (user, "Sorry, your class has a minimum share of %s.\n",
+	  plugin_user_printf (user, _("Sorry, your class has a minimum share of %s.\n"),
 			      format_size (sharereq_registered_share));
 	  goto drop;
 	}
       }
     } else {
       if (user->share < sharereq_unregistered_share) {
-	plugin_user_printf (user, "Sorry, your class has a minimum share of %s.\n",
+	plugin_user_printf (user, _("Sorry, your class has a minimum share of %s.\n"),
 			    format_size (sharereq_unregistered_share));
 	goto drop;
       }
@@ -169,7 +169,7 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
   /* check if client is accepted */
   if ((cl = banlist_client_find (&clientbanlist, user->client, user->version))
       && (!(user->rights & CAP_TAG))) {
-    plugin_user_printf (user, "Sorry, this client is not accepted because: %*s\n",
+    plugin_user_printf (user, _("Sorry, this client is not accepted because: %*s\n"),
 			bf_used (cl->message), cl->message->s);
     goto drop;
   }
@@ -180,7 +180,7 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
     struct in_addr ip;
 
     ip.s_addr = user->ipaddress;
-    plugin_user_printf (user, "Sorry, your login is not accepted from this IP (%s)",
+    plugin_user_printf (user, _("Sorry, your login is not accepted from this IP (%s)"),
 			inet_ntoa (ip));
     goto drop;
   }
@@ -212,7 +212,7 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
   }
 
   plugin_user_printf (user,
-		      "Sorry, the hub is full. It cannot accept more users from your class.\n");
+		      _("Sorry, the hub is full. It cannot accept more users from your class.\n"));
 
 drop:
   /* owners always get in. */
@@ -270,7 +270,7 @@ unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * out
   plugin_user_t *tgt;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <nick> <ip/network>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <ip/network>"), argv[0]);
     return 0;
   }
 
@@ -278,14 +278,15 @@ unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * out
     banlist_add (&sourcelist, user->nick, argv[1], ip.s_addr, netmask.s_addr, bf_buffer (""), 0);
     if ((tgt = plugin_user_find (argv[1]))) {
       if (!(tgt->rights & CAP_SOURCEVERIFY)) {
-	bf_printf (output, "Please do not forget to assign the \"sourceverify\" right to user %s\n",
+	bf_printf (output,
+		   _("Please do not forget to assign the \"sourceverify\" right to user %s\n"),
 		   argv[1]);
       }
     }
-    bf_printf (output, "User %s is now allowed to log in from %s\n", argv[1],
+    bf_printf (output, _("User %s is now allowed to log in from %s\n"), argv[1],
 	       print_ip (ip, netmask));
   } else {
-    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address or network.", argv[2]);
+    bf_printf (output, _("Sorry, \"%s\" is not a recognisable IP address or network."), argv[2]);
   }
 
   return 0;
@@ -298,7 +299,7 @@ unsigned long pi_user_handler_userunrestrict (plugin_user_t * user, buffer_t * o
   banlist_entry_t *e;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <nick> <ip/network>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick> <ip/network>"), argv[0]);
     return 0;
   }
 
@@ -306,14 +307,14 @@ unsigned long pi_user_handler_userunrestrict (plugin_user_t * user, buffer_t * o
     e = banlist_find_exact (&sourcelist, argv[1], ip.s_addr, netmask.s_addr);
     if (e) {
       banlist_del (&sourcelist, e);
-      bf_printf (output, "User %s is no longer allowed to log in from %s\n", argv[1],
+      bf_printf (output, _("User %s is no longer allowed to log in from %s\n"), argv[1],
 		 print_ip (ip, netmask));
     } else {
-      bf_printf (output, "Could not find source restriction \"%s\" for nick %s\n", argv[2],
+      bf_printf (output, _("Could not find source restriction \"%s\" for nick %s\n"), argv[2],
 		 argv[1]);
     }
   } else {
-    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address or network.", argv[2]);
+    bf_printf (output, _("Sorry, \"%s\" is not a recognisable IP address or network."), argv[2]);
   }
 
   return 0;
@@ -327,20 +328,20 @@ unsigned long pi_user_handler_userrestrictlist (plugin_user_t * user, buffer_t *
   banlist_entry_t *e = NULL;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    bf_printf (output, _("Usage: %s <nick>"), argv[0]);
     return 0;
   }
 
   i = 0;
-  bf_printf (output, "Allow user %s from:\n", argv[1]);
+  bf_printf (output, _("Allow user %s from:\n"), argv[1]);
   while ((e = banlist_find_bynick_next (&sourcelist, e, argv[1]))) {
     ip.s_addr = e->ip;
     netmask.s_addr = e->netmask;
-    bf_printf (output, " Source %s\n", print_ip (ip, netmask));
+    bf_printf (output, _(" Source %s\n"), print_ip (ip, netmask));
     i++;
   }
   if (!i)
-    bf_printf (output, " None.");
+    bf_printf (output, _(" None."));
 
   return 0;
 }
@@ -353,7 +354,8 @@ unsigned long pi_user_handler_clientban (plugin_user_t * user, buffer_t * output
 
   if (argc < 4) {
     bf_printf (output,
-	       "Usage: !%s <clienttag> <minversion> <maxversion> <reason>\nUse 0 for version if unimportant.",
+	       _
+	       ("Usage: !%s <clienttag> <minversion> <maxversion> <reason>\nUse 0 for version if unimportant."),
 	       argv[0]);
     return 0;
   }
@@ -372,7 +374,7 @@ unsigned long pi_user_handler_clientban (plugin_user_t * user, buffer_t * output
   if (buf)
     bf_free (buf);
 
-  bf_printf (output, "Client \"%s\" (%lf, %lf) added to banned list because: %s\n", argv[1], min,
+  bf_printf (output, _("Client \"%s\" (%lf, %lf) added to banned list because: %s\n"), argv[1], min,
 	     max, argv[4]);
 
   return 0;
@@ -386,13 +388,13 @@ unsigned long pi_user_handler_clientlist (plugin_user_t * user, buffer_t * outpu
 
   dlhashlist_foreach (&clientbanlist, i) {
     dllist_foreach (dllist_bucket (&clientbanlist, i), b) {
-      bf_printf (output, "Client \"%s\" (%lf, %lf) because: %.*s\n", b->client, b->minVersion,
+      bf_printf (output, _("Client \"%s\" (%lf, %lf) because: %.*s\n"), b->client, b->minVersion,
 		 b->maxVersion, bf_used (b->message), b->message->s);
     }
   }
 
   if (!bf_used (output)) {
-    bf_printf (output, "No clients banned.");
+    bf_printf (output, _("No clients banned."));
   }
 
   return 0;
@@ -405,7 +407,7 @@ unsigned long pi_user_handler_clientunban (plugin_user_t * user, buffer_t * outp
   double min, max;
 
   if (argc < 4) {
-    bf_printf (output, "Usage: !%s <clientname> <min> <max>\n", argv[0]);
+    bf_printf (output, _("Usage: !%s <clientname> <min> <max>\n"), argv[0]);
     return 0;
   }
 
@@ -413,9 +415,9 @@ unsigned long pi_user_handler_clientunban (plugin_user_t * user, buffer_t * outp
   sscanf (argv[3], "%lf", &max);
 
   if (banlist_client_del_byclient (&clientbanlist, argv[1], min, max)) {
-    bf_printf (output, "Client \"%s\" removed from banlist\n", argv[1]);
+    bf_printf (output, _("Client \"%s\" removed from banlist\n"), argv[1]);
   } else {
-    bf_printf (output, "Client \"%s\" not found in banlist\n", argv[1]);
+    bf_printf (output, _("Client \"%s\" not found in banlist\n"), argv[1]);
   }
 
   return 0;
@@ -456,7 +458,8 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
   if (limit.rlim_cur < (user_unregistered_max + user_registered_max + user_op_max)) {
 
     bf_printf (buf,
-	       "WARNING: resourcelimit for this process allows a absolute maximum of %lu users, currently %lu are configured.\n",
+	       _
+	       ("WARNING: resourcelimit for this process allows a absolute maximum of %lu users, currently %lu are configured.\n"),
 	       limit.rlim_cur, (user_unregistered_max + user_registered_max));
 
   };
@@ -465,20 +468,23 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 #ifndef USE_POLL
   if ((user_unregistered_max + user_registered_max + user_op_max) >= (FD_SETSIZE - 5)) {
     bf_printf (buf,
-	       "WARNING: You are using an Aquila version based on select(). This limits the effective maximum size of your hub to %u. Going over this limit may crash your hub.\n",
+	       _
+	       ("WARNING: You are using an Aquila version based on select(). This limits the effective maximum size of your hub to %u. Going over this limit may crash your hub.\n"),
 	       (FD_SETSIZE - 5));
   }
 #else
   if ((user_unregistered_max + user_registered_max + user_op_max) >= 5000) {
     bf_printf (buf,
-	       "WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n");
+	       _
+	       ("WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n"));
   }
 #endif
 #endif
 
   if (user_registered_max == user_op_max) {
     bf_printf (buf,
-	       "WARNING: userlimit.registered equals userlimit.op. userlimit.registered includes the ops (since they are registered too): setting them equal means that you only allow OPs, but not normal registered users.\n");
+	       _
+	       ("WARNING: userlimit.registered equals userlimit.op. userlimit.registered includes the ops (since they are registered too): setting them equal means that you only allow OPs, but not normal registered users.\n"));
   }
 
   plugin_user_sayto (NULL, user, buf, 0);
@@ -512,33 +518,33 @@ int pi_user_init ()
 
   /* *INDENT-OFF* */
   
-  config_register ("userlimit.unregistered",  CFG_ELEM_ULONG, &user_unregistered_max, "Maximum unregistered users.");
-  config_register ("userlimit.registered",    CFG_ELEM_ULONG, &user_registered_max,   "Maximum registered users.");
-  config_register ("userlimit.op",            CFG_ELEM_ULONG, &user_op_max,           "Reserve place for this many ops in the registered users.");
+  config_register ("userlimit.unregistered",  CFG_ELEM_ULONG, &user_unregistered_max, _("Maximum unregistered users."));
+  config_register ("userlimit.registered",    CFG_ELEM_ULONG, &user_registered_max,   _("Maximum registered users."));
+  config_register ("userlimit.op",            CFG_ELEM_ULONG, &user_op_max,           _("Reserve place for this many ops in the registered users."));
 
   /* config_register ("file.clientbanlist",      CFG_ELEM_STRING, &ClientBanFileName,     "Name of the file containing the client banlist."); */
   
-  config_register ("sharemin.unregistered",   CFG_ELEM_BYTESIZE, &sharereq_unregistered_share, "Minimum share requirement for unregistered users.");
-  config_register ("sharemin.registered",     CFG_ELEM_BYTESIZE, &sharereq_registered_share,   "Minimum share requirement for registered users.");
-  config_register ("sharemin.op",             CFG_ELEM_BYTESIZE, &sharereq_op_share,           "Minimum share requirement for OPS");
+  config_register ("sharemin.unregistered",   CFG_ELEM_BYTESIZE, &sharereq_unregistered_share, _("Minimum share requirement for unregistered users."));
+  config_register ("sharemin.registered",     CFG_ELEM_BYTESIZE, &sharereq_registered_share,   _("Minimum share requirement for registered users."));
+  config_register ("sharemin.op",             CFG_ELEM_BYTESIZE, &sharereq_op_share,           _("Minimum share requirement for OPS"));
 
-  config_register ("hub.unregistered.min",    CFG_ELEM_UINT,   &slotratios[0].minhub,  "Minimum hubs for unregistered users.");
-  config_register ("hub.unregistered.max",    CFG_ELEM_UINT,   &slotratios[0].maxhub,  "Maximum hubs for unregistered users.");
-  config_register ("slot.unregistered.min",   CFG_ELEM_UINT,   &slotratios[0].minslot, "Minimum slots for unregistered users.");
-  config_register ("slot.unregistered.max",   CFG_ELEM_UINT,   &slotratios[0].maxslot, "Maximum slots for unregistered users.");
-  config_register ("slot.unregistered.ratio", CFG_ELEM_DOUBLE, &slotratios[0].ratio,   "Minimum hubs/slot ratio for unregistered users.");
+  config_register ("hub.unregistered.min",    CFG_ELEM_UINT,   &slotratios[0].minhub,  _("Minimum hubs for unregistered users."));
+  config_register ("hub.unregistered.max",    CFG_ELEM_UINT,   &slotratios[0].maxhub,  _("Maximum hubs for unregistered users."));
+  config_register ("slot.unregistered.min",   CFG_ELEM_UINT,   &slotratios[0].minslot, _("Minimum slots for unregistered users."));
+  config_register ("slot.unregistered.max",   CFG_ELEM_UINT,   &slotratios[0].maxslot, _("Maximum slots for unregistered users."));
+  config_register ("slot.unregistered.ratio", CFG_ELEM_DOUBLE, &slotratios[0].ratio,   _("Minimum hubs/slot ratio for unregistered users."));
     
-  config_register ("hub.registered.min",      CFG_ELEM_UINT,   &slotratios[1].minhub,  "Minimum hubs for registered users.");
-  config_register ("hub.registered.max",      CFG_ELEM_UINT,   &slotratios[1].maxhub,  "Maximum hubs for registered users.");
-  config_register ("slot.registered.min",     CFG_ELEM_UINT,   &slotratios[1].minslot, "Minimum slots for registered users.");
-  config_register ("slot.registered.max",     CFG_ELEM_UINT,   &slotratios[1].maxslot, "Maximum slots for registered users.");
-  config_register ("slot.registered.ratio",   CFG_ELEM_DOUBLE, &slotratios[1].ratio,   "Minimum hubs/slot ratio for registered users.");
+  config_register ("hub.registered.min",      CFG_ELEM_UINT,   &slotratios[1].minhub,  _("Minimum hubs for registered users."));
+  config_register ("hub.registered.max",      CFG_ELEM_UINT,   &slotratios[1].maxhub,  _("Maximum hubs for registered users."));
+  config_register ("slot.registered.min",     CFG_ELEM_UINT,   &slotratios[1].minslot, _("Minimum slots for registered users."));
+  config_register ("slot.registered.max",     CFG_ELEM_UINT,   &slotratios[1].maxslot, _("Maximum slots for registered users."));
+  config_register ("slot.registered.ratio",   CFG_ELEM_DOUBLE, &slotratios[1].ratio,   _("Minimum hubs/slot ratio for registered users."));
     
-  config_register ("hub.op.min",              CFG_ELEM_UINT,   &slotratios[2].minhub,  "Minimum hubs for Operators.");
-  config_register ("hub.op.max",              CFG_ELEM_UINT,   &slotratios[2].maxhub,  "Maximum hubs for Operators.");
-  config_register ("slot.op.min",             CFG_ELEM_UINT,   &slotratios[2].minslot, "Minimum slots for Operators.");
-  config_register ("slot.op.max",             CFG_ELEM_UINT,   &slotratios[2].maxslot, "Maximum slots for Operators.");
-  config_register ("slot.op.ratio",           CFG_ELEM_DOUBLE, &slotratios[2].ratio,   "Minimum hubs/slot ratio for Operators.");
+  config_register ("hub.op.min",              CFG_ELEM_UINT,   &slotratios[2].minhub,  _("Minimum hubs for Operators."));
+  config_register ("hub.op.max",              CFG_ELEM_UINT,   &slotratios[2].maxhub,  _("Maximum hubs for Operators."));
+  config_register ("slot.op.min",             CFG_ELEM_UINT,   &slotratios[2].minslot, _("Minimum slots for Operators."));
+  config_register ("slot.op.max",             CFG_ELEM_UINT,   &slotratios[2].maxslot, _("Maximum slots for Operators."));
+  config_register ("slot.op.ratio",           CFG_ELEM_DOUBLE, &slotratios[2].ratio,   _("Minimum hubs/slot ratio for Operators."));
 
   plugin_request (plugin_user, PLUGIN_EVENT_PRELOGIN,   (plugin_event_handler_t *) &pi_user_event_prelogin);
   plugin_request (plugin_user, PLUGIN_EVENT_LOGOUT,     (plugin_event_handler_t *) &pi_user_event_logout);
@@ -549,16 +555,16 @@ int pi_user_init ()
   
   plugin_request (plugin_user, PLUGIN_EVENT_CONFIG,  (plugin_event_handler_t *) &pi_user_event_config);
   
-  command_register ("statuser", &pi_user_handler_userstat, 0, "Show logged in user counts.");
+  command_register ("statuser", &pi_user_handler_userstat, 0, _("Show logged in user counts."));
 
-  command_register ("clientban",     &pi_user_handler_clientban,   CAP_CONFIG, "Ban a client.");
-  command_register ("clientbanlist", &pi_user_handler_clientlist,  CAP_KEY,    "List client bans.");
-  command_register ("clientunban",   &pi_user_handler_clientunban, CAP_CONFIG, "Unban a client.");
+  command_register ("clientban",     &pi_user_handler_clientban,   CAP_CONFIG, _("Ban a client."));
+  command_register ("clientbanlist", &pi_user_handler_clientlist,  CAP_KEY,    _("List client bans."));
+  command_register ("clientunban",   &pi_user_handler_clientunban, CAP_CONFIG, _("Unban a client."));
 
-  command_register ("userrestrict",     &pi_user_handler_userrestrict,     CAP_USER, "Add a source IP restriction for a user.");
-  command_register ("userunrestrict",   &pi_user_handler_userunrestrict,   CAP_USER, "Remove a source IP restriction for a user.");
-  command_register ("userrestrictlist", &pi_user_handler_userrestrictlist, CAP_USER, "Show source IP restrictions for a user.");
-  
+  command_register ("userrestrict",     &pi_user_handler_userrestrict,     CAP_USER, _("Add a source IP restriction for a user."));
+  command_register ("userunrestrict",   &pi_user_handler_userunrestrict,   CAP_USER, _("Remove a source IP restriction for a user."));
+  command_register ("userrestrictlist", &pi_user_handler_userrestrictlist, CAP_USER, _("Show source IP restrictions for a user."));
+ 
   /* *INDENT-ON* */  
 
   return 0;

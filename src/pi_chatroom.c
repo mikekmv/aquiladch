@@ -242,23 +242,24 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
 
   if (argc < 3) {
     bf_printf (output,
-	       "Usage: %s <room> <description> [<private>] [<autoreg>] [<autorights>] [<rights <rights>...>]\n"
-	       " supply the flag \"private\" if you want the room autojoin or invite only.\n"
-	       " supply the flag \"autoreg\" if you only want registered users to autojoin.\n"
-	       " supply the flag \"autorights\" if you to autojoin all users with correct rights.\n"
-	       " supply the flag \"rights\" if you want to autojoin users based on their rights, must be last argument!\n"
-	       " be sure to add a description between \". For an empty description, provide \"\".",
+	       _
+	       ("Usage: %s <room> <description> [<private>] [<autoreg>] [<autorights>] [<rights <rights>...>]\n"
+		" supply the flag \"private\" if you want the room autojoin or invite only.\n"
+		" supply the flag \"autoreg\" if you only want registered users to autojoin.\n"
+		" supply the flag \"autorights\" if you to autojoin all users with correct rights.\n"
+		" supply the flag \"rights\" if you want to autojoin users based on their rights, must be last argument!\n"
+		" be sure to add a description between \". For an empty description, provide \"\"."),
 	       argv[0]);
     return 0;
   };
 
   if (strlen (argv[1]) > NICKLENGTH) {
-    bf_printf (output, "Chatroom name %s is too long. Max %d characters\n", argv[1], NICKLENGTH);
+    bf_printf (output, _("Chatroom name %s is too long. Max %d characters\n"), argv[1], NICKLENGTH);
     return 0;
   }
 
   if (chatroom_find (argv[1])) {
-    bf_printf (output, "Chatroom %s already exists.", argv[1]);
+    bf_printf (output, _("Chatroom %s already exists."), argv[1]);
     return 0;
   }
 
@@ -267,26 +268,26 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
     while ((argc > counter) && (strcmp (argv[counter], "rights"))) {
       if (!strcmp (argv[counter], "private")) {
 	roomflags |= CHATROOM_FLAG_PRIVATE;
-	bf_printf (output, "Room is private.\n");
+	bf_printf (output, _("Room is private.\n"));
 	counter++;
 	continue;
       }
       if (!strcmp (argv[counter], "autoreg")) {
 	roomflags |= CHATROOM_FLAG_AUTOJOIN_REG;
-	bf_printf (output, "Room will autojoin registered users.\n");
+	bf_printf (output, _("Room will autojoin registered users.\n"));
 	counter++;
 	continue;
       }
       if (!strcmp (argv[counter], "autorights")) {
 	roomflags |= CHATROOM_FLAG_AUTOJOIN_RIGHTS;
-	bf_printf (output, "Room will autojoin users with sufficient rights.\n");
+	bf_printf (output, _("Room will autojoin users with sufficient rights.\n"));
 	counter++;
 	continue;
       }
 
       if (!strcmp (argv[counter], "rights"))
 	break;
-      bf_printf (output, "Ignoring unknown argument %s\n", argv[counter++]);
+      bf_printf (output, _("Ignoring unknown argument %s\n"), argv[counter++]);
     }
 
     if ((argc > counter) && (!strcmp (argv[counter], "rights"))) {
@@ -296,7 +297,7 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
 	command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, counter,
 			     &roomrights, &ncap);
       roomrights &= ~ncap;
-      bf_printf (output, "Room requires: ");
+      bf_printf (output, _("Room requires: "));
       command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			   roomrights);
       bf_strcat (output, "\n");
@@ -309,9 +310,9 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
   if (!chatroom_new
       (argv[1], roomrights, roomflags, argv[2],
        (plugin_event_handler_t *) & pi_chatroom_event_pm)) {
-    bf_printf (output, "Room creation failed!\n");
+    bf_printf (output, _("Room creation failed!\n"));
   } else {
-    bf_printf (output, "Room %s created successfully!\n", argv[1]);
+    bf_printf (output, _("Room %s created successfully!\n"), argv[1]);
   }
 
   return 0;
@@ -323,13 +324,13 @@ unsigned long pi_chatroom_handler_roomdel (plugin_user_t * user, buffer_t * outp
   chatroom_t *room;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <room>\n", argv[0]);
+    bf_printf (output, _("Usage: %s <room>\n"), argv[0]);
     return 0;
   };
 
   room = chatroom_find (argv[1]);
   if (!room) {
-    bf_printf (output, "Cannot find room %s\n", argv[1]);
+    bf_printf (output, _("Cannot find room %s\n"), argv[1]);
     return 0;
   }
   chatroom_del (room);
@@ -339,15 +340,15 @@ unsigned long pi_chatroom_handler_roomdel (plugin_user_t * user, buffer_t * outp
 
 unsigned int pi_chatroom_show (buffer_t * buf, chatroom_t * room)
 {
-  bf_printf (buf, "Room %s has %d users", room->name, room->count);
+  bf_printf (buf, _("Room %s has %d users"), room->name, room->count);
   if (room->flags & CHATROOM_FLAG_PRIVATE)
-    bf_printf (buf, ", is private");
+    bf_printf (buf, _(", is private"));
   if (room->flags & CHATROOM_FLAG_AUTOJOIN_REG)
-    bf_printf (buf, ", autojoins registered users");
+    bf_printf (buf, _(", autojoins registered users"));
   if (room->flags & CHATROOM_FLAG_AUTOJOIN_RIGHTS)
-    bf_printf (buf, ", autojoins users with sufficient rights");
+    bf_printf (buf, _(", autojoins users with sufficient rights"));
   if (room->flags & CHATROOM_FLAG_AUTOJOIN_RIGHTS) {
-    bf_printf (buf, " and requires rights ");
+    bf_printf (buf, _(" and requires rights "));
     command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), buf, room->rights);
   }
   bf_strcat (buf, ".\n");
@@ -366,7 +367,7 @@ unsigned long pi_chatroom_handler_roomlist (plugin_user_t * user, buffer_t * out
     while (count < argc) {
       room = chatroom_find (argv[count]);
       if (!room) {
-	bf_printf (output, "Cannot find room %s\n", argv[count]);
+	bf_printf (output, _("Cannot find room %s\n"), argv[count]);
 	return 0;
       }
       pi_chatroom_show (output, room);
@@ -553,10 +554,11 @@ int pi_chatroom_init ()
   plugin_request (plugin_chatroom, PLUGIN_EVENT_LOAD,
 		  (plugin_event_handler_t *) & pi_chatroom_event_load);
 
-  command_register ("chatroomadd", &pi_chatroom_handler_roomadd, CAP_CONFIG, "Add a chatroom.");
-  command_register ("chatroomdel", &pi_chatroom_handler_roomdel, CAP_CONFIG, "Remove a chatroom.");
+  command_register ("chatroomadd", &pi_chatroom_handler_roomadd, CAP_CONFIG, _("Add a chatroom."));
+  command_register ("chatroomdel", &pi_chatroom_handler_roomdel, CAP_CONFIG,
+		    _("Remove a chatroom."));
   command_register ("chatroomlist", &pi_chatroom_handler_roomlist, CAP_CONFIG,
-		    "Lists available chatrooms.");
+		    _("Lists available chatrooms."));
 
   return 0;
 }

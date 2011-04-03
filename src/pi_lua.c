@@ -161,7 +161,7 @@ int pi_lua_getconfig (lua_State * lua)
   elem = config_find (name);
   if (!elem) {
     /* push error message */
-    lua_pushstring (lua, "Unknown config value.");
+    lua_pushstring (lua, __ ("Unknown config value."));
     /* flag error, this function never returns. */
     lua_error (lua);
   }
@@ -219,7 +219,7 @@ int pi_lua_getconfig (lua_State * lua)
       }
       break;
     case CFG_ELEM_PTR:
-      lua_pushstring (lua, "Element Type not supported.");
+      lua_pushstring (lua, __ ("Element Type not supported."));
       lua_error (lua);
       break;
   };
@@ -237,7 +237,7 @@ int pi_lua_setconfig (lua_State * lua)
   elem = config_find (name);
   if (!elem) {
     /* push error message */
-    lua_pushstring (lua, "Unknown config value.");
+    lua_pushstring (lua, __ ("Unknown config value."));
     /* flag error, this function never returns. */
     lua_error (lua);
   }
@@ -271,7 +271,7 @@ int pi_lua_setconfig (lua_State * lua)
 	struct in_addr ia;
 
 	if (!inet_aton (value, &ia)) {
-	  lua_pushstring (lua, "Not a valid IP address.\n");
+	  lua_pushstring (lua, __ ("Not a valid IP address.\n"));
 	  lua_error (lua);
 	}
 	*elem->val.v_ip = ia.s_addr;
@@ -292,7 +292,7 @@ int pi_lua_setconfig (lua_State * lua)
       break;
     case CFG_ELEM_CAP:
     default:
-      lua_pushstring (lua, "Element Type not supported.");
+      lua_pushstring (lua, __ ("Element Type not supported."));
       lua_error (lua);
   }
 
@@ -806,7 +806,7 @@ int pi_lua_banip (lua_State * lua)
 
 
   if (!parse_ip (ip, &ia, &netmask)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_pushstring (lua, __ ("Not a valid IP address.\n"));
     lua_error (lua);
   }
 
@@ -835,7 +835,7 @@ int pi_lua_banip_hard (lua_State * lua)
 
 
   if (!parse_ip (ip, &ia, &netmask)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_pushstring (lua, __ ("Not a valid IP address.\n"));
     lua_error (lua);
   }
 
@@ -875,7 +875,7 @@ int pi_lua_unbanip (lua_State * lua)
   struct in_addr ia, netmask;
 
   if (!parse_ip (ip, &ia, &netmask)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_pushstring (lua, __ ("Not a valid IP address.\n"));
     lua_error (lua);
   }
 
@@ -890,7 +890,7 @@ int pi_lua_unbanip_hard (lua_State * lua)
   struct in_addr ia, netmask;
 
   if (!parse_ip (ip, &ia, &netmask)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_pushstring (lua, __ ("Not a valid IP address.\n"));
     lua_error (lua);
   }
 
@@ -958,7 +958,7 @@ int pi_lua_findipban (lua_State * lua)
   struct in_addr ia;
 
   if (!inet_aton (ip, &ia)) {
-    lua_pushstring (lua, "Not a valid IP address.\n");
+    lua_pushstring (lua, __ ("Not a valid IP address.\n"));
     lua_error (lua);
   }
 
@@ -1415,7 +1415,7 @@ unsigned long pi_lua_robot_event_handler (plugin_user_t * user, void *dummy,
 
     buf = bf_alloc (32 + strlen (error) + strlen (ctx->name));
 
-    bf_printf (buf, "LUA ERROR ('%s'): %s\n", ctx->name, error);
+    bf_printf (buf, _("LUA ERROR ('%s'): %s\n"), ctx->name, error);
 
     plugin_report (buf);
 
@@ -1596,7 +1596,7 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
 
     buf = bf_alloc (32 + strlen (error) + strlen (ctx->name));
 
-    bf_printf (buf, "LUA ERROR ('%s'): %s\n", ctx->name, error);
+    bf_printf (buf, _("LUA ERROR ('%s'): %s\n"), ctx->name, error);
 
     plugin_report (buf);
 
@@ -1627,7 +1627,7 @@ int pi_lua_cmdreg (lua_State * lua)
   lua_gettable (lua, LUA_GLOBALSINDEX);
   if (lua_isnil (lua, -1)) {
     lua_remove (lua, -1);
-    lua_pushstring (lua, "No such LUA function.");
+    lua_pushstring (lua, __ ("No such LUA function."));
     return lua_error (lua);
   }
   lua_remove (lua, -1);
@@ -1635,7 +1635,7 @@ int pi_lua_cmdreg (lua_State * lua)
   parserights (rights, &caps, &ncaps);
 
   if (command_register (cmd, &handler_luacommand, caps, desc)) {
-    lua_pushstring (lua, "Command failed to register.");
+    lua_pushstring (lua, __ ("Command failed to register."));
     return lua_error (lua);
   }
 
@@ -1643,7 +1643,7 @@ int pi_lua_cmdreg (lua_State * lua)
   ctx = malloc (sizeof (pi_lua_command_context_t));
   if (!ctx) {
     command_unregister (cmd);
-    lua_pushstring (lua, "Could not allocate memory.");
+    lua_pushstring (lua, __ ("Could not allocate memory."));
     return lua_error (lua);
   }
   ctx->name = strdup (cmd);
@@ -1882,7 +1882,7 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
   if (result) {
     unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
 
-    bf_printf (output, "LUA ERROR: %s\n", error);
+    bf_printf (output, _("LUA ERROR: %s\n"), error);
 
     goto error;
   }
@@ -1907,7 +1907,7 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
   if (result) {
     unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
 
-    bf_printf (output, "LUA ERROR: %s\n", error);
+    bf_printf (output, _("LUA ERROR: %s\n"), error);
 
     goto late_error;
   }
@@ -2007,15 +2007,15 @@ unsigned long handler_luastat (plugin_user_t * user, buffer_t * output, void *pr
 {
   lua_context_t *ctx;
 
-  bf_printf (output, "Lua stats\nVersion: " LUA_VERSION "\nScripts count/peak: %d/%d",
+  bf_printf (output, _("Lua stats\nVersion: %s\nScripts count/peak: %d/%d"), HUBSOFT_NAME,
 	     lua_ctx_cnt, lua_ctx_peak);
 
   if (!lua_ctx_cnt) {
-    bf_printf (output, "\nNo LUA scripts running.\n");
+    bf_printf (output, _("\nNo LUA scripts running.\n"));
     return 1;
   }
 
-  bf_printf (output, "\nRunning LUA scripts:\n");
+  bf_printf (output, _("\nRunning LUA scripts:\n"));
 
   for (ctx = lua_list.next; ctx != &lua_list; ctx = ctx->next) {
     bf_printf (output, " %s (%s)\n", ctx->name, format_size (lua_getgccount (ctx->l) * 1024));
@@ -2030,14 +2030,14 @@ unsigned long handler_luaload (plugin_user_t * user, buffer_t * output, void *pr
 
 
   if (argc != 2) {
-    bf_printf (output, "Usage: %s <script>", argv[0]);
+    bf_printf (output, _("Usage: %s <script>"), argv[0]);
     return 0;
   }
 
   if (pi_lua_load (output, argv[1])) {
-    bf_printf (output, "Lua script '%s' loaded.\n", argv[1]);
+    bf_printf (output, _("Lua script '%s' loaded.\n"), argv[1]);
   } else {
-    bf_printf (output, "Lua script '%s' failed to load.\n", argv[1]);
+    bf_printf (output, _("Lua script '%s' failed to load.\n"), argv[1]);
   }
 
   return 0;
@@ -2048,14 +2048,14 @@ unsigned long handler_luaclose (plugin_user_t * user, buffer_t * output, void *p
 {
 
   if (argc != 2) {
-    bf_printf (output, "Usage: %s <script>", argv[0]);
+    bf_printf (output, _("Usage: %s <script>"), argv[0]);
     return 0;
   }
 
   if (pi_lua_close (argv[1])) {
-    bf_printf (output, "Lua script '%s' unloaded.\n", argv[1]);
+    bf_printf (output, _("Lua script '%s' unloaded.\n"), argv[1]);
   } else {
-    bf_printf (output, "Lua script '%s' not found.\n", argv[1]);
+    bf_printf (output, _("Lua script '%s' not found.\n"), argv[1]);
   }
 
   return 0;
@@ -2110,7 +2110,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 
       buf = bf_alloc (32 + strlen (error) + strlen (ctx->name));
 
-      bf_printf (buf, "LUA ERROR ('%s'): %s\n", ctx->name, error);
+      bf_printf (buf, _("LUA ERROR ('%s'): %s\n"), ctx->name, error);
 
       plugin_report (buf);
 
@@ -2140,7 +2140,7 @@ unsigned long pi_lua_event_save (plugin_user_t * user, buffer_t * output, void *
 
   fp = fopen (pi_lua_savefile, "w+");
   if (!fp) {
-    plugin_perror ("LUA: ERROR saving %s", pi_lua_savefile);
+    plugin_perror (__ ("LUA: ERROR saving %s"), pi_lua_savefile);
     return PLUGIN_RETVAL_CONTINUE;
   }
 

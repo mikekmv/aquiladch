@@ -93,17 +93,13 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
 
   bf_strncat (output, u->lock, LOCKLENGTH);
   bf_strncat (output, "]] Pk=Aquila|", 13);
-  bf_strcat (output, "<");
-  bf_strcat (output, HubSec->nick);
-  bf_strcat (output, "> This hub is running Aquila Version " AQUILA_VERSION " (Uptime ");
-  time_print (output, tnow.tv_sec);
-  bf_printf (output, ".%.3lu).|", tnow.tv_usec / 1000);
+  bf_printf (output, _("<%s> This hub is running %s Version %s (Uptime .%.3lu).|"), HubSec->nick,
+	     HUBSOFT_NAME, AQUILA_VERSION, time_print (tnow.tv_sec), tnow.tv_usec / 1000);
 
   /* check for a reconnect ban */
   if (!cloning && (ban = banlist_find_bynet (&reconnectbanlist, u->ipaddress, 0xFFFFFFFF))) {
-    bf_printf (output, "<%s> Do not reconnect too fast, time remaining: ", HubSec->nick);
-    time_print (output, ban->expire - now.tv_sec);
-    bf_strcat (output, "|");
+    bf_printf (output, _("<%s> Do not reconnect too fast, time remaining: %s|"), HubSec->nick,
+	       time_print (ban->expire - now.tv_sec));
     retval = server_write (u->parent, output);
     proto_nmdc_user_drop (u, NULL);
     return retval;
@@ -240,7 +236,7 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
       broken_key:
 	DPRINTF ("ILLEGAL KEY\n");
 	nmdc_stats.brokenkey++;
-	server_disconnect_user (u->parent, "Protocol violation: Bad key.");
+	server_disconnect_user (u->parent, _("Protocol violation: Bad key."));
 	retval = -1;
 	break;
       }
@@ -282,7 +278,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       bf_strcat (output, u->nick);
       bf_strcat (output, "|");
       retval = server_write (u->parent, output);
-      proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+      proto_nmdc_user_redirect (u, bf_buffer (__ ("Your nickname is already in use.")));
       nmdc_stats.usednick++;
       retval = -1;
       break;
@@ -308,15 +304,15 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	u->rights =
 	  config.DefaultRights | ((a->rights | a->classp->rights) & (CAP_SHARE | CAP_TAG));
 	proto_nmdc_user_say_string (HubSec, output,
-				    "Your account priviliges will not be awarded until you set a password.");
+				    __
+				    ("Your account priviliges will not be awarded until you set a password."));
       }
     }
 
     /* check for a reconnect ban */
     if ((ban = banlist_find_bynick (&reconnectbanlist, u->nick))) {
-      bf_printf (output, "<%s> Do not reconnect too fast, time remaining: ", HubSec->nick);
-      time_print (output, ban->expire - now.tv_sec);
-      bf_strcat (output, "|");
+      bf_printf (output, _("<%s> Do not reconnect too fast, time remaining: %s|"), HubSec->nick,
+		 time_print (ban->expire - now.tv_sec));
       retval = server_write (u->parent, output);
       proto_nmdc_user_drop (u, NULL);
       retval = -1;
@@ -330,14 +326,15 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	bf_strcat (output, u->nick);
 	bf_strcat (output, "|");
 	retval = server_write (u->parent, output);
-	proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+	proto_nmdc_user_redirect (u, bf_buffer (__ ("Your nickname is already in use.")));
 	nmdc_stats.usednick++;
 	retval = -1;
 	break;
       } else {
-	proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+	proto_nmdc_user_say_string (HubSec, output,
+				    __ ("Another instance of you is connecting, bye!"));
 	server_write (existing_user->parent, output);
-	server_disconnect_user (existing_user->parent, "Reconnecting.");
+	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
 	*output->s = '\0';
 	output->e = output->s;
       }
@@ -347,7 +344,8 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     if ((!cloning) && (existing_user = hash_find_ip (&hashlist, u->ipaddress))) {
       proto_nmdc_user_redirect (u,
 				bf_buffer
-				("Cloning is not allowed. Another user is already logged in from this IP address."));
+				(__
+				 ("Cloning is not allowed. Another user is already logged in from this IP address.")));
       retval = -1;
       break;
     }
@@ -355,7 +353,8 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     /* add a reconnect ban for the user to prevent quick relogin. */
     if (config.ReconnectBantime) {
       banlist_add (&reconnectbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
-		   bf_buffer ("Do not reconnect too fast."), now.tv_sec + config.ReconnectBantime);
+		   bf_buffer (__ ("Do not reconnect too fast.")),
+		   now.tv_sec + config.ReconnectBantime);
     }
 
     /* prepare buffer */
@@ -368,23 +367,18 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     if (ban) {
       DPRINTF ("** Refused user %s. IP Banned because %.*s\n", u->nick,
 	       (unsigned int) bf_used (ban->message), ban->message->s);
-      bf_strcat (output, "<");
-      bf_strcat (output, HubSec->nick);
-      bf_strcat (output, "> You have been banned by ");
-      bf_strcat (output, ban->op);
-      bf_strcat (output, " because: ");
+      bf_printf (output, _("<%s> You have been banned by %s because: "), HubSec->nick, ban->op);
       bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
       if (ban->expire) {
-	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
-	time_print (output, ban->expire - now.tv_sec);
-	bf_strcat (output, "|");
+	bf_printf (output, _("<%s> Time remaining %s|"), HubSec->nick,
+		   time_print (ban->expire - now.tv_sec));
       }
       if (defaultbanmessage && strlen (defaultbanmessage)) {
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
       retval = server_write (u->parent, output);
-      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
+      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer (__ ("Banned.")));
       nmdc_stats.forcemove--;
       nmdc_stats.banned++;
       retval = -1;
@@ -397,23 +391,18 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     if (ban) {
       DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
 	       (unsigned int) bf_used (ban->message), ban->message->s);
-      bf_strcat (output, "<");
-      bf_strcat (output, HubSec->nick);
-      bf_strcat (output, "> You have been banned by ");
-      bf_strcat (output, ban->op);
-      bf_strcat (output, " because: ");
+      bf_printf (output, _("<%s> You have been banned by %s because: "), HubSec->nick, ban->op);
       bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
       if (ban->expire) {
-	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
-	time_print (output, ban->expire - now.tv_sec);
-	bf_strcat (output, "|");
+	bf_printf (output, _("<%s> Time remaining %s|"), HubSec->nick,
+		   time_print (ban->expire - now.tv_sec));
       }
       if (defaultbanmessage && strlen (defaultbanmessage)) {
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
       retval = server_write (u->parent, output);
-      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
+      proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer (__ ("Banned.")));
       nmdc_stats.forcemove--;
       nmdc_stats.banned++;
       retval = -1;
@@ -467,16 +456,17 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       if ((ban = banlist_find_bynick (&softbanlist, u->nick)))
 	goto banned;
 
-      proto_nmdc_user_say (HubSec, output, bf_buffer ("Bad password."));
+      proto_nmdc_user_say (HubSec, output, bf_buffer (__ ("Bad password.")));
       bf_strcat (output, "$BadPass|");
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent, "Bad password");
+      server_disconnect_user (u->parent, __ ("Bad password"));
       retval = -1;
       nmdc_stats.badpasswd++;
       /* check password guessing attempts */
       if (++a->badpw >= config.PasswdRetry) {
 	banlist_add (&softbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
-		     bf_buffer ("Password retry overflow."), now.tv_sec + config.PasswdBantime);
+		     bf_buffer (__ ("Password retry overflow.")),
+		     now.tv_sec + config.PasswdBantime);
 	a->badpw = 0;
       }
 
@@ -489,9 +479,10 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 
     /* check if users exists, if so, redirect old */
     if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
-      proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+      proto_nmdc_user_say_string (HubSec, output,
+				  __ ("Another instance of you is connecting, bye!"));
       server_write (existing_user->parent, output);
-      server_disconnect_user (existing_user->parent, "Reconnecting.");
+      server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
       *output->s = '\0';
       output->e = output->s;
     }
@@ -520,7 +511,8 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     if (!a->passwd[0])
       proto_nmdc_user_say (HubSec, output,
 			   bf_buffer
-			   ("Your account priviliges will not be awarded until you set a password. Use !passwd or !pwgen."));
+			   (__
+			    ("Your account priviliges will not be awarded until you set a password. Use !passwd or !pwgen.")));
 
     u->state = PROTO_STATE_HELLO;
     server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
@@ -537,23 +529,18 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 banned:
   DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
 	   (unsigned int) bf_used (ban->message), ban->message->s);
-  bf_strcat (output, "<");
-  bf_strcat (output, HubSec->nick);
-  bf_strcat (output, "> You have been banned by ");
-  bf_strcat (output, ban->op);
-  bf_strcat (output, " because: ");
+  bf_printf (output, _("<%s> You have been banned by %s because: "), HubSec->nick, ban->op);
   bf_strncat (output, ban->message->s, bf_used (ban->message));
   bf_strcat (output, "|");
   if (ban->expire) {
-    bf_printf (output, "<%s> Time remaining ", HubSec->nick);
-    time_print (output, ban->expire - now.tv_sec);
-    bf_strcat (output, "|");
+    bf_printf (output, _("<%s> Time remaining %s|"), HubSec->nick,
+	       time_print (ban->expire - now.tv_sec));
   }
   if (defaultbanmessage && strlen (defaultbanmessage)) {
     bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
   }
   retval = server_write (u->parent, output);
-  proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer ("Banned."));
+  proto_nmdc_user_forcemove (u, config.KickBanRedirect, bf_buffer (__ ("Banned.")));
   nmdc_stats.forcemove--;
   nmdc_stats.banned++;
   nmdc_stats.nickban++;
@@ -593,14 +580,15 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     /* check again if user exists */
     if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
       if (existing_user->ipaddress != u->ipaddress) {
-	proto_nmdc_user_redirect (u, bf_buffer ("Your nickname is already in use."));
+	proto_nmdc_user_redirect (u, bf_buffer (__ ("Your nickname is already in use.")));
 	nmdc_stats.usednick++;
 	retval = -1;
 	break;
       } else {
-	proto_nmdc_user_say_string (HubSec, output, "Another instance of you is connecting, bye!");
+	proto_nmdc_user_say_string (HubSec, output,
+				    __ ("Another instance of you is connecting, bye!"));
 	server_write (existing_user->parent, output);
-	server_disconnect_user (existing_user->parent, "Reconnecting");
+	server_disconnect_user (existing_user->parent, __ ("Reconnecting"));
       }
       existing_user = NULL;
     }
@@ -622,12 +610,13 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	if (u->rights & CAP_TAG) {
 	  DPRINTF ("  Warning: CAP_TAG overrides bad myinfo");
 	  proto_nmdc_user_say (HubSec, output,
-			       bf_buffer ("WARNING: You should use a client that uses tags!"));
+			       bf_buffer (__ ("WARNING: You should use a client that uses tags!")));
 	  u->active = 0;
 	} else {
 	  proto_nmdc_user_redirect (u,
 				    bf_buffer
-				    ("This hub requires tags, please upgrade to a client that supports them."));
+				    (__
+				     ("This hub requires tags, please upgrade to a client that supports them.")));
 	  retval = -1;
 	  nmdc_stats.notags++;
 	  break;
@@ -635,7 +624,8 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       } else {
 	DPRINTF ("  User %s refused due to bad MyINFO.\n", u->nick);
 	proto_nmdc_user_redirect (u,
-				  bf_buffer ("Your login was refused, your MyINFO seems corrupt."));
+				  bf_buffer (__
+					     ("Your login was refused, your MyINFO seems corrupt.")));
 	retval = -1;
 	nmdc_stats.badmyinfo++;
 	break;
@@ -649,7 +639,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     /* send the login event before we announce the new user to the hub so plugins can redirect those users */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_PRELOGIN, u->MyINFO) !=
 	PLUGIN_RETVAL_CONTINUE) {
-      proto_nmdc_user_redirect (u, bf_buffer ("Your login was refused."));
+      proto_nmdc_user_redirect (u, bf_buffer (__ ("Your login was refused.")));
       retval = -1;
       nmdc_stats.preloginevent++;
       break;
@@ -723,7 +713,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 
     /* send the login event */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGIN, u->MyINFO) != PLUGIN_RETVAL_CONTINUE) {
-      proto_nmdc_user_redirect (u, bf_buffer ("Your login was refused."));
+      proto_nmdc_user_redirect (u, bf_buffer (__ ("Your login was refused.")));
       retval = -1;
       nmdc_stats.loginevent++;
       break;
@@ -748,13 +738,13 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
 
   do {
     if (!(u->rights & CAP_CHAT)) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to chat.");
+      proto_nmdc_user_warn (u, &now, __ ("You are not allowed to chat."));
       break;
     }
 
     /* check quota */
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
-      proto_nmdc_user_warn (u, &now, "Think before you talk and don't spam.");
+      proto_nmdc_user_warn (u, &now, __ ("Think before you talk and don't spam."));
       nmdc_stats.chatoverflow++;
       retval = proto_nmdc_violation (u, &now, "Chat");
       break;
@@ -762,7 +752,7 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
 
     /* drop all chat message that are too long */
     if ((bf_size (b) > chatmaxlength) && (!(u->rights & CAP_SPAM))) {
-      proto_nmdc_user_warn (u, &now, "Your chat message was too long.");
+      proto_nmdc_user_warn (u, &now, __ ("Your chat message was too long."));
       nmdc_stats.chattoolong++;
       break;
     }
@@ -850,7 +840,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 	if (u->rights & CAP_TAG) {
 	  DPRINTF ("  Warning: CAP_TAG overrides bad myinfo");
 	  proto_nmdc_user_say (HubSec, output,
-			       bf_buffer ("WARNING: You should use a client that uses tags!"));
+			       bf_buffer (__ ("WARNING: You should use a client that uses tags!")));
 	  retval = server_write (u->parent, output);
 	  u->active = 0;
 	  ASSERT (new);
@@ -858,7 +848,8 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 	} else {
 	  proto_nmdc_user_redirect (u,
 				    bf_buffer
-				    ("This hub requires tags, please upgrade to a client that supports them."));
+				    (__
+				     ("This hub requires tags, please upgrade to a client that supports them.")));
 	  retval = -1;
 	  nmdc_stats.notags++;
 	}
@@ -867,7 +858,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 	break;
       }
 
-      proto_nmdc_user_redirect (u, bf_buffer ("Broken MyINFO, get lost."));
+      proto_nmdc_user_redirect (u, bf_buffer (__ ("Broken MyINFO, get lost.")));
       retval = -1;
       nmdc_stats.badmyinfo++;
       break;
@@ -882,7 +873,8 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       nmdc_stats.myinfoevent++;
       proto_nmdc_user_redirect (u,
 				bf_buffer
-				("Sorry, you no longer satisfy the necessary requirements for this hub."));
+				(__
+				 ("Sorry, you no longer satisfy the necessary requirements for this hub.")));
       retval = -1;
       bf_free (new);
       break;
@@ -966,10 +958,10 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
     if (!get_token (u->active ? &rates.asearch : &rates.psearch, &u->rate_search, now.tv_sec)
 	&& (!(u->rights & CAP_NOSRCHLIMIT))) {
       if (u->active) {
-	proto_nmdc_user_warn (u, &now, "Active searches are limited to %u every %u seconds.",
+	proto_nmdc_user_warn (u, &now, __ ("Active searches are limited to %u every %u seconds."),
 			      rates.asearch.refill, rates.asearch.period);
       } else {
-	proto_nmdc_user_warn (u, &now, "Passive searches are limited to %u every %u seconds.",
+	proto_nmdc_user_warn (u, &now, __ ("Passive searches are limited to %u every %u seconds."),
 			      rates.psearch.refill, rates.psearch.period);
       }
       retval = proto_nmdc_violation (u, &now, "Search");
@@ -979,7 +971,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 
     /* drop all seach message that are too long */
     if ((bf_size (b) > searchmaxlength) && (!(u->rights & CAP_SPAM))) {
-      proto_nmdc_user_warn (u, &now, "Your search message is too long.");
+      proto_nmdc_user_warn (u, &now, __ ("Your search message is too long."));
       nmdc_stats.searchtoolong++;
       break;
     }
@@ -996,7 +988,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 
       /* check mode */
       if (u->active) {
-	proto_nmdc_user_warn (u, &now, "You claim to be active. Passive search DENIED.");
+	proto_nmdc_user_warn (u, &now, __ ("You claim to be active. Passive search DENIED."));
 	nmdc_stats.searchcorrupt++;
 	break;
       }
@@ -1012,7 +1004,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
     } else {
       /* check mode */
       if (!u->active) {
-	proto_nmdc_user_warn (u, &now, "You claim to be passive. Active search DENIED.");
+	proto_nmdc_user_warn (u, &now, __ ("You claim to be passive. Active search DENIED."));
 	nmdc_stats.searchcorrupt++;
 	break;
       }
@@ -1031,8 +1023,8 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	if (u->ipaddress != addr.s_addr) {
 	  addr.s_addr = u->ipaddress;
 	  proto_nmdc_user_warn (u, &now,
-				"Your client uses IP %s for searching, while you have IP %s\n", n,
-				inet_ntoa (addr));
+				__ ("Your client uses IP %s for searching, while you have IP %s\n"),
+				n, inet_ntoa (addr));
 	  nmdc_stats.searchcorrupt++;
 	  *c = ':';
 	  break;
@@ -1048,7 +1040,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	if ((e = tth_list_check (u->tthlist, &tth, researchperiod))) {
 	  if ((now.tv_sec - e->stamp) < researchmininterval) {
 	    /* search dropped because researched too quickly */
-	    proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
+	    proto_nmdc_user_warn (u, &now, __ ("Do not repeat searches within %d seconds."),
 				  researchmininterval);
 	    u->rate_search.tokens++;
 	    nmdc_stats.researchdrop++;
@@ -1231,7 +1223,7 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
   do {
     /* this means a passive user cannot download from a user that isn't allowed to dl */
     if (!(u->rights & CAP_DL)) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to download.");
+      proto_nmdc_user_warn (u, &now, __ ("You are not allowed to download."));
       break;
     }
 
@@ -1258,7 +1250,7 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
     }
 
     if ((t->rights & CAP_SHAREBLOCK) && t->active) {
-      proto_nmdc_user_warn (u, &now, "You cannot download from %s.", t->nick);
+      proto_nmdc_user_warn (u, &now, __ ("You cannot download from %s."), t->nick);
       break;
     }
 
@@ -1279,8 +1271,8 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
       if (u->ipaddress != addr.s_addr) {
 	addr.s_addr = u->ipaddress;
 	proto_nmdc_user_warn (u, &now,
-			      "Your client uses IP %s for downloading, while you have IP %s\n", n,
-			      inet_ntoa (addr));
+			      __ ("Your client uses IP %s for downloading, while you have IP %s\n"),
+			      n, inet_ntoa (addr));
 	*c = ':';
 	break;
       }
@@ -1310,7 +1302,7 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
 
   do {
     if (!(u->rights & CAP_DL)) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to download.");
+      proto_nmdc_user_warn (u, &now, __ ("You are not allowed to download."));
       break;
     }
 
@@ -1350,7 +1342,7 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
     }
 
     if (t->rights & CAP_SHAREBLOCK) {
-      proto_nmdc_user_warn (u, &now, "You cannot download from %s.", t->nick);
+      proto_nmdc_user_warn (u, &now, __ ("You cannot download from %s."), t->nick);
       break;
     }
 
@@ -1381,7 +1373,7 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
   do {
 
     if (!(u->rights & (CAP_PM | CAP_PMOP))) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to send private messages.");
+      proto_nmdc_user_warn (u, &now, __ ("You are not allowed to send private messages."));
       break;
     }
 
@@ -1390,7 +1382,7 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
 
     /* check quota */
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
-      proto_nmdc_user_warn (u, &now, "Don't send private messages so fast.");
+      proto_nmdc_user_warn (u, &now, __ ("Don't send private messages so fast."));
       nmdc_stats.pmoverflow++;
       retval = proto_nmdc_violation (u, &now, "PM");
       break;
@@ -1420,9 +1412,9 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     l = c - n;
 
     if (strncmp (u->nick, n, l)) {
-      bf_printf (output, "Bad From: nick. No faking.");
+      bf_printf (output, _("Bad From: nick. No faking."));
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent, "Attempted PM faking.");
+      server_disconnect_user (u->parent, __ ("Attempted PM faking."));
       nmdc_stats.pmbadsource++;
       retval = -1;
       break;
@@ -1441,9 +1433,9 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     l = c - n;
 
     if (strncmp (u->nick, n, l)) {
-      bf_printf (output, "Bad display nick. No faking.");
+      bf_printf (output, _("Bad display nick. No faking."));
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent, "Attempted display nick faking");
+      server_disconnect_user (u->parent, __ ("Attempted display nick faking"));
       nmdc_stats.pmbadsource++;
       retval = -1;
       break;
@@ -1456,7 +1448,8 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
 
     /* do not send if only PMOP and target is not an OP */
     if ((!(u->rights & CAP_PM)) && (!t->op)) {
-      proto_nmdc_user_warn (u, &now, "Sorry, you can only send private messages to operators.");
+      proto_nmdc_user_warn (u, &now,
+			    __ ("Sorry, you can only send private messages to operators."));
       break;
     }
     if (plugin_send_event (t->plugin_priv, PLUGIN_EVENT_PM_IN, b) != PLUGIN_RETVAL_CONTINUE) {
@@ -1488,7 +1481,7 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
   /* unsigned int port; */
   do {
     if (!(u->rights & CAP_REDIRECT)) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to redirect users.");
+      proto_nmdc_user_warn (u, &now, __ ("You are not allowed to redirect users."));
       break;
     }
 
@@ -1568,7 +1561,7 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
     c = output->s;
     bf_printf (output, "%s", why);
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, output) != PLUGIN_RETVAL_CONTINUE) {
-      proto_nmdc_user_warn (u, &now, "Redirect refused.\n");
+      proto_nmdc_user_warn (u, &now, __ ("Redirect refused.\n"));
       output->s = c;
       break;
     }
@@ -1596,7 +1589,7 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
 
   do {
     if (!(u->rights & CAP_KICK)) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to kick users.");
+      proto_nmdc_user_warn (u, &now, __ ("You are not allowed to kick users."));
       break;
     }
 
@@ -1620,12 +1613,12 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
       break;
 
     c = output->s;
-    bf_printf (output, "You were kicked.");
+    bf_printf (output, _("You were kicked."));
     banlist_add (&softbanlist, u->nick, target->nick, target->ipaddress, 0xFFFFFFFF, output,
 		 now.tv_sec + config.defaultKickPeriod);
 
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, NULL) != PLUGIN_RETVAL_CONTINUE) {
-      proto_nmdc_user_warn (u, &now, "Redirect refused.\n");
+      proto_nmdc_user_warn (u, &now, __ ("Redirect refused.\n"));
       output->s = c;
       break;
     }
@@ -1646,7 +1639,7 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
     /* we reuse the warning rate here. Should not affect pingers (since they don't do much) and
      * prevents the need for yet another leaky bucket. */
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.warnings, &u->rate_warnings, now.tv_sec))) {
-      proto_nmdc_user_warn (u, &now, "Think before you ask HubINFO and don't spam.\n");
+      proto_nmdc_user_warn (u, &now, __ ("Think before you ask HubINFO and don't spam.\n"));
       retval = proto_nmdc_violation (u, &now, "HubINFO");
       break;
     }
@@ -1701,7 +1694,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
     case TOKEN_GETNICKLIST:
       /* check quota */
       if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec)) {
-	proto_nmdc_user_warn (u, &now, "Userlist request denied. Maximum 1 reload per %ds.",
+	proto_nmdc_user_warn (u, &now, __ ("Userlist request denied. Maximum 1 reload per %ds."),
 			      rates.getnicklist.period);
 	retval = proto_nmdc_violation (u, &now, "GetNickList");
 	break;

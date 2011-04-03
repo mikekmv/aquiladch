@@ -117,7 +117,7 @@ unsigned long pi_iplog_handler_clientlist (plugin_user_t * user, buffer_t * outp
   unsigned int i = 0;
 
   if (!iplog_length) {
-    bf_printf (output, "No IP logging enabled.\n");
+    bf_printf (output, _("No IP logging enabled.\n"));
     return 0;
   }
 
@@ -127,7 +127,7 @@ unsigned long pi_iplog_handler_clientlist (plugin_user_t * user, buffer_t * outp
     nick = NULL;
   }
 
-  bf_printf (output, "Logout time  :  IP  : Nick\n");
+  bf_printf (output, _("Logout time  :  IP  : Nick\n"));
   dllist_foreach (&iplog, entry) {
     if (nick && strncasecmp (nick, entry->nick, NICKLENGTH))
       continue;
@@ -137,7 +137,7 @@ unsigned long pi_iplog_handler_clientlist (plugin_user_t * user, buffer_t * outp
   }
 
   if (!i) {
-    bf_printf (output, "No IPs found.\n");
+    bf_printf (output, _("No IPs found.\n"));
   }
 
   return 0;
@@ -149,12 +149,12 @@ int pi_iplog_init ()
 {
   plugin_iplog = plugin_register ("iplog");
 
-  config_register ("iplog.length", CFG_ELEM_UINT, &iplog_length, "Number of IPs to remember.");
+  config_register ("iplog.length", CFG_ELEM_UINT, &iplog_length, _("Number of IPs to remember."));
 
   plugin_request (plugin_iplog, PLUGIN_EVENT_LOGOUT,
 		  (plugin_event_handler_t *) & pi_iplog_event_logout);
 
-  command_register ("iplog", &pi_iplog_handler_clientlist, CAP_KEY, "List iplogs.");
+  command_register ("iplog", &pi_iplog_handler_clientlist, CAP_KEY, _("List iplogs."));
 
   dllist_init (&iplog);
 

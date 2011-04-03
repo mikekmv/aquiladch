@@ -27,7 +27,7 @@
 #include "buffer.h"
 extern unsigned char *format_size (unsigned long long size);
 extern unsigned long long parse_size (unsigned char *token);
-extern unsigned int time_print (buffer_t * b, unsigned long s);
+extern char * time_print (unsigned long s);
 extern unsigned long time_parse (unsigned char *string);
 extern unsigned long parse_ip (unsigned char *text, struct in_addr *ip, struct in_addr *netmask);
 extern unsigned char *print_ip (struct in_addr ip, struct in_addr netmask);

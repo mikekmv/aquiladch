@@ -27,7 +27,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <locale.h>
 
+#include "defaults.h"
+#include "gettext.h"
 #include "aqtime.h"
 #include "proto.h"
 #include "config.h"
@@ -270,6 +273,12 @@ int main (int argc, char **argv)
   sigaddset (&set, SIGPIPE);
   sigaddset (&set, SIGURG);
   sigprocmask (SIG_BLOCK, &set, NULL);
+
+#if ENABLE_NLS
+  setlocale (LC_ALL, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+#endif
 
 #ifdef DEBUG
   /* add stacktrace handler */

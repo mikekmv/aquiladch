@@ -97,7 +97,7 @@ void cpu_parse ()
 
   fp = fopen ("/proc/cpuinfo", "r");
   if (!fp) {
-    bf_printf (b, "CPU Unknown\n");
+    bf_printf (b, _("CPU Unknown\n"));
     goto leave;
   }
 
@@ -112,11 +112,11 @@ void cpu_parse ()
     fgets (buf, 1024, fp);
     if (!strncasecmp (buf, "model name", 10) || !strncmp (buf, "Processor", 9)
 	|| !strncmp (buf, "cpu model", 9)) {
-      bf_printf (b, "CPU%.1d: %.*s\n", cpucount++, strlen (buf) - 14, buf + 13);
+      bf_printf (b, _("CPU%.1d: %.*s\n"), cpucount++, strlen (buf) - 14, buf + 13);
     } else if (!strncasecmp (buf, "cpu MHz", 7)) {
-      bf_printf (b, "     Clock: %.*s MHz ", strlen (buf) - 12, buf + 11);
+      bf_printf (b, _("     Clock: %.*s MHz "), strlen (buf) - 12, buf + 11);
     } else if (!strncasecmp (buf, "bogomips", 8)) {
-      bf_printf (b, "BogoMIPS: %.*s\n", strlen (buf) - 12, buf + 11);
+      bf_printf (b, _("BogoMIPS: %.*s\n"), strlen (buf) - 12, buf + 11);
     }
   }
   fclose (fp);
@@ -201,22 +201,22 @@ int cpu_printf (buffer_t * buf)
 
   time_t tnow = now.tv_sec;
 
-  bf_printf (buf, "\nCpu Statistics at %s", ctime (&tnow));
+  bf_printf (buf, _("\nCpu Statistics at %s"), ctime (&tnow));
 
   if (procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
-    bf_printf (buf, " last hour %2.2f%%\n",
+    bf_printf (buf, _(" last hour %2.2f%%\n"),
 	       cpu_calc (&procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS],
 			 &procstats[0][current[0]]));
   if (procstats[1][(current[1] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
-    bf_printf (buf, " last minute %2.2f%%\n",
+    bf_printf (buf, _(" last minute %2.2f%%\n"),
 	       cpu_calc (&procstats[1][(current[1] - 1) % PROCSTAT_MEASUREMENTS],
 			 &procstats[0][current[0]]));
   if (procstats[0][(current[0] - 5) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
-    bf_printf (buf, " last 5 seconds %2.2f%%\n\n",
+    bf_printf (buf, _(" last 5 seconds %2.2f%%\n\n"),
 	       cpu_calc (&procstats[0][(current[0] - 5) % PROCSTAT_MEASUREMENTS],
 			 &procstats[0][current[0]]));
 
-  bf_printf (buf, "Since boot %2.2f%%\n", cpu_calc (&procstat_boot, &procstats[0][current[0]]));
+  bf_printf (buf, _("Since boot %2.2f%%\n"), cpu_calc (&procstat_boot, &procstats[0][current[0]]));
 
   if (cpuinfo)
     bf_printf (buf, "\n%.*s", bf_used (cpuinfo), cpuinfo->s);
@@ -317,7 +317,7 @@ unsigned int bandwidth_printf (buffer_t * buf)
   stat_bw_level_t *lvl;
   stat_bw_elem_t *elem;
 
-  bf_printf (buf, "Total traffic since boot: In %lu, Out %lu\n", hubstats.TotalBytesReceived,
+  bf_printf (buf, _("Total traffic since boot: In %lu, Out %lu\n"), hubstats.TotalBytesReceived,
 	     hubstats.TotalBytesSend);
 
   lvl = &stats.bandwidth[0];
@@ -326,7 +326,7 @@ unsigned int bandwidth_printf (buffer_t * buf)
   out = (8 * (double) elem->BytesSend) / ((double) TV_TO_MSEC (elem->stamp));
   in = (8 * (double) elem->BytesReceived) / ((double) TV_TO_MSEC (elem->stamp));
 
-  retval += bf_printf (buf, "In last %lu ms: In %f kbps, Out %f kbps\n",
+  retval += bf_printf (buf, _("In last %lu ms: In %f kbps, Out %f kbps\n"),
 		       TV_TO_MSEC (elem->stamp), in, out);
 
   for (i = 0; i < STATS_NUM_LEVELS; i++) {
@@ -337,8 +337,8 @@ unsigned int bandwidth_printf (buffer_t * buf)
       in = (8000 * (double) lvl->TotalBytesReceived) / ((double) TV_TO_MSEC (lvl->TotalTime));
 
       retval +=
-	bf_printf (buf, "Average over %d seconds: In %f kbps, Out %f kbps\n", lvl->TotalTime.tv_sec,
-		   in / 1000, out / 1000);
+	bf_printf (buf, _("Average over %d seconds: In %f kbps, Out %f kbps\n"),
+		   lvl->TotalTime.tv_sec, in / 1000, out / 1000);
     };
   };
   return retval;
@@ -376,20 +376,20 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
   add_elem (output, cache.results, now.tv_sec);
   add_elem (output, cache.privatemessages, now.tv_sec);
 
-  bf_printf (output, "Total Count: %lu, Total Memory: %lu\n", totallines, totalmem);
+  bf_printf (output, _("Total Count: %lu, Total Memory: %lu\n"), totallines, totalmem);
 
-  bf_printf (output, "ZPipe users: %lu, ZLine users: %lu\n\n", cache.ZpipeSupporters,
+  bf_printf (output, _("ZPipe users: %lu, ZLine users: %lu\n\n"), cache.ZpipeSupporters,
 	     cache.ZlineSupporters);
-  bf_printf (output, "Nicklist cache (last updated %lu seconds ago).\n",
+  bf_printf (output, _("Nicklist cache (last updated %lu seconds ago).\n"),
 	     now.tv_sec - cache.lastrebuild);
 #ifdef ZLINES
-  bf_printf (output, "  Nicklist length %lu (zpipe %lu, zline %lu)\n", bf_used (cache.nicklist),
+  bf_printf (output, _("  Nicklist length %lu (zpipe %lu, zline %lu)\n"), bf_used (cache.nicklist),
 	     bfz_used (cache.nicklistzpipe), bfz_used (cache.nicklistzline));
-  bf_printf (output, "  Infolist length %lu (zpipe %lu, zline %lu)\n", bf_used (cache.infolist),
+  bf_printf (output, _("  Infolist length %lu (zpipe %lu, zline %lu)\n"), bf_used (cache.infolist),
 	     bfz_used (cache.infolistzpipe), bfz_used (cache.infolistzline));
 #else
-  bf_printf (output, "  Nicklist length %lu\n", bf_used (cache.nicklist));
-  bf_printf (output, "  Infolist length %lu\n", bf_used (cache.infolist));
+  bf_printf (output, _("  Nicklist length %lu\n"), bf_used (cache.nicklist));
+  bf_printf (output, _("  Infolist length %lu\n"), bf_used (cache.infolist));
 #endif
   return 0;
 }
@@ -399,7 +399,7 @@ unsigned long pi_statistics_handler_statbw (plugin_user_t * user, buffer_t * out
 {
   bandwidth_printf (output);
 #ifdef DEBUG
-  bf_printf (output, "Warning: DEBUG build, cpu measurements highly inaccurate.\n");
+  bf_printf (output, _("Warning: DEBUG build, cpu measurements highly inaccurate.\n"));
 #endif
   return 0;
 }
@@ -416,22 +416,22 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
   unsigned long count;
   unsigned long long bufs, total, rest;
 
-  bf_printf (output, "Allocated size: %llu (max: %llu)\n", bufferstats.size, bufferstats.peak);
-  bf_printf (output, "Allocated buffers: %lu (max %lu)\n", bufferstats.count, bufferstats.max);
-  bf_printf (output, " Users having buffered output: %lu\n", buffering);
+  bf_printf (output, _("Allocated size: %llu (max: %llu)\n"), bufferstats.size, bufferstats.peak);
+  bf_printf (output, _("Allocated buffers: %lu (max %lu)\n"), bufferstats.count, bufferstats.max);
+  bf_printf (output, _(" Users having buffered output: %lu\n"), buffering);
 
   count = 0;
   bufs = 0;
   total = 0;
   rest = 0;
-  bf_printf (output, "\nBuffering clients:\n");
+  bf_printf (output, _("\nBuffering clients:\n"));
   for (u = userlist; u; u = u->next) {
     cl = (client_t *) u->parent;
 
     if (!cl) {
       if (u->state == PROTO_STATE_VIRTUAL)
 	continue;
-      bf_printf (output, "Real user %s without socket?\n", u->nick);
+      bf_printf (output, _("Real user %s without socket?\n"), u->nick);
       continue;
     }
     if (!cl->outgoing.count)
@@ -444,9 +444,8 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
       output = b;
     }
 
-    bf_printf (output, " %s (online: ", u->nick);
-    time_print (output, now.tv_sec - u->joinstamp);
-    bf_printf (output, "), %lu buffers, total %lu, offset %lu, credit %lu\n", cl->outgoing.count,
+    bf_printf (output, _(" %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"),
+	       u->nick, time_print (now.tv_sec - u->joinstamp), cl->outgoing.count,
 	       cl->outgoing.size, cl->offset, cl->credit);
     bufs += cl->outgoing.count;
     total += cl->outgoing.size;
@@ -456,10 +455,11 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
   }
   /* free up some room for the totals */
   if (!count)
-    bf_printf (output, " None.\n");
+    bf_printf (output, _(" None.\n"));
 
   bf_printf (output,
-	     "\n Total found: %lu\n Total bytes queued %lu\n Average bufs %lu\n Average bytes queued %lu\n Average bytes to write %lu\n",
+	     _
+	     ("\n Total found: %lu\n Total bytes queued %lu\n Average bufs %lu\n Average bytes queued %lu\n Average bytes to write %lu\n"),
 	     count, total, count ? bufs / count : 0, count ? total / count : 0,
 	     count ? rest / count : 0);
 
@@ -471,7 +471,7 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
 {
   cpu_printf (output);
 #ifdef DEBUG
-  bf_printf (output, "Warning: DEBUG build, cpu measurements higher as normal.\n");
+  bf_printf (output, _("Warning: DEBUG build, cpu measurements higher as normal.\n"));
 #endif
   return 0;
 }
@@ -481,7 +481,7 @@ extern iplist_t lastlist;
 unsigned long pi_statistics_handler_statconn (plugin_user_t * user, buffer_t * output, void *dummy,
 					      unsigned int argc, unsigned char **argv)
 {
-  bf_printf (output, "Total IPs remembered (roughly last %us): %lu\n", iplist_interval,
+  bf_printf (output, _("Total IPs remembered (roughly last %us): %lu\n"), iplist_interval,
 	     lastlist.count);
   return 0;
 }
@@ -494,7 +494,7 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
 					     unsigned int argc, unsigned char **argv)
 {
 
-  bf_printf (output, "Memory Usage:\n");
+  bf_printf (output, _("Memory Usage:\n"));
 
 #if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
   if (1) {
@@ -502,21 +502,23 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
 
     mi = mallinfo ();
 
-    bf_printf (output, "GNU LibC memory statistics:\n");
-    bf_printf (output, " Total heap     : %lu (%s)\n", mi.arena, format_size (mi.arena));
-    bf_printf (output, " # Free chunks    : %lu\n", mi.ordblks);
-    bf_printf (output, " # Fastbin blocks : %lu\n", mi.smblks);
-    bf_printf (output, " Total alloced space : %lu (%s)\n", mi.uordblks, format_size (mi.uordblks));
-    bf_printf (output, " Total free space    : %lu (%s)\n", mi.fordblks, format_size (mi.fordblks));
-    bf_printf (output, " keepcost : %lu (%s)\n", mi.keepcost, format_size (mi.keepcost));
-    bf_printf (output, " # MMAP regions : %lu\n", mi.hblks);
-    bf_printf (output, " MMAP space     : %lu (%s)\n\n", mi.hblkhd, format_size (mi.hblkhd));
+    bf_printf (output, _("GNU LibC memory statistics:\n"));
+    bf_printf (output, _(" Total heap     : %lu (%s)\n"), mi.arena, format_size (mi.arena));
+    bf_printf (output, _(" # Free chunks    : %lu\n"), mi.ordblks);
+    bf_printf (output, _(" # Fastbin blocks : %lu\n"), mi.smblks);
+    bf_printf (output, _(" Total alloced space : %lu (%s)\n"), mi.uordblks,
+	       format_size (mi.uordblks));
+    bf_printf (output, _(" Total free space    : %lu (%s)\n"), mi.fordblks,
+	       format_size (mi.fordblks));
+    bf_printf (output, _(" keepcost : %lu (%s)\n"), mi.keepcost, format_size (mi.keepcost));
+    bf_printf (output, _(" # MMAP regions : %lu\n"), mi.hblks);
+    bf_printf (output, _(" MMAP space     : %lu (%s)\n\n"), mi.hblkhd, format_size (mi.hblkhd));
   }
 #endif
 
-  bf_printf (output, HUBSOFT_NAME " stats:\n");
-  bf_printf (output, " Buffering memory: %lu\n", buf_mem);
-  bf_printf (output, " Cachelist size: %lu\n", cachelist_count);
+  bf_printf (output, _("%s stats:\n"), HUBSOFT_NAME);
+  bf_printf (output, _(" Buffering memory: %lu\n"), buf_mem);
+  bf_printf (output, _(" Cachelist size: %lu\n"), cachelist_count);
   return 0;
 }
 
@@ -527,9 +529,8 @@ unsigned long pi_statistics_handler_uptime (plugin_user_t * user, buffer_t * out
 
   timersub (&now, &boottime, &diff);
 
-  bf_printf (output, "Booted at %.*s, up %lu seconds (", 24, ctime (&boottime.tv_sec), diff.tv_sec);
-  time_print (output, diff.tv_sec);
-  bf_strcat (output, ")\n");
+  bf_printf (output, _("Booted at %.*s, up %lu seconds (%s)\n"), 24, ctime (&boottime.tv_sec),
+	     diff.tv_sec, time_print (diff.tv_sec));
 
   return 0;
 }
@@ -612,15 +613,15 @@ int pi_statistics_init ()
   plugin_request (plugin_stats, PLUGIN_EVENT_CACHEFLUSH, &pi_statistics_event_cacheflush);
 
   command_register ("statbuffer", &pi_statistics_handler_statbuffer, CAP_CONFIG,
-		    "Show buffer stats.");
-  command_register ("statcache", &pi_statistics_handler_statcache, 0, "Show cache stats.");
-  command_register ("statbw", &pi_statistics_handler_statbw, 0, "Show cache stats.");
-  command_register ("statcpu", &pi_statistics_handler_statcpu, 0, "Show cpu usage stats.");
+		    _("Show buffer stats."));
+  command_register ("statcache", &pi_statistics_handler_statcache, 0, _("Show cache stats."));
+  command_register ("statbw", &pi_statistics_handler_statbw, 0, _("Show cache stats."));
+  command_register ("statcpu", &pi_statistics_handler_statcpu, 0, _("Show cpu usage stats."));
   command_register ("statnmdc", &pi_statistics_handler_statnmdc, 0,
-		    "Show nmdc protocol stats. Experts only.");
-  command_register ("statmem", &pi_statistics_handler_statmem, 0, "Show memory usage stats.");
-  command_register ("statconn", &pi_statistics_handler_statconn, 0, "Show connection stats.");
-  command_register ("uptime", &pi_statistics_handler_uptime, 0, "Show uptime.");
+		    _("Show nmdc protocol stats. Experts only."));
+  command_register ("statmem", &pi_statistics_handler_statmem, 0, _("Show memory usage stats."));
+  command_register ("statconn", &pi_statistics_handler_statconn, 0, _("Show connection stats."));
+  command_register ("uptime", &pi_statistics_handler_uptime, 0, _("Show uptime."));
 
   return 0;
 }

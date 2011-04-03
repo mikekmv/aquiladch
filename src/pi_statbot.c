@@ -84,7 +84,7 @@ int pi_statbot_init ()
   plugin_statbot = plugin_register ("statbot");
 
   command_register ("statbot", &pi_statbot_handler_statbot, 0,
-		    "Command returns info for the statbot.");
+		    _("Command returns info for the statbot."));
 
   return 0;
 }

@@ -35,7 +35,7 @@ unsigned int command_flags_print (command_flag_t * flags, buffer_t * buf, unsign
   unsigned int cnt = 0, j;
 
   if (!flag) {
-    bf_printf (buf, "None");
+    bf_printf (buf, _("None"));
     return 0;
   }
 
@@ -86,11 +86,11 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
       for (j = 0; flags[j].name; j++) {
 	if (!strcasecmp (flags[j].name, name)) {
 	  if (arg[0] != '-') {
-	    bf_printf (buf, "Added %s.\n", flags[j].name);
+	    bf_printf (buf, _("Added %s.\n"), flags[j].name);
 	    *flag |= flags[j].flag;
 	    *nflag &= ~flags[j].flag;
 	  } else {
-	    bf_printf (buf, "Removed %s.\n", flags[j].name);
+	    bf_printf (buf, _("Removed %s.\n"), flags[j].name);
 	    *nflag |= flags[j].flag;
 	    *flag &= ~flags[j].flag;
 	  }
@@ -98,7 +98,7 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
 	}
       }
       if (!flags[j].name)
-	bf_printf (buf, "Unknown flag %s.\n", argv[i]);
+	bf_printf (buf, _("Unknown %s.\n"), argv[i]);
 
       name = strtok (NULL, ",");
     }
@@ -137,9 +137,9 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
   cmd->prev = list;
   cmd->req_cap = cap;
   if (help)
-    cmd->help = strdup (help);
+    cmd->help = strdup (gettext (help));
   else
-    cmd->help = strdup ("No help available.");
+    cmd->help = strdup (__ ("No help available."));
   list->next = cmd;
 
   {
@@ -301,7 +301,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
   } else {
     buffer_t *buf = bf_alloc (strlen (argv[0]) + 256);
 
-    bf_printf (buf, "Command not found: %s\n", argv[0]);
+    bf_printf (buf, _("Command not found: %s\n"), argv[0]);
     if (target) {
       plugin_user_priv (target, user, NULL, buf, 1);
     } else {

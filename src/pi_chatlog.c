@@ -46,11 +46,11 @@ unsigned long pi_chatlog_handler_chatlog (plugin_user_t * user, buffer_t * outpu
   string_list_entry_t *e;
 
   if (!chatlogmax) {
-    bf_printf (output, "No Chat History configured.\n");
+    bf_printf (output, _("No Chat History configured.\n"));
     return 0;
   }
 
-  bf_printf (output, "Chat History:\n");
+  bf_printf (output, _("Chat History:\n"));
 
   if (bf_unused (output) < (chatlog.size + chatlog.count)) {
     b = bf_alloc (chatlog.size + chatlog.count);
@@ -118,9 +118,10 @@ int pi_chatlog_init ()
   plugin_request (plugin_chatlog, PLUGIN_EVENT_CHAT, &pi_chatlog_handler_chat);
 
   config_register ("chatlog.lines", CFG_ELEM_ULONG, &chatlogmax,
-		   "Maximum number of chat history lines.");
+		   _("Maximum number of chat history lines."));
 
-  command_register ("chatlog", &pi_chatlog_handler_chatlog, 0, "Command returns last chatlines.");
+  command_register ("chatlog", &pi_chatlog_handler_chatlog, 0,
+		    _("Command returns last chatlines."));
 
   return 0;
 }

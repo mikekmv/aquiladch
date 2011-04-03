@@ -543,24 +543,24 @@ unsigned long pi_trigger_handler_triggeradd (plugin_user_t * user, buffer_t * ou
   trigger_t *t;
 
   if (argc < 4) {
-    bf_printf (output, "Usage: %s <name> <type> <arg>\n"
-	       "   name: name of the trigger\n"
-	       "   type: one of:\n"
-	       "      - text : the trigger will dump the text provided in arg, \n"
-	       "      - file : the trigger will dump the contents of the file provided in arg\n"
-	       "	 - command : the trigger will dump the output of the command provided in arg\n"
-	       "   arg: depends on type\n", argv[0]);
+    bf_printf (output, _("Usage: %s <name> <type> <arg>\n"
+			 "   name: name of the trigger\n"
+			 "   type: one of:\n"
+			 "      - text : the trigger will dump the text provided in arg, \n"
+			 "      - file : the trigger will dump the contents of the file provided in arg\n"
+			 "	 - command : the trigger will dump the output of the command provided in arg\n"
+			 "   arg: depends on type\n"), argv[0]);
     return 0;
   }
 
   if (strlen (argv[1]) > TRIGGER_NAME_LENGTH) {
-    bf_printf (output, "Triggername %s is too long. Max %d characters\n", argv[1],
+    bf_printf (output, _("Triggername %s is too long. Max %d characters\n"), argv[1],
 	       TRIGGER_RELOAD_PERIOD);
     return 0;
   }
 
   if (trigger_find (argv[1])) {
-    bf_printf (output, "Triggername %s already exists.", argv[1]);
+    bf_printf (output, _("Triggername %s already exists."), argv[1]);
     return 0;
   }
 
@@ -571,15 +571,15 @@ unsigned long pi_trigger_handler_triggeradd (plugin_user_t * user, buffer_t * ou
   } else if (!strcmp (argv[2], "command")) {
     type = TRIGGER_TYPE_COMMAND;
   } else {
-    bf_printf (output, "Unknown trigger type %s.", argv[2]);
+    bf_printf (output, _("Unknown trigger type %s."), argv[2]);
     return 0;
   }
 
   t = trigger_create (argv[1], type, argv[3]);
   if (t) {
-    bf_printf (output, "Trigger %s created successfully.", argv[1]);
+    bf_printf (output, _("Trigger %s created successfully."), argv[1]);
   } else {
-    bf_printf (output, "Trigger %s creation failed.", argv[1]);
+    bf_printf (output, _("Trigger %s creation failed."), argv[1]);
   }
   return 0;
 }
@@ -590,18 +590,18 @@ unsigned long pi_trigger_handler_triggerdel (plugin_user_t * user, buffer_t * ou
   trigger_t *t;
 
   if (argc < 2) {
-    bf_printf (output, "Usage: %s <name>\n" "   name: name of the trigger\n", argv[0]);
+    bf_printf (output, _("Usage: %s <name>\n" "   name: name of the trigger\n"), argv[0]);
     return 0;
   }
 
 
   if (!(t = trigger_find (argv[1]))) {
-    bf_printf (output, "Triggername %s doesn't exist.", argv[1]);
+    bf_printf (output, _("Triggername %s doesn't exist."), argv[1]);
     return 0;
   }
 
   trigger_delete (t);
-  bf_printf (output, "Trigger %s deleted.", argv[1]);
+  bf_printf (output, _("Trigger %s deleted."), argv[1]);
 
   return 0;
 }
@@ -610,11 +610,11 @@ unsigned int trigger_show (buffer_t * buf, trigger_t * trigger)
 {
   switch (trigger->type) {
     case TRIGGER_TYPE_FILE:
-      return bf_printf (buf, "Trigger %s dumps file %s (Hits %ld)\n",
+      return bf_printf (buf, _("Trigger %s dumps file %s (Hits %ld)\n"),
 			trigger->name, trigger->file, trigger->usecnt);
       break;
     case TRIGGER_TYPE_TEXT:
-      return bf_printf (buf, "Trigger %s dumps text %.*s (Hits %ld)\n",
+      return bf_printf (buf, _("Trigger %s dumps text %.*s (Hits %ld)\n"),
 			trigger->name, bf_used (trigger->text), trigger->text->s, trigger->usecnt);
       break;
   };
@@ -634,7 +634,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     goto printhelp;
 
   if (!(t = trigger_find (argv[1]))) {
-    bf_printf (output, "Triggername %s doesn't exist.", argv[1]);
+    bf_printf (output, _("Triggername %s doesn't exist."), argv[1]);
     return 0;
   }
 
@@ -653,7 +653,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     help = argv[4];
     arg = argv[3];
   } else {
-    bf_printf (output, "Unknown trigger rule type %s.", argv[2]);
+    bf_printf (output, _("Unknown trigger rule type %s."), argv[2]);
     return 0;
   }
 
@@ -679,25 +679,25 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
 
   r = trigger_rule_create (t, type, cap, flags, arg, help);
   if (r) {
-    bf_printf (output, "Rule for trigger %s created successfully.", argv[1]);
+    bf_printf (output, _("Rule for trigger %s created successfully."), argv[1]);
   } else {
-    bf_printf (output, "Rule creation failed.");
+    bf_printf (output, _("Rule creation failed."));
   }
 
   return 0;
 
 printhelp:
-  bf_printf (output, "Usage: %s <name> <type> [<arg> <help>] [<pm>] [<broadcast>] [rights <cap>]\n"
-	     "   name: name of the trigger\n"
-	     "   type: one of:\n"
-	     "      - login   : the trigger will be triggered on user login, provide rights after type\n"
-	     "      - command : the trigger will be triggered by a command, provide the command in <arg>,\n"
-	     "                    then a help msg for the command, followed by any required rights\n"
-	     "   arg: depends on type\n"
-	     "   help: help message for command (only for command triggers)\n"
-	     "   pm: always send trigger as a private message\n"
-	     "   broadcast: send this to all users\n"
-	     "   rights: rights required to activate rule\n", argv[0]);
+  bf_printf (output,
+	     _("Usage: %s <name> <type> [<arg> <help>] [<pm>] [<broadcast>] [rights <cap>]\n"
+	       "   name: name of the trigger\n" "   type: one of:\n"
+	       "      - login   : the trigger will be triggered on user login, provide rights after type\n"
+	       "      - command : the trigger will be triggered by a command, provide the command in <arg>,\n"
+	       "                    then a help msg for the command, followed by any required rights\n"
+	       "   arg: depends on type\n"
+	       "   help: help message for command (only for command triggers)\n"
+	       "   pm: always send trigger as a private message\n"
+	       "   broadcast: send this to all users\n"
+	       "   rights: rights required to activate rule\n"), argv[0]);
   return 0;
 }
 
@@ -709,25 +709,25 @@ unsigned long pi_trigger_handler_ruledel (plugin_user_t * user, buffer_t * outpu
   unsigned long id;
 
   if (argc < 3) {
-    bf_printf (output, "Usage: %s <name> <id>\n"
-	       "   name: name of the trigger\n" "   id  : ID of the rule\n", argv[0]);
+    bf_printf (output, _("Usage: %s <name> <id>\n"
+			 "   name: name of the trigger\n" "   id  : ID of the rule\n"), argv[0]);
     return 0;
   }
 
   if (!(t = trigger_find (argv[1]))) {
-    bf_printf (output, "Triggername %s doesn't exist.", argv[1]);
+    bf_printf (output, _("Triggername %s doesn't exist."), argv[1]);
     return 0;
   }
 
   sscanf (argv[2], "%lu", &id);
 
   if (!(r = trigger_rule_find (t, id))) {
-    bf_printf (output, "Trigger %s Rule ID %lu doesn't exist.", argv[1], id);
+    bf_printf (output, _("Trigger %s Rule ID %lu doesn't exist."), argv[1], id);
     return 0;
   }
 
   trigger_rule_delete (r);
-  bf_printf (output, "Trigger %s Rule ID %lu deleted.", argv[1], id);
+  bf_printf (output, _("Trigger %s Rule ID %lu deleted."), argv[1], id);
 
   return 0;
 }
@@ -735,7 +735,7 @@ unsigned long pi_trigger_handler_ruledel (plugin_user_t * user, buffer_t * outpu
 unsigned int rule_show (buffer_t * buf, trigger_rule_t * rule)
 {
 
-  bf_printf (buf, "  Rule %lu type ", rule->id);
+  bf_printf (buf, _("  Rule %lu type "), rule->id);
   switch (rule->type) {
     case TRIGGER_RULE_COMMAND:
       bf_printf (buf, "command %s, ", rule->arg);
@@ -771,14 +771,14 @@ unsigned long pi_trigger_handler_rulelist (plugin_user_t * user, buffer_t * outp
     while ((count + 1) < argc) {
       t = trigger_find (argv[count]);
       if (!t) {
-	bf_printf (output, "Cannot find trigger %s\n", argv[count]);
+	bf_printf (output, _("Cannot find trigger %s\n"), argv[count]);
 	count += 2;
 	continue;
       }
       sscanf (argv[count + 1], "%u", &id);
       r = trigger_rule_find (t, id);
       if (!r) {
-	bf_printf (output, "Cannot find trigger %s rule ID %u\n", argv[count], id);
+	bf_printf (output, _("Cannot find trigger %s rule ID %u\n"), argv[count], id);
 	count += 2;
 	continue;
       }
@@ -837,12 +837,13 @@ int pi_trigger_init ()
   plugin_trigger = plugin_register ("trigger");
   plugin_request (plugin_trigger, PLUGIN_EVENT_LOGIN, &pi_trigger_login);
 
-  command_register ("triggeradd", &pi_trigger_handler_triggeradd, CAP_CONFIG, "Add a trigger.");
-  command_register ("triggerlist", &pi_trigger_handler_rulelist, CAP_CONFIG, "List triggers.");
-  command_register ("triggerdel", &pi_trigger_handler_triggerdel, CAP_CONFIG, "Delete a trigger.");
+  command_register ("triggeradd", &pi_trigger_handler_triggeradd, CAP_CONFIG, _("Add a trigger."));
+  command_register ("triggerlist", &pi_trigger_handler_rulelist, CAP_CONFIG, _("List triggers."));
+  command_register ("triggerdel", &pi_trigger_handler_triggerdel, CAP_CONFIG,
+		    _("Delete a trigger."));
 
-  command_register ("ruleadd", &pi_trigger_handler_ruleadd, CAP_CONFIG, "Add a rule.");
-  command_register ("ruledel", &pi_trigger_handler_ruledel, CAP_CONFIG, "Delete a rule.");
+  command_register ("ruleadd", &pi_trigger_handler_ruleadd, CAP_CONFIG, _("Add a rule."));
+  command_register ("ruledel", &pi_trigger_handler_ruledel, CAP_CONFIG, _("Delete a rule."));
 
   plugin_request (plugin_trigger, PLUGIN_EVENT_SAVE,
 		  (plugin_event_handler_t *) & pi_trigger_event_save);

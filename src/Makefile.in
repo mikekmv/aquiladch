@@ -15,7 +15,6 @@
 @SET_MAKE@
 
 srcdir = @srcdir@
-top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -37,10 +36,13 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = aquila$(EXEEXT)
-subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/herrno.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
+	$(top_srcdir)/m4/herrno.m4 $(top_srcdir)/m4/iconv.m4 \
+	$(top_srcdir)/m4/lib-ld.m4 $(top_srcdir)/m4/lib-link.m4 \
+	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/nls.m4 \
+	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
 	$(top_srcdir)/m4/sockinttypes.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -94,6 +96,7 @@ DIST_SOURCES = $(am__aquila_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+top_srcdir = @top_srcdir@
 ACLOCAL = @ACLOCAL@
 ALLOW_EPOLL = @ALLOW_EPOLL@
 ALLOW_LUA = @ALLOW_LUA@
@@ -114,7 +117,7 @@ CYGPATH_W = @CYGPATH_W@
 CYGWIN_LDFLAGS = @CYGWIN_LDFLAGS@
 DEBUG_FALSE = @DEBUG_FALSE@
 DEBUG_TRUE = @DEBUG_TRUE@
-DEFS = @DEFS@
+DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
 DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -125,22 +128,35 @@ GCC_CFLAGS = @GCC_CFLAGS@
 GDB = @GDB@
 GETADDRINFO_FALSE = @GETADDRINFO_FALSE@
 GETADDRINFO_TRUE = @GETADDRINFO_TRUE@
+GMSGFMT = @GMSGFMT@
+GMSGFMT_015 = @GMSGFMT_015@
 GPROF = @GPROF@
 GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTLLIBS = @INTLLIBS@
+INTL_MACOSX_LIBS = @INTL_MACOSX_LIBS@
 LDFLAGS = @LDFLAGS@
+LIBICONV = @LIBICONV@
+LIBINTL = @LIBINTL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LTLIBICONV = @LTLIBICONV@
+LTLIBINTL = @LTLIBINTL@
 LTLIBOBJS = @LTLIBOBJS@
 LUALIB = @LUALIB@
 LUA_FALSE = @LUA_FALSE@
 LUA_INCLUDES = @LUA_INCLUDES@
 LUA_TRUE = @LUA_TRUE@
 MAKEINFO = @MAKEINFO@
+MSGFMT = @MSGFMT@
+MSGFMT_015 = @MSGFMT_015@
+MSGMERGE = @MSGMERGE@
 OBJEXT = @OBJEXT@
+
+# for gettext
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -148,10 +164,14 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+POSUB = @POSUB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+XGETTEXT = @XGETTEXT@
+XGETTEXT_015 = @XGETTEXT_015@
 ZLIB = @ZLIB@
 ZLINE = @ZLINE@
 ac_ct_CC = @ac_ct_CC@
@@ -184,7 +204,7 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
+localedir = $(datadir)/locale
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
@@ -197,7 +217,10 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+subdir = src
 @DEBUG_FALSE@DEBUG_CFLAGS = 
+
+# my stuff
 @DEBUG_TRUE@DEBUG_CFLAGS = -DDEBUG
 @DEBUG_FALSE@DEBUG_FILES = 
 @DEBUG_TRUE@DEBUG_FILES = stacktrace.c
@@ -211,7 +234,7 @@ DISTCLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
 NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
 aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) tth.c aqtime.c iplist.c pi_configlock.c
-aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@
+aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@ @LIBINTL@
 all: all-am
 
 .SUFFIXES:

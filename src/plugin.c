@@ -185,7 +185,7 @@ unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, "You have been kicked by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+  bf_printf (b, _("You have been kicked by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
 
   plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_KICK, b);
@@ -218,7 +218,7 @@ unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
 
   plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
@@ -354,7 +354,7 @@ unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, b
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
 
   plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
@@ -387,7 +387,7 @@ unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buff
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
 
   plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
@@ -420,7 +420,7 @@ unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
   retval =
     ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
@@ -439,11 +439,11 @@ unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
     return 0;
 
   if (ne->expire) {
-    return bf_printf (buf, "Found nick ban by %s for %s for %lus because: %.*s", ne->op, ne->nick,
-		      ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
+    return bf_printf (buf, _("Found nick ban by %s for %s for %lus because: %.*s"), ne->op,
+		      ne->nick, ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
   } else {
-    return bf_printf (buf, "Found permanent nick ban by %s for %s because: %.*s", ne->op, ne->nick,
-		      bf_used (ne->message), ne->message->s);
+    return bf_printf (buf, _("Found permanent nick ban by %s for %s because: %.*s"), ne->op,
+		      ne->nick, bf_used (ne->message), ne->message->s);
   }
 }
 
@@ -459,11 +459,11 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   ipa.s_addr = ie->ip;
   netmask.s_addr = ie->netmask;
   if (ie->expire) {
-    return bf_printf (buf, "Found IP ban by %s for %s for %lus because: %.*s", ie->op,
+    return bf_printf (buf, _("Found IP ban by %s for %s for %lus because: %.*s"), ie->op,
 		      print_ip (ipa, netmask), ie->expire - now.tv_sec, bf_used (ie->message),
 		      ie->message->s);
   } else {
-    return bf_printf (buf, "Found permanent ban by %s for %s because: %.*s", ie->op,
+    return bf_printf (buf, _("Found permanent ban by %s for %s because: %.*s"), ie->op,
 		      print_ip (ipa, netmask), bf_used (ie->message), ie->message->s);
   }
 }
@@ -481,12 +481,11 @@ unsigned int plugin_banlist (buffer_t * output)
       ip.s_addr = e->ip;
       nm.s_addr = e->netmask;
       if (e->expire) {
-	bf_printf (output, "%s %s by %s Expires: ", e->nick, print_ip (ip, nm), e->op);
-	time_print (output, e->expire - now.tv_sec);
-	bf_printf (output, " Message: %.*s\n", bf_used (e->message), e->message->s);
+	bf_printf (output, _("%s %s by %s Expires: %s Message: %.*s\n"), e->nick, print_ip (ip, nm),
+		   e->op, time_print (e->expire - now.tv_sec), bf_used (e->message), e->message->s);
       } else {
-	bf_printf (output, "%s %s by %s Message: %.*s\n", e->nick, print_ip (ip, nm),
-		   e->op, bf_used (e->message), e->message->s);
+	bf_printf (output, _("%s %s by %s Message: %.*s\n"), e->nick, print_ip (ip, nm), e->op,
+		   bf_used (e->message), e->message->s);
       }
       n++;
     }
@@ -970,19 +969,20 @@ unsigned int plugin_config_save (buffer_t * output)
 
   retval = config_save (ConfigFile);
   if (retval)
-    bf_printf (output, "Error saving configuration to %s: %s\n", ConfigFile, strerror (retval));
+    bf_printf (output, _("Error saving configuration to %s: %s\n"), ConfigFile, strerror (retval));
 
   retval = accounts_save (AccountsFile);
   if (retval)
-    bf_printf (output, "Error saving configuration to %s: %s\n", AccountsFile, strerror (retval));
+    bf_printf (output, _("Error saving configuration to %s: %s\n"), AccountsFile,
+	       strerror (retval));
 
   retval = banlist_save (&hardbanlist, HardBanFile);
   if (retval)
-    bf_printf (output, "Error saving configuration to %s: %s\n", HardBanFile, strerror (retval));
+    bf_printf (output, _("Error saving configuration to %s: %s\n"), HardBanFile, strerror (retval));
 
   retval = banlist_save (&softbanlist, SoftBanFile);
   if (retval)
-    bf_printf (output, "Error saving configuration to %s: %s\n", SoftBanFile, strerror (retval));
+    bf_printf (output, _("Error saving configuration to %s: %s\n"), SoftBanFile, strerror (retval));
 
   plugin_send_event (NULL, PLUGIN_EVENT_SAVE, output);
 
