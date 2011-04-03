@@ -142,7 +142,6 @@ int accept_new_user (esocket_t * s)
       return -1;
     }
 
-    /* FIXME: test. we disable naggle: we do our own queueing! */
     if (ndelay) {
       if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
 	perror ("setsockopt:");
@@ -369,8 +368,6 @@ int server_write (client_t * cl, buffer_t * b)
 
 int server_disconnect_user (client_t * cl, char *reason)
 {
-  int s;
-
   if (!cl)
     return 0;
 

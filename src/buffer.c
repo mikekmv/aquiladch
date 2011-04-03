@@ -138,7 +138,7 @@ int bf_append_raw (buffer_t ** buffer, unsigned char *data, unsigned long size)
 
   b = bf_alloc (size);
   if (!b)
-    return errno;
+    return -1;
 
   memcpy (b->buffer, data, size);
   b->e += size;

@@ -49,7 +49,7 @@ struct token_definition Tokens[] = {
 	{ TOKEN_QUIT,			 6, "$Quit "},
 	{ TOKEN_OPFORCEMOVE,		13, "$OpForceMove "},
 	{ TOKEN_VALIDATENICK,		14, "$ValidateNick "},
-	{ TOKEN_BOTINFO,		 9, "$BotINFO "},
+	{ TOKEN_BOTINFO,		 8, "$BotINFO"},
 	{ TOKEN_NUM, 			 0, NULL}
 };
 /* *INDENT-ON* */

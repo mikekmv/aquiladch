@@ -1879,7 +1879,8 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
 
       memcpy (t, b->s, l);
       t += l;
-      *t++ = '|';
+      if (*(t - 1) != '|')
+	*t++ = '|';
     };
     u->CacheException -= u->ChatCnt;
     u->ChatCnt = 0;
@@ -1898,7 +1899,8 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
 	/* copy data */
 	memcpy (t, b->s, l);
 	t += l;
-	*t++ = '|';
+	if (*(t - 1) != '|')
+	  *t++ = '|';
       }
       u->CacheException -= u->SearchCnt;
       u->SearchCnt = 0;
@@ -1917,7 +1919,8 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
 	/* copy data */
 	memcpy (t, b->s, l);
 	t += l;
-	*t++ = '|';
+	if (*(t - 1) != '|')
+	  *t++ = '|';
       }
       u->CacheException -= u->SearchCnt;
       u->SearchCnt = 0;
@@ -1935,7 +1938,8 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
       /* copy data */
       memcpy (t, b->s, l);
       t += l;
-      *t++ = '|';
+      if (*(t - 1) != '|')
+	*t++ = '|';
       u->ResultCnt--;
       u->CacheException--;
     }
@@ -1953,7 +1957,8 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
       /* copy data */
       memcpy (t, b->s, l);
       t += l;
-      *t++ = '|';
+      if (*(t - 1) != '|')
+	*t++ = '|';
       u->MessageCnt--;
       u->CacheException--;
     }
@@ -1984,7 +1989,8 @@ inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, buffe
       /* copy data */
       memcpy (t, b->s, l);
       t += l;
-      *t++ = '|';
+      if (*(t - 1) != '|')
+	*t++ = '|';
     }
     if (buf2) {
       memcpy (buf2->e, buf->e, t - buf->e);
