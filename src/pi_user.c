@@ -278,7 +278,8 @@ unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * out
 
     banlist_add (&sourcelist, user->nick, argv[1], ip.s_addr, netmask.s_addr, bf_buffer (""), 0);
     a = account_find (argv[1]);
-    if (!((a->rights | a->classp->rights) & CAP_SOURCEVERIFY)) {
+
+    if (a && (!((a->rights | a->classp->rights) & CAP_SOURCEVERIFY))) {
       bf_printf (output,
 		 _("Please do not forget to assign the \"sourceverify\" right to user %s\n"),
 		 argv[1]);

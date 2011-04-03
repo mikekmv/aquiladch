@@ -375,6 +375,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 				    __ ("Another instance of you is connecting, bye!"));
 	server_write (existing_user->parent, buf);
 	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
+
 	bf_free (buf);
       }
     }
@@ -634,11 +635,6 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       existing_user = NULL;
     }
 
-    /* now check if user is in the cachelist, if ip address changed, check the sharesize */
-    if ((existing_user = hash_find_nick (&cachehashlist, u->nick, strlen (u->nick))) &&
-	((u->ipaddress != existing_user->ipaddress) && (u->share != existing_user->share)))
-      existing_user = NULL;
-
     /* should not happen */
     if (u->MyINFO)
       bf_free (u->MyINFO);
@@ -673,6 +669,16 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       }
     }
     ASSERT (u->MyINFO);
+
+    /* now check if user is in the cachelist, if ip address changed, check the sharesize */
+    if ((existing_user = hash_find_nick (&cachehashlist, u->nick, strlen (u->nick))) &&
+	((u->ipaddress != existing_user->ipaddress) && (u->share != existing_user->share))) {
+      /* this is a different user, don't reuse his data, but since he has the same nick, we gotta
+       * delete him from the cachelist or the hub will send a #Quit or that nick.
+       */
+      proto_nmdc_user_cachelist_invalidate (existing_user);
+      existing_user = NULL;
+    }
 
     /* allocate plugin private stuff */
     plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
@@ -727,7 +733,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 
     /* add user to nicklist cache, if the user existed, just update him. */
     if (existing_user) {
-      nicklistcache_updateuser (existing_user->MyINFO, u->MyINFO);
+      nicklistcache_updateuser (existing_user, u);
       u->flags |= (existing_user->flags & NMDC_FLAG_CACHED);
     } else {
       nicklistcache_adduser (u);
@@ -938,7 +944,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
     u->MyINFO = new;
 
     /* update the tag */
-    nicklistcache_updateuser (old, new);
+    nicklistcache_updatemyinfo (old, new);
     bf_free (old);
 
     /* ops get the full tag immediately */

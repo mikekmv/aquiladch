@@ -103,7 +103,20 @@ int nicklistcache_adduser (user_t * u)
   return 0;
 }
 
-int nicklistcache_updateuser (buffer_t * old, buffer_t * new)
+int nicklistcache_updateuser (user_t * old, user_t * new)
+{
+  if (old->op != new->op) {
+    unsigned long l = strlen (new->nick);
+
+    if (old->op && (cache.length_estimate_op > l))
+      cache.length_estimate_op -= l;
+    if (new->op)
+      cache.length_estimate_op += l;
+  }
+  return nicklistcache_updatemyinfo (old->MyINFO, new->MyINFO);
+}
+
+int nicklistcache_updatemyinfo (buffer_t * old, buffer_t * new)
 {
   unsigned long l;
 
@@ -297,11 +310,13 @@ int nicklistcache_sendnicklist (user_t * target)
 #else
     server_write_credit (target->parent, cache.infolist);
 #endif
+#ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
       zline (cache.infolistupdate, &b, NULL);
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
       zline (cache.infolistupdate, NULL, &b);
     }
+#endif
     if ((!b) || (b == cache.infolistupdate))
       b = bf_copy (cache.infolistupdate, 0);
 

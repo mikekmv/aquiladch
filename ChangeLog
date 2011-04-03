@@ -1,5 +1,11 @@
 This is the Aquila Changelog.
 
+0.1.10-pre4:
+	Fix oplist length estimate bug when user is made op and reconnects.
+	Fix reconnect bug when IP changed. (Thanks FleetCommand)
+	Fix zline bug (Thanks Sporos)
+	Fix bug in !userrestrict (Thanks Bliss)
+
 0.1.10-pre3:
 	Really fix bug with too many args for commands (Report FleetCommand)
 	Fix bug in delayed logout feature.
