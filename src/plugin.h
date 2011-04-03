@@ -160,4 +160,6 @@ extern unsigned int plugin_config_save (buffer_t * output);
 
 extern unsigned long plugin_user_event (plugin_user_t * user, unsigned long event, void *token);
 
+extern unsigned int plugin_user_setrights (plugin_user_t *user, unsigned long cap, unsigned long ncap);
+
 #endif

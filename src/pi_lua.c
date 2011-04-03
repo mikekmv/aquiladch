@@ -593,6 +593,25 @@ int pi_lua_getusermyinfo (lua_State * lua)
   return 1;
 }
 
+int pi_lua_setuserrights (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *right = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned long cap = 0, ncap = 0;
+  plugin_user_t *user;
+
+  user = PLUGIN_USER_FIND (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    parserights (right, &cap, &ncap);
+    plugin_user_setrights (user, cap, ncap);
+  }
+
+  return 1;
+}
+
 
 /******************************************************************************************
  *  LUA Functions User handling
@@ -1715,6 +1734,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"GetUserSlots", pi_lua_getuserslots,},
   {"GetUserHubs", pi_lua_getuserhubs,},
   {"GetUserRights", pi_lua_getuserrights,},
+  {"SetUserRights", pi_lua_setuserrights,},
   {"GetUserGroup", pi_lua_getusergroup,},
   {"GetUserSupports", pi_lua_getusersupports,},
   {"GetUserMyINFO", pi_lua_getusermyinfo,},

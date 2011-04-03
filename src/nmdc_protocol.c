@@ -673,14 +673,16 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       u->rate_psresults_in = existing_user->rate_psresults_in;
       u->rate_psresults_out = existing_user->rate_psresults_out;
 
-      /* restore the tthlist */
-      free (u->tthlist);
-      u->tthlist = existing_user->tthlist;
-      existing_user->tthlist = NULL;
+      /* restore the tthlist if old user has one, otherwise keep new */
+      if (u->tthlist && existing_user->tthlist)
+	free (u->tthlist);
+      if (existing_user->tthlist) {
+	u->tthlist = existing_user->tthlist;
+	existing_user->tthlist = NULL;
+      }
 
       /* queue the old userentry for deletion */
-      existing_user->joinstamp = 0;
-      hash_deluser (&cachehashlist, &existing_user->hash);
+      proto_nmdc_user_cachelist_invalidate (existing_user);
 
       nmdc_stats.logincached++;
     }
@@ -711,7 +713,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       nicklistcache_sendoplist (u);
 
     /* send the nicklist if it was requested before the MyINFO arrived 
-     * if not, credit user with 1 getinfo token.
+     * if not, credit user with 1 getnicklist token.
      */
     if (u->flags & NMDC_FLAG_DELAYEDNICKLIST) {
       u->flags &= ~NMDC_FLAG_DELAYEDNICKLIST;
@@ -760,7 +762,7 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Think before you talk and don't spam.");
       nmdc_stats.chatoverflow++;
-      retval = proto_nmdc_violation (u, &now);
+      retval = proto_nmdc_violation (u, &now, "Chat");
       break;
     }
 
@@ -913,7 +915,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       /* if no entry in the stringlist yet, exit */
       if (!(entry = string_list_find (&cache.myinfoupdate.messages, u))) {
 	nmdc_stats.myinfooverflow++;
-	/* retval = proto_nmdc_violation (u, &now); */
+	/* retval = proto_nmdc_violation (u, &now, "MyINFO"); */
 	break;
       }
 
@@ -941,10 +943,8 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
   int retval = 0;
   tth_t tth;
   tth_list_entry_t *e;
-  buffer_t *ss = NULL;
   unsigned char *c = NULL, *n;
   unsigned long deadline;
-  unsigned int drop = 0;
   struct timeval now;
   struct in_addr addr;
 
@@ -965,7 +965,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	proto_nmdc_user_warn (u, &now, "Passive searches are limited to %u every %u seconds.",
 			      rates.psearch.refill, rates.psearch.period);
       }
-      retval = proto_nmdc_violation (u, &now);
+      retval = proto_nmdc_violation (u, &now, "Search");
       nmdc_stats.searchoverflow++;
       break;
     }
@@ -1401,7 +1401,7 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Don't send private messages so fast.");
       nmdc_stats.pmoverflow++;
-      retval = proto_nmdc_violation (u, &now);
+      retval = proto_nmdc_violation (u, &now, "PM");
       break;
     }
 
@@ -1494,7 +1494,8 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
   int retval = 0;
   unsigned char *c, *who, *where, *why;
   user_t *target;
-  unsigned int port;
+
+  /* unsigned int port; */
   struct timeval now;
 
 
@@ -1668,7 +1669,7 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
      * prevents the need for yet another leaky bucket. */
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.warnings, &u->rate_warnings, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Think before you ask HubINFO and don't spam.\n");
-      retval = proto_nmdc_violation (u, &now);
+      retval = proto_nmdc_violation (u, &now, "HubINFO");
       break;
     }
 
@@ -1729,7 +1730,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
       if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec)) {
 	proto_nmdc_user_warn (u, &now, "Userlist request denied. Maximum 1 reload per %ds.",
 			      rates.getnicklist.period);
-	retval = proto_nmdc_violation (u, &now);
+	retval = proto_nmdc_violation (u, &now, "GetNickList");
 	break;
       }
 
@@ -2211,7 +2212,7 @@ void proto_nmdc_flush_cache ()
   DPRINTF
     ("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ end cache flush /////////////////////////////\n");
 
-  proto_nmdc_user_cachefree ();
+  proto_nmdc_user_cachelist_clear ();
 
   plugin_send_event (NULL, PLUGIN_EVENT_CACHEFLUSH, NULL);
 }

@@ -274,7 +274,7 @@ int server_write (client_t * cl, buffer_t * b)
 	case EAGAIN:
 	  break;
 	case EPIPE:
-	  return server_disconnect_user (cl);
+	  server_disconnect_user (cl);
 	default:
 	  return -1;
       }

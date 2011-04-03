@@ -1,3 +1,4 @@
+
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
@@ -243,6 +244,115 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
   cache_queue (cache.myinfo, u, u->MyINFO);
 
   return u;
+}
+
+/******************************************************************************\
+**                                                                            **
+**                          FREELIST HANDLING                                **
+**                                                                            **
+\******************************************************************************/
+
+void proto_nmdc_user_freelist_add (user_t * user)
+{
+  user->next = freelist;
+  user->prev = NULL;
+  freelist = user;
+}
+
+void proto_nmdc_user_freelist_clear ()
+{
+  /* destroy freelist */
+  while (freelist) {
+    user_t *o;
+
+    o = freelist;
+    freelist = freelist->next;
+
+    if (o->tthlist)
+      free (o->tthlist);
+
+    if (o->MyINFO) {
+      bf_free (o->MyINFO);
+      o->MyINFO = NULL;
+    }
+
+    if (o->plugin_priv)
+      plugin_del_user ((plugin_private_t **) & o->plugin_priv);
+    /* free protocol private data */
+    if (o->pdata)
+      free (o->pdata);
+
+    free (o);
+  }
+}
+
+/******************************************************************************\
+**                                                                            **
+**                          CACHELIST HANDLING                                **
+**                                                                            **
+\******************************************************************************/
+
+void proto_nmdc_user_cachelist_add (user_t * user)
+{
+  user->next = cachelist;
+  if (user->next) {
+    user->next->prev = user;
+  } else {
+    cachelist_last = user;
+  }
+  user->prev = NULL;
+  cachelist = user;
+}
+
+void proto_nmdc_user_cachelist_invalidate (user_t * u)
+{
+  u->joinstamp = 0;
+  hash_deluser (&cachehashlist, &u->hash);
+}
+
+void proto_nmdc_user_cachelist_clear ()
+{
+  buffer_t *buf;
+  user_t *u, *p;
+  time_t now;
+
+  time (&now);
+  now -= config.DelayedLogout;
+  for (u = cachelist_last; u; u = p) {
+    p = u->prev;
+    if (u->joinstamp >= (unsigned) now)
+      continue;
+
+    /* a joinstamp of 0 means the user rejoined */
+    if (u->joinstamp) {
+      /* queue the quit message */
+      buf = bf_alloc (8 + NICKLENGTH);
+      bf_strcat (buf, "$Quit ");
+      bf_strcat (buf, u->nick);
+      cache_queue (cache.myinfo, u, buf);
+      bf_free (buf);
+      nicklistcache_deluser (u);
+
+      /* remove from hashlist */
+      hash_deluser (&cachehashlist, &u->hash);
+    }
+
+    /* remove from list */
+    if (u->next) {
+      u->next->prev = u->prev;
+    } else {
+      cachelist_last = u->prev;
+    }
+    if (u->prev) {
+      u->prev->next = u->next;
+    } else {
+      cachelist = u->next;
+    };
+
+    /* put user in freelist */
+    proto_nmdc_user_freelist_add (u);
+    u = NULL;
+  }
 }
 
 /******************************************************************************\
@@ -533,18 +643,9 @@ int proto_nmdc_user_free (user_t * user)
   user->parent = NULL;
   /* if the user was online, put him in the cachelist. if he was kicked, don't. */
   if (!(user->flags & NMDC_FLAG_WASONLINE) || (user->flags & NMDC_FLAG_WASKICKED)) {
-    user->next = freelist;
-    user->prev = NULL;
-    freelist = user;
+    proto_nmdc_user_freelist_add (user);
   } else {
-    user->next = cachelist;
-    if (user->next) {
-      user->next->prev = user;
-    } else {
-      cachelist_last = user;
-    }
-    user->prev = NULL;
-    cachelist = user;
+    proto_nmdc_user_cachelist_add (user);
   }
 
   nmdc_stats.userpart++;
@@ -552,42 +653,6 @@ int proto_nmdc_user_free (user_t * user)
   return 0;
 }
 
-void proto_nmdc_user_cachefree ()
-{
-  buffer_t *buf;
-  user_t *u, *p;
-  time_t now;
-
-  time (&now);
-  now -= config.DelayedLogout;
-  for (u = cachelist_last; u && (u->joinstamp < now); u = p) {
-    p = u->prev;
-    if (p)
-      p->next = NULL;
-
-    /* a joinstamp of 0 means the user rejoined */
-    if (u->joinstamp) {
-      /* queue the quit message */
-      buf = bf_alloc (8 + NICKLENGTH);
-      bf_strcat (buf, "$Quit ");
-      bf_strcat (buf, u->nick);
-      cache_queue (cache.myinfo, u, buf);
-      bf_free (buf);
-      nicklistcache_deluser (u);
-
-      /* remove from hashlist */
-      hash_deluser (&cachehashlist, &u->hash);
-    }
-
-    /* put user in freelist */
-    u->next = freelist;
-    u->prev = NULL;
-    freelist = u;
-  }
-  if (!u)
-    cachelist = NULL;
-  cachelist_last = u;
-}
 
 user_t *proto_nmdc_user_find (unsigned char *nick)
 {
@@ -610,7 +675,6 @@ int proto_nmdc_user_disconnect (user_t * u)
     string_list_purge (&cache.psearch.messages, u);
     string_list_clear (&((nmdc_user_t *) u->pdata)->results.messages);
     string_list_clear (&((nmdc_user_t *) u->pdata)->privatemessages.messages);
-
 
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
@@ -671,7 +735,7 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   server_write (u->parent, b);
   bf_free (b);
 
-  u->flags & NMDC_FLAG_WASKICKED;
+  u->flags &= NMDC_FLAG_WASKICKED;
 
   if (u->state != PROTO_STATE_DISCONNECTED)
     server_disconnect_user (u->parent);
@@ -700,7 +764,7 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
     bf_free (b);
   }
 
-  u->flags & NMDC_FLAG_WASKICKED;
+  u->flags &= NMDC_FLAG_WASKICKED;
 
   server_disconnect_user (u->parent);
 
@@ -735,7 +799,7 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
     bf_strcat (b, "|");
   }
 
-  u->flags & NMDC_FLAG_WASKICKED;
+  u->flags &= NMDC_FLAG_WASKICKED;
 
   server_write (u->parent, b);
   bf_free (b);
@@ -748,7 +812,7 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
   return 0;
 }
 
-int proto_nmdc_violation (user_t * u, struct timeval *now)
+int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
 {
   buffer_t *buf, *report;
 
@@ -765,16 +829,16 @@ int proto_nmdc_violation (user_t * u, struct timeval *now)
   /* if he is only a short time online, this is most likely a spammer and he will be hardbanned */
   buf = bf_alloc (128);
   if ((u->joinstamp - now->tv_sec) < config.ProbationPeriod) {
-    bf_printf (buf, "Rate Probation Violation.");
+    bf_printf (buf, "Rate Probation Violation (Last: %s).", reason);
     banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf, 0);
 
   } else {
-    bf_printf (buf, "Rate Violation.");
+    bf_printf (buf, "Rate Violation (Last: %s).", reason);
     banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf,
 		 now->tv_sec + config.ViolationBantime);
   }
 
-  u->flags & NMDC_FLAG_WASKICKED;
+  u->flags &= NMDC_FLAG_WASKICKED;
 
   /* send message */
   server_write (u->parent, buf);
@@ -787,7 +851,8 @@ int proto_nmdc_violation (user_t * u, struct timeval *now)
 
   report = bf_alloc (1024);
 
-  bf_printf (report, "Flood detected: %s was banned: %.*s\n", u->nick, bf_used (buf), buf->s);
+  bf_printf (report, "Flood detected: %s was banned: %.*s (Last violation: %s)\n", u->nick,
+	     bf_used (buf), buf->s, reason);
 
   plugin_report (report);
 
@@ -858,29 +923,8 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
       break;
   }
 
-  /* destroy freelist */
-  while (freelist) {
-    user_t *o;
+  proto_nmdc_user_freelist_clear ();
 
-    o = freelist;
-    freelist = freelist->next;
-
-    if (o->tthlist)
-      free (o->tthlist);
-
-    if (o->MyINFO) {
-      bf_free (o->MyINFO);
-      o->MyINFO = NULL;
-    }
-
-    if (o->plugin_priv)
-      plugin_del_user ((plugin_private_t **) & o->plugin_priv);
-    /* free protocol private data */
-    if (o->pdata)
-      free (o->pdata);
-
-    free (o);
-  }
   return 0;
 }
 

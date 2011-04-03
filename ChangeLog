@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Rport the last rate violation when a user gets banned.
+	On reconnect, only restore tthlist if the old user had one.
+	fix userlist layout
+	add lua SetUserRights()
 	Fix banlist bugs.
 	Refuse to delete a user as bot.
 	Fix bug when script is unloaded during creation and a bot is deleted.

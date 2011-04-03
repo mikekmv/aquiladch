@@ -1,7 +1,6 @@
 
 Develstatus:
-	- fix userlist layout
-	- add lua SetUserRights()
+	- stay in prelogin until the userlist is downloaded
 	- add trigger to pm or to main
 	- command trigger to mainchat
 	- create some sort of external statistics support.

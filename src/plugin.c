@@ -531,6 +531,21 @@ unsigned int plugin_banlist (buffer_t * output)
   return (n > 0);
 }
 
+unsigned int plugin_user_setrights (plugin_user_t * user, unsigned long cap, unsigned long ncap)
+{
+  user_t *u;
+
+  u = ((plugin_private_t *) user->private)->parent;
+
+  user->rights |= cap;
+  user->rights &= ~ncap;
+
+  u->rights |= cap;
+  u->rights &= ~ncap;
+
+  return 0;
+}
+
 /******************************* UTILITIES: USER MANAGEMENT **************************************/
 
 unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message)
