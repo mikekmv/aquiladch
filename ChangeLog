@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Added gettext.h to dist.
 	Fix crash in time_print
 	Added gettext support
 	Fixed !statbuffer crash.
