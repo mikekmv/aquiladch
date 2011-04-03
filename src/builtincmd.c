@@ -1084,15 +1084,20 @@ unsigned long handler_userlist (plugin_user_t * user, buffer_t * output, void *p
   unsigned int i, cnt;
 
   if (argc == 1) {
-    for (cnt = 0, account = accounts; account; account = account->next) {
-      bf_printf (output, "%s (%s),", account->nick, account->classp->name);
-      cnt++;
+    for (type = accountTypes; type; type = type->next) {
+      bf_printf (output, "\nGroup %s:\n ", type->name);
+      for (cnt = 0, account = accounts; account; account = account->next) {
+	if (account->classp != type)
+	  continue;
+	bf_printf (output, " %s,", account->nick, account->classp->name);
+	cnt++;
+      };
+      if (cnt) {
+	output->e--;
+	*output->e = '\0';
+      } else
+	bf_printf (output, " No users.");
     };
-    /* remove trailing , */
-    if (cnt) {
-      output->e--;
-      *output->e = '\0';
-    }
   } else {
     for (i = 1; i < argc; i++) {
       type = account_type_find (argv[i]);
@@ -1100,10 +1105,10 @@ unsigned long handler_userlist (plugin_user_t * user, buffer_t * output, void *p
 	bf_printf (output, _("Group %s does not exist.\n"), argv[1]);
 	continue;
       }
-      bf_printf (output, _("Group %s: "), type->name);
+      bf_printf (output, _("\nGroup %s:\n "), type->name);
       for (cnt = 0, account = accounts; account; account = account->next) {
 	if (account->class == type->id) {
-	  bf_printf (output, "%s,", account->nick);
+	  bf_printf (output, " %s,", account->nick);
 	  cnt++;
 	}
       };
@@ -1112,7 +1117,6 @@ unsigned long handler_userlist (plugin_user_t * user, buffer_t * output, void *p
 	output->e--;
 	*output->e = '\0';
       }
-      bf_strcat (output, "\n");
     }
   }
 

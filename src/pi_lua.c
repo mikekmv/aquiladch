@@ -1104,6 +1104,81 @@ int pi_lua_sendpmtonick (lua_State * lua)
   return 1;
 }
 
+int pi_lua_sendtorights (lua_State * lua)
+{
+  unsigned int i;
+  buffer_t *b;
+  plugin_user_t *tgt = NULL, *u, *prev = NULL;
+  unsigned long cap = 0, ncap = 0;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+
+  u = plugin_user_find (nick);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  parserights (rights, &cap, &ncap);
+
+  /* send to all users */
+  i = 0;
+  prev = NULL;
+  while (plugin_user_next (&tgt)) {
+    prev = tgt;
+    if (((tgt->rights & cap) != cap) || ((tgt->rights & ncap) != 0))
+      continue;
+    if (plugin_user_sayto (u, tgt, b, 0) < 0) {
+      tgt = prev;
+    } else {
+      i++;
+    }
+  }
+  lua_pushnumber (lua, i);
+
+  bf_free (b);
+
+  return 1;
+}
+
+
+int pi_lua_sendpmtorights (lua_State * lua)
+{
+  unsigned int i;
+  buffer_t *b;
+  plugin_user_t *tgt = NULL, *u, *prev = NULL;
+  unsigned long cap = 0, ncap = 0;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+
+  u = plugin_user_find (nick);
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  parserights (rights, &cap, &ncap);
+
+  /* send to all users */
+  i = 0;
+  prev = NULL;
+  while (plugin_user_next (&tgt)) {
+    prev = tgt;
+    if (((tgt->rights & cap) != cap) || ((tgt->rights & ncap) != 0))
+      continue;
+    if (plugin_user_priv (u, tgt, u, b, 0) < 0) {
+      tgt = prev;
+    } else {
+      i++;
+    }
+  }
+  lua_pushnumber (lua, i);
+
+  bf_free (b);
+
+  return 1;
+}
+
 int pi_lua_rawtonick (lua_State * lua)
 {
   buffer_t *b;
@@ -1780,8 +1855,10 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   /* hub message functions */
   {"ChatToAll", pi_lua_sendtoall,},
   {"ChatToNick", pi_lua_sendtonick,},
+  {"ChatToRights", pi_lua_sendtorights,},
   {"PMToAll", pi_lua_sendpmtoall,},
   {"PMToNick", pi_lua_sendpmtonick,},
+  {"PMToRights", pi_lua_sendpmtorights,},
 
   {"RawToNick", pi_lua_rawtonick,},
   {"RawToAll", pi_lua_rawtoall,},

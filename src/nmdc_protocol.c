@@ -614,8 +614,6 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
   output->s[0] = '\0';
 
   do {
-    /* $MyINFO $ALL Jove yes... i cannot type. I can Dream though...<DCGUI V:0.3.3,M:A,H:1,S:5>$ $DSL.$email$0$ */
-
     /* check again if user exists */
     if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
       if (existing_user->ipaddress != u->ipaddress) {

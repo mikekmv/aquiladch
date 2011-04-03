@@ -1,14 +1,11 @@
 
 Develstatus:
-	- support UserIP2 ?
+	- no kicking ppl with same rights?
 	- create some sort of external statistics support.
 	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files
-	- language suppport
 	- Add some sort of command "context" support. 
 		(allow !help and !leave etc to work in chatrooms)
-	- Fix the crash if the clock is set back... (still crashes??)
-	- add nick checking for insane chars and spaces  ( $|<>:?*"/\)
 	- SSL (not for 0.1)
 	- ADC (future)
 	- redo tag parsing, make it more flexible. (allow missing fields).
@@ -21,6 +18,3 @@ Large changes:
 	- split off timers in esocket.c, export them genericly
 	- consider adding the chunked approach FarCry suggested for the nicklistcache
 
-Ideas:
-	- if i ever implement something of a congestion measure, i could add
-		cache_rebuild  to the "when i got time" list 

@@ -133,7 +133,8 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
   if ((l <= config.MaxSpeedLength) || (u->op)) {
     bf_strncat (d, s, l);
   } else {
-    bf_strncat (d, s, config.MaxSpeedLength - 1);
+    if (config.MaxSpeedLength)
+      bf_strncat (d, s, config.MaxSpeedLength - 1);
     bf_strncat (d, s + l - 1, 1);	/* append last byte of his speed entry. */
   }
   bf_strcat (d, "$");

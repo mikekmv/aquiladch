@@ -212,8 +212,8 @@ after you change the line!
 		;;
         Ubuntu)   
                 INSTALLHINT="apt-get install "
-                INSTALLDT="apt-get install daemontools-installer && build-daemools"
-                INSTALLDTHELP="If the package is not found, please make sure yo
+                INSTALLDT="apt-get install daemontools-installer && build-daemtools"
+                INSTALLDTHELP="If the package is not found, please make sure you have the contrib tree in your /etc/apt/sources.list.
 Add a line like:
 
    deb http://archive.ubuntu.com/ubuntu/ dapper multiverse

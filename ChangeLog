@@ -1,6 +1,11 @@
 This is the Aquila Changelog.
 
 0.1.10-pre4:
+	Added ChatToRights and PmToRights lua functions.
+	Fix Ubuntu support.
+	Improved userlist layout. (General request)
+	Added userlimit.total (Req Bliss)
+	Fix speedentry filtering.
 	Fix oplist length estimate bug when user is made op and reconnects.
 	Fix reconnect bug when IP changed. (Thanks FleetCommand)
 	Fix zline bug (Thanks Sporos)

@@ -60,6 +60,7 @@ unsigned long users_dropped = 0;
 unsigned long user_unregistered_max = 0;
 unsigned long user_registered_max = 0;
 unsigned long user_op_max = 0;
+unsigned long user_total_max = 0;
 
 unsigned long user_unregistered_current = 0;
 unsigned long user_registered_current = 0;
@@ -189,28 +190,30 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
   if (!pi_user_check_user (user))
     goto drop;
 
-  /* if this is a registered user, check for registered/op max */
-  if (user->flags & PROTO_FLAG_REGISTERED) {
-    if (user->op) {
-      if (user_registered_current < user_registered_max) {
-	user_registered_current++;
-	user_op_current++;
-	goto accept;
+  if ((users_total < user_total_max) || (!user_total_max)) {
+
+    /* if this is a registered user, check for registered/op max */
+    if (user->flags & PROTO_FLAG_REGISTERED) {
+      if (user->op) {
+	if (user_registered_current < user_registered_max) {
+	  user_registered_current++;
+	  user_op_current++;
+	  goto accept;
+	}
+      } else {
+	if (user_registered_current < (user_registered_max - user_op_max + user_op_current)) {
+	  user_registered_current++;
+	  goto accept;
+
+	}
       }
     } else {
-      if (user_registered_current < (user_registered_max - user_op_max + user_op_current)) {
-	user_registered_current++;
+      if (user_unregistered_current < user_unregistered_max) {
+	user_unregistered_current++;
 	goto accept;
-
       }
     }
-  } else {
-    if (user_unregistered_current < user_unregistered_max) {
-      user_unregistered_current++;
-      goto accept;
-    }
   }
-
   plugin_user_printf (user,
 		      _("Sorry, the hub is full. It cannot accept more users from your class.\n"));
 
@@ -457,6 +460,7 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 {
   buffer_t *buf;
   struct rlimit limit;
+  unsigned long max;
 
   if ((elem->name[0] != 'u') || strncasecmp (elem->name, "userlimit", 9))
     return PLUGIN_RETVAL_CONTINUE;
@@ -465,25 +469,29 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 
   getrlimit (RLIMIT_NOFILE, &limit);
 
-  if (limit.rlim_cur < (user_unregistered_max + user_registered_max + user_op_max)) {
+  max = user_unregistered_max + user_registered_max;
+  if ((max > user_total_max) && (user_total_max != 0))
+    max = user_total_max;
+
+  if (limit.rlim_cur < max) {
 
     bf_printf (buf,
 	       _
 	       ("WARNING: resourcelimit for this process allows a absolute maximum of %lu users, currently %lu are configured.\n"),
-	       limit.rlim_cur, (user_unregistered_max + user_registered_max));
+	       limit.rlim_cur, max);
 
   };
 
 #ifndef USE_EPOLL
 #ifndef USE_POLL
-  if ((user_unregistered_max + user_registered_max + user_op_max) >= (FD_SETSIZE - 5)) {
+  if (max >= (FD_SETSIZE - 5)) {
     bf_printf (buf,
 	       _
 	       ("WARNING: You are using an Aquila version based on select(). This limits the effective maximum size of your hub to %u. Going over this limit may crash your hub.\n"),
 	       (FD_SETSIZE - 5));
   }
 #else
-  if ((user_unregistered_max + user_registered_max + user_op_max) >= 5000) {
+  if (max >= 5000) {
     bf_printf (buf,
 	       _
 	       ("WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n"));
@@ -491,7 +499,7 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 #endif
 #endif
 
-  if (user_registered_max == user_op_max) {
+  if (max == user_op_max) {
     bf_printf (buf,
 	       _
 	       ("WARNING: userlimit.registered equals userlimit.op. userlimit.registered includes the ops (since they are registered too): setting them equal means that you only allow OPs, but not normal registered users.\n"));
@@ -528,6 +536,7 @@ int pi_user_init ()
 
   /* *INDENT-OFF* */
   
+  config_register ("userlimit.total",  CFG_ELEM_ULONG, &user_total_max, _("Maximum number of users (set to 0 to ignore)."));
   config_register ("userlimit.unregistered",  CFG_ELEM_ULONG, &user_unregistered_max, _("Maximum unregistered users."));
   config_register ("userlimit.registered",    CFG_ELEM_ULONG, &user_registered_max,   _("Maximum registered users."));
   config_register ("userlimit.op",            CFG_ELEM_ULONG, &user_op_max,           _("Reserve place for this many ops in the registered users."));
