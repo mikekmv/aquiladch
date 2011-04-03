@@ -23,8 +23,12 @@
 #include <string.h>
 #include <assert.h>
 
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#ifndef USE_WINDOWS
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#else
+#  include "sys_windows.h"
 #endif
 
 #include <stdlib.h>
@@ -253,7 +257,11 @@ int pi_lua_setconfig (lua_State * lua)
       sscanf (value, "%lu", elem->val.v_ulong);
       break;
     case CFG_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
       sscanf (value, "%Lu", elem->val.v_ulonglong);
+#else
+      sscanf (value, "%I64u", elem->val.v_ulonglong);
+#endif
       break;
     case CFG_ELEM_INT:
       sscanf (value, "%d", elem->val.v_int);

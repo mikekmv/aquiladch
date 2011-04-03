@@ -22,7 +22,9 @@
 
 #include "esocket.h"
 
-#include <arpa/inet.h>
+#ifndef __USE_W32_SOCKETS
+#  include <arpa/inet.h>
+#endif
 
 #include "config.h"
 #include "buffer.h"

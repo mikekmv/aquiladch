@@ -36,11 +36,15 @@ typedef struct iplisthashbucket {
 
 typedef struct iplist {
   unsigned int count;
+  unsigned int found;
+  unsigned int new;
+
   iplistentry_t *freelist;
   iplisthashbucket_t ht[IPLIST_HASHSIZE];
   iplistentry_t *mem;
 } iplist_t;
 
+extern void iplist_clean (iplist_t *list);
 extern int iplist_add (iplist_t *list, unsigned long ip);
 extern int iplist_find (iplist_t *list, unsigned long ip);
 extern void iplist_init (iplist_t *list);

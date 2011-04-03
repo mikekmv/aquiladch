@@ -18,11 +18,16 @@
  */
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
-#endif
-#include <arpa/inet.h>
+
+#ifndef __USE_W32_SOCKETS
+#  include <sys/socket.h>
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#  ifdef HAVE_ARPA_INET_H
+#    include <arpa/inet.h>
+#  endif
+#endif /* __USE_W32_SOCKETS */
 
 #include "hub.h"
 
@@ -200,6 +205,7 @@ int proto_nmdc_user_delrobot (user_t * u)
 
   plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
+  /* for nicklistcache_deluser and nicklistcache_verify */
   u->state = PROTO_STATE_DISCONNECTED;
 
   nicklistcache_deluser (u);
@@ -211,7 +217,7 @@ int proto_nmdc_user_delrobot (user_t * u)
   }
 
   if (u->plugin_priv)
-    plugin_del_user ((plugin_private_t **) & u->plugin_priv);
+    plugin_del_user ((void *) &u->plugin_priv);
 
   /* remove from the current user list */
   if (u->next)
@@ -309,7 +315,7 @@ void proto_nmdc_user_freelist_clear ()
     }
 
     if (o->plugin_priv)
-      plugin_del_user ((plugin_private_t **) & o->plugin_priv);
+      plugin_del_user ((void *) &o->plugin_priv);
 
     free (o);
   }
@@ -1357,7 +1363,7 @@ int proto_nmdc_setup ()
 
   HubSec = proto_nmdc_user_addrobot (config.HubSecurityNick, config.HubSecurityDesc);
   HubSec->flags |= PROTO_FLAG_HUBSEC;
-  plugin_new_user ((plugin_private_t **) & HubSec->plugin_priv, HubSec, &nmdc_proto);
+  plugin_new_user ((void *) &HubSec->plugin_priv, HubSec, &nmdc_proto);
 
   plugin_nmdc = plugin_register ("nmdc");
   plugin_request (plugin_nmdc, PLUGIN_EVENT_CONFIG, (void *) &nmdc_event_config);

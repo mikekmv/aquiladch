@@ -30,6 +30,10 @@
 #include "nmdc_utils.h"
 #include "cap.h"
 
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
+#endif
+
 buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
 {
   buffer_t *d;

@@ -17,8 +17,6 @@
  *  
  */
 
-#include <sys/time.h>
-
 #include "leakybucket.h"
 
 __inline__ int get_token (leaky_bucket_type_t * type, leaky_bucket_t * bucket, time_t now)

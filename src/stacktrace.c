@@ -63,6 +63,9 @@
 #include <limits.h>
 #include <errno.h>
 #include <signal.h>
+#ifdef __USE_W32_SOCKETS
+#include <winsock2.h>
+#endif
 #if defined(PLATFORM_UNIX)
 # include <unistd.h>
 # include <sys/types.h>

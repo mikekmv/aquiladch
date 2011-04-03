@@ -24,6 +24,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <assert.h>
+#ifdef __USE_W32_SOCKETS
+#include <winsock2.h>
+#endif
 #include <sys/time.h>
 
 #include "aqtime.h"
@@ -31,6 +34,11 @@
 #include "config.h"
 #include "commands.h"
 #include "utils.h"
+
+#ifdef USE_WINDOWS
+#define stat _stat
+#endif
+
 
 #define TRIGGER_RELOAD_PERIOD   10
 
@@ -203,11 +211,14 @@ trigger_t *trigger_create (unsigned char *name, unsigned long type, unsigned cha
 	errno = EINVAL;
 	goto error;
       }
+#ifndef USE_WINDOWS
       /* verify if executable  */
       if (trigger->stat.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 	errno = EINVAL;
 	goto error;
       }
+#endif
+
       /* ok... we will know if we have permission later... */
       break;
     case TRIGGER_TYPE_TEXT:

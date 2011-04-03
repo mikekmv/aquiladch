@@ -22,7 +22,9 @@ CURRENTURL = $(shell svn info | grep URL | cut -c 6-)
 
 commit: 
 	make -C src indent
+if ENABLE_NLS
 	make -C po update-po
+endif
 	svn commit
 
 log:
@@ -30,7 +32,9 @@ log:
 
 commitlog:
 	make -C src indent
+if ENABLE_NLS
 	make -C po update-po
+endif
 	@svn diff ChangeLog 2>&1 | grep -e "^+" | grep -v -e "^++" | cut -c 2- | sed -r 's/^[\t ]*//' > CommitMessage
 	echo "Commit Message:"
 	@cat CommitMessage
@@ -39,7 +43,7 @@ commitlog:
 	@rm -f CommitMessage
 
 release: commit dist
-	svn copy ${CURRENTURL} svn://gw/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
+	svn copy  ${CURRENTURL} svn://gw/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
 	@echo Release ${VERSION}
 	@echo File: aquila-${VERSION}.tar.gz
 
@@ -71,3 +75,10 @@ cygsrc: cygdist/${CYGCRYPT_SRC} cygdist/${CYGWIN1_SRC} cygdist/${CYGZ_SRC}
 	@mkdir -p cygsrc
 	cp $^ cygsrc/
 
+aquila-${VERSION}-win32.tgz: src/aquila.exe tools/aqpasswd.exe
+	mkdir -p windist
+	cp src/aquila.exe windist
+	cp tools/aqpasswd.exe windist
+	tar -C windist -zcvf aquila-${VERSION}-win32.tgz .
+
+windist: aquila-${VERSION}-win32.tgz

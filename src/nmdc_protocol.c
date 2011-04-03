@@ -26,8 +26,10 @@
 #include <assert.h>
 
 #include "../config.h"
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#ifndef __USE_W32_SOCKETS
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
 #endif
 
 #include "aqtime.h"
@@ -44,6 +46,9 @@
 #include "nmdc_local.h"
 #include "nmdc_protocol.h"
 
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
+#endif
 
 /******************************************************************************\
 **                                                                            **
@@ -679,7 +684,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     }
 
     /* allocate plugin private stuff */
-    plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
+    plugin_new_user ((void *) &u->plugin_priv, u, &nmdc_proto);
 
     /* send the login event before we announce the new user to the hub so plugins can redirect those users */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_PRELOGIN, u->MyINFO) !=
@@ -1096,7 +1101,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
       if (u->tthlist && tth_harvest (&tth, tkn->argument)) {
 	nmdc_stats.searchtth++;
 	if ((e = tth_list_check (u->tthlist, &tth, researchperiod))) {
-	  if ((now.tv_sec - e->stamp) < researchmininterval) {
+	  if ((unsigned long) (now.tv_sec - e->stamp) < researchmininterval) {
 	    /* search dropped because researched too quickly */
 	    proto_nmdc_user_warn (u, &now, __ ("Do not repeat searches within %d seconds."),
 				  researchmininterval);
@@ -1709,6 +1714,7 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
     users = config_find ("userlimit.unregistered");
     owner = config_find ("hubowner");
 
+#ifndef USE_WINDOWS
     bf_printf (output, "$HubINFO %s$%s:%d$%s$%lu$%llu$%lu$%lu$%s$%s|",
 	       config.HubName,
 	       config.Hostname,
@@ -1719,7 +1725,18 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
 	       slot ? *slot->val.v_ulong : 0,
 	       hub ? *hub->val.v_ulong : 100,
 	       HUBSOFT_NAME, owner ? *owner->val.v_string : (unsigned char *) "Unknown");
-
+#else
+    bf_printf (output, "$HubINFO %s$%s:%d$%s$%lu$%I64u$%lu$%lu$%s$%s|",
+	       config.HubName,
+	       config.Hostname,
+	       config.ListenPort,
+	       config.HubDesc,
+	       users ? *users->val.v_ulong : 100,
+	       share ? *share->val.v_ulonglong : 0,
+	       slot ? *slot->val.v_ulong : 0,
+	       hub ? *hub->val.v_ulong : 100,
+	       HUBSOFT_NAME, owner ? *owner->val.v_string : (unsigned char *) "Unknown");
+#endif
     retval = server_write (u->parent, output);
 
     nmdc_stats.botinfo++;
@@ -1921,6 +1938,7 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
 	t += l;
 	if (*(t - 1) != '|')
 	  *t++ = '|';
+
       }
       u->CacheException -= u->SearchCnt;
       u->SearchCnt = 0;
@@ -1991,6 +2009,7 @@ inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, buffe
       t += l;
       if (*(t - 1) != '|')
 	*t++ = '|';
+
     }
     if (buf2) {
       memcpy (buf2->e, buf->e, t - buf->e);

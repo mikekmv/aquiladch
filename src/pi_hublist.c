@@ -30,8 +30,18 @@
 #include "plugin.h"
 
 #include "../config.h"
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+
+#ifndef __USE_W32_SOCKETS
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#else
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#endif
+
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
 #endif
 
 #define PI_HUBLIST_BUFFER_SIZE 	4096
@@ -137,7 +147,7 @@ int pi_hublist_update (buffer_t * output, unsigned long flags)
     /* create esocket */
     s =
       esocket_new (pi_hublist_handler, pi_hublist_es_type, AF_INET, SOCK_STREAM, 0,
-		   (unsigned long long) ctx);
+		   (uintptr_t) ctx);
 
     if (!s) {
       bf_printf (output, _("Hublist update ERROR: %s: socket: %s\n"), l, strerror (errno));
@@ -183,7 +193,7 @@ int pi_hublist_handle_input (esocket_t * s)
   output = NULL;
 
   /* read data */
-  n = read (s->socket, buf->s, PI_HUBLIST_BUFFER_SIZE);
+  n = esocket_recv (s, buf);
   if (n <= 0) {
     bf_clear (buf);
     bf_printf (buf, _("Hublist update ERROR: %s: read: %s\n"), ctx->address, strerror (errno));
@@ -192,8 +202,7 @@ int pi_hublist_handle_input (esocket_t * s)
       plugin_report (buf);
     goto leave;
   }
-  buf->e = buf->s + n;
-  buf->s[n - 1] = '\0';
+  *(buf->e - 1) = '\0';
 
   /* retrieve remote port */
   n = sizeof (local);
@@ -201,7 +210,7 @@ int pi_hublist_handle_input (esocket_t * s)
     bf_clear (buf);
     bf_printf (buf, _("Hublist update ERROR: %s: getsockname: %s\n"), ctx->address,
 	       strerror (errno));
-    DPRINTF ("pi_hublist: read: %.*s", (int) bf_used (buf), buf->s);
+    DPRINTF ("pi_hublist: getsockname: %.*s", (int) bf_used (buf), buf->s);
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
       plugin_report (buf);
     goto leave;
@@ -257,22 +266,30 @@ int pi_hublist_handle_input (esocket_t * s)
   ASSERT (listenport);
   hubdesc = config_find ("hubdescription");
   ASSERT (hubdesc);
+#ifndef USE_WINDOWS
   bf_printf (output, "%s|%s:%u|%s|%d|%llu|",
 	     *hubname->val.v_string ? *hubname->val.v_string : (unsigned char *) "",
 	     *hostname->val.v_string ? *hostname->val.v_string : (unsigned char *) "",
 	     *listenport->val.v_uint ? *listenport->val.v_uint : 411,
 	     *hubdesc->val.v_string ? *hubdesc->val.v_string : (unsigned char *) "",
 	     users_total, 0LL);
-
+#else
+  bf_printf (output, "%s|%s:%u|%s|%d|%I64u|",
+	     *hubname->val.v_string ? *hubname->val.v_string : (unsigned char *) "",
+	     *hostname->val.v_string ? *hostname->val.v_string : (unsigned char *) "",
+	     *listenport->val.v_uint ? *listenport->val.v_uint : 411,
+	     *hubdesc->val.v_string ? *hubdesc->val.v_string : (unsigned char *) "",
+	     users_total, 0LL);
+#endif
   DPRINTF ("pi_hublist:  Send: %.*s\n", (int) bf_used (output), output->s);
 
-  n = write (s->socket, output->s, bf_used (output));
+  n = esocket_send (s, output, 0);
   if (n < 0) {
     bf_clear (buf);
-    bf_printf (buf, _("Hublist update ERROR: %s: write: %s\n"), ctx->address, strerror (errno));
+    bf_printf (buf, _("Hublist update ERROR: %s: send: %s\n"), ctx->address, strerror (errno));
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
       plugin_report (buf);
-    DPRINTF ("pi_hublist: write: %.*s", (int) bf_used (buf), buf->s);
+    DPRINTF ("pi_hublist: esocket_send: %.*s", (int) bf_used (buf), buf->s);
   }
 
   if (ctx->flags & PI_HUBLIST_FLAGS_REPORT) {

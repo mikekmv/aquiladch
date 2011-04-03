@@ -26,11 +26,20 @@
 #include <time.h>
 
 #include "../config.h"
-#ifdef HAVE_CRYPT_H
-#  include <crypt.h>
-#endif
 
 #include "user.h"
+
+#ifndef USE_WINDOWS
+#  ifdef HAVE_CRYPT_H
+#    include <crypt.h>
+#  endif
+#else
+#  include "sys_windows.h"
+
+char *crypt (char *, char *);
+
+#endif /* USE_WINDOWS */
+
 
 unsigned int type_ids = 0;
 unsigned long account_ids = 0;
@@ -131,6 +140,7 @@ account_t *account_add (account_type_t * type, unsigned char *op, unsigned char 
 
 int account_pwd_set (account_t * account, unsigned char *pwd)
 {
+#ifdef HAVE_CRYPT_H
   unsigned char salt[3];
 
   do {
@@ -142,13 +152,19 @@ int account_pwd_set (account_t * account, unsigned char *pwd)
   salt[2] = 0;
 
   strncpy (account->passwd, crypt (pwd, salt), NICKLENGTH);
-
+#else
+  strncpy (account->passwd, pwd, NICKLENGTH);
+#endif /* HAVE_CRYPT_H */
   return 0;
 }
 
 int account_pwd_check (account_t * account, unsigned char *pwd)
 {
+#ifdef HAVE_CRYPT_H
   return !strcmp (account->passwd, crypt (pwd, account->passwd));
+#else
+  return !strcmp (account->passwd, pwd);
+#endif /* HAVE_CRYPT_H */
 }
 
 account_t *account_find (unsigned char *nick)
@@ -202,15 +218,13 @@ unsigned int account_del (account_t * a)
   return 0;
 }
 
-unsigned int accounts_clear ()
+void accounts_clear ()
 {
   while (accounts)
     account_del (accounts);
 
   while (accountTypes)
     account_type_del (accountTypes);
-
-  return 0;
 }
 
 unsigned int accounts_load (const unsigned char *filename)

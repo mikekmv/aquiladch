@@ -70,9 +70,8 @@ extern int proto_nmdc_user_free (user_t * user);
 extern user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *description);
 extern int proto_nmdc_user_delrobot (user_t * u);
 
+extern int proto_nmdc_user_say_pm (user_t * u, user_t * target, user_t * src, buffer_t * b, buffer_t * message);
 extern int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message);
-extern int proto_nmdc_user_say_pm (user_t * u, user_t * target, user_t * src, buffer_t * b,
-				       buffer_t * message);
 extern int proto_nmdc_user_say_string (user_t * u, buffer_t * b, unsigned char *message);
 
 extern int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *message, ...);

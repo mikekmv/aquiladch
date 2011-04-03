@@ -23,7 +23,6 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/resource.h>
 
 #include "plugin.h"
 #include "user.h"

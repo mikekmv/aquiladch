@@ -26,9 +26,13 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <fcntl.h>
+#ifndef ENABLE_NLS
 #include <locale.h>
+#endif
+#ifndef USE_WINDOWS
+#include <sys/wait.h>
+#endif
 
 #include "defaults.h"
 #include "gettext.h"
@@ -47,6 +51,10 @@
 
 #ifdef DEBUG
 #include "stacktrace.h"
+#endif
+
+#ifdef USE_WINDOWS
+#include "sys_windows.h"
 #endif
 
 /* global data */
@@ -133,6 +141,7 @@ void parseargs (int argc, char **argv)
 
 void daemonize (char **argv)
 {
+#ifndef USE_WINDOWS
   int i, lockfd;
   unsigned char pid[16];
 
@@ -169,7 +178,7 @@ void daemonize (char **argv)
     if (i < 0)
       exit (1);
     dup (i);
-    dup (i);			/* handle standart I/O */
+    dup (i);			/* handle standard I/O */
   }
 
   /* change to working directory */
@@ -264,6 +273,7 @@ void daemonize (char **argv)
     /* restore childs signal mask */
     sigprocmask (SIG_SETMASK, &oldset, NULL);
   }
+#endif
 }
 
 /*
@@ -274,16 +284,20 @@ int main (int argc, char **argv)
   int ret, cont;
   struct timeval to, tnow, tnext;
   esocket_handler_t *h;
+
+#ifndef USE_WINDOWS
   sigset_t set;
 
-  /* unbuffer the output */
-  setvbuf (stdout, (char *) NULL, _IOLBF, 0);
 
   /* block SIGPIPE */
   sigemptyset (&set);
   sigaddset (&set, SIGPIPE);
   sigaddset (&set, SIGURG);
   sigprocmask (SIG_BLOCK, &set, NULL);
+#endif
+
+  /* unbuffer the output */
+  setvbuf (stdout, (char *) NULL, _IOLBF, 0);
 
 #if ENABLE_NLS
   /* we adjust the language to the enviroment, but
@@ -298,6 +312,17 @@ int main (int argc, char **argv)
 #ifdef DEBUG
   /* add stacktrace handler */
   StackTraceInit (argv[0], -1);
+#endif
+
+#ifdef __USE_W32_SOCKETS
+  {
+    WSADATA wsd;
+
+    ret = WSAStartup (MAKEWORD (2, 0), &wsd);
+    if (ret) {
+      return 0;
+    }
+  }
 #endif
 
   /* parse arguments */

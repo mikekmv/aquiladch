@@ -20,10 +20,15 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
-#endif
-#include <arpa/inet.h>
+#ifndef __USE_W32_SOCKETS
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#  include <arpa/inet.h>
+#else
+#  include <winsock2.h>
+#endif /* __USE_W32_SOCKETS */
+
 #include "buffer.h"
 extern unsigned char *format_size (unsigned long long size);
 extern unsigned long long parse_size (unsigned char *token);

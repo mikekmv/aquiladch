@@ -57,7 +57,11 @@ unsigned long pi_statbot_handler_statbot (plugin_user_t * user, buffer_t * outpu
   maxhubs = config_find ("hub.unregistered.max");
 
   bf_printf (output,
+#ifndef USE_WINDOWS
 	     "HubInfo %s$%s$%s$%s$%u$%lu$%llu$%llu$%u$%u$%lu$%lu$%lu$%lu$%lu$%lu$%lu$%.2f$%.2f$%.2f$%lu$%lu$%lu$",
+#else
+	     "HubInfo %s$%s$%s$%s$%u$%lu$%I64u$%I64u$%u$%u$%lu$%lu$%lu$%lu$%lu$%lu$%lu$%.2f$%.2f$%.2f$%lu$%lu$%lu$",
+#endif
 	     hubname ? *(hubname->val.v_string) : (unsigned char *) "", "" /* config.HubTopic */ ,
 	     hubdesc ? *(hubdesc->val.v_string) : (unsigned char *) "", hostname ? *(hostname->val.v_string) : (unsigned char *) "", listenport ? (*listenport->val.v_uint) : 411, userlimit ? *(userlimit->val.v_ulong) : 0L, minshare ? *(minshare->val.v_ulonglong) : 0LL, 0LL,	/* max share */
 	     minslots ? *(minslots->val.v_uint) : 0,

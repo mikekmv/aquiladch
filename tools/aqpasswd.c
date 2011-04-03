@@ -24,8 +24,16 @@
 #include <time.h>
 #include "../src/cap.h"
 
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
+#ifndef USE_WINDOWS
+#  ifdef HAVE_CRYPT_H
+#    include <crypt.h>
+#  endif
+#else
+#  define random(x) rand(x)
+#  define srandom(x) srand(x)
+
+char *crypt (char *, char *);
+
 #endif
 
 int main (int argc, char **argv)

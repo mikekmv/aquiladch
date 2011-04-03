@@ -5,6 +5,10 @@
 #include "config.h"
 #include "plugin.h"
 
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
+#endif
+
 typedef struct configlock {
   struct configlock *next;
 
@@ -78,7 +82,11 @@ unsigned long pi_configlock_event_load (plugin_user_t * user, void *dummy, unsig
 	break;
       case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
 	sscanf (c, "%Lu", &lock->data.v_ulonglong);
+#else
+	sscanf (c, "%I64u", &lock->data.v_ulonglong);
+#endif
 	break;
       case CFG_ELEM_INT:
 	sscanf (c, "%d", &lock->data.v_int);

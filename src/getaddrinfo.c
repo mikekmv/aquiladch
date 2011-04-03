@@ -81,8 +81,11 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+
 #include <sys/socket.h>
-#include <netinet/in.h>
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 #include <netdb.h>
 

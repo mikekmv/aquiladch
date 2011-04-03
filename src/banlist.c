@@ -21,7 +21,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <arpa/inet.h>
 
 #include "aqtime.h"
 #include "defaults.h"
@@ -29,6 +28,11 @@
 #include "buffer.h"
 #include "hash.h"
 
+#ifndef USE_WINDOWS
+#  ifdef HAVE_ARPA_INET_H
+#    include <arpa/inet.h>
+#  endif
+#endif
 
 __inline__ uint32_t netmask_to_numbits (uint32_t netmask)
 {
@@ -118,6 +122,7 @@ unsigned int banlist_del (banlist_t * list, banlist_entry_t * e)
   dllist_del ((dllist_entry_t *) (&e->list_name));
   if (e->message)
     bf_free (e->message);
+
   free (e);
 
   return 1;
@@ -127,7 +132,7 @@ unsigned int banlist_del_byip (banlist_t * list, uint32_t ip, uint32_t netmask)
 {
   banlist_entry_t *e;
 
-  if (netmask) {
+  if (netmask != 0xffffffff) {
     e = banlist_find_bynet (list, ip, netmask);
   } else {
     e = banlist_find_byip (list, ip);
@@ -244,8 +249,8 @@ banlist_entry_t *banlist_find_bynick (banlist_t * list, unsigned char *nick)
 
   ASSERT (*nick);
 
-repeat:
   i = nicktolower (n, nick);
+repeat:
   l = dllist_bucket (&list->list_name, SuperFastHash (n, i) & BANLIST_NICK_HASHMASK);
   dllist_foreach (l, p) {
     e = (banlist_entry_t *) ((char *) p - sizeof (dllist_t));
@@ -255,7 +260,7 @@ repeat:
   if (p == dllist_end (l))
     return NULL;
 
-  if (e->expire && (now.tv_sec > e->expire)) {
+  if (e && e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
     goto repeat;

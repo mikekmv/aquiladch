@@ -63,7 +63,7 @@ unsigned int tth_harvest (tth_t * tth, unsigned char *s)
 
 tth_list_entry_t *tth_list_check (tth_list_t * list, tth_t * tth, unsigned long interval)
 {
-  unsigned int i, j, n, t;
+  unsigned int i, j, n;
   time_t limit;
   tth_list_entry_t *e;
 

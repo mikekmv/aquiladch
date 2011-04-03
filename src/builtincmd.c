@@ -19,20 +19,29 @@
 
 #define _GNU_SOURCE
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <time.h>
 #include <limits.h>
+
+#ifdef ENABLE_NLS
 #include <locale.h>
+#endif
 
 #include "../config.h"
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
-#endif
-#include <arpa/inet.h>
+#ifndef __USE_W32_SOCKETS
+#  include <sys/socket.h>
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#  include <arpa/inet.h>
+#else
+#  include <winsock2.h>
+#endif /* __USE_W32_SOCKETS */
+
+#include <sys/time.h>
 
 #include "aqtime.h"
 #include "defaults.h"
@@ -41,6 +50,9 @@
 #include "commands.h"
 #include "utils.h"
 
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
+#endif
 
 unsigned int MinPwdLength;
 unsigned long AutoSaveInterval;
@@ -632,7 +644,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
 		 time_print (period), bf_used (buf), buf->s);
     }
     plugin_user_banip (user, target, buf, period);
-  } else if (pi_iplog_find (argv[1], &ip.s_addr)) {
+  } else if (pi_iplog_find (argv[1], (uint32_t *) & ip.s_addr)) {
     netmask.s_addr = 0xFFFFFFFF;
     bf_printf (output, _("User %s offline, found in iplog\n"), argv[1]);
     plugin_ban_ip (user, ip.s_addr, 0xFFFFFFFF, buf, period);
@@ -738,7 +750,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
 
   target = plugin_user_find (argv[1]);
   if (!target) {
-    if (!pi_iplog_find (argv[1], &ip.s_addr)) {
+    if (!pi_iplog_find (argv[1], (uint32_t *) & ip.s_addr)) {
       bf_printf (output, _("User %s not found."), argv[1]);
       goto leave;
     }
@@ -1348,6 +1360,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   if (target) {
     in.s_addr = target->ipaddress;
     bf_printf (output, _("Using Client %s version %s\n"), target->client, target->versionstring);
+#ifndef USE_WINDOWS
     if (target->active) {
       bf_printf (output, "Client claims to be active and is sharing %s (%llu bytes)\n",
 		 format_size (target->share), target->share);
@@ -1355,6 +1368,15 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
       bf_printf (output, "Client claims to be passive and is sharing %s (%llu bytes)\n",
 		 format_size (target->share), target->share);
     }
+#else
+    if (target->active) {
+      bf_printf (output, "Client claims to be active and is sharing %s (%I64u bytes)\n",
+		 format_size (target->share), target->share);
+    } else {
+      bf_printf (output, "Client claims to be passive and is sharing %s (%I64u bytes)\n",
+		 format_size (target->share), target->share);
+    }
+#endif
     bf_printf (output, _("IP: %s Hubs: (%u, %u, %u), Slots %u\n"), inet_ntoa (in), target->hubs[0],
 	       target->hubs[1], target->hubs[2], target->slots);
   };
@@ -1532,6 +1554,7 @@ leave:
   return 0;
 }
 
+#ifdef ENABLE_NLS
 unsigned long handler_setlocale (plugin_user_t * user, buffer_t * output, void *priv,
 				 unsigned int argc, unsigned char **argv)
 {
@@ -1586,6 +1609,7 @@ unsigned long handler_getlocale (plugin_user_t * user, buffer_t * output, void *
 
   return 0;
 }
+#endif
 
 #ifdef DEBUG
 #include "stacktrace.h"
@@ -1595,6 +1619,7 @@ unsigned long handler_crash (plugin_user_t * user, buffer_t * output, void *priv
   ASSERT (0);
   return 0;
 }
+#endif
 
 unsigned long handler_bug (plugin_user_t * user, buffer_t * output, void *priv,
 			   unsigned int argc, unsigned char **argv)
@@ -1602,7 +1627,8 @@ unsigned long handler_bug (plugin_user_t * user, buffer_t * output, void *priv,
   strcpy ((void *) 1L, "");
   return 0;
 }
-#endif
+
+//#endif
 
 /************************** config ******************************/
 
@@ -1622,7 +1648,11 @@ int printconfig (buffer_t * buf, config_element_t * elem)
       bf_printf (buf, "%s %lu\n", elem->name, *elem->val.v_ulong);
       break;
     case CFG_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
       bf_printf (buf, "%s %llu\n", elem->name, *elem->val.v_ulonglong);
+#else
+      bf_printf (buf, "%s %I64u\n", elem->name, *elem->val.v_ulonglong);
+#endif
       break;
     case CFG_ELEM_CAP:
       bf_printf (buf, "%s ", elem->name);
@@ -1754,7 +1784,11 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
       sscanf (argv[2], "%lu", elem->val.v_ulong);
       break;
     case CFG_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
       sscanf (argv[2], "%Lu", elem->val.v_ulonglong);
+#else
+      sscanf (argv[2], "%I64u", elem->val.v_ulonglong);
+#endif
       break;
     case CFG_ELEM_CAP:
       if (!(user->rights & CAP_INHERIT)) {
@@ -1950,13 +1984,15 @@ int builtincmd_init ()
   command_register ("passwd",     &handler_passwd,	0,            _("Change your password."));
   command_register ("pwgen",      &handler_pwgen,	0,            _("Let the hub generate a random password."));
 
+#ifdef ENABLE_NLS
   command_register ("setlocale",  &handler_setlocale,	CAP_ADMIN,    _("Set the locale of the hub."));
   command_register ("getlocale",  &handler_getlocale,	CAP_ADMIN,    _("Get the locale of the hub."));
+#endif
 
 #ifdef DEBUG
   command_register ("crash",      &handler_crash,	CAP_OWNER,    _("Let the hub CRASH!."));
-  command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let the hub CRASH!."));
 #endif
+  command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let the hub CRASH!."));
   gettimeofday (&savetime, NULL);
   
   plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *)handler_autosave);

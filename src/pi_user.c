@@ -22,7 +22,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
-#include <sys/resource.h>
+#ifndef USE_WINDOWS
+#  include <sys/resource.h>
+#endif
 
 #include "plugin.h"
 #include "user.h"
@@ -80,7 +82,7 @@ unsigned long pi_user_handler_userstat (plugin_user_t * user, buffer_t * output,
 		       "Operators           %lu / %lu\n"
 		       " Total      %lu / %lu\n"
 		       " Peak             %lu\n"
-		       " Refused          %lu\n"
+		       " Dropped          %lu\n"
 		       " Buffering        %lu\n"),
 	     user_unregistered_current, user_unregistered_max,
 	     user_registered_current, user_registered_max,
@@ -459,7 +461,6 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 				    config_element_t * elem)
 {
   buffer_t *buf;
-  struct rlimit limit;
   unsigned long max;
 
   if ((elem->name[0] != 'u') || strncasecmp (elem->name, "userlimit", 9))
@@ -467,36 +468,41 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 
   buf = bf_alloc (1024);
 
-  getrlimit (RLIMIT_NOFILE, &limit);
-
   max = user_unregistered_max + user_registered_max;
   if ((max > user_total_max) && (user_total_max != 0))
     max = user_total_max;
 
-  if (limit.rlim_cur < max) {
+#ifndef USE_WINDOWS
+  {
+    struct rlimit limit;
 
-    bf_printf (buf,
-	       _
-	       ("WARNING: resourcelimit for this process allows a absolute maximum of %lu users, currently %lu are configured.\n"),
-	       limit.rlim_cur, max);
+    getrlimit (RLIMIT_NOFILE, &limit);
 
-  };
+    if (limit.rlim_cur < max) {
 
-#ifndef USE_EPOLL
-#ifndef USE_POLL
+      bf_printf (buf,
+		 _
+		 ("WARNING: resourcelimit for this process allows a absolute maximum of %lu users, currently %lu are configured.\n"),
+		 limit.rlim_cur, max);
+
+    };
+  }
+#endif
+
+#ifdef USE_SELECT
   if (max >= (FD_SETSIZE - 5)) {
     bf_printf (buf,
 	       _
 	       ("WARNING: You are using an Aquila version based on select(). This limits the effective maximum size of your hub to %u. Going over this limit may crash your hub.\n"),
 	       (FD_SETSIZE - 5));
   }
-#else
+#endif
+#ifdef USE_POLL
   if (max >= 5000) {
     bf_printf (buf,
 	       _
 	       ("WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n"));
   }
-#endif
 #endif
 
   if (max == user_op_max) {
@@ -528,9 +534,9 @@ int pi_user_init ()
 
   for (i = 0; i < 3; i++) {
     slotratios[i].minslot = 0;
-    slotratios[i].maxslot = ~0;
+    slotratios[i].maxslot = 9999999;
     slotratios[i].minhub = 0;
-    slotratios[i].maxhub = ~0;
+    slotratios[i].maxhub = 9999999;
     slotratios[i].ratio = 1000.0;
   }
 

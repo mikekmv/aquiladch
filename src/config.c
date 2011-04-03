@@ -28,12 +28,19 @@
 #include "utils.h"
 
 #include "../config.h"
-#include <sys/socket.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
+
+#ifndef __USE_W32_SOCKETS
+#  include <sys/socket.h>
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#  ifdef HAVE_ARPA_INET_H
+#    include <arpa/inet.h>
+#  endif
+#endif /* __USE_W32_SOCKETS */
+
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
 #endif
 
 config_element_t configlist[CONFIG_HASHSIZE];
@@ -180,7 +187,11 @@ int config_save (unsigned char *filename)
 	break;
       case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
 	fprintf (fp, "%s %Lu\n", elem->name, *elem->val.v_ulonglong);
+#else
+	fprintf (fp, "%s %I64u\n", elem->name, *elem->val.v_ulonglong);
+#endif
 	break;
       case CFG_ELEM_INT:
 	fprintf (fp, "%s %d\n", elem->name, *elem->val.v_int);
@@ -256,7 +267,11 @@ int config_load (unsigned char *filename)
 	break;
       case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
 	sscanf (c, "%Lu", elem->val.v_ulonglong);
+#else
+	sscanf (c, "%I64u", elem->val.v_ulonglong);
+#endif
 	break;
       case CFG_ELEM_INT:
 	sscanf (c, "%d", elem->val.v_int);

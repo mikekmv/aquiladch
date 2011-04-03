@@ -5,41 +5,98 @@ VERSION = @VERSION@
 top_srcdir = @top_srcdir@
 subdir = src
 
+#
+## NLS Support
+#
 datadir = @datadir@
 localedir = $(datadir)/locale
-DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
+LOCALE_DEFS=-DLOCALEDIR=\"$(localedir)\"
+# "
 
-# my stuff
+#
+## Set the correct flags for debugging support
+#
 if DEBUG
-DEBUG_CFLAGS=-DDEBUG
-DEBUG_FILES=stacktrace.c
+DEBUG_CFLAGS = -DDEBUG
+DEBUG_FILES = stacktrace.c
 else
-DEBUG_CFLAGS=
-DEBUG_FILES=
+DEBUG_CFLAGS =
+DEBUG_FILES =
 endif
 
+#
+## set platform specific stuff.
+#
+if USE_WINDOWS
+WINDOWS_DEFS = -DUSE_WINDOWS
+else
 if GETADDRINFO
 GETADDRINFO_SOURCES = getaddrinfo.c
-else
-GETADDRINFO_SOURCES = 
+endif
+if USE_PTHREADDNS
+DNS_FILES:=dns.c
+DNS_FLAGS:=-D_REENTRANT -DUSE_PTHREADDNS
+endif
 endif
 
+#
+## Set LUA variables
+#
 if LUA
 LUA_SOURCES = pi_lua.c
 else
 LUA_SOURCES =
 endif
 
-AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_LUA@ @LUA_INCLUDES@
+DEFS = @DEFS@ $(LOCALE_DEFS) $(WINDOWS_DEFS)
 
-EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h
+AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_LUA@ @LUA_INCLUDES@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS)
+
+EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h
 DISTCLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
 
 NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
 
 bin_PROGRAMS = aquila
-aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) tth.c aqtime.c iplist.c pi_configlock.c
+aquila_SOURCES = buffer.c \
+		 esocket.c \
+		 stringlist.c \
+		 rbt.c utils.c \
+		 hash.c \
+		 dllist.c \
+		 leakybucket.c \
+		 config.c \
+		 hub.c \
+		 core_config.c \
+		 $(NMDC_SOURCES) \
+		 hashlist.c \
+		 user.c \
+		 banlist.c \
+		 banlistclient.c \
+		 plugin.c \
+		 commands.c \
+		 builtincmd.c \
+		 cap.c \
+		 pi_user.c \
+		 pi_statistics.c \
+		 pi_chatroom.c \
+		 pi_trigger.c \
+		 pi_chatlog.c \
+		 pi_statbot.c \
+		 pi_iplog.c \
+		 pi_hublist.c \
+		 $(LUA_SOURCES) \
+		 main.c \
+		 searchlist.c \
+		 $(DEBUG_FILES) \
+		 $(GETADDRINFO_SOURCES) \
+		 tth.c \
+		 aqtime.c \
+		 iplist.c \
+		 pi_configlock.c \
+		 $(DNS_FILES)
+
 aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@ @LIBINTL@
 
 indent: .indent
@@ -70,3 +127,4 @@ coverage2: $(aquila_SOURCES)
 
 clean-local:
 	-rm -f *.gcov *.gcno *.gcda
+

@@ -1,6 +1,9 @@
 
 Develstatus:
-	- fix pi_trigger.c make a windows equivalent of stat()
+	- implement delayed close on windows.
+	- async DNS resolving
+	- LUA 5.1
+	- move AcceptEx to handler. Add ConnectEx and the other one.
 	- <FleetCommand> plus, !iplog could accept ips too, not just nicks.. or, even better: ip patterns :)
 	- <FleetCommand> another request: when !unban nick both unbans ip and nick, it should report not just "nick bah unbanned" but it should let you know that the whole ban (ip and nick too) is removed
 	- no kicking ppl with same rights?

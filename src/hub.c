@@ -28,11 +28,22 @@
 #include <string.h>
 
 #include "../config.h"
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#ifndef __USE_W32_SOCKETS
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
+#  ifdef HAVE_NETINET_TCP_H
+#    include <netinet/tcp.h>
+#  endif
+#else
+#  define SHUT_RDWR	SD_BOTH
+#  define close(x) closesocket(x)
 #endif
-#ifdef HAVE_NETINET_TCP_H
-#  include <netinet/tcp.h>
+
+#if 0
+#define BUF_DPRINTF(x...) DPRINTF(x)
+#else
+#define BUF_DPRINTF(x...)	/* x */
 #endif
 
 #include "core_config.h"
@@ -76,49 +87,42 @@ int server_settimeout (client_t * cl, unsigned long timeout)
 /*
  * GENERIC NETWORK FUNCTIONS
  */
-int setup_incoming_socket (unsigned long address, int port)
+esocket_t *setup_incoming_socket (proto_t * proto, esocket_handler_t * h, unsigned int etype,
+				  unsigned long address, int port)
 {
-  struct sockaddr_in a;
-  int s, yes = 1;
+  esocket_t *es;
 
-  /* we create a socket */
-  if ((s = socket (AF_INET, SOCK_STREAM, 0)) < 0) {
+#ifndef USE_WINDOWS
+  int yes = 1;
+#endif
+
+  es = esocket_new (h, etype, AF_INET, SOCK_STREAM, 0, (uintptr_t) proto);
+  if (!es) {
     perror ("socket:");
-    return -1;
+    return NULL;
   }
+#ifndef USE_WINDOWS
   /* we make the socket reusable, so many ppl can connect here */
-  if (setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof (yes)) < 0) {
-    perror ("setsockopt:");
-    close (s);
-    return -1;
+  if (setsockopt (es->socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof (yes)) < 0) {
+    perror ("setsockopt (SO_REUSEADDR):");
+    esocket_remove_socket (es);
+    return NULL;
   }
-  /* init the socket address structure */
-  memset (&a, 0, sizeof (a));
-  a.sin_addr.s_addr = address;
-  a.sin_port = htons (port);
-  a.sin_family = AF_INET;
+#endif
 
-  /* bind the socket to the local port */
-  if (bind (s, (struct sockaddr *) &a, sizeof (a)) < 0) {
-    perror ("bind:");
-    close (s);
-    return -1;
-  }
-
-  /* make socket non-blocking */
-  if (fcntl (s, F_SETFL, O_NONBLOCK)) {
-    perror ("ioctl()");
-    shutdown (s, SHUT_RDWR);
-    close (s);
-    return -1;
+  if (esocket_bind (es, address, port)) {
+    esocket_remove_socket (es);
+    return NULL;
   }
 
   /* start listening on the port */
-  listen (s, 10);
+  esocket_listen (es, 10, AF_INET, SOCK_STREAM, 0);
+
+  esocket_setevents (es, ESOCKET_EVENT_IN);
 
   DPRINTF ("Listening for clients on port %d\n", port);
 
-  return s;
+  return es;
 }
 
 
@@ -126,29 +130,40 @@ int setup_incoming_socket (unsigned long address, int port)
 
 int accept_new_user (esocket_t * s)
 {
-  int r, l, yes = 1;
+  int l;
+
+#ifndef USE_WINDOWS
+  int r, yes = 1;
+#else
+  SOCKET r;
+#endif
   struct sockaddr_in client_address;
-  client_t *cl;
+  client_t *cl = NULL;
 
   gettime ();
-  for (;;) {
+#ifndef USE_WINDOWS
+  for (;;)
+#endif
+  {
     memset (&client_address, 0, l = sizeof (client_address));
-    r = accept (s->socket, (struct sockaddr *) &client_address, &l);
+    r = esocket_accept (s, (struct sockaddr *) &client_address, &l);
 
-    if (r == -1) {
+    if (r == INVALID_SOCKET) {
       if (errno == EAGAIN)
 	return 0;
       perror ("accept:");
       return -1;
     }
-
+#ifndef USE_WINDOWS
     if (ndelay) {
       if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
-	perror ("setsockopt:");
+	DPRINTF ("setsockopt (TCP_NODELAY): %s\n", strerror (errno));
+	shutdown (r, SHUT_RDWR);
 	close (r);
 	return -1;
       }
     }
+#endif
 
     /* before all else, test hardban */
     if (banlist_find_byip (&hardbanlist, client_address.sin_addr.s_addr)) {
@@ -158,12 +173,24 @@ int accept_new_user (esocket_t * s)
     }
 
     /* make socket non-blocking */
+#ifndef USE_IOCP
     if (fcntl (r, F_SETFL, O_NONBLOCK)) {
-      perror ("fcntl()");
-      shutdown (r, SHUT_RDWR);
+      perror ("ioctl(O_NONBLOCK):");
       close (r);
       return -1;
+    };
+#else
+    {
+      DWORD yes = 1;
+      DWORD bytes = 0;
+
+      if (WSAIoctl (r, FIONBIO, &yes, sizeof (yes), NULL, 0, &bytes, NULL, NULL)) {
+	perror ("WSAIoctl (FIONBIO):");
+	close (r);
+	return -1;
+      }
     }
+#endif
 
     /* check last connection list */
     if (iplist_interval) {
@@ -224,8 +251,7 @@ int accept_new_user (esocket_t * s)
     /* init some fields */
     cl->user->ipaddress = client_address.sin_addr.s_addr;
     cl->es =
-      esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED,
-			  (unsigned long long) cl);
+      esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED, (uintptr_t) cl);
 
     if (!cl->es) {
       int l;
@@ -287,8 +313,8 @@ int server_write (client_t * cl, buffer_t * b)
       buf_mem -= cl->outgoing.size;
       string_list_add (&cl->outgoing, cl->user, b);
       buf_mem += cl->outgoing.size;
-      DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count,
-	       cl->outgoing.size, cl->user->nick);
+      BUF_DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count,
+		   cl->outgoing.size, cl->user->nick);
       /* if we are over the softlimit, we go into quick timeout mode */
       if ((cl->state == HUB_STATE_BUFFERING)
 	  && ((cl->outgoing.size - cl->offset) >= (config.BufferSoftLimit + cl->credit))) {
@@ -306,17 +332,21 @@ int server_write (client_t * cl, buffer_t * b)
   w = l = t = 0;
   for (e = b; e; e = e->next) {
     l = bf_used (e);
-    w = send (s->socket, e->s, l, 0);
+    w = esocket_send (s, e, 0);
     if (w < 0) {
-      DPRINTF ("server_write: write: %s\n", strerror (errno));
       switch (errno) {
 	case EAGAIN:
 	case ENOMEM:
 	  break;
 	case EPIPE:
+#ifndef USE_WINDOWS
 	case ECONNRESET:
+#endif
+	  DPRINTF ("server_write: write: %s\n", strerror (errno));
 	  server_disconnect_user (cl, __ ("Connection closed."));
+	  return -1;
 	default:
+	  DPRINTF ("server_write: write: %s\n", strerror (errno));
 	  return -1;
       }
       w = 0;
@@ -359,8 +389,8 @@ int server_write (client_t * cl, buffer_t * b)
 	esocket_settimeout (s, config.TimeoutOverflow);
       }
     }
-    DPRINTF (" %p Starting to buffer... %lu (credit %lu)\n", cl->user, cl->outgoing.size,
-	     cl->credit);
+    BUF_DPRINTF (" %p Starting to buffer... %lu (credit %lu)\n", cl->user, cl->outgoing.size,
+		 cl->credit);
   };
 
   return t;
@@ -422,7 +452,7 @@ int server_handle_output (esocket_t * es)
   if (!cl->outgoing.count)
     return 0;
 
-  DPRINTF (" %p Writing output (%u, %lu)...", cl->user, cl->outgoing.count, cl->offset);
+  BUF_DPRINTF (" %p Writing output (%u, %lu)...", cl->user, cl->outgoing.count, cl->offset);
   w = 0;
   t = 0;
   b = NULL;
@@ -442,14 +472,16 @@ int server_handle_output (esocket_t * es)
     /* write out data in buffer chain */
     for (; b; b = b->next) {
       l = bf_used (b) - o;
-      w = send (es->socket, b->s + o, l, 0);
+      w = esocket_send (es, b, o);
       if (w < 0) {
 	switch (errno) {
 	  case EAGAIN:
 	  case ENOMEM:
 	    break;
 	  case EPIPE:
+#ifndef USE_WINDOWS
 	  case ECONNRESET:
+#endif
 	    buf_mem += cl->outgoing.size;
 	    server_disconnect_user (cl, __ ("Connection closed."));
 	    return -1;
@@ -493,12 +525,12 @@ int server_handle_output (esocket_t * es)
 
     buf_mem += cl->outgoing.size;
 
-    DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu, credit %lu)\n", t,
-	     cl->outgoing.count, cl->outgoing.size, cl->offset, cl->credit);
+    BUF_DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu, credit %lu)\n", t,
+		 cl->outgoing.count, cl->outgoing.size, cl->offset, cl->credit);
     return 0;
   }
 
-  DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
+  BUF_DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
 
   /* all data was written, we don't need the output event anymore */
   ASSERT (!cl->outgoing.count);
@@ -555,11 +587,11 @@ int server_handle_input (esocket_t * s)
 
 int server_timeout (esocket_t * s)
 {
-  client_t *cl = (client_t *) ((unsigned long long) s->context);
+  client_t *cl = (client_t *) ((uintptr_t) s->context);
 
   /* if the client is online and has no data buffered, ignore the timeout -- this avoids disconnection in an empty hub */
   if ((cl->user->state == PROTO_STATE_ONLINE) && !cl->outgoing.size) {
-    esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
+    esocket_settimeout (s, PROTO_TIMEOUT_ONLINE);
     return 0;
   }
 
@@ -569,21 +601,24 @@ int server_timeout (esocket_t * s)
 
 int server_error (esocket_t * s)
 {
-  client_t *cl = (client_t *) ((unsigned long long) s->context);
+  char buffer[256];
+
+  client_t *cl = (client_t *) ((uintptr_t) s->context);
 
   DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl, __ ("Socket error."));
+
+  if (s->error) {
+    sprintf (buffer, __ ("Socket error %d."), s->error);
+  } else {
+    sprintf (buffer, __ ("Socket errno %d."), errno);
+  }
+
+  return server_disconnect_user (cl, buffer);
 }
 
 int server_add_port (esocket_handler_t * h, proto_t * proto, unsigned long address, int port)
 {
-  int s;
-
-  s = setup_incoming_socket (address, port);
-  if (s >= 0)
-    esocket_add_socket (h, es_type_listen, s, SOCKSTATE_CONNECTED, (unsigned long long) proto);
-
-  return 0;
+  return setup_incoming_socket (proto, h, es_type_listen, address, port) != NULL;
 }
 
 int server_setup (esocket_handler_t * h)

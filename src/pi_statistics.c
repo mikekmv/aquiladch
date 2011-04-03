@@ -22,7 +22,11 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/resource.h>
+
+#ifndef USE_WINDOWS
+#  include <sys/resource.h>
+#endif
+
 #include <limits.h>
 
 #ifdef HAVE_MALLOC_H
@@ -36,6 +40,11 @@
 #include "proto.h"
 #include "utils.h"
 #include "nmdc_protocol.h"
+
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
+#endif
+
 
 #define STATS_NUM_MEASUREMENTS 360
 #define STATS_NUM_LEVELS	 3
@@ -71,6 +80,12 @@ statistics_t stats;
 #define PROCSTAT_LEVELS 3
 #define PROCSTAT_MEASUREMENTS 60
 
+#define TV_TO_MSEC(tv) ((tv.tv_sec*1000)+(tv.tv_usec/1000))
+
+
+/************************* CPU FUNCTIONS ******************************************/
+
+#ifndef USE_WINDOWS
 typedef struct procstat {
   struct rusage ps;
   struct timeval tv;
@@ -83,7 +98,6 @@ unsigned int current[PROCSTAT_LEVELS];
 buffer_t *cpuinfo = NULL;
 unsigned int cpucount = 0;
 
-/************************* CPU FUNCTIONS ******************************************/
 
 void cpu_parse ()
 {
@@ -164,8 +178,6 @@ unsigned int cpu_measure ()
   return 0;
 }
 
-#define TV_TO_MSEC(tv) ((tv.tv_sec*1000)+(tv.tv_usec/1000))
-
 float cpu_calc (procstat_t * old, procstat_t * new)
 {
   long used, real;
@@ -199,7 +211,6 @@ float cpu_calculate (int seconds)
 
 int cpu_printf (buffer_t * buf)
 {
-
   time_t tnow = now.tv_sec;
 
   bf_printf (buf, _("\nCpu Statistics at %s"), ctime (&tnow));
@@ -224,6 +235,185 @@ int cpu_printf (buffer_t * buf)
 
   return 0;
 }
+#else /* USE_WINDOWS */
+
+buffer_t *cpuinfo = NULL;
+unsigned int cpucount = 0;
+
+#define FT_TO_MSEC(time)	( (((unsigned long long)time.dwLowDateTime) + (((unsigned long long)time.dwHighDateTime) << 32)) / 10000LL)
+
+void ft_add (FILETIME * target, FILETIME * t1, FILETIME * t2)
+{
+  unsigned long long tmp;
+
+  target->dwHighDateTime = t1->dwHighDateTime + t2->dwHighDateTime;
+  tmp = t1->dwLowDateTime + t2->dwLowDateTime;
+  if (tmp > 0xffffffff)
+    target->dwHighDateTime++;
+  target->dwLowDateTime = tmp & 0xffffffff;
+}
+
+typedef struct procstat {
+  FILETIME ps;
+  struct timeval tv;
+} procstat_t;
+
+procstat_t procstat_boot;
+procstat_t procstats[PROCSTAT_LEVELS][PROCSTAT_MEASUREMENTS + 1];
+unsigned int current[PROCSTAT_LEVELS];
+
+HANDLE myProcess;
+
+#define CPU_REG_KEY             HKEY_LOCAL_MACHINE
+#define CPU_REG_SUBKEY  "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\%d"
+
+#define CPU_SPEED                       "~MHz"
+#define CPU_IDENTIFIER          "Identifier"
+#define CPU_NAME                        "ProcessorNameString"
+#define CPU_VENDOR                      "VendorIdentifier"
+
+int cpu_parse ()
+{
+  HKEY hKey;
+  LONG ret;
+  DWORD dwSize, dwType;
+  unsigned int i;
+  unsigned char buf[256], *c;
+  SYSTEM_INFO sysinfo;
+
+  GetSystemInfo (&sysinfo);
+
+  cpucount = sysinfo.dwNumberOfProcessors;
+
+  cpuinfo = bf_alloc (1024);
+  for (i = 0; i < cpucount; i++) {
+    bf_printf (cpuinfo, "CPU%d: ", i);
+    sprintf (buf, CPU_REG_SUBKEY, i);
+
+    ret = RegOpenKeyEx (CPU_REG_KEY, buf, 0, KEY_READ, &hKey);
+    if (ret != ERROR_SUCCESS)
+      continue;
+
+    dwSize = 0;
+    buf[0] = 0;
+    ret = RegQueryValueEx (hKey, CPU_NAME, NULL, &dwType, NULL, &dwSize);
+    ret = RegQueryValueEx (hKey, CPU_NAME, NULL, &dwType, buf, &dwSize);
+    if (ret != ERROR_SUCCESS) {
+      RegCloseKey (hKey);
+      return -1;
+    }
+
+    c = buf;
+    while (*c == ' ')
+      c++;
+
+    bf_strcat (cpuinfo, c);
+    bf_strcat (cpuinfo, "\n");
+  }
+
+  return 0;
+}
+
+int cpu_init ()
+{
+  FILETIME d1, d2, KernelTime, UserTime;
+  DWORD pid = GetCurrentProcessId ();
+
+  myProcess = OpenProcess (PROCESS_QUERY_INFORMATION, FALSE, pid);
+
+  gettimeofday (&(procstats[0][0].tv), NULL);
+
+  GetProcessTimes (myProcess, &d1, &d2, &KernelTime, &UserTime);
+  ft_add (&(procstats[0][0].ps), &KernelTime, &UserTime);
+
+  procstat_boot = procstats[0][0];
+  cpu_parse ();
+
+  return 0;
+};
+
+int cpu_measure ()
+{
+  int i;
+  FILETIME d1, d2, KernelTime, UserTime;
+
+  GetProcessTimes (myProcess, &d1, &d2, &KernelTime, &UserTime);
+
+  current[0]++;
+  gettimeofday (&(procstats[0][current[0]].tv), NULL);
+
+  ft_add (&(procstats[0][current[0]].ps), &KernelTime, &UserTime);
+
+  for (i = 0; (current[i] == (PROCSTAT_MEASUREMENTS)) && (i < PROCSTAT_LEVELS); i++) {
+    if (i < (PROCSTAT_LEVELS - 1)) {
+      current[i + 1]++;
+      procstats[i + 1][current[i + 1]] = procstats[i][PROCSTAT_MEASUREMENTS];
+    }
+    current[i] = 0;
+    procstats[i][0] = procstats[i][PROCSTAT_MEASUREMENTS];
+  }
+
+  return 0;
+};
+
+float cpu_calc (procstat_t * old, procstat_t * new)
+{
+  long long used, real;
+
+  /* we aren't up that long yet */
+  if (!old->tv.tv_sec)
+    return 0;
+
+  used = FT_TO_MSEC (new->ps);
+  used -= FT_TO_MSEC (old->ps);
+
+  real = TV_TO_MSEC (new->tv);
+  real -= TV_TO_MSEC (old->tv);
+
+  return ((100.0 * (float) used) / (float) real) / (float) cpucount;
+}
+
+float cpu_calculate (int seconds)
+{
+  int level = seconds % PROCSTAT_MEASUREMENTS;
+
+  if (procstats[level][(current[level] - 1) % PROCSTAT_MEASUREMENTS].ps.dwHighDateTime > 0) {
+    return cpu_calc (&procstats[level][(current[level] - 1) % PROCSTAT_MEASUREMENTS],
+		     &procstats[0][current[0]]);
+  } else {
+    return 0.0;
+  }
+};
+
+int cpu_printf (buffer_t * buf)
+{
+  time_t tnow = now.tv_sec;
+
+  bf_printf (buf, _("\nCpu Statistics at %s"), ctime (&tnow));
+
+  if (procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
+    bf_printf (buf, _(" last hour %2.2f%%\n"),
+	       cpu_calc (&procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS],
+			 &procstats[0][current[0]]));
+  if (procstats[1][(current[1] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
+    bf_printf (buf, _(" last minute %2.2f%%\n"),
+	       cpu_calc (&procstats[1][(current[1] - 1) % PROCSTAT_MEASUREMENTS],
+			 &procstats[0][current[0]]));
+  if (procstats[0][(current[0] - 5) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
+    bf_printf (buf, _(" last 5 seconds %2.2f%%\n\n"),
+	       cpu_calc (&procstats[0][(current[0] - 5) % PROCSTAT_MEASUREMENTS],
+			 &procstats[0][current[0]]));
+
+  bf_printf (buf, _("Since boot %2.2f%%\n"), cpu_calc (&procstat_boot, &procstats[0][current[0]]));
+
+  if (cpuinfo)
+    bf_printf (buf, "\n%.*s", bf_used (cpuinfo), cpuinfo->s);
+
+  return 0;
+}
+
+
+#endif /* USE_WINDOWS */
 
 /************************* BW FUNCTIONS ******************************************/
 
@@ -419,7 +609,11 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
   unsigned long count;
   unsigned long long bufs, total, rest;
 
+#ifndef USE_WINDOWS
   bf_printf (output, _("Allocated size: %llu (max: %llu)\n"), bufferstats.size, bufferstats.peak);
+#else
+  bf_printf (output, _("Allocated size: %I64u (max: %llu)\n"), bufferstats.size, bufferstats.peak);
+#endif
   bf_printf (output, _("Allocated buffers: %lu (max %lu)\n"), bufferstats.count, bufferstats.max);
   bf_printf (output, _(" Users having buffered output: %lu\n"), buffering);
 
@@ -479,13 +673,51 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
   return 0;
 }
 
+#ifdef USE_WINDOWS
+extern unsigned long outstanding;
+extern unsigned long outstanding_peak;
+extern unsigned long outstanding_max;
+
+extern unsigned long outstandingbytes;
+extern unsigned long outstandingbytes_peak;
+extern unsigned long outstandingbytes_max;
+
+extern unsigned long iocp_users;
+extern unsigned long outstandingbytes_peruser;
+
+unsigned long pi_statistics_handler_statiocp (plugin_user_t * user, buffer_t * output, void *dummy,
+					      unsigned int argc, unsigned char **argv)
+{
+
+  bf_printf (output,
+	     "IOCP Statistics:\n"
+	     "  Outstanding requests:\n"
+	     "    Current: %lu Peak: %lu Max: %lu\n"
+	     "  Outstanding bytes:\n"
+	     "    Current: %lu Peak: %lu Max: %lu\n"
+	     "  Max bytes per user: %lu\n"
+	     "  Current users: %lu\n",
+	     outstanding, outstanding_peak, outstanding_max,
+	     outstandingbytes, outstandingbytes_peak, outstandingbytes_max,
+	     outstandingbytes_peruser, iocp_users);
+
+  return 0;
+}
+
+#endif
+
 #include "iplist.h"
 extern iplist_t lastlist;
 unsigned long pi_statistics_handler_statconn (plugin_user_t * user, buffer_t * output, void *dummy,
 					      unsigned int argc, unsigned char **argv)
 {
-  bf_printf (output, _("Total IPs remembered (roughly last %us): %lu\n"), iplist_interval,
-	     lastlist.count);
+  iplist_clean (&lastlist);
+
+  bf_printf (output, _("Connection statistics:\n"
+		       "  Total IPs remembered (roughly last %us): %lu\n"
+		       "    Allowed connection attempts: %lu\n"
+		       "    Blocked connection attempts: %lu\n"), iplist_interval, lastlist.count,
+	     lastlist.new, lastlist.found);
   return 0;
 }
 
@@ -499,7 +731,7 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
 
   bf_printf (output, _("Memory Usage:\n"));
 
-#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO) && !defined(USE_WINDOWS)
   if (1) {
     struct mallinfo mi;
 
@@ -626,6 +858,10 @@ int pi_statistics_init ()
   command_register ("statmem", &pi_statistics_handler_statmem, 0, _("Show memory usage stats."));
   command_register ("statconn", &pi_statistics_handler_statconn, 0, _("Show connection stats."));
   command_register ("uptime", &pi_statistics_handler_uptime, 0, _("Show uptime."));
+
+#ifdef USE_WINDOWS
+  command_register ("statiocp", &pi_statistics_handler_statiocp, 0, _("Show iocp usage stats."));
+#endif
 
   return 0;
 }

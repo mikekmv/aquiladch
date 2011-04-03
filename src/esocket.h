@@ -17,12 +17,26 @@
  *  
  */
 
+
 #ifndef _ESOCKET_H_
 #define _ESOCKET_H_
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
+
+#ifdef USE_WINDOWS
+#undef HAVE_ARPA_INET_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_SYS_POLL_H
+#endif
+
+
+#undef USE_EPOLL
+#undef USE_POLL
+#undef USE_SELECT
+#undef USE_IOCP
 
 /*
  * Decide if we want to use epoll.
@@ -46,7 +60,7 @@
 
 #ifndef USE_EPOLL
 #  ifdef ALLOW_POLL
-#    define USE_POLL
+#    define USE_POLL 1
 #  endif
 #endif
 
@@ -58,13 +72,24 @@
 #  ifndef USE_POLL
 #    ifndef HAVE_SELECT
 #      warning "You are missing epoll, poll and select. This code will not work."
+#      define USE_SELECT 1
 #    endif
 #  endif
 #endif
 
-#ifdef __CYGWIN__
-#define MAX_FD		16384
-#define FD_SETSIZE 	16384
+/*
+ * decide if we want to use IOCP
+ */
+#ifdef USE_WINDOWS
+#  ifdef ALLOW_IOCP
+#    ifdef HAVE_WINDOWS_H
+#      ifdef HAVE_CREATEIOCOMPLETIONPORT
+#        define USE_IOCP 1
+#        undef USE_POLL
+#        undef USE_SELECT
+#      endif
+#    endif
+#  endif
 #endif
 
 #include <sys/types.h>
@@ -74,19 +99,30 @@
 #else
 # if HAVE_STDINT_H
 #  include <stdint.h>
+# else
+   typedef void * uintptr_t;
 # endif
 #endif
 
 #include <stdlib.h>
-#include <sys/time.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include <sys/time.h>
 
-#if !defined(HAVE_GETADDRINFO) || !defined(HAVE_GETNAMEINFO)
-# include "getaddrinfo.h"
+#ifdef USE_IOCP
+#  include <winsock2.h>
+#else 
+#  include <sys/socket.h>
+#  include <netdb.h>
+#  if !defined(HAVE_GETADDRINFO) || !defined(HAVE_GETNAMEINFO)
+#    include "getaddrinfo.h"
+#  endif
+#  ifdef USE_PTHREADDNS
+#    include "dns.h"
+#  endif
 #endif
 
+
+#include "buffer.h"
 #include "rbt.h"
 
 #ifdef USE_EPOLL
@@ -96,11 +132,12 @@
 #endif
 
 #define SOCKSTATE_INIT		0
-#define SOCKSTATE_CONNECTING	1
-#define SOCKSTATE_CONNECTED	2
-#define SOCKSTATE_CLOSED	3
-#define SOCKSTATE_ERROR		4
-#define SOCKSTATE_FREED		5
+#define SOCKSTATE_RESOLVING	1
+#define SOCKSTATE_CONNECTING	2
+#define SOCKSTATE_CONNECTED	3
+#define SOCKSTATE_CLOSED	4
+#define SOCKSTATE_ERROR		5
+#define SOCKSTATE_FREED		6
 
 #ifndef USE_EPOLL
 
@@ -118,27 +155,85 @@
 
 #endif
 
+#ifndef USE_WINDOWS
+#  define INVALID_SOCKET (-1)
+#endif
 
-
-/* enhanced sockets */
+typedef struct esocket esocket_t;
 struct esockethandler;
 
-typedef struct esocket {
+
+#ifdef USE_IOCP
+
+#ifndef LPFN_ACCEPTEX
+typedef BOOL (WINAPI *LPFN_ACCEPTEX) (SOCKET,SOCKET,PVOID,DWORD,DWORD,DWORD,LPDWORD,LPOVERLAPPED);
+#endif
+
+typedef enum {
+  ESIO_INVALID = 0,
+  ESIO_READ,
+  ESIO_WRITE,
+  ESIO_WRITE_TRIGGER,
+  ESIO_ACCEPT,
+  ESIO_ACCEPT_TRIGGER,
+  ESIO_RESOLVE,
+  ESIO_CONNECT
+} esocket_io_t;
+
+typedef struct esocket_ioctx {
+  WSAOVERLAPPED		Overlapped;
+  
+  struct esocket_ioctx  *next, *prev;
+
+  esocket_t		*es;
+  buffer_t		*buffer;
+  unsigned long 	length;
+  esocket_io_t		iotype;
+  SOCKET		ioAccept;
+  unsigned short	port;
+  int 			family;
+  int 			type;
+  int 			protocol;
+} esocket_ioctx_t;
+
+#endif
+
+/* enhanced sockets */
+struct esocket {
   rbt_t rbt;
   struct esocket *next, *prev;	/* main socket list */
 
+#ifdef USE_IOCP
+  SOCKET socket;
+  //struct AddrInfoEx *addr;
+  struct addrinfo *addr;
+#else
   int socket;
+  struct addrinfo *addr;
+#endif
   unsigned int state;
   unsigned int error;
-  unsigned long long context;
+  uintptr_t context;
   unsigned int type;
-  struct addrinfo *addr;
   uint32_t events;
 
   unsigned int tovalid, resetvalid;
   struct timeval to, reset;
   struct esockethandler *handler;
-} esocket_t;
+  
+#ifdef USE_IOCP
+  /* accept context */
+  esocket_ioctx_t *ctxt;
+  /* LPFN_ACCEPTEX fnAcceptEx; */
+  LPWSAPROTOCOL_INFO protinfo;
+  
+  /* writes context */
+  unsigned long outstanding;
+  unsigned int  fragments;
+  
+  esocket_ioctx_t *ioclist;
+#endif
+};
 
 
 /* define handler functions */
@@ -167,16 +262,24 @@ typedef struct esockethandler {
   rbt_t *root;
   unsigned long timercnt;
 
-#ifndef USE_EPOLL
-#ifndef USE_POLL
+#ifdef USE_SELECT
   fd_set input;
   fd_set output;
   fd_set error;
 
   int ni, no, ne;
 #endif
-#else
+
+#ifdef USE_EPOLL
   int epfd;
+#endif
+
+#ifdef USE_IOCP
+  HANDLE iocp;
+#endif
+
+#ifdef USE_PTHREADDNS
+  dns_t *dns;
 #endif
   int n;
 
@@ -189,11 +292,13 @@ extern unsigned int esocket_add_type (esocket_handler_t * h, unsigned int events
 				      input_handler_t input, output_handler_t output,
 				      error_handler_t error, timeout_handler_t timeout);
 extern esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
-			       int protocol, unsigned long long context);
+			       int protocol, uintptr_t context);
 extern esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
-				      unsigned int state, unsigned long long context);
+				      unsigned int state, uintptr_t context);
 extern unsigned int esocket_close (esocket_t * s);
 extern unsigned int esocket_remove_socket (esocket_t * s);
+
+extern int esocket_bind (esocket_t * s, unsigned long address, unsigned int port);
 
 extern int esocket_connect (esocket_t * s, char *address, unsigned int port);
 extern unsigned int esocket_select (esocket_handler_t * h, struct timeval *to);
@@ -204,6 +309,15 @@ extern unsigned int esocket_deltimeout (esocket_t * s);
 extern unsigned int esocket_setevents (esocket_t * s, unsigned int events);
 extern unsigned int esocket_addevents (esocket_t * s, unsigned int events);
 extern unsigned int esocket_clearevents (esocket_t * s, unsigned int events);
+
+#ifndef USE_IOCP
+extern int esocket_accept (esocket_t *s, struct sockaddr *addr, int *addrlen);
+#else
+extern SOCKET esocket_accept (esocket_t *s, struct sockaddr *addr, int *addrlen);
+#endif
+extern int esocket_recv (esocket_t *s, buffer_t *buf);
+extern int esocket_send (esocket_t *s, buffer_t *buf, unsigned long offset);
+extern int esocket_listen (esocket_t *s, int num,int family, int type, int protocol);
 
 #define esocket_hasevent(s,e)     (s->events & e)
 

@@ -28,6 +28,38 @@
 unsigned long iplist_interval = IPLIST_TIME;
 unsigned long iplist_size = IPLIST_SIZE;
 
+void iplist_clean (iplist_t * list)
+{
+  unsigned int i;
+  iplisthashbucket_t *hb;
+  iplistentry_t *entry, *prev, *next;
+  time_t age;
+
+  for (i = 0; i < IPLIST_HASHSIZE; i++) {
+    hb = &(list->ht[i]);
+    age = now.tv_sec - iplist_interval;
+
+    prev = NULL;
+    entry = hb->first;
+    while (entry) {
+      next = entry->next;
+      if (entry->stamp >= age)
+	break;
+
+      if (prev) {
+	prev->next = next;
+      } else {
+	hb->first = next;
+	if (next == NULL)
+	  hb->last = NULL;
+      }
+      entry->next = list->freelist;
+      list->freelist = entry;
+      list->count--;
+      entry = next;
+    }
+  }
+}
 
 int iplist_add (iplist_t * list, unsigned long ip)
 {
@@ -64,7 +96,7 @@ int iplist_find (iplist_t * list, unsigned long ip)
 
   hb = &list->ht[one_at_a_time (ip) % IPLIST_HASHMASK];
   if (!hb)
-    return 0;
+    goto allow;
 
   age = now.tv_sec - iplist_interval;
 
@@ -99,12 +131,17 @@ int iplist_find (iplist_t * list, unsigned long ip)
 	hb->last = entry;
       }
       entry->stamp = now.tv_sec;
+      list->found++;
       return 1;
     }
 
     prev = entry;
     entry = next;
   }
+
+allow:
+  list->new++;
+
   return 0;
 }
 

@@ -20,7 +20,7 @@
 #ifndef _LEAKY_BUCKET_H_
 #define _LEAKY_BUCKET_H_
 
-#include <sys/time.h>
+#include <sys/types.h>
 
 typedef struct leaky_bucket {
   time_t timestamp;

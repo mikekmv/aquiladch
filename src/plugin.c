@@ -24,8 +24,10 @@
 #include <string.h>
 #include <assert.h>
 
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#ifndef __USE_W32_SOCKETS
+#  ifdef HAVE_NETINET_IN_H
+#    include <netinet/in.h>
+#  endif
 #endif
 
 #include "aqtime.h"
@@ -762,7 +764,7 @@ plugin_user_t *plugin_robot_add (unsigned char *name, unsigned char *description
 
   u = nmdc_proto.robot_add (name, description);
   u->rights |= CAP_KEY;
-  plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
+  plugin_new_user ((void *) &u->plugin_priv, u, &nmdc_proto);
 
   priv = ((plugin_private_t *) u->plugin_priv);
   priv->handler = handler;

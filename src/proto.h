@@ -20,6 +20,14 @@
 #ifndef _PROTO_H_
 #define _PROTO_H_
 
+#ifdef USE_WINDOWS
+#undef HAVE_ARPA_INET_H
+#endif
+
+#ifdef HAVE_ARPA_INET_H
+#  include "arpa/inet.h"
+#endif
+
 #include "hashlist.h"
 #include "buffer.h"
 #include "config.h"

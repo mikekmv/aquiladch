@@ -1,17 +1,43 @@
 This is the Aquila Changelog.
 
-0.1.10:
-	Fixed hardbanlist (Report FleetCommand)
-	Changed "Dropped" into "Refused" for clarification in !statuser
-	Fix poll() bug.
-	Fix BSD configure bug.
+0.1.11-pre1-beta1:
+	Added dns.h to DISTFILES
+	Fixed hardban stuff.
+	Added blocked and allowed count.
+	Clean iplist before printing stats.
+	No USE_PTHREADDNS on windows.
+	Replace compile with real version.
+	Build system stable.
+	Clean windows build.
+	Fix build error in esocket.c
+	Cleaned up configure.ac
+	Added pthread async dns resolver
+	Extended error printing on socket error.
+	Loads of small random changes.
+	Removed command window in none-debug build.
+	Fixed file stat call in pi_trigger.c
+	Increased max buffer size that can be queued to windows in IOCP.
+	Improved error handling
 	Make release target work everywhere.
 	Delete all accounts on !load
-	Removed unecessary errno dependecy in buffer.c
+	Do not use %llu on windows. Use %I64u...
+	Do not use %Lu either... not in printf or scanf.
+	Do not use %llu in printf on windows. Use %I64u...
+	Modded pi_hublist.c
+	Added some statistics and automatic memory tuning for IOCP.
 	Eliminated superfluous |s in output.
-	Fix release target to work in all branches.
-	Fix possible crash on account load.
-	Fix chatroom del and OP rejoin bugs.
+	Removed unecessary errno dependecy in buffer.c
+	Fix bug with OP rejoin.
+	Remove warings from esocket.
+	Fix assert in debug build when deleting chatroom.
+	Comment out all references to fnAcceptEx
+	Step back to using AcceptEx.
+	Added sys_windows.h
+	Fixed compiler warnings on windows.
+	Fixed compiler warnings on linux.
+	Fixed on windows again.
+	Fix build on linux.
+	Native Windows support.
 
 0.1.10-pre4:
 	banlist will list both IP and nick for dual bans (Req FleetCommand).

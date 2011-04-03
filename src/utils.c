@@ -23,16 +23,19 @@
 #include <string.h>
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
-#endif
-#include <arpa/inet.h>
 
-#include "buffer.h"
 #include "utils.h"
 
+#ifndef __USE_W32_SOCKETS
+#  include <sys/socket.h>
+#endif
+
+#include "buffer.h"
 #include "gettext.h"
+
+#ifdef USE_WINDOWS
+#  include "sys_windows.h"
+#endif
 
 const char *units[] = { "Bytes", "Kilobyte", "Megabyte", "Gigabyte", "Terabyte", "Petabyte" };
 

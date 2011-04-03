@@ -24,6 +24,14 @@
 #include "../config.h"
 #endif
 
+#ifdef USE_WINDOWS
+#undef HAVE_ARPA_INET_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_SYS_POLL_H
+#endif
+
+
 #ifdef SVNREVISION
 #define AQUILA_VERSION			VERSION " (" SVNREVISION ")"
 #else
