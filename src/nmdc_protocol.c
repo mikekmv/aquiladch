@@ -607,7 +607,13 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	server_write (existing_user->parent, output);
 	server_disconnect_user (existing_user->parent);
       }
+      existing_user = NULL;
     }
+
+    /* now check if user is in the cachelist, if ip address changed, check the sharesize */
+    if ((existing_user = hash_find_nick (&cachehashlist, u->nick, strlen (u->nick))) &&
+	((u->ipaddress != existing_user->ipaddress) && (u->share != existing_user->share)))
+      existing_user = NULL;
 
     /* should not happen */
     if (u->MyINFO)
@@ -642,10 +648,6 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     }
     ASSERT (u->MyINFO);
 
-    /* searches start with a full load too to prevent users from getting the warning at login. */
-    u->rate_search.tokens = u->active ? rates.asearch.refill : rates.psearch.refill;
-
-
     /* allocate plugin private stuff */
     plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
 
@@ -656,6 +658,31 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       retval = -1;
       nmdc_stats.preloginevent++;
       break;
+    }
+
+    /* restore some values */
+    if (existing_user) {
+      /* restore rates */
+      u->rate_warnings = existing_user->rate_warnings;
+      u->rate_chat = existing_user->rate_chat;
+      u->rate_search = existing_user->rate_search;
+      u->rate_myinfo = existing_user->rate_myinfo;
+      u->rate_getnicklist = existing_user->rate_getnicklist;
+      u->rate_getinfo = existing_user->rate_getinfo;
+      u->rate_downloads = existing_user->rate_downloads;
+      u->rate_psresults_in = existing_user->rate_psresults_in;
+      u->rate_psresults_out = existing_user->rate_psresults_out;
+
+      /* restore the tthlist */
+      free (u->tthlist);
+      u->tthlist = existing_user->tthlist;
+      existing_user->tthlist = NULL;
+
+      /* queue the old userentry for deletion */
+      existing_user->joinstamp = 0;
+      hash_deluser (&cachehashlist, &existing_user->hash);
+
+      nmdc_stats.logincached++;
     }
 
     DPRINTF (" - User %s has %s shared and is %s\n", u->nick, format_size (u->share),
@@ -672,7 +699,9 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     hash_adduser (&hashlist, u);
 
     /* send it to the users */
-    cache_queue (cache.myinfo, u, u->MyINFO);
+    if ((!existing_user) || (existing_user->share != u->share)) {
+      cache_queue (cache.myinfo, u, u->MyINFO);
+    };
 
     /* ops get the full tag immediately -- it means the ops get all MYINFOs double though */
     cache_queue (cache.myinfoupdateop, u, b);
@@ -2183,6 +2212,8 @@ void proto_nmdc_flush_cache ()
 
   DPRINTF
     ("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ end cache flush /////////////////////////////\n");
+
+  proto_nmdc_user_cachefree ();
 
   plugin_send_event (NULL, PLUGIN_EVENT_CACHEFLUSH, NULL);
 }

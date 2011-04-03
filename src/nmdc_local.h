@@ -28,6 +28,10 @@ extern ratelimiting_t rates;
 extern user_t *userlist;
 extern hashlist_t hashlist;
 
+extern user_t *   cachelist;
+extern user_t *   cachelist_last;
+extern hashlist_t cachehashlist;
+
 extern user_t *HubSec;
 
 extern unsigned int keylen;

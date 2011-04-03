@@ -68,6 +68,9 @@ int core_config_init ()
 
   config.ReconnectBantime = DEFAULT_RECONNECTBANTIME;
 
+  config.DelayedLogout = DEFAULT_DELAYEDLOGOUT;
+  // NI config.DelayedLogoutMax = DEFAULT_DELAYEDLOGOUTMAX;
+
   config_register ("NMDC.ListenPort",    CFG_ELEM_UINT,   &config.ListenPort,      "Port on which the hub will listen.");
   config_register ("NMDC.ListenAddress", CFG_ELEM_IP,     &config.ListenAddress,   "IP on which the hub will listen, set to 0.0.0.0 for all.");
   config_register ("NMDC.ExtraPorts",    CFG_ELEM_STRING, &config.NMDCExtraPorts,  "Extra NMDC ports to listen on.");
@@ -93,6 +96,9 @@ int core_config_init ()
   config_register ("hub.PasswdBantime",  CFG_ELEM_ULONG,  &config.PasswdBantime, "Length of automatic ban on too many retries (in seconds).");
 
   config_register ("hub.ReconnectBantime",  CFG_ELEM_ULONG,  &config.ReconnectBantime, "Users can only reconnect after this period (in seconds). This is counted from the previous login time, not logout.");
+
+  config_register ("hub.DelayedLogout",     CFG_ELEM_ULONG,  &config.DelayedLogout, "Users that go offline for shorter than this period do not appear to go offline. On rejoing they will get their rate counters back.");
+  // NI config_register ("hub.DelayedLogoutMax",  CFG_ELEM_ULONG,  &config.DelayedLogoutMax, "Users that go offline for shorter than this period do not appear to go offline. This is max number of users to remember\n");
 
   config_register ("hub.SysReportTarget", CFG_ELEM_STRING, &config.SysReportTarget, "The hub sends all error messages here.");
 

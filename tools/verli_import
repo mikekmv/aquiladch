@@ -29,7 +29,7 @@
 	}
 	fclose ($fp);
 
-	printf ("T regs 28160 5\nT vips 290305 4\nT ops 290319 3\nT cheefs 290383 2\nT Admins 290783 1\nT Owner 2147774431 0\n");
+	printf ("T regs 28160 5\nT vips 290305 4\nT ops 2911759 3\nT cheefs 2911823 2\nT admins 2912223 1\nT owner 2150395871 0\n");
 
 	$sql = mysql_connect ($db_host, $db_user, $db_pass);
 	mysql_select_db ($db_data, $sql);

@@ -97,7 +97,7 @@ void cpu_parse ()
   while (!feof (fp)) {
     fgets (buf, 1024, fp);
     if (!strncmp (buf, "model name", 10)) {
-      bf_printf (b, "CPU%.1d: %.*s\n", i, strlen (buf) - 14, buf + 13);
+      bf_printf (b, "CPU%.1d: %.*s\n", i++, strlen (buf) - 14, buf + 13);
     } else if (!strncmp (buf, "cpu MHz", 7)) {
       bf_printf (b, "     Clock: %.*s MHz ", strlen (buf) - 12, buf + 11);
     } else if (!strncmp (buf, "bogomips", 8)) {
@@ -460,6 +460,7 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " badmyinfo : %lu\n", nmdc_stats.badmyinfo);
   bf_printf (output, " preloginevent : %lu\n", nmdc_stats.preloginevent);
   bf_printf (output, " loginevent : %lu\n", nmdc_stats.loginevent);
+  bf_printf (output, " logincached : %lu\n", nmdc_stats.logincached);
   bf_printf (output, " chatoverflow : %lu\n", nmdc_stats.chatoverflow);
   bf_printf (output, " chatfakenick : %lu\n", nmdc_stats.chatfakenick);
   bf_printf (output, " chattoolong : %lu\n", nmdc_stats.chattoolong);

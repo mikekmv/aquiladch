@@ -146,6 +146,9 @@
 
 #define DEFAULT_RECONNECTBANTIME	120
 
+#define DEFAULT_DELAYEDLOGOUT		10
+#define DEFAULT_DELAYEDLOGOUTMAX	100
+
 /*
  * Fork storm prevention: minimum second delay between forks
  */

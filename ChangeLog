@@ -1,5 +1,10 @@
 This is the Aquila Changelog.
 
+0.1.10-pre3:
+	Added delayedlogout feature.
+	Default groups of ddhc_verli are now identical to those of aqpasswd.
+	Added ddch_import
+
 0.1.10-pre2:
 	Add cpuinfo in !statcpu
 	Don't build for windows if debug build.

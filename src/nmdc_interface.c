@@ -65,10 +65,12 @@ unsigned int researchmininterval, researchperiod, researchmaxcount;
 
 unsigned char *defaultbanmessage = NULL;
 
-/* users currently logged in */
 static user_t *freelist = NULL;
-
 hashlist_t hashlist;
+
+user_t *cachelist = NULL;
+user_t *cachelist_last = NULL;
+hashlist_t cachehashlist;
 
 /******************************************************************************\
 **                                                                            **
@@ -521,13 +523,61 @@ int proto_nmdc_user_free (user_t * user)
   };
 
   user->parent = NULL;
-  user->next = freelist;
-  user->prev = NULL;
-  freelist = user;
+  /* if the user was online, put him in the cachelist */
+  if (!(user->flags & NMDC_FLAG_WASONLINE)) {
+    user->next = freelist;
+    user->prev = NULL;
+    freelist = user;
+  } else {
+    user->next = cachelist;
+    if (user->next) {
+      user->next->prev = user;
+    } else {
+      cachelist_last = user;
+    }
+    user->prev = NULL;
+    cachelist = user;
+  }
 
   nmdc_stats.userpart++;
 
   return 0;
+}
+
+void proto_nmdc_user_cachefree ()
+{
+  buffer_t *buf;
+  user_t *u, *p;
+  time_t now;
+
+  time (&now);
+  now -= config.DelayedLogout;
+  for (u = cachelist_last; u && (u->joinstamp < now); u = p) {
+    p = u->prev;
+    if (p)
+      p->next = NULL;
+
+    /* a joinstamp of 0 means the user rejoined */
+    if (u->joinstamp) {
+      /* queue the quit message */
+      buf = bf_alloc (8 + NICKLENGTH);
+      bf_strcat (buf, "$Quit ");
+      bf_strcat (buf, u->nick);
+      cache_queue (cache.myinfo, u, buf);
+      bf_free (buf);
+
+      /* remove from hashlist */
+      hash_deluser (&cachehashlist, &u->hash);
+    }
+
+    /* put user in freelist */
+    u->next = freelist;
+    u->prev = NULL;
+    freelist = u;
+  }
+  if (!u)
+    cachelist = NULL;
+  cachelist_last = u;
 }
 
 user_t *proto_nmdc_user_find (unsigned char *nick)
@@ -537,7 +587,6 @@ user_t *proto_nmdc_user_find (unsigned char *nick)
 
 int proto_nmdc_user_disconnect (user_t * u)
 {
-  buffer_t *buf;
 
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
@@ -552,21 +601,15 @@ int proto_nmdc_user_disconnect (user_t * u)
     string_list_clear (&((nmdc_user_t *) u->pdata)->results.messages);
     string_list_clear (&((nmdc_user_t *) u->pdata)->privatemessages.messages);
 
-    buf = bf_alloc (8 + NICKLENGTH);
-
-    bf_strcat (buf, "$Quit ");
-    bf_strcat (buf, u->nick);
-
-    cache_queue (cache.myinfo, u, buf);
-
-    bf_free (buf);
+    u->flags |= NMDC_FLAG_WASONLINE;
 
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
     nicklistcache_deluser (u);
     hash_deluser (&hashlist, &u->hash);
+    hash_adduser (&cachehashlist, u);
   } else {
-    /* if the returned user has same nick, but differnt user pointer, this is legal */
+    /* if the returned user has same nick, but different user pointer, this is legal */
     ASSERT (u != hash_find_nick (&hashlist, u->nick, strlen (u->nick)));
   }
 
@@ -958,6 +1001,7 @@ int proto_nmdc_init ()
   /* further inits */
   memset (&hashlist, 0, sizeof (hashlist));
   hash_init (&hashlist);
+  hash_init (&cachehashlist);
   token_init ();
 
   memset (&nmdc_stats, 0, sizeof (nmdc_stats_t));

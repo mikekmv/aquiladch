@@ -40,6 +40,7 @@
 #define NMDC_FLAG_DELAYEDNICKLIST	0x00010000
 #define NMDC_FLAG_BOT			0x00020000
 #define NMDC_FLAG_CACHED		0x00040000
+#define NMDC_FLAG_WASONLINE		0x80000000
 
 typedef struct ratelimiting {
   leaky_bucket_type_t warnings;
@@ -81,6 +82,7 @@ typedef struct {
   unsigned long badmyinfo;
   unsigned long preloginevent;
   unsigned long loginevent;
+  unsigned long logincached;
   unsigned long chatoverflow;	/* when a user oversteps his chat allowence */
   unsigned long chatfakenick;	/* when a user fakes his source nick */
   unsigned long chattoolong;
