@@ -1,5 +1,6 @@
 
 Develstatus:
+	- support UserIP2 ?
 	- create some sort of external statistics support.
 	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files

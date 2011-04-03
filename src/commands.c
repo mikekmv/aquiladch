@@ -74,7 +74,7 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
   for (i = flagstart; i < argc; i++) {
     work = strdup (argv[i]);
 
-    name = strtok (work, ",");
+    name = strtok (work, ", ");
 
     while (name) {
       while (isspace (*name))
@@ -101,7 +101,7 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
       if (!flags[j].name)
 	bf_printf (buf, _("Unknown %s.\n"), argv[i]);
 
-      name = strtok (NULL, ",");
+      name = strtok (NULL, ", ");
     }
 
     free (work);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta28\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-06 17:13+0100\n"
+"POT-Creation-Date: 2006-12-08 22:51+0100\n"
 "PO-Revision-Date: 2006-12-02 10:13+0200\n"
 "Last-Translator: maksalaatikko <maksis@adrenaline-network.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -945,7 +945,7 @@ msgstr "Your account priviliges will not be awarded until you set a password."
 msgid "Another instance of you is connecting, bye!"
 msgstr "Another instance of you is connecting, bye!"
 
-#: src/nmdc_protocol.c:338 src/nmdc_protocol.c:485
+#: src/nmdc_protocol.c:338 src/nmdc_protocol.c:485 src/nmdc_protocol.c:591
 msgid "Reconnecting."
 msgstr "Reconnecting."
 
@@ -975,13 +975,9 @@ msgstr "<%s> Time remaining %s|"
 msgid "Banned."
 msgstr "Banned."
 
-#: src/nmdc_protocol.c:459
+#: src/nmdc_protocol.c:459 src/nmdc_protocol.c:462
 msgid "Bad password."
 msgstr "Bad password."
-
-#: src/nmdc_protocol.c:462
-msgid "Bad password"
-msgstr "Bad password"
 
 #: src/nmdc_protocol.c:468
 msgid "Password retry overflow."
@@ -994,10 +990,6 @@ msgid ""
 msgstr ""
 "Your account priviliges will not be awarded until you set a password. Use !"
 "passwd or !pwgen."
-
-#: src/nmdc_protocol.c:591
-msgid "Reconnecting"
-msgstr "Reconnecting"
 
 #: src/nmdc_protocol.c:613 src/nmdc_protocol.c:847
 msgid "WARNING: You should use a client that uses tags!"
@@ -1067,69 +1059,69 @@ msgstr "Your client uses IP %s for searching, while you have IP %s\n"
 msgid "Do not repeat searches within %d seconds."
 msgstr "Do not repeat searches within %d seconds."
 
-#: src/nmdc_protocol.c:1229 src/nmdc_protocol.c:1308
+#: src/nmdc_protocol.c:1228 src/nmdc_protocol.c:1307
 msgid "You are not allowed to download."
 msgstr "You are not allowed to download."
 
-#: src/nmdc_protocol.c:1256 src/nmdc_protocol.c:1348
+#: src/nmdc_protocol.c:1255 src/nmdc_protocol.c:1347
 #, c-format
 msgid "You cannot download from %s."
 msgstr "You cannot download from %s."
 
-#: src/nmdc_protocol.c:1277
+#: src/nmdc_protocol.c:1276
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr "Your client uses IP %s for downloading, while you have IP %s\n"
 
-#: src/nmdc_protocol.c:1379
+#: src/nmdc_protocol.c:1378
 msgid "You are not allowed to send private messages."
 msgstr "You are not allowed to send private messages."
 
-#: src/nmdc_protocol.c:1388
+#: src/nmdc_protocol.c:1387
 msgid "Don't send private messages so fast."
 msgstr "Don't send private messages so fast."
 
-#: src/nmdc_protocol.c:1418
+#: src/nmdc_protocol.c:1417
 msgid "Bad From: nick. No faking."
 msgstr "Bad From: nick. No faking."
 
-#: src/nmdc_protocol.c:1420
+#: src/nmdc_protocol.c:1419
 msgid "Attempted PM faking."
 msgstr "Attempted PM faking."
 
-#: src/nmdc_protocol.c:1439
+#: src/nmdc_protocol.c:1438
 msgid "Bad display nick. No faking."
 msgstr "Bad display nick. No faking."
 
-#: src/nmdc_protocol.c:1441
+#: src/nmdc_protocol.c:1440
 msgid "Attempted display nick faking"
 msgstr "Attempted display nick faking"
 
-#: src/nmdc_protocol.c:1455
+#: src/nmdc_protocol.c:1454
 msgid "Sorry, you can only send private messages to operators."
 msgstr "Sorry, you can only send private messages to operators."
 
-#: src/nmdc_protocol.c:1487
+#: src/nmdc_protocol.c:1486
 msgid "You are not allowed to redirect users."
 msgstr "You are not allowed to redirect users."
 
-#: src/nmdc_protocol.c:1567 src/nmdc_protocol.c:1624
+#: src/nmdc_protocol.c:1566 src/nmdc_protocol.c:1623
 msgid "Redirect refused.\n"
 msgstr "Redirect refused.\n"
 
-#: src/nmdc_protocol.c:1595
+#: src/nmdc_protocol.c:1594
 msgid "You are not allowed to kick users."
 msgstr "You are not allowed to kick users."
 
-#: src/nmdc_protocol.c:1619
+#: src/nmdc_protocol.c:1618
 msgid "You were kicked."
 msgstr "You were kicked."
 
-#: src/nmdc_protocol.c:1645
+#: src/nmdc_protocol.c:1644
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr "Think before you ask HubINFO and don't spam.\n"
 
-#: src/nmdc_protocol.c:1699
+#: src/nmdc_protocol.c:1698
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Userlist request denied. Maximum 1 reload per %ds."
@@ -1369,7 +1361,6 @@ msgstr ""
 "varoitus lähetetään rajoitukset ylittävälle käyttäjälle."
 
 #: src/nmdc_interface.c:1118
-#, fuzzy
 msgid ""
 "Refill of user warnings. This controls how many warning a user gets within "
 "the period."
@@ -1378,7 +1369,6 @@ msgstr ""
 "monta varoitusta käyttäjä saa tässä ajanjaksossa."
 
 #: src/nmdc_interface.c:1121
-#, fuzzy
 msgid ""
 "Burst of user warnings. This controls how many warnings a user that overstep "
 "limits can save up."
@@ -1395,7 +1385,6 @@ msgstr ""
 "lähetetään rajoitukset ylittävälle käyttäjälle."
 
 #: src/nmdc_interface.c:1128
-#, fuzzy
 msgid ""
 "Refill of user violations. This controls how many warning a user gets within "
 "the period."
@@ -1404,7 +1393,6 @@ msgstr ""
 "monta varoitusta käyttäjä saa tässä ajanjaksossa."
 
 #: src/nmdc_interface.c:1131
-#, fuzzy
 msgid ""
 "Burst of user violations. This controls how many violations a user that "
 "overstep limits can save up."
@@ -2148,18 +2136,16 @@ msgid "LUA: ERROR saving %s"
 msgstr "LUA: VIRHE tallentaessa %s"
 
 #: src/pi_lua.c:2226
-#, fuzzy
 msgid "Show lua stats."
-msgstr "Show cache stats. / Näyttää välimuistin tilastot"
+msgstr "Näyttää luan tilastot"
 
 #: src/pi_lua.c:2227
 msgid "Load a lua script."
-msgstr ""
+msgstr "Lataa lua-scripti"
 
 #: src/pi_lua.c:2228
-#, fuzzy
 msgid "Remove a lua script."
-msgstr "Poista keskusteluhuone."
+msgstr "Poista lua-scripti."
 
 #: src/pi_trigger.c:546
 #, c-format
@@ -3032,3 +3018,9 @@ msgstr ""
 #: src/core_config.c:120
 msgid "This is the number of IP address to remember."
 msgstr "Muistettavien IP-osotteiden määrä (suojaamaan hyökkäyksiltä)."
+
+#~ msgid "Bad password"
+#~ msgstr "Bad password"
+
+#~ msgid "Reconnecting"
+#~ msgstr "Reconnecting"

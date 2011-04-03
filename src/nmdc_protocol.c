@@ -459,7 +459,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       proto_nmdc_user_say (HubSec, output, bf_buffer (__ ("Bad password.")));
       bf_strcat (output, "$BadPass|");
       retval = server_write (u->parent, output);
-      server_disconnect_user (u->parent, __ ("Bad password"));
+      server_disconnect_user (u->parent, __ ("Bad password."));
       retval = -1;
       nmdc_stats.badpasswd++;
       /* check password guessing attempts */
@@ -588,7 +588,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	proto_nmdc_user_say_string (HubSec, output,
 				    __ ("Another instance of you is connecting, bye!"));
 	server_write (existing_user->parent, output);
-	server_disconnect_user (existing_user->parent, __ ("Reconnecting"));
+	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
       }
       existing_user = NULL;
     }
@@ -1190,8 +1190,7 @@ int proto_nmdc_state_online_getinfo (user_t * u, token_t * tkn, buffer_t * outpu
 
   do {
     /* check quota */
-    if ((u->supports & NMDC_SUPPORTS_NoGetINFO)
-	&& (!get_token (&rates.getinfo, &u->rate_getinfo, now.tv_sec)))
+    if (!get_token (&rates.getinfo, &u->rate_getinfo, now.tv_sec))
       break;
 
     c = tkn->argument;

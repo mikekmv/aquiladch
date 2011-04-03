@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-06 17:13+0100\n"
+"POT-Creation-Date: 2006-12-08 22:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -894,7 +894,7 @@ msgstr ""
 msgid "Another instance of you is connecting, bye!"
 msgstr ""
 
-#: src/nmdc_protocol.c:338 src/nmdc_protocol.c:485
+#: src/nmdc_protocol.c:338 src/nmdc_protocol.c:485 src/nmdc_protocol.c:591
 msgid "Reconnecting."
 msgstr ""
 
@@ -922,12 +922,8 @@ msgstr ""
 msgid "Banned."
 msgstr ""
 
-#: src/nmdc_protocol.c:459
+#: src/nmdc_protocol.c:459 src/nmdc_protocol.c:462
 msgid "Bad password."
-msgstr ""
-
-#: src/nmdc_protocol.c:462
-msgid "Bad password"
 msgstr ""
 
 #: src/nmdc_protocol.c:468
@@ -938,10 +934,6 @@ msgstr ""
 msgid ""
 "Your account priviliges will not be awarded until you set a password. Use !"
 "passwd or !pwgen."
-msgstr ""
-
-#: src/nmdc_protocol.c:591
-msgid "Reconnecting"
 msgstr ""
 
 #: src/nmdc_protocol.c:613 src/nmdc_protocol.c:847
@@ -1012,69 +1004,69 @@ msgstr ""
 msgid "Do not repeat searches within %d seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1229 src/nmdc_protocol.c:1308
+#: src/nmdc_protocol.c:1228 src/nmdc_protocol.c:1307
 msgid "You are not allowed to download."
 msgstr ""
 
-#: src/nmdc_protocol.c:1256 src/nmdc_protocol.c:1348
+#: src/nmdc_protocol.c:1255 src/nmdc_protocol.c:1347
 #, c-format
 msgid "You cannot download from %s."
 msgstr ""
 
-#: src/nmdc_protocol.c:1277
+#: src/nmdc_protocol.c:1276
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1379
+#: src/nmdc_protocol.c:1378
 msgid "You are not allowed to send private messages."
 msgstr ""
 
-#: src/nmdc_protocol.c:1388
+#: src/nmdc_protocol.c:1387
 msgid "Don't send private messages so fast."
 msgstr ""
 
-#: src/nmdc_protocol.c:1418
+#: src/nmdc_protocol.c:1417
 msgid "Bad From: nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1420
+#: src/nmdc_protocol.c:1419
 msgid "Attempted PM faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1439
+#: src/nmdc_protocol.c:1438
 msgid "Bad display nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1441
+#: src/nmdc_protocol.c:1440
 msgid "Attempted display nick faking"
 msgstr ""
 
-#: src/nmdc_protocol.c:1455
+#: src/nmdc_protocol.c:1454
 msgid "Sorry, you can only send private messages to operators."
 msgstr ""
 
-#: src/nmdc_protocol.c:1487
+#: src/nmdc_protocol.c:1486
 msgid "You are not allowed to redirect users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1567 src/nmdc_protocol.c:1624
+#: src/nmdc_protocol.c:1566 src/nmdc_protocol.c:1623
 msgid "Redirect refused.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1595
+#: src/nmdc_protocol.c:1594
 msgid "You are not allowed to kick users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1619
+#: src/nmdc_protocol.c:1618
 msgid "You were kicked."
 msgstr ""
 
-#: src/nmdc_protocol.c:1645
+#: src/nmdc_protocol.c:1644
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1699
+#: src/nmdc_protocol.c:1698
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr ""

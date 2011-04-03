@@ -42,6 +42,9 @@ int nicklistcache_adduser (user_t * u)
 
   cache.usercount++;
 
+  if (!(u->supports & NMDC_SUPPORTS_NoGetINFO))
+    u->rate_getinfo.tokens += cache.usercount;
+
   if (u->op) {
     cache.length_estimate_op += strlen (u->nick) + 2;
     cache.needrebuild = 1;
