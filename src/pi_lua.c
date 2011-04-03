@@ -296,6 +296,8 @@ int pi_lua_setconfig (lua_State * lua)
       lua_error (lua);
   }
 
+  plugin_user_event (NULL, PLUGIN_EVENT_CONFIG, elem);
+
   return 1;
 }
 

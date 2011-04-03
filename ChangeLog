@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	pi_lua ConfigSet now also sends EVENT_CONFIG
+	Fixed buf. Extended !statbuffer now uses CAP_CONFIG.
+	Added pi_configlock.c. config values in configlock.conf cannot
+		be changed.
 	Changed error handling in hub.c
 	Rights can now be seperated with , too. 
 		(example: != user.defaultrights chat,search,pmop,dl,tag)

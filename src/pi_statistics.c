@@ -611,7 +611,7 @@ int pi_statistics_init ()
   plugin_stats = plugin_register ("stats");
   plugin_request (plugin_stats, PLUGIN_EVENT_CACHEFLUSH, &pi_statistics_event_cacheflush);
 
-  command_register ("statbuffer", &pi_statistics_handler_statbuffer, CAP_ADMIN,
+  command_register ("statbuffer", &pi_statistics_handler_statbuffer, CAP_CONFIG,
 		    "Show buffer stats.");
   command_register ("statcache", &pi_statistics_handler_statcache, 0, "Show cache stats.");
   command_register ("statbw", &pi_statistics_handler_statbw, 0, "Show cache stats.");

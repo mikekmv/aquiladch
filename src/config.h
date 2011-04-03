@@ -32,13 +32,7 @@ typedef enum { CFG_ELEM_PTR,
   CFG_ELEM_BYTESIZE
 } config_type_t;
 
-typedef struct config_element {
-  struct config_element *next, *prev;
-  struct config_element *onext, *oprev;
-
-  unsigned char name[CONFIG_NAMELENGTH];
-  config_type_t type;
-  union {
+typedef union config_value {
     void **v_ptr;
     long *v_long;
     unsigned long *v_ulong;
@@ -49,7 +43,16 @@ typedef struct config_element {
     unsigned int *v_uint;
     double *v_double;
     unsigned char **v_string;
-  } val;
+  } config_value_t;
+
+
+typedef struct config_element {
+  struct config_element *next, *prev;
+  struct config_element *onext, *oprev;
+
+  unsigned char name[CONFIG_NAMELENGTH];
+  config_type_t type;
+  config_value_t val;
 
   const unsigned char *help;
 } config_element_t;
