@@ -402,12 +402,17 @@ unsigned long pi_user_handler_clientlist (plugin_user_t * user, buffer_t * outpu
 unsigned long pi_user_handler_clientunban (plugin_user_t * user, buffer_t * output, void *dummy,
 					   unsigned int argc, unsigned char **argv)
 {
-  if (argc < 2) {
-    bf_printf (output, "Usage: !%s <clientname>\n", argv[0]);
+  double min, max;
+
+  if (argc < 4) {
+    bf_printf (output, "Usage: !%s <clientname> <min> <max>\n", argv[0]);
     return 0;
   }
 
-  if (banlist_client_del_byclient (&clientbanlist, argv[1])) {
+  sscanf (argv[2], "%lf", &min);
+  sscanf (argv[3], "%lf", &max);
+
+  if (banlist_client_del_byclient (&clientbanlist, argv[1], min, max)) {
     bf_printf (output, "Client \"%s\" removed from banlist\n", argv[1]);
   } else {
     bf_printf (output, "Client \"%s\" not found in banlist\n", argv[1]);

@@ -38,7 +38,7 @@ typedef struct iplog_entry {
   dllist_entry_t dllist;
 
   unsigned char nick[NICKLENGTH];
-  unsigned long ip;
+  uint32_t ip;
   // unsigned long login; NA
   unsigned long logout;
 } iplog_entry_t;
@@ -50,6 +50,25 @@ unsigned int iplog_count = 0;
 unsigned int iplog_length = 0;
 
 dllist_entry_t iplog;
+
+unsigned int pi_iplog_find (unsigned char *nick, uint32_t * ip)
+{
+  iplog_entry_t *entry;
+
+  if (!nick || !*nick)
+    return 0;
+
+  if (!iplog_length)
+    return 0;
+
+  dllist_foreach (&iplog, entry) {
+    if (strncasecmp (nick, entry->nick, NICKLENGTH))
+      continue;
+    *ip = entry->ip;
+    return 1;
+  }
+  return 0;
+}
 
 unsigned long pi_iplog_event_logout (plugin_user_t * user, void *dummy, unsigned long event,
 				     buffer_t * token)

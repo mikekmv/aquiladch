@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.9-pre11-2]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.9]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/banlistclient.c])
@@ -167,14 +167,9 @@ if test "${ZLINE}" = "" ;
 then
 	unset ZLIB;
 else
-	AC_CHECK_LIB([z], [deflate], [ZLIB=-lz])
+	AC_CHECK_LIB([z], [deflate], [ZLIB=-lz], [unset ZLINE])
 fi
 AC_SUBST(ZLIB)
-
-if test "${ZLIB}" = "" ;
-then
-	unset ZLINE
-fi
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -190,6 +185,11 @@ fi
 if test "${ALLOW_POLL}" != "" ;
 then
 	AC_CHECK_HEADERS([sys/poll.h])
+fi
+
+if test "${ZLINE}" != "";
+then
+	AC_CHECK_HEADERS([zlib.h], [], [unset ZLINE])
 fi
 
 dnl if test "${ALLOW_LUA}" != "" ;

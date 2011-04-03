@@ -55,7 +55,7 @@ extern banlist_client_entry_t *banlist_client_add (banlist_client_t * list, unsi
 						   buffer_t * reason);
 
 extern unsigned int banlist_client_del (banlist_client_t * list, banlist_client_entry_t *);
-extern unsigned int banlist_client_del_byclient (banlist_client_t * list, unsigned char *client);
+extern unsigned int banlist_client_del_byclient (banlist_client_t * list, unsigned char *client, double min, double max);
 
 extern banlist_client_entry_t *banlist_client_find (banlist_client_t * list, unsigned char *client,
 						    double version);

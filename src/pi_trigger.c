@@ -286,7 +286,7 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
 
     trigger_verify (r->trigger);
     if (bf_used (r->trigger->text))
-      bf_printf (output, "%*s", bf_used (r->trigger->text), r->trigger->text->s);
+      bf_printf (output, "%.*s", bf_used (r->trigger->text), r->trigger->text->s);
     break;
   };
 
@@ -410,7 +410,7 @@ int trigger_save (unsigned char *file)
 	fprintf (fp, "%s\n", trigger->file);
 	break;
       case TRIGGER_TYPE_TEXT:
-	fprintf (fp, "%*s\n", (int) bf_used (trigger->text), trigger->text->s);
+	fprintf (fp, "%.*s\n", (int) bf_used (trigger->text), trigger->text->s);
 	break;
       case TRIGGER_TYPE_COMMAND:
 	break;
@@ -570,7 +570,7 @@ unsigned int trigger_show (buffer_t * buf, trigger_t * trigger)
 			trigger->name, trigger->file, trigger->usecnt);
       break;
     case TRIGGER_TYPE_TEXT:
-      return bf_printf (buf, "Trigger %s dumps text %*s (Hits %ld)\n",
+      return bf_printf (buf, "Trigger %s dumps text %.*s (Hits %ld)\n",
 			trigger->name, bf_used (trigger->text), trigger->text->s, trigger->usecnt);
       break;
   };

@@ -220,6 +220,8 @@ int accept_new_user (esocket_t * s)
 
 int server_write_credit (client_t * cl, buffer_t * b)
 {
+  if (!cl)
+    return 0;
   cl->credit += bf_size (b);
   return server_write (cl, b);
 }

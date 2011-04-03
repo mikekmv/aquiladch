@@ -1,6 +1,27 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	!ban kicks user again. (Thanks DZ, Bliss)
+	Fixed printing of hub.buffer*limit while setting. (Thanks Charmed)
+	Added uptime to hub greeting. (request Charmed)
+	Fix building on armv5b-unknown-linux-gnu (Thanks Malte1)
+	Fix debug build without zline. (thanks Malte1)
+	Fix $GetNickList reate warning. (Thanks DZ)
+	Fix ZLib detection bugs
+	Fixed bug in !pwgen (thanks Charmed)
+	Added CFG_ELEM_MEMSIZE to avoid weird problem. (Seems to be 
+		long long <--> long implicit conversion related).
+	Make the locking work on cygwin
+	Right nosrchlimit skips researches.
+	Fixed multiple entries per client in clientbanlist.
+	Added support for gentoo, ubuntu, debian, suse and fedora in aqdtinstall.
+	Added -v version cli option
+	Fix crash in server_write_credit (Thanks maksalaatikko)
+	aqdtinstall now creates aquila.pid too.
+	fixed bug in hub.c. bytesize configs are long long.
+	nicks for !ban and !banip are now looked for in iplog too.
+	Fixed some printf "%*s" bugs all over the place.
+	Fixed bug in pi_hublist registering.
 	Added configure check to see if epoll_wait is implemented.
 	Changed config type for hub.buffer* to BYTESIZE.
 	Changed the default timeouts for buffering and overflow.

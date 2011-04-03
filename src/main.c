@@ -77,19 +77,28 @@ void usage (unsigned char *name)
 {
   printf ("Usage: %s [-hd] [-p <pidfile>] [-c <config dir>]\n"
 	  "  -h : print this help\n"
+	  "  -v : print version\n"
 	  "  -d : detach (run as daemon)\n"
 	  "  -p : specify pidfile\n" "  -c : specify config directory\n", name);
 }
 
+void version ()
+{
+  printf (HUBSOFT_NAME " " VERSION "\n");
+}
+
 void parseargs (int argc, char **argv)
 {
-  char opt;
+  int opt;
 
-  while ((opt = getopt (argc, argv, "hdp:c:")) > 0) {
+  while ((opt = getopt (argc, argv, "hvdp:c:")) > 0) {
     switch (opt) {
       case '?':
       case 'h':
 	usage (argv[0]);
+	exit (0);
+      case 'v':
+	version ();
 	exit (0);
 	break;
       case 'd':
@@ -135,6 +144,8 @@ void daemonize ()
 
     /* close parent fds and send output to fds 0, 1 and 2 to bitbucket */
     i = open ("/dev/null", O_RDWR);
+    if (i < 0)
+      exit (1);
     dup (i);
     dup (i);			/* handle standart I/O */
   }
@@ -149,14 +160,30 @@ void daemonize ()
     perror ("lock: open");
     exit (1);
   }
-
+#ifndef __CYGWIN__
   /* lock the file */
   if (lockf (lockfd, F_TLOCK, 0) < 0) {
     perror ("lock: lockf");
     printf (HUBSOFT_NAME " is already running.\n");
     exit (0);
   }
+#else
+  /* lock the file */
+  {
+    struct flock lock;
 
+    lock.l_type = F_RDLCK;
+    lock.l_start = 0;
+    lock.l_whence = SEEK_SET;
+    lock.l_len = 0;
+
+    if (fcntl (lockfd, F_SETLK, &lock) < 0) {
+      perror ("lock: lockf");
+      printf (HUBSOFT_NAME " is already running.\n");
+      exit (0);
+    }
+  }
+#endif
   /* write to pid to lockfile */
   snprintf (pid, 16, "%d\n", getpid ());
   write (lockfd, pid, strlen (pid));

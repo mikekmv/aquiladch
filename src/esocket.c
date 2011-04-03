@@ -281,7 +281,7 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
   gettimeofday (&s->to, NULL);
 
   /* determine key */
-  key = (s->to.tv_sec * 1000) + (s->to.tv_usec / 1000) + timeout;
+  key = (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + timeout;
 
   /* create timeout */
   s->to.tv_sec += timeout / 1000;
@@ -680,7 +680,7 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
       return 0;
 
     if (s->resetvalid) {
-      unsigned long long key = (s->reset.tv_sec * 1000) + (s->reset.tv_usec / 1000);
+      unsigned long long key = (s->reset.tv_sec * 1000LL) + (s->reset.tv_usec / 1000LL);
 
       s->to = s->reset;
       s->resetvalid = 0;

@@ -49,7 +49,7 @@ unsigned long pi_chatlog_handler_chatlog (plugin_user_t * user, buffer_t * outpu
 
   bf_printf (output, "Chat History:\n");
   for (e = chatlog.first; e; e = e->next)
-    bf_printf (output, "%*s\n", bf_used (e->data), e->data->s);
+    bf_printf (output, "%.*s\n", bf_used (e->data), e->data->s);
 
   return 0;
 }

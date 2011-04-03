@@ -326,12 +326,14 @@ int nicklistcache_rebuild (struct timeval now)
 #endif
 
   BF_VERIFY (cache.infolist);
+  BF_VERIFY (cache.nicklist);
+  BF_VERIFY (cache.oplist);
+#ifdef ZLINES
   BF_VERIFY (cache.infolistzline);
   BF_VERIFY (cache.infolistzpipe);
-  BF_VERIFY (cache.nicklist);
   BF_VERIFY (cache.nicklistzline);
   BF_VERIFY (cache.nicklistzpipe);
-  BF_VERIFY (cache.oplist);
+#endif
 
   return 0;
 }
@@ -967,11 +969,18 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
  *  State INIT
  */
 
+/* define in main.c :S */
+extern struct timeval boottime;
+
 int proto_nmdc_state_init (user_t * u, token_t * tkn)
 {
   unsigned int i;
   int retval = 0;
   buffer_t *output;
+  struct timeval now;
+
+  gettimeofday (&now, NULL);
+  timersub (&now, &boottime, &now);
 
   output = bf_alloc (2048);
   output->s[0] = '\0';
@@ -986,8 +995,13 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
   bf_strncat (output, "]] Pk=Aquila|", 13);
   bf_strcat (output, "<");
   bf_strcat (output, HubSec->nick);
-  bf_strcat (output, "> This hub is running Aquila Version " AQUILA_VERSION ".|");
+  bf_strcat (output, "> This hub is running Aquila Version " AQUILA_VERSION " (Uptime ");
+  time_print (output, now.tv_sec);
+  bf_printf (output, ".%.3lu).|", now.tv_usec / 1000);
   retval = server_write (u->parent, output);
+
+  if (u->state == PROTO_STATE_DISCONNECTED)
+    return retval;
 
   u->state = PROTO_STATE_SENDLOCK;
   server_settimeout (u->parent, PROTO_TIMEOUT_SENDLOCK);
@@ -1518,6 +1532,9 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       u->rate_getnicklist.tokens = 1;
     }
 
+    if (u->state != PROTO_STATE_ONLINE)
+      break;
+
     /* send the login event */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGIN, u->MyINFO) != PLUGIN_RETVAL_CONTINUE) {
       proto_nmdc_user_redirect (u, bf_buffer ("Your login was refused."));
@@ -1760,38 +1777,40 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	for (c = tkn->argument; *c != ' '; c++);
 	c++;
 
-	for (e = u->searchlist.last; e; e = e->prev) {
-	  /* see if search is cached */
-	  if (!strcmp (e->data->s, c)) {
-	    /* was the search outside the minimum interval ? */
-	    if ((now.tv_sec - e->timestamp) < researchmininterval) {
-	      proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
-				    researchmininterval);
-	      /* no. restore search token and drop search */
-	      u->rate_search.tokens++;
-	      drop = 1;
-	      //DPRINTF ("Dropped research\n");
+	/* CAP_NOSRCHLIMIT avoids research option */
+	if (!(u->rights & CAP_NOSRCHLIMIT)) {
+	  for (e = u->searchlist.last; e; e = e->prev) {
+	    /* see if search is cached */
+	    if (!strcmp (e->data->s, c)) {
+	      /* was the search outside the minimum interval ? */
+	      if ((now.tv_sec - e->timestamp) < researchmininterval) {
+		proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
+				      researchmininterval);
+		/* no. restore search token and drop search */
+		u->rate_search.tokens++;
+		drop = 1;
+		//DPRINTF ("Dropped research\n");
+		break;
+	      }
+	      /* was it done within the re-search period ? */
+	      if (deadline < e->timestamp) {
+		//proto_nmdc_user_warn (u, &now, "Searches repeated within %u seconds are only send to users joined within that period.", researchperiod);
+		/* if so, only search recent users */
+		/* queue in re-searchqueue */
+		cache_queue (cache.aresearch, u, b);
+		if (u->active) {
+		  cache_queue (cache.presearch, u, b);
+		}
+		drop = 1;
+		//DPRINTF ("Doing RESEARCH\n");
+	      }
+	      searchlist_update (&u->searchlist, e);
 	      break;
 	    }
-	    /* was it done within the re-search period ? */
-	    if (deadline < e->timestamp) {
-	      //proto_nmdc_user_warn (u, &now, "Searches repeated within %u seconds are only send to users joined within that period.", researchperiod);
-	      /* if so, only search recent users */
-	      /* queue in re-searchqueue */
-	      cache_queue (cache.aresearch, u, b);
-	      if (u->active) {
-		cache_queue (cache.presearch, u, b);
-	      }
-	      drop = 1;
-	      //DPRINTF ("Doing RESEARCH\n");
-	    }
-	    searchlist_update (&u->searchlist, e);
-	    break;
 	  }
+	  if (drop)
+	    break;
 	}
-	if (drop)
-	  break;
-
 	/* if search wasn't cached, cache it */
 	if (!e) {
 	  //DPRINTF ("New Search\n");
@@ -1924,7 +1943,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
       /* check quota */
       if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec)) {
 	proto_nmdc_user_warn (u, &now, "Userlist request denied. Maximum 1 reload per %ds.",
-			      researchmininterval);
+			      rates.getnicklist.period);
 	break;
       }
 
@@ -2660,12 +2679,12 @@ void proto_nmdc_flush_cache ()
     zline (buf_active, cache.ZpipeSupporters ? &buf_zpipeactive : NULL,
 	   cache.ZlineSupporters ? &buf_zlineactive : NULL);
   }
-#endif
 
   BF_VERIFY (buf_zpipeactive);
   BF_VERIFY (buf_zlineactive);
   BF_VERIFY (buf_zpipepassive);
   BF_VERIFY (buf_zlinepassive);
+#endif
 
   if (mi)
     nmdc_stats.cache_myinfo += cache.myinfo.length + cache.myinfo.messages.count;
@@ -2833,7 +2852,7 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
     }
     bf_free (b);
     /* if parent is freed "buffers" is not longer valid */
-    if (!user->parent)
+    if (user->state == PROTO_STATE_DISCONNECTED)
       break;
   }
 

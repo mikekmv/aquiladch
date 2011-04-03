@@ -282,6 +282,17 @@ unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t 
   return 0;
 }
 
+unsigned int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip,
+			 unsigned long netmask, buffer_t * message, unsigned long period)
+{
+  struct timeval now;
+
+  gettimeofday (&now, NULL);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, ip, netmask, message,
+	       period ? now.tv_sec + period : 0);
+  return 0;
+}
+
 unsigned int plugin_unban_nick (unsigned char *nick)
 {
   banlist_del_bynick (&softbanlist, nick);

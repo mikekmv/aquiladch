@@ -51,9 +51,9 @@ typedef struct {
   unsigned char *KickBanRedirect;
   
   /* buffering settings */
-  unsigned long long BufferSoftLimit;
-  unsigned long long BufferHardLimit;
-  unsigned long long BufferTotalLimit;
+  unsigned long BufferSoftLimit;
+  unsigned long BufferHardLimit;
+  unsigned long BufferTotalLimit;
 
   unsigned long TimeoutBuffering;
   unsigned long TimeoutOverflow;

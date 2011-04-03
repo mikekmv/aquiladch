@@ -174,6 +174,7 @@ int config_save (unsigned char *filename)
 	break;
       case CFG_ELEM_ULONG:
       case CFG_ELEM_CAP:
+      case CFG_ELEM_MEMSIZE:
 	fprintf (fp, "%s %lu\n", elem->name, *elem->val.v_ulong);
 	break;
       case CFG_ELEM_BYTESIZE:
@@ -244,6 +245,7 @@ int config_load (unsigned char *filename)
 	break;
       case CFG_ELEM_ULONG:
       case CFG_ELEM_CAP:
+      case CFG_ELEM_MEMSIZE:
 	sscanf (c, "%lu", elem->val.v_ulong);
 	break;
       case CFG_ELEM_BYTESIZE:

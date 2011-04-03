@@ -47,6 +47,8 @@ unsigned int KickNoBanMayBan;
 
 struct timeval savetime;
 
+extern unsigned int pi_iplog_find (unsigned char *nick, uint32_t * ip);
+
 #ifndef HAVE_STRCASESTR
 
 #include <ctype.h>
@@ -561,6 +563,18 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
       bf_printf (output, ": %.*s", bf_used (buf), buf->s);
     }
     plugin_user_banip (user, target, buf, period);
+  } else if (pi_iplog_find (argv[1], &ip.s_addr)) {
+    netmask.s_addr = 0xFFFFFFFF;
+    bf_printf (output, "User %s offline, found in iplog\n", argv[1]);
+    plugin_ban_ip (user, ip.s_addr, 0xFFFFFFFF, buf, period);
+    if (!period) {
+      bf_printf (output, "IP Banning %s (ip %s) forever: %.*s.", argv[1], print_ip (ip, netmask),
+		 bf_used (buf), buf->s);
+    } else {
+      bf_printf (output, "IP Banning %s (ip %s) for ", argv[1], print_ip (ip, netmask));
+      time_print (output, period);
+      bf_printf (output, ": %.*s", bf_used (buf), buf->s);
+    }
   } else {
     if (parse_ip (argv[1], &ip, &netmask)) {
       plugin_ban_ip (user, ip.s_addr, netmask.s_addr, buf, period);
@@ -576,7 +590,6 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
       bf_printf (output, "User not found or IP address not valid: %s\n", argv[1]);
     }
   }
-
 
   bf_free (buf);
 
@@ -641,6 +654,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
   buffer_t *buf;
   plugin_user_t *target;
   struct in_addr ip;
+  unsigned char *nick;
 
   if (argc < 2) {
     bf_printf (output, "Usage: %s <nick> [<period>] <reason>", argv[0]);
@@ -658,22 +672,27 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
 
   target = plugin_user_find (argv[1]);
   if (!target) {
-    bf_printf (output, "User %s not found.\n", argv[1]);
-    goto leave;
+    if (!pi_iplog_find (argv[1], &ip.s_addr)) {
+      bf_printf (output, "User %s not found.\n", argv[1]);
+      goto leave;
+    }
+    nick = argv[1];
+    bf_printf (output, "User %s not online, found in iplog.\n", argv[1]);
+    plugin_ban (user, nick, ip.s_addr, 0xFFFFFFFF, buf, period);
+  } else {
+    ip.s_addr = target->ipaddress;
+    nick = target->nick;
+    plugin_user_ban (user, target, buf, period);
   }
 
-  ip.s_addr = target->ipaddress;
-
   if (!period) {
-    bf_printf (output, "Banning user %s (ip %s) forever: %.*s", target->nick, inet_ntoa (ip),
+    bf_printf (output, "Banning user %s (ip %s) forever: %.*s", nick, inet_ntoa (ip),
 	       bf_used (buf), buf->s);
   } else {
-    bf_printf (output, "Banning user %s (ip %s) for ", target->nick, inet_ntoa (ip));
+    bf_printf (output, "Banning user %s (ip %s) for ", nick, inet_ntoa (ip));
     time_print (output, period);
     bf_printf (output, ": %.*s", bf_used (buf), buf->s);
   }
-
-  plugin_user_ban (user, target, buf, period);
 
 leave:
   bf_free (buf);
@@ -1380,11 +1399,11 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
 
   if (target) {
     message = bf_alloc (1024);
-    bf_printf (message, "Your password was reset. It is now\n%*s\n", PASSWDLENGTH - 1, passwd);
+    bf_printf (message, "Your password was reset. It is now\n%.*s\n", PASSWDLENGTH, passwd);
     plugin_user_priv (NULL, target, NULL, message, 1);
     bf_free (message);
   } else {
-    bf_printf (output, "The password of %s was reset. It is now\n%*s\n", argv[1], PASSWDLENGTH - 1,
+    bf_printf (output, "The password of %s was reset. It is now\n%.*s\n", argv[1], PASSWDLENGTH,
 	       passwd);
   }
 
@@ -1458,6 +1477,9 @@ int printconfig (buffer_t * buf, config_element_t * elem)
 	ia.s_addr = *elem->val.v_ip;
 	bf_printf (buf, "%s %s\n", elem->name, inet_ntoa (ia));
       }
+      break;
+    case CFG_ELEM_MEMSIZE:
+      bf_printf (buf, "%s %s\n", elem->name, format_size (*elem->val.v_ulong));
       break;
     case CFG_ELEM_BYTESIZE:
       bf_printf (buf, "%s %s\n", elem->name, format_size (*elem->val.v_ulonglong));
@@ -1594,6 +1616,17 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	  break;
 	}
 	*elem->val.v_ip = ia.s_addr;
+      }
+      break;
+    case CFG_ELEM_MEMSIZE:
+      {
+	unsigned long long tmp = parse_size (argv[2]);
+
+	if (tmp > LONG_MAX) {
+	  bf_printf (output, "The maximum value for this element is %s\n", format_size (LONG_MAX));
+	  break;
+	}
+	*elem->val.v_ulong = tmp;
       }
       break;
     case CFG_ELEM_BYTESIZE:

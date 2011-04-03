@@ -28,6 +28,7 @@ typedef enum { CFG_ELEM_PTR,
   CFG_ELEM_DOUBLE,
   CFG_ELEM_STRING,
   CFG_ELEM_IP,
+  CFG_ELEM_MEMSIZE,
   CFG_ELEM_BYTESIZE
 } config_type_t;
 

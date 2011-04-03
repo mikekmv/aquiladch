@@ -31,7 +31,7 @@ banlist_client_entry_t *banlist_client_add (banlist_client_t * list, unsigned ch
   banlist_client_entry_t *b;
 
   /* delete any prior ban of this client */
-  banlist_client_del_byclient (list, client);
+  banlist_client_del_byclient (list, client, minVersion, maxVersion);
 
   /* alloc and clear new element */
   b = malloc (sizeof (banlist_client_entry_t));
@@ -68,13 +68,15 @@ unsigned int banlist_client_del (banlist_client_t * list, banlist_client_entry_t
   return 1;
 }
 
-unsigned int banlist_client_del_byclient (banlist_client_t * list, unsigned char *client)
+unsigned int banlist_client_del_byclient (banlist_client_t * list, unsigned char *client,
+					  double min, double max)
 {
   banlist_client_entry_t *e, *l;
 
   l = dllist_bucket (list, SuperFastHash (client, strlen (client)) & BANLIST_NICK_HASHMASK);
   dllist_foreach (l, e)
-    if (!strncmp (e->client, client, NICKLENGTH))
+    if ((!strncmp (e->client, client, NICKLENGTH)) && (e->minVersion == min)
+	&& (e->maxVersion == max))
     break;
 
   if (e == dllist_end (l))
@@ -91,19 +93,14 @@ banlist_client_entry_t *banlist_client_find (banlist_client_t * list, unsigned c
 
   l = dllist_bucket (list, SuperFastHash (client, strlen (client)) & BANLIST_NICK_HASHMASK);
   dllist_foreach (l, e)
-    if (!strncmp (e->client, client, NICKLENGTH))
+    if (!strncmp (e->client, client, NICKLENGTH)
+	&& ((version == 0) || ((version >= e->minVersion) && (version <= e->maxVersion))))
     break;
 
   if (e == dllist_end (l))
     return 0;
 
-  if (version == 0)
-    return e;
-
-  if ((version >= e->minVersion) && (version <= e->maxVersion))
-    return e;
-
-  return 0;
+  return e;
 }
 
 unsigned int banlist_client_cleanup (banlist_client_t * list)

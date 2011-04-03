@@ -137,6 +137,7 @@ extern unsigned int plugin_user_printf (plugin_user_t * user, const char *format
 extern unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message);
 extern unsigned int plugin_user_forcemove (plugin_user_t * user, unsigned char *destination,
 					   buffer_t * message);
+extern unsigned int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
 extern unsigned int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
 extern unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
 extern unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message, unsigned long period);

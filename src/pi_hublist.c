@@ -18,10 +18,11 @@
  *  Thanks to Tomas "ZeXx86" Jedrzejek (admin@infern0.tk) for example code.
  */
 
+#include "esocket.h"
+
 #include <unistd.h>
 #include <string.h>
 
-#include "esocket.h"
 #include "buffer.h"
 #include "config.h"
 #include "commands.h"
@@ -130,14 +131,22 @@ int pi_hublist_update (buffer_t * output, unsigned long flags)
       esocket_new (pi_hublist_handler, pi_hublist_es_type, AF_INET, SOCK_STREAM, 0,
 		   (unsigned long long) ctx);
 
+    if (!s) {
+      bf_printf (output, "Hublist update ERROR: %s: socket: %s\n", l, strerror (errno));
+      DPRINTF ("pi_hublist: socket: %.*s", (int) bf_used (output), output->s);
+      free (ctx->address);
+      free (ctx);
+      continue;
+    }
+
     /* connect */
     if ((result = esocket_connect (s, l, port)) != 0) {
       if (result > 0) {
 	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, gai_strerror (result));
-	DPRINTF ("pi_hublist: connect: %s", output->s);
+	DPRINTF ("pi_hublist: connect: %.*s", (int) bf_used (output), output->s);
       } else {
 	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, strerror (-result));
-	DPRINTF ("pi_hublist: connect: %s", output->s);
+	DPRINTF ("pi_hublist: connect: %.*s", (int) bf_used (output), output->s);
       }
       esocket_close (s);
       free (ctx->address);
@@ -169,7 +178,7 @@ int pi_hublist_handle_input (esocket_t * s)
   if (n <= 0) {
     bf_clear (buf);
     bf_printf (buf, "Hublist update ERROR: %s: read: %s\n", ctx->address, strerror (errno));
-    DPRINTF ("pi_hublist: read: %*s", (int) bf_used (buf), buf->s);
+    DPRINTF ("pi_hublist: read: %.*s", (int) bf_used (buf), buf->s);
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
       plugin_report (buf);
     goto leave;
@@ -181,7 +190,7 @@ int pi_hublist_handle_input (esocket_t * s)
   if (getsockname (s->socket, (struct sockaddr *) &local, &n)) {
     bf_clear (buf);
     bf_printf (buf, "Hublist update ERROR: %s: gethostname: %s\n", ctx->address, strerror (errno));
-    DPRINTF ("pi_hublist: read: %*s", (int) bf_used (buf), buf->s);
+    DPRINTF ("pi_hublist: read: %.*s", (int) bf_used (buf), buf->s);
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
       plugin_report (buf);
     goto leave;
@@ -199,7 +208,7 @@ int pi_hublist_handle_input (esocket_t * s)
   if (!t || (j >= PI_HUBLIST_BUFFER_SIZE)) {
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT)) {
       bf_clear (output);
-      bf_printf (output, "Hublist update ERROR: %s: illegal input %*s\n", (int) bf_used (buf),
+      bf_printf (output, "Hublist update ERROR: %s: illegal input %.*s\n", (int) bf_used (buf),
 		 buf->s);
       plugin_report (output);
     }
@@ -245,7 +254,7 @@ int pi_hublist_handle_input (esocket_t * s)
 	     *hubdesc->val.v_string ? *hubdesc->val.v_string : (unsigned char *) "",
 	     users_total, 0LL);
 
-  DPRINTF ("pi_hublist:  Send: %*s\n", (int) bf_used (output), output->s);
+  DPRINTF ("pi_hublist:  Send: %.*s\n", (int) bf_used (output), output->s);
 
   n = write (s->socket, output->s, bf_used (output));
   if (n < 0) {
@@ -253,7 +262,7 @@ int pi_hublist_handle_input (esocket_t * s)
     bf_printf (buf, "Hublist update ERROR: %s: write: %s\n", ctx->address, strerror (errno));
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
       plugin_report (buf);
-    DPRINTF ("pi_hublist: write: %*s", (int) bf_used (buf), buf->s);
+    DPRINTF ("pi_hublist: write: %.*s", (int) bf_used (buf), buf->s);
   }
 
   bf_free (output);
@@ -293,7 +302,7 @@ int pi_hublist_handle_error (esocket_t * s)
   bf_printf (buf, "Hublist update ERROR: %s: %s.\n", ctx->address, strerror (s->error));
   if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
     plugin_report (buf);
-  DPRINTF ("pi_hublist: error: %*s", (int) bf_used (buf), buf->s);
+  DPRINTF ("pi_hublist: error: %.*s", (int) bf_used (buf), buf->s);
 
   free (ctx->address);
   free (ctx);
@@ -313,7 +322,7 @@ int pi_hublist_handle_timeout (esocket_t * s)
   bf_printf (buf, "Hublist update ERROR: %s: Timed out.\n", ctx->address);
   if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
     plugin_report (buf);
-  DPRINTF ("pi_hublist: timeout: %*s", (int) bf_used (buf), buf->s);
+  DPRINTF ("pi_hublist: timeout: %.*s", (int) bf_used (buf), buf->s);
 
   free (ctx->address);
   free (ctx);

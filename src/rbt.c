@@ -3,130 +3,132 @@
 /*
  * from http://www.cs.auckland.ac.nz/software/AlgAnim/niemann/s_man.htm
  * Source code, when part of a software project, may be used freely without reference to the author
- */ 
-  
+ */
+
 #define compLT(a,b) (a < b)
 #define compEQ(a,b) (a == b)
-  
-#define NIL &sentinel           /* all leafs are sentinels */
-  rbt_t sentinel = {
-NIL, NIL, 0, BLACK, 0};
+
+#define NIL &sentinel		/* all leafs are sentinels */
+rbt_t sentinel = {
+  NIL, NIL, 0, BLACK, 0
+};
 void rotateLeft (rbt_t ** root, rbt_t * x)
 {
-  
+
    /**************************
     *  rotate node x to left *
-    **************************/ 
-    rbt_t * y = x->right;
-  
-    /* establish x->right link */ 
-    x->right = y->left;
+    **************************/
+  rbt_t *y = x->right;
+
+  /* establish x->right link */
+  x->right = y->left;
   if (y->left != NIL)
     y->left->parent = x;
-  
-    /* establish y->parent link */ 
-    if (y != NIL)
+
+  /* establish y->parent link */
+  if (y != NIL)
     y->parent = x->parent;
   if (x->parent) {
     if (x == x->parent->left)
       x->parent->left = y;
-    
+
     else
       x->parent->right = y;
   } else {
     *root = y;
   }
-  
-    /* link x and y */ 
-    y->left = x;
+
+  /* link x and y */
+  y->left = x;
   if (x != NIL)
     x->parent = y;
 }
 
 void rotateRight (rbt_t ** root, rbt_t * x)
 {
-  
+
    /****************************
     *  rotate node x to right  *
-    ****************************/ 
-    rbt_t * y = x->left;
-  
-    /* establish x->left link */ 
-    x->left = y->right;
+    ****************************/
+  rbt_t *y = x->left;
+
+  /* establish x->left link */
+  x->left = y->right;
   if (y->right != NIL)
     y->right->parent = x;
-  
-    /* establish y->parent link */ 
-    if (y != NIL)
+
+  /* establish y->parent link */
+  if (y != NIL)
     y->parent = x->parent;
   if (x->parent) {
     if (x == x->parent->right)
       x->parent->right = y;
-    
+
     else
       x->parent->left = y;
   } else {
     *root = y;
   }
-  
-    /* link x and y */ 
-    y->right = x;
+
+  /* link x and y */
+  y->right = x;
   if (x != NIL)
     x->parent = y;
 }
 
 void insertFixup (rbt_t ** root, rbt_t * x)
 {
-  
+
    /*************************************
     *  maintain Red-Black tree balance  *
     *  after inserting node x           *
-    *************************************/ 
-    
-    /* check Red-Black properties */ 
-    while (x != *root && x->parent->color == RED) {
-    
-      /* we have a violation */ 
-      if (x->parent == x->parent->parent->left) {
+    *************************************/
+
+  /* check Red-Black properties */
+  while (x != *root && x->parent->color == RED) {
+
+    /* we have a violation */
+    if (x->parent == x->parent->parent->left) {
       rbt_t *y = x->parent->parent->right;
 
       if (y->color == RED) {
-	
-	  /* uncle is RED */ 
-	  x->parent->color = BLACK;
+
+	/* uncle is RED */
+	x->parent->color = BLACK;
 	y->color = BLACK;
 	x->parent->parent->color = RED;
 	x = x->parent->parent;
       } else {
-	
-	  /* uncle is BLACK */ 
-	  if (x == x->parent->right) {
-	  
-	    /* make x a left child */ 
-	    x = x->parent;
+
+	/* uncle is BLACK */
+	if (x == x->parent->right) {
+
+	  /* make x a left child */
+	  x = x->parent;
 	  rotateLeft (root, x);
 	}
-	
-	  /* recolor and rotate */ 
-	  x->parent->color = BLACK;
+
+	/* recolor and rotate */
+	x->parent->color = BLACK;
 	x->parent->parent->color = RED;
 	rotateRight (root, x->parent->parent);
       }
     } else {
-      
-	/* mirror image of above code */ 
-	rbt_t * y = x->parent->parent->left;
+
+      /* mirror image of above code */
+      rbt_t *y = x->parent->parent->left;
+
       if (y->color == RED) {
-	
-	  /* uncle is RED */ 
-	  x->parent->color = BLACK;
+
+	/* uncle is RED */
+	x->parent->color = BLACK;
 	y->color = BLACK;
 	x->parent->parent->color = RED;
 	x = x->parent->parent;
       } else {
-	
-	  /* uncle is BLACK */ 
-	  if (x == x->parent->left) {
+
+	/* uncle is BLACK */
+	if (x == x->parent->left) {
 	  x = x->parent;
 	  rotateRight (root, x);
 	}
@@ -143,30 +145,30 @@ void insertNode (rbt_t ** root, rbt_t * new)
 {
   rbt_t *current, *parent;
 
-  
+
    /***********************************************
     *  allocate node for data and insert in tree  *
-    ***********************************************/ 
-    
-    /* find where node belongs */ 
-    current = *root;
+    ***********************************************/
+
+  /* find where node belongs */
+  current = *root;
   parent = 0;
   while (current != NIL) {
     parent = current;
     current = compLT (new->data, current->data) ? current->left : current->right;
   }
-  
-    /* setup new node */ 
-    new->parent = parent;
+
+  /* setup new node */
+  new->parent = parent;
   new->left = NIL;
   new->right = NIL;
   new->color = RED;
-  
-    /* insert node in tree */ 
-    if (parent) {
+
+  /* insert node in tree */
+  if (parent) {
     if (compLT (new->data, parent->data))
       parent->left = new;
-    
+
     else
       parent->right = new;
   } else {
@@ -177,12 +179,12 @@ void insertNode (rbt_t ** root, rbt_t * new)
 
 void deleteFixup (rbt_t ** root, rbt_t * x)
 {
-  
+
    /*************************************
     *  maintain Red-Black tree balance  *
     *  after deleting node x            *
-    *************************************/ 
-    while (x != *root && x->color == BLACK) {
+    *************************************/
+  while (x != *root && x->color == BLACK) {
     if (x == x->parent->left) {
       rbt_t *w = x->parent->right;
 
@@ -242,47 +244,47 @@ void deleteNode (rbt_t ** root, rbt_t * z)
 {
   rbt_t *x, *y;
 
-  
+
    /*****************************
     *  delete node z from tree  *
-    *****************************/ 
-    if (!z || z == NIL)
+    *****************************/
+  if (!z || z == NIL)
     return;
   if (z->left == NIL || z->right == NIL) {
-    
-      /* y has a NIL node as a child */ 
-      y = z;
+
+    /* y has a NIL node as a child */
+    y = z;
   } else {
-    
-      /* find tree successor with a NIL node as a child */ 
-      y = z->right;
+
+    /* find tree successor with a NIL node as a child */
+    y = z->right;
     while (y->left != NIL)
       y = y->left;
   }
-  
-    /* x is y's only child */ 
-    if (y->left != NIL)
+
+  /* x is y's only child */
+  if (y->left != NIL)
     x = y->left;
-  
+
   else
     x = y->right;
-  
-    /* remove y from the parent chain */ 
-    x->parent = y->parent;
+
+  /* remove y from the parent chain */
+  x->parent = y->parent;
   if (y->parent)
     if (y == y->parent->left)
       y->parent->left = x;
-  
+
     else
       y->parent->right = x;
-  
+
   else
     *root = x;
   if (y->color == BLACK)
     deleteFixup (root, x);
-  
-    /* replace z with y */ 
-    if (z != y) {
+
+  /* replace z with y */
+  if (z != y) {
     y->parent = z->parent;
     y->color = z->color;
     y->left = z->left;
@@ -324,5 +326,3 @@ void initRoot (rbt_t ** root)
     n = n->left;
   return n;
 }
-
-
