@@ -316,13 +316,15 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     }
 
     /* check for a reconnect ban */
+    gettimeofday (&now, NULL);
     if ((ban = banlist_find_bynick (&reconnectbanlist, u->nick))) {
       bf_printf (output, "<%s> Do not reconnect too fast, time remaining: ", HubSec->nick);
-      gettimeofday (&now, NULL);
       time_print (output, ban->expire - now.tv_sec);
       bf_strcat (output, "|");
       retval = server_write (u->parent, output);
       proto_nmdc_user_drop (u, NULL);
+      retval = -1;
+      break;
     }
 
     /* add a reconnect ban for the user to prevent quick relogin. */
@@ -376,7 +378,6 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
       if (ban->expire) {
-	gettimeofday (&now, NULL);
 	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
 	time_print (output, ban->expire - now.tv_sec);
 	bf_strcat (output, "|");
@@ -406,7 +407,6 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
       if (ban->expire) {
-	gettimeofday (&now, NULL);
 	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
 	time_print (output, ban->expire - now.tv_sec);
 	bf_strcat (output, "|");
