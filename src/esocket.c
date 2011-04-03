@@ -550,7 +550,6 @@ unsigned int esocket_close (esocket_t * s)
   esocket_update_state (s, SOCKSTATE_CLOSED);
   close (s->socket);
   s->socket = -1;
-  s->handler->n--;
 
   if (s->tovalid)
     esocket_deltimeout (s);
@@ -650,6 +649,7 @@ unsigned int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
   s->tovalid = 0;
 
 #ifndef USE_EPOLL
+#ifndef USE_POLL
   /* recalculate fd upperlimit for select */
   /* FIXME could be optimized */
   h->n = 0;
@@ -657,6 +657,7 @@ unsigned int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
     if (s->socket > h->n)
       h->n = s->socket;
   h->n += 1;
+#endif
 #endif
 
   return 1;
