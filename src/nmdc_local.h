@@ -79,6 +79,8 @@ extern int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * so
 extern int proto_nmdc_user_raw (user_t * target, buffer_t * message);
 extern int proto_nmdc_user_raw_all (buffer_t * message);
 
+extern int proto_nmdc_user_userip2 (user_t *target);
+
 extern void proto_nmdc_user_cachelist_add (user_t *user);
 extern void proto_nmdc_user_cachelist_invalidate (user_t *u);
 extern void proto_nmdc_user_cachelist_clear ();

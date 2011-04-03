@@ -18,8 +18,9 @@ CYGWIN_FTP = ftp://ftp.easynet.be/cygwin/release/
 
 ACLOCAL_AMFLAGS = -I m4
 
-commit:
+commit: 
 	make -C src indent
+	make -C po update-po
 	svn commit
 
 log:
@@ -27,6 +28,7 @@ log:
 
 commitlog:
 	make -C src indent
+	make -C po update-po
 	@svn diff ChangeLog 2>&1 | grep -e "^+" | grep -v -e "^++" | cut -c 2- | sed -r 's/^[\t ]*//' > CommitMessage
 	echo "Commit Message:"
 	@cat CommitMessage

@@ -337,7 +337,6 @@ int zline (buffer_t * input, buffer_t ** zpipe, buffer_t ** zline)
   stream.zfree = Z_NULL;
   stream.data_type = Z_TEXT;
 
-  memset (&stream, 0, sizeof (stream));
   deflateInit (&stream, Z_BEST_COMPRESSION);
 
   stream.next_in = input->s;

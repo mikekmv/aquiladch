@@ -474,6 +474,7 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
 
 int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message)
 {
+  int retval = 0;
   buffer_t *buf;
 
   if (target->state == PROTO_STATE_DISCONNECTED)
@@ -483,11 +484,11 @@ int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message
 
   proto_nmdc_user_say (u, buf, message);
 
-  server_write (target->parent, buf);
+  retval = server_write (target->parent, buf);
 
   bf_free (buf);
 
-  return 0;
+  return retval;
 }
 
 int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t * message)
@@ -526,6 +527,7 @@ leave:
 
 int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, buffer_t * message)
 {
+  int retval = 0;
   buffer_t *buf;
 
   if (target->state == PROTO_STATE_DISCONNECTED)
@@ -545,12 +547,12 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
     goto leave;
   }
 
-  server_write (target->parent, buf);
+  retval = server_write (target->parent, buf);
 
 leave:
   bf_free (buf);
 
-  return 0;
+  return retval;
 }
 
 int proto_nmdc_user_raw (user_t * target, buffer_t * message)
@@ -584,6 +586,27 @@ int proto_nmdc_user_raw_all (buffer_t * message)
   bf_free (buf);
 
   return 0;
+}
+
+int proto_nmdc_user_userip2 (user_t * target)
+{
+  int retval;
+  buffer_t *buf;
+  struct in_addr addr;
+
+  if (target->state == PROTO_STATE_DISCONNECTED)
+    return EINVAL;
+
+  buf = bf_alloc (128);
+
+  addr.s_addr = target->ipaddress;
+  bf_printf (buf, "$UserIP %s|", inet_ntoa (addr));
+
+  retval = server_write (target->parent, buf);
+
+  bf_free (buf);
+
+  return retval;
 }
 
 /******************************************************************************\
@@ -916,11 +939,11 @@ int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...)
   buffer_t *buf;
   va_list ap;
 
-  u = hash_find_nick (&hashlist, config.SysReportTarget, strlen (config.SysReportTarget));
-  if (!u)
+  if (!get_token (&rates.warnings, &rate_warnings, now->tv_sec))
     return 0;
 
-  if (!get_token (&rates.warnings, &rate_warnings, now->tv_sec))
+  u = hash_find_nick (&hashlist, config.SysReportTarget, strlen (config.SysReportTarget));
+  if (!u)
     return 0;
 
   buf = bf_alloc (10240);

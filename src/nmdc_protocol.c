@@ -200,7 +200,7 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 	    DPRINTF ("Unknown Support flag %.*s\n", (int) (l - k), k);
 	}
       }
-      bf_strcat (output, "$Supports NoGetINFO NoHello BotINFO"
+      bf_strcat (output, "$Supports NoGetINFO NoHello BotINFO UserIP2"
 #ifdef ZLINES
 		 " ZLine"
 #endif
@@ -697,6 +697,10 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 
     /* ops get the full tag immediately */
     cache_queue (cache.myinfoupdateop, u, b);
+
+    /* send user his IP address, if supported */
+    if (u->supports & NMDC_SUPPORTS_UserIP2)
+      proto_nmdc_user_userip2 (u);
 
     /* if this new user is an OP send an updated OpList */
     if (u->op)

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-10 19:00+0100\n"
+"POT-Creation-Date: 2006-12-11 16:35+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -1001,11 +1001,11 @@ msgstr ""
 "Uw account privileges zullen niet worden toegekend totdat uw wachtwoord is "
 "gezet.Gebruik !passwd or !pwgen."
 
-#: src/nmdc_protocol.c:613 src/nmdc_protocol.c:847
+#: src/nmdc_protocol.c:613 src/nmdc_protocol.c:851
 msgid "WARNING: You should use a client that uses tags!"
 msgstr "WAARSCHUWING: U zou een client moeten gebruiken die tags ondersteund!"
 
-#: src/nmdc_protocol.c:619 src/nmdc_protocol.c:856
+#: src/nmdc_protocol.c:619 src/nmdc_protocol.c:860
 msgid "This hub requires tags, please upgrade to a client that supports them."
 msgstr ""
 "Deze hub vereist tags, upgrade alstublief naar een client die tags "
@@ -1015,425 +1015,425 @@ msgstr ""
 msgid "Your login was refused, your MyINFO seems corrupt."
 msgstr "Uw login is geweigerd, uw MyINFO lijkt beschadigd."
 
-#: src/nmdc_protocol.c:642 src/nmdc_protocol.c:720
+#: src/nmdc_protocol.c:642 src/nmdc_protocol.c:724
 msgid "Your login was refused."
 msgstr "Uw login is geweigerd."
 
-#: src/nmdc_protocol.c:745
+#: src/nmdc_protocol.c:749
 msgid "You are not allowed to chat."
 msgstr "U hebt geen toestemming om te praten."
 
-#: src/nmdc_protocol.c:751
+#: src/nmdc_protocol.c:755
 msgid "Think before you talk and don't spam."
 msgstr "Denk voor je praat en spam niet."
 
-#: src/nmdc_protocol.c:759
+#: src/nmdc_protocol.c:763
 msgid "Your chat message was too long."
 msgstr "Uw bericht was te lang."
 
-#: src/nmdc_protocol.c:865
+#: src/nmdc_protocol.c:869
 msgid "Broken MyINFO, get lost."
 msgstr "Beschadigde MyINFO."
 
-#: src/nmdc_protocol.c:880
+#: src/nmdc_protocol.c:884
 msgid "Sorry, you no longer satisfy the necessary requirements for this hub."
 msgstr "Het spijt ons, u voldoet niet langen aan de vereisten voor deze hub."
 
-#: src/nmdc_protocol.c:964
+#: src/nmdc_protocol.c:968
 #, c-format
 msgid "Active searches are limited to %u every %u seconds."
 msgstr "Actief zoeken is gelimiteerd tot %u keer elke %u seconden."
 
-#: src/nmdc_protocol.c:967
+#: src/nmdc_protocol.c:971
 #, c-format
 msgid "Passive searches are limited to %u every %u seconds."
 msgstr "Passief zoeken is gelimiteerd tot %u keer elke %u seconden."
 
-#: src/nmdc_protocol.c:977
+#: src/nmdc_protocol.c:981
 msgid "Your search message is too long."
 msgstr "Uw bericht is te lang."
 
-#: src/nmdc_protocol.c:994
+#: src/nmdc_protocol.c:998
 msgid "You claim to be active. Passive search DENIED."
 msgstr "U beweerd actief te zijn. Passief zoeken GEWIJGERD."
 
-#: src/nmdc_protocol.c:1010
+#: src/nmdc_protocol.c:1014
 msgid "You claim to be passive. Active search DENIED."
 msgstr "U beweerd passief te zijn, Actief zoeken GEWIJGERD."
 
-#: src/nmdc_protocol.c:1029
+#: src/nmdc_protocol.c:1033
 #, c-format
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr "Uw client gebruikt IP %s om te zoeken, terwijl u IP %s gebruikt.\n"
 
-#: src/nmdc_protocol.c:1046
+#: src/nmdc_protocol.c:1050
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr "Dezelfde zoek bewerking niet herhalen binnen %d seconden."
 
-#: src/nmdc_protocol.c:1228 src/nmdc_protocol.c:1307
+#: src/nmdc_protocol.c:1232 src/nmdc_protocol.c:1311
 msgid "You are not allowed to download."
 msgstr "U hebt geen toestemming om te downloaden."
 
-#: src/nmdc_protocol.c:1255 src/nmdc_protocol.c:1347
+#: src/nmdc_protocol.c:1259 src/nmdc_protocol.c:1351
 #, c-format
 msgid "You cannot download from %s."
 msgstr "U kan niet downloaden van %s."
 
-#: src/nmdc_protocol.c:1276
+#: src/nmdc_protocol.c:1280
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr "Uw client gebruikt IP %s om te downloaden, terwijl u IP %s gebruikt.\n"
 
-#: src/nmdc_protocol.c:1378
+#: src/nmdc_protocol.c:1382
 msgid "You are not allowed to send private messages."
 msgstr "U hebt geen toestemming om privee berichten te sturen."
 
-#: src/nmdc_protocol.c:1387
+#: src/nmdc_protocol.c:1391
 msgid "Don't send private messages so fast."
 msgstr "Stuur niet zo snel privee berichten."
 
-#: src/nmdc_protocol.c:1417
+#: src/nmdc_protocol.c:1421
 msgid "Bad From: nick. No faking."
 msgstr "Slechte bron naam. Geen faking."
 
-#: src/nmdc_protocol.c:1419
+#: src/nmdc_protocol.c:1423
 msgid "Attempted PM faking."
 msgstr "PM faking poging."
 
-#: src/nmdc_protocol.c:1438
+#: src/nmdc_protocol.c:1442
 msgid "Bad display nick. No faking."
 msgstr "Slechte display naam. Geen faking."
 
-#: src/nmdc_protocol.c:1440
+#: src/nmdc_protocol.c:1444
 msgid "Attempted display nick faking"
 msgstr "Display naam vervalsing."
 
-#: src/nmdc_protocol.c:1454
+#: src/nmdc_protocol.c:1458
 msgid "Sorry, you can only send private messages to operators."
 msgstr "Het spijt ons, u kan alleen privee berichten sturen naar operators."
 
-#: src/nmdc_protocol.c:1486
+#: src/nmdc_protocol.c:1490
 msgid "You are not allowed to redirect users."
 msgstr "U hebt geen toestemming om gebruikers te redirected."
 
-#: src/nmdc_protocol.c:1566 src/nmdc_protocol.c:1623
+#: src/nmdc_protocol.c:1570 src/nmdc_protocol.c:1627
 msgid "Redirect refused.\n"
 msgstr "Redirect gewijgerd.\n"
 
-#: src/nmdc_protocol.c:1594
+#: src/nmdc_protocol.c:1598
 msgid "You are not allowed to kick users."
 msgstr "U hebt geen toestemming om gebruikers te kicken."
 
-#: src/nmdc_protocol.c:1618
+#: src/nmdc_protocol.c:1622
 msgid "You were kicked."
 msgstr "U werd gekickt."
 
-#: src/nmdc_protocol.c:1644
+#: src/nmdc_protocol.c:1648
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr "Denk voor u een HubINFO vraagt en spam niet.\n"
 
-#: src/nmdc_protocol.c:1698
+#: src/nmdc_protocol.c:1702
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Gebruikerslijst gewijgerd. Maximum 1 reload per %ds."
 
-#: src/nmdc_interface.c:852
+#: src/nmdc_interface.c:875
 #, c-format
 msgid "Rate Probation Violation (Last: %s)."
 msgstr ""
 
-#: src/nmdc_interface.c:856
+#: src/nmdc_interface.c:879
 #, c-format
 msgid "Rate Violation (Last: %s)."
 msgstr ""
 
-#: src/nmdc_interface.c:875
+#: src/nmdc_interface.c:898
 #, c-format
 msgid "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"
 msgstr ""
 
-#: src/nmdc_interface.c:898 src/nmdc_interface.c:928
+#: src/nmdc_interface.c:921 src/nmdc_interface.c:951
 msgid "WARNING: "
 msgstr ""
 
-#: src/nmdc_interface.c:1041
+#: src/nmdc_interface.c:1064
 msgid ""
 "Period of chat messages. This controls how often a user can send a chat "
 "message. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1044
+#: src/nmdc_interface.c:1067
 msgid ""
 "Burst of chat messages. This controls how many chat messages a user can "
 "'save up'. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1047
+#: src/nmdc_interface.c:1070
 msgid ""
 "Period of searches. This controls how often an active user can search. Keep "
 "this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1050
+#: src/nmdc_interface.c:1073
 msgid ""
 "Burst of searches. This controls how many searches an active user can 'save "
 "up'. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1053
+#: src/nmdc_interface.c:1076
 msgid ""
 "Period of searches. This controls how often a passive user can search. Keep "
 "this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1056
+#: src/nmdc_interface.c:1079
 msgid ""
 "Burst of searches. This controls how many searches a passive user can 'save "
 "up'. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1059
+#: src/nmdc_interface.c:1082
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send to everyone. Keep this very high."
 msgstr ""
 
-#: src/nmdc_interface.c:1062
+#: src/nmdc_interface.c:1085
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (everyone). Keep this at 1."
 msgstr ""
 
-#: src/nmdc_interface.c:1065
+#: src/nmdc_interface.c:1088
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send on to the ops only. Keep this very high."
 msgstr ""
 
-#: src/nmdc_interface.c:1068
+#: src/nmdc_interface.c:1091
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (OPs messages only). Keep this at 1."
 msgstr ""
 
-#: src/nmdc_interface.c:1071
+#: src/nmdc_interface.c:1094
 msgid ""
 "Period of nicklist requests. This controls how often a user can refresh his "
 "userlist. Keep this high."
 msgstr ""
 
-#: src/nmdc_interface.c:1074
+#: src/nmdc_interface.c:1097
 msgid ""
 "Burst of nicklist requests. This controls how many userlist refreshes a user "
 "can 'save up'. Keep this at 1."
 msgstr ""
 
-#: src/nmdc_interface.c:1077
+#: src/nmdc_interface.c:1100
 msgid ""
 "Period of getinfo requests. This controls how often a user can request info "
 "on a user. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1080
+#: src/nmdc_interface.c:1103
 msgid ""
 "Burst of getinfo requests. This controls how many getinfo requests a user "
 "can 'save up'."
 msgstr ""
 
-#: src/nmdc_interface.c:1083
+#: src/nmdc_interface.c:1106
 msgid ""
 "Period of downloads. This controls how often a user can initiate a download. "
 "Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1086
+#: src/nmdc_interface.c:1109
 msgid ""
 "Burst of downloads. This controls how many downloads a user can 'save up'. "
 "Keep this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1089
+#: src/nmdc_interface.c:1112
 msgid ""
 "Period of connects. This controls how often the connect counter is "
 "refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1092
+#: src/nmdc_interface.c:1115
 msgid ""
 "Burst of connects. This controls how many new user connects can be saved up "
 "in idle time. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1095
+#: src/nmdc_interface.c:1118
 msgid ""
 "Refill of connects. This controls how many new user connects are added each "
 "time the counter resets. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1099
+#: src/nmdc_interface.c:1122
 msgid ""
 "Period of passive search results. This controls how often the incoming "
 "passive search results counter is refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1102
+#: src/nmdc_interface.c:1125
 msgid ""
 "Burst of passive search results. This controls how many incoming passive "
 "search results can be saved up in idle time. Keep this equal to the search "
 "period."
 msgstr ""
 
-#: src/nmdc_interface.c:1105
+#: src/nmdc_interface.c:1128
 msgid ""
 "Refill of passive search results. This controls how many incoming passive "
 "search results are added each time the counter resets. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1109
+#: src/nmdc_interface.c:1132
 msgid ""
 "Period of passive search results. This controls how often the outgoing "
 "passive search results counter is refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1112
+#: src/nmdc_interface.c:1135
 msgid ""
 "Burst of passive search results. This controls how many outgoing passive "
 "search results can be saved up in idle time. Keep this reasonably high."
 msgstr ""
 
-#: src/nmdc_interface.c:1115
+#: src/nmdc_interface.c:1138
 msgid ""
 "Refill of passive search results. This controls how many outgoing passive "
 "search results are added each time the counter resets. Keep this reasonably "
 "high."
 msgstr ""
 
-#: src/nmdc_interface.c:1119
+#: src/nmdc_interface.c:1142
 msgid ""
 "Period of user warnings. This controls how often a warning is send to user "
 "that overstep limits."
 msgstr ""
 
-#: src/nmdc_interface.c:1122
+#: src/nmdc_interface.c:1145
 msgid ""
 "Refill of user warnings. This controls how many warning a user gets within "
 "the period."
 msgstr ""
 
-#: src/nmdc_interface.c:1125
+#: src/nmdc_interface.c:1148
 msgid ""
 "Burst of user warnings. This controls how many warnings a user that overstep "
 "limits can save up."
 msgstr ""
 
-#: src/nmdc_interface.c:1129
+#: src/nmdc_interface.c:1152
 msgid ""
 "Period of user violations. This controls how often a warning is send to user "
 "that overstep limits."
 msgstr ""
 
-#: src/nmdc_interface.c:1132
+#: src/nmdc_interface.c:1155
 msgid ""
 "Refill of user violations. This controls how many warning a user gets within "
 "the period."
 msgstr ""
 
-#: src/nmdc_interface.c:1135
+#: src/nmdc_interface.c:1158
 msgid ""
 "Burst of user violations. This controls how many violations a user that "
 "overstep limits can save up."
 msgstr ""
 
-#: src/nmdc_interface.c:1167
+#: src/nmdc_interface.c:1190
 msgid ""
 "Period of chat cache flush. This controls how often chat messages are sent "
 "to users. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1170
+#: src/nmdc_interface.c:1193
 msgid ""
 "Period of join cache flush. This controls how often users are notified of "
 "new joins."
 msgstr ""
 
-#: src/nmdc_interface.c:1173
+#: src/nmdc_interface.c:1196
 msgid ""
 "Period of update cache flush. This controls how often users are sent MyINFO "
 "updates. Keep this high."
 msgstr ""
 
-#: src/nmdc_interface.c:1176
+#: src/nmdc_interface.c:1199
 msgid ""
 "Period of operator update cache flush. This controls how often operators are "
 "sent MyINFO updates. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1179
+#: src/nmdc_interface.c:1202
 msgid ""
 "Period of active search cache flush. This controls how often search messages "
 "are sent to active users."
 msgstr ""
 
-#: src/nmdc_interface.c:1182
+#: src/nmdc_interface.c:1205
 msgid ""
 "Period of passive search cache flush. This controls how often search "
 "messages are sent to passive users."
 msgstr ""
 
-#: src/nmdc_interface.c:1185
+#: src/nmdc_interface.c:1208
 msgid ""
 "Period of search results cache flush. This controls how often search results "
 "are sent to passive users."
 msgstr ""
 
-#: src/nmdc_interface.c:1188
+#: src/nmdc_interface.c:1211
 msgid ""
 "Period of private messages cache flush. This controls how often private "
 "messages are sent to users. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1192
+#: src/nmdc_interface.c:1215
 msgid ""
 "Period of active repeated search cache flush. This controls how often search "
 "messages are sent to active users."
 msgstr ""
 
-#: src/nmdc_interface.c:1196
+#: src/nmdc_interface.c:1219
 msgid ""
 "Period of passive repeated search cache flush. This controls how often "
 "search messages are sent to passive users."
 msgstr ""
 
-#: src/nmdc_interface.c:1208
+#: src/nmdc_interface.c:1231
 msgid "Allow multiple users from the same IP address."
 msgstr ""
 
-#: src/nmdc_interface.c:1210
+#: src/nmdc_interface.c:1233
 msgid "Maximum length of a chat message."
 msgstr ""
 
-#: src/nmdc_interface.c:1212
+#: src/nmdc_interface.c:1235
 msgid "Maximum length of a search message."
 msgstr ""
 
-#: src/nmdc_interface.c:1214
+#: src/nmdc_interface.c:1237
 msgid "Maximum length of a search result"
 msgstr ""
 
-#: src/nmdc_interface.c:1217
+#: src/nmdc_interface.c:1240
 msgid "Minimum time before a re-search is considered valid."
 msgstr ""
 
-#: src/nmdc_interface.c:1219
+#: src/nmdc_interface.c:1242
 msgid "Period during which a search is considered a re-search."
 msgstr ""
 
-#: src/nmdc_interface.c:1221
+#: src/nmdc_interface.c:1244
 msgid "Maximum number of searches cached."
 msgstr ""
 
-#: src/nmdc_interface.c:1224
+#: src/nmdc_interface.c:1247
 msgid "This message is send to all banned users when they try to join."
 msgstr ""
 

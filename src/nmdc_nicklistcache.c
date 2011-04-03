@@ -204,6 +204,7 @@ int nicklistcache_rebuild (struct timeval now)
 
 int nicklistcache_sendnicklist (user_t * target)
 {
+  buffer_t *b;
 
   if ((now.tv_sec - cache.lastrebuild) > PROTOCOL_REBUILD_PERIOD)
     cache.needrebuild = 1;
@@ -247,7 +248,9 @@ int nicklistcache_sendnicklist (user_t * target)
 #else
     server_write_credit (target->parent, cache.infolist);
 #endif
-    server_write_credit (target->parent, cache.infolistupdate);
+    b = bf_copy (cache.infolistupdate, 0);
+    server_write_credit (target->parent, b);
+    bf_free (b);
   } else {
     server_write_credit (target->parent, cache.hellolist);
   }
