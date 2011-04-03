@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta28\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-21 03:26+0100\n"
+"POT-Creation-Date: 2006-12-24 13:18+0100\n"
 "PO-Revision-Date: 2006-12-02 10:13+0200\n"
 "Last-Translator: maksalaatikko <maksis@adrenaline-network.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -949,7 +949,7 @@ msgstr "Tuntematon %s.\n"
 msgid "No help available."
 msgstr "Apua ei saatavilla."
 
-#: src/commands.c:309
+#: src/commands.c:310
 #, c-format
 msgid "Command not found: %s\n"
 msgstr "Command not found: %s\n"

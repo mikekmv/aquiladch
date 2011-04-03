@@ -202,7 +202,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
   buffer_t *local;
   unsigned char *c, t, *d;
   unsigned int argc = 0;
-  unsigned char *argv[COMMAND_MAX_ARGS];
+  unsigned char *argv[COMMAND_MAX_ARGS + 1];
   command_t *cmd;
   command_t *list;
 
@@ -228,10 +228,10 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
 
   /*  switch to local buffer copy so we can modify it. */
   local = bf_alloc (bf_used (token) + 1);
-  local->e = '\0';
-  d = local->s + (c - token->s);
+  *local->e = '\0';
+  d = local->s;
 
-  while (*c && (argc < (COMMAND_MAX_ARGS - 2))) {
+  while (*c && (argc < (COMMAND_MAX_ARGS - 1))) {
     argv[argc] = d;
     /* if argument starts with a ' or a " include everything until next matching quote. */
     if ((*c == '\'') || (*c == '\"')) {
@@ -268,17 +268,18 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
 
     argc++;
   }
+  local->e = d;
 
   if (!argc)
     goto leave;
 
   /* string wasn't completely parsed, but we are running out of argv spaces. all the rest in one argument. */
-  if (*c && (argc == (COMMAND_MAX_ARGS - 2))) {
+  if (*c && (argc == (COMMAND_MAX_ARGS - 1))) {
     argv[argc++] = d;
-    strncpy (d, c, bf_unused (local));
+    bf_strcat (local, c);
   }
 
-  for (i = argc; i < COMMAND_MAX_ARGS; i++)
+  for (i = argc; i <= COMMAND_MAX_ARGS; i++)
     argv[i] = NULL;
 
   /* look up command */
