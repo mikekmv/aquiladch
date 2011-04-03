@@ -1,5 +1,8 @@
 This is the Aquila Changelog.
 
+0.1.9-2:
+	Fixing defaults.
+
 0.1.9:
 	!ban kicks user again. (Thanks DZ, Bliss)
 	Fixed printing of hub.buffer*limit while setting. (Thanks Charmed)
