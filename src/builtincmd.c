@@ -1310,6 +1310,10 @@ unsigned long handler_usergroup (plugin_user_t * user, buffer_t * output, void *
   }
 
   if (!(user->rights & CAP_OWNER)) {
+    if (account->classp->rights & ~user->rights) {
+      bf_printf (output, "You are not allowed to remove a user from this group.\n");
+      return 0;
+    }
     if (group->rights & ~user->rights) {
       bf_printf (output, "You are not allowed to assign a user to this group.\n");
       return 0;

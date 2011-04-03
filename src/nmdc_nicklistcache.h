@@ -1,5 +1,3 @@
-#ifndef _NMDC_NICKLISTCACHE_H_
-#define _NMDC_NICKLISTCACHE_H_
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
@@ -18,6 +16,8 @@
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
  */
+#ifndef _NMDC_NICKLISTCACHE_H_
+#define _NMDC_NICKLISTCACHE_H_
 
 /* define extra size of nicklist infobuffer. when this extra space is full, 
  * nicklist is rebuild. keep this relatively small to reduce bw overhead.
