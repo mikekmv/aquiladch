@@ -29,6 +29,7 @@
 #include "plugin.h"
 #include "config.h"
 #include "commands.h"
+#include "utils.h"
 
 #define TRIGGER_RELOAD_PERIOD   10
 
@@ -205,7 +206,7 @@ trigger_t *trigger_create (unsigned char *name, unsigned long type, unsigned cha
       /* ok... we will know if we have permission later... */
       break;
     case TRIGGER_TYPE_TEXT:
-      trigger->text = bf_alloc (strlen (arg));
+      trigger->text = bf_alloc (strlen (arg) + 1);
       bf_strcat (trigger->text, arg);
       break;
   }
@@ -410,7 +411,12 @@ int trigger_save (unsigned char *file)
 	fprintf (fp, "%s\n", trigger->file);
 	break;
       case TRIGGER_TYPE_TEXT:
-	fprintf (fp, "%.*s\n", (int) bf_used (trigger->text), trigger->text->s);
+	{
+	  unsigned char *out = string_escape (trigger->text->s);
+
+	  fprintf (fp, "%s\n", out);
+	  free (out);
+	}
 	break;
       case TRIGGER_TYPE_COMMAND:
 	break;
@@ -458,11 +464,17 @@ int trigger_load (unsigned char *file)
 
     switch (buffer[0]) {
       case 't':
-	sscanf (buffer, "trigger %s %lu %lu %n", name, &type, &flags, &offset);
-	if ((trigger = trigger_find (name)))
-	  trigger_delete (trigger);
-	trigger = trigger_create (name, type, buffer + offset);
-	break;
+	{
+	  unsigned char *out;
+
+	  sscanf (buffer, "trigger %s %lu %lu %n", name, &type, &flags, &offset);
+	  if ((trigger = trigger_find (name)))
+	    trigger_delete (trigger);
+	  out = string_unescape (buffer + offset);
+	  trigger = trigger_create (name, type, out);
+	  free (out);
+	  break;
+	}
       case 'r':
 	sscanf (buffer, "rule %s %lu ", name, &type);
 	trigger = trigger_find (name);

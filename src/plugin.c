@@ -633,6 +633,7 @@ plugin_user_t *plugin_robot_add (unsigned char *name, unsigned char *description
   plugin_private_t *priv;
 
   u = nmdc_proto.robot_add (name, description);
+  u->rights |= CAP_KEY;
   plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
 
   priv = ((plugin_private_t *) u->plugin_priv);

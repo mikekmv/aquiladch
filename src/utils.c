@@ -199,3 +199,58 @@ leave:
   free (work);
   return retval;
 }
+unsigned char *string_escape (unsigned char *in)
+{
+  unsigned char *c;
+  unsigned char *out;
+
+  if (!in)
+    return NULL;
+
+  out = malloc (strlen (in) * 2 + 2);
+  for (c = out; *in; in++) {
+    switch (*in) {
+      case '\\':
+	*c++ = '\\';
+	*c++ = '\\';
+	break;
+      case '\n':
+	*c++ = '\\';
+	*c++ = 'n';
+	break;
+      default:
+	*c++ = *in;
+    }
+  }
+  *c++ = '\0';
+
+  return out;
+}
+
+unsigned char *string_unescape (unsigned char *in)
+{
+  unsigned char *c;
+  unsigned char *out;
+
+  out = malloc (strlen (in) + 1);
+
+  for (c = out; *in; in++) {
+    switch (*in) {
+      case '\\':
+	++in;
+	switch (*in) {
+	  case 'n':
+	    *c++ = '\n';
+	    break;
+	  default:
+	    *c++ = *in;
+	}
+	break;
+      default:
+	*c++ = *in;
+    }
+  }
+  *c = '\0';
+
+  return out;
+}

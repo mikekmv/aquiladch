@@ -1380,7 +1380,7 @@ unsigned long pi_lua_robot_event_handler (plugin_user_t * user, void *dummy,
   lua_pushstring (ctx->l, pi_lua_eventnames[event]);
 
   /* call funtion. */
-  result = lua_pcall (ctx->l, 2, 1, 0);
+  result = lua_pcall (ctx->l, 3, 1, 0);
   if (result) {
     unsigned char *error = (unsigned char *) luaL_checkstring (ctx->l, 1);
     buffer_t *buf;

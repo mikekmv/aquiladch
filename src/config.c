@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include "hash.h"
 #include "cap.h"
+#include "utils.h"
 
 #include "../config.h"
 #include <sys/socket.h>
@@ -191,8 +192,13 @@ int config_save (unsigned char *filename)
 	fprintf (fp, "%s %lf\n", elem->name, *elem->val.v_double);
 	break;
       case CFG_ELEM_STRING:
-	fprintf (fp, "%s \"%s\"\n", elem->name,
-		 *elem->val.v_string ? *elem->val.v_string : (unsigned char *) "");
+	{
+	  unsigned char *out = string_escape (*elem->val.v_string);
+
+	  fprintf (fp, "%s \"%s\"\n", elem->name, out ? out : (unsigned char *) "");
+	  if (out)
+	    free (out);
+	}
 	break;
       case CFG_ELEM_IP:
 	{
@@ -271,7 +277,7 @@ int config_load (unsigned char *filename)
 	  c[l - 1] = '\0';
 	  c++;
 	};
-	*elem->val.v_string = strdup (c);
+	*elem->val.v_string = string_unescape (c);
 	break;
       case CFG_ELEM_IP:
 	{

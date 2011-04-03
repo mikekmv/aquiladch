@@ -93,8 +93,8 @@ int core_config_init ()
   config_register ("hub.BufferHardLimit",     CFG_ELEM_MEMSIZE,  &config.BufferHardLimit, "If a user has more data buffered than this setting, no more will be allowed.");
   config_register ("hub.BufferTotalLimit",     CFG_ELEM_MEMSIZE,  &config.BufferTotalLimit, "If the hub is buffering more than this setting, no more will be allowed.");
 
-  config_register ("hub.TimeoutBuffering",     CFG_ELEM_ULONG,  &config.TimeoutBuffering, "If the hub start buffering for a user, after this many seconds, the user will be disconnected.");
-  config_register ("hub.TimeoutOverflow",      CFG_ELEM_ULONG,  &config.TimeoutOverflow,  "If the hub start buffering for a user and the amount exceed hub.BufferSoftLimit, he wil be disconnected after this many seconds.");
+  config_register ("hub.TimeoutBuffering",     CFG_ELEM_ULONG,  &config.TimeoutBuffering, "If the hub start buffering for a user, after this many milliseconds, the user will be disconnected.");
+  config_register ("hub.TimeoutOverflow",      CFG_ELEM_ULONG,  &config.TimeoutOverflow,  "If the hub start buffering for a user and the amount exceed hub.BufferSoftLimit, he wil be disconnected after this many milliseconds.");
 
   config_register ("user.defaultrights",CFG_ELEM_CAP,  &config.DefaultRights,      "These are the rights of an unregistered user.");
 

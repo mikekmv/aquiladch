@@ -130,7 +130,7 @@ void daemonize ()
     if (getppid () == 1)
       return;			/* already a daemon */
 
-    /* spawn daemon */
+    /* fork to guarantee we are not process group leader */
     i = fork ();
     if (i < 0)
       exit (1);			/* fork error */
@@ -139,6 +139,17 @@ void daemonize ()
 
     /* child (daemon) continues */
     setsid ();			/* obtain a new process group */
+
+    /* fork again so we become process group leader 
+       and cannot regain a controlling tty 
+     */
+    i = fork ();
+    if (i < 0)
+      exit (1);			/* fork error */
+    if (i > 0)
+      exit (0);			/* parent exits */
+
+    /* close all fds */
     for (i = getdtablesize (); i >= 0; --i)
       close (i);		/* close all descriptors */
 

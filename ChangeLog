@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre1:
+	Fork twice to get rid of controlling terminal for good in -d mode.
+	Added multiline support to config values and text triggers.
+	Bots have key by default.
 	Fixes default settings for hub.buffer*timeout
 	Make stuff compile on cygwin again.
 	Make banned users a seperate counter from forcemoves.
