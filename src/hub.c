@@ -127,6 +127,7 @@ int accept_new_user (esocket_t * s)
   struct sockaddr_in client_address;
   client_t *cl;
 
+  gettime ();
   memset (&client_address, 0, l = sizeof (client_address));
   r = accept (s->socket, (struct sockaddr *) &client_address, &l);
 
@@ -557,6 +558,8 @@ int server_setup (esocket_handler_t * h)
   /* set default timeout */
   h->toval.tv_sec = 1200;
 
+  iplist_init (&lastlist);
+
   return 0;
 }
 
@@ -569,7 +572,6 @@ int server_init ()
 
   core_config_init ();
 
-  iplist_init (&lastlist);
 
   return 0;
 }

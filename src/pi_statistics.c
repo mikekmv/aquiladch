@@ -427,6 +427,16 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
   return 0;
 }
 
+#include "iplist.h"
+extern iplist_t lastlist;
+unsigned long pi_statistics_handler_statconn (plugin_user_t * user, buffer_t * output, void *dummy,
+					      unsigned int argc, unsigned char **argv)
+{
+  bf_printf (output, "Total IPs remembered (roughly last %us): %lu\n", iplist_interval,
+	     lastlist.count);
+  return 0;
+}
+
 /* FIXME read this from proc.*/
 extern unsigned long buf_mem;
 extern unsigned long cachelist_count;
@@ -556,6 +566,7 @@ int pi_statistics_init ()
   command_register ("statnmdc", &pi_statistics_handler_statnmdc, 0,
 		    "Show nmdc protocol stats. Experts only.");
   command_register ("statmem", &pi_statistics_handler_statmem, 0, "Show memory usage stats.");
+  command_register ("statconn", &pi_statistics_handler_statconn, 0, "Show connection stats.");
   command_register ("uptime", &pi_statistics_handler_uptime, 0, "Show uptime.");
 
   return 0;

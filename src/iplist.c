@@ -51,8 +51,8 @@ int iplist_add (iplist_t * list, unsigned long ip)
     hb->last->next = entry;
   } else {
     hb->first = entry;
-    hb->last = entry;
   }
+  hb->last = entry;
 
   return 1;
 };
