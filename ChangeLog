@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Fixed warnings
+	Fixed memleak in proto_nmdc_state_init();
 	Now use correct keywords for gettext string parsing.
 	Added all nmdc_interface.c and core_config.c configs to gettext.
 	Added gettext supports on caps

@@ -1832,10 +1832,10 @@ int builtincmd_init ()
   command_register ("save",       &handler_save,       CAP_CONFIG,    _("Save all changes to file. WARNING: All previously saved settings will be lost!"));
   
   command_register ("passwd",     &handler_passwd,	0,            _("Change your password."));
-  command_register ("pwgen",      &handler_pwgen,	0,            _("Let " HUBSOFT_NAME " generate a random password."));
+  command_register ("pwgen",      &handler_pwgen,	0,            _("Let the hub generate a random password."));
 #ifdef DEBUG
-  command_register ("crash",      &handler_crash,	CAP_OWNER,    _("Let " HUBSOFT_NAME " CRASH!."));
-  command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let " HUBSOFT_NAME " CRASH!."));
+  command_register ("crash",      &handler_crash,	CAP_OWNER,    _("Let the hub CRASH!."));
+  command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let the hub CRASH!."));
 #endif
   gettimeofday (&savetime, NULL);
   

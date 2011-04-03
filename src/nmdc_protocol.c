@@ -102,17 +102,18 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
 	       time_print (ban->expire - now.tv_sec));
     retval = server_write (u->parent, output);
     proto_nmdc_user_drop (u, NULL);
-    return retval;
+    goto leave;
   }
 
   retval = server_write (u->parent, output);
 
   if (u->state == PROTO_STATE_DISCONNECTED)
-    return retval;
+    goto leave;
 
   u->state = PROTO_STATE_SENDLOCK;
   server_settimeout (u->parent, PROTO_TIMEOUT_SENDLOCK);
 
+leave:
   bf_free (output);
 
   return retval;
@@ -445,7 +446,6 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 
   if (tkn->type != TOKEN_MYPASS)
     return 0;
-
 
   output = bf_alloc (2048);
   output->s[0] = '\0';
@@ -872,9 +872,8 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_INFOUPDATE, b) != PLUGIN_RETVAL_CONTINUE) {
       nmdc_stats.myinfoevent++;
       proto_nmdc_user_redirect (u,
-				bf_buffer
-				(__
-				 ("Sorry, you no longer satisfy the necessary requirements for this hub.")));
+				bf_buffer (__
+					   ("Sorry, you no longer satisfy the necessary requirements for this hub.")));
       retval = -1;
       bf_free (new);
       break;
@@ -941,7 +940,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
   tth_t tth;
   tth_list_entry_t *e;
   unsigned char *c = NULL, *n;
-  unsigned long deadline;
+  time_t deadline;
   struct in_addr addr;
 
   deadline = now.tv_sec - researchperiod;
@@ -1672,12 +1671,11 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
 int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 {
   int retval = 0;
-
-  /* user protocol handling */
   buffer_t *output;
 
   output = bf_alloc (2048);
   output->s[0] = '\0';
+
   switch (tkn->type) {
     case TOKEN_CHAT:
       retval = proto_nmdc_state_online_chat (u, tkn, output, b);
@@ -1949,7 +1947,7 @@ void proto_nmdc_flush_cache ()
   unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0, ars = 0, prs = 0;
   unsigned long deadline;
 
-  unsigned long t, r;
+  unsigned long t;
 
   unsigned long l, asl, psl;
   buffer_t *buf_passive, *buf_active, *buf_exception;

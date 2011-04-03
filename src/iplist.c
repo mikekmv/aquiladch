@@ -33,7 +33,6 @@ int iplist_add (iplist_t * list, unsigned long ip)
 {
   iplisthashbucket_t *hb;
   iplistentry_t *entry;
-  time_t age;
 
   entry = list->freelist;
   if (!entry)
@@ -62,7 +61,6 @@ int iplist_find (iplist_t * list, unsigned long ip)
   iplisthashbucket_t *hb;
   iplistentry_t *entry, *prev, *next;
   time_t age;
-
 
   hb = &list->ht[one_at_a_time (ip) % IPLIST_HASHMASK];
   if (!hb)
@@ -110,9 +108,9 @@ int iplist_find (iplist_t * list, unsigned long ip)
   return 0;
 }
 
-int iplist_init (iplist_t * list)
+void iplist_init (iplist_t * list)
 {
-  int i = 0;
+  unsigned int i = 0;
   iplistentry_t *entry;
 
   memset (list, 0, sizeof (iplist_t));

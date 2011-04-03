@@ -43,7 +43,7 @@ typedef struct iplist {
 
 extern int iplist_add (iplist_t *list, unsigned long ip);
 extern int iplist_find (iplist_t *list, unsigned long ip);
-extern int iplist_init (iplist_t *list);
+extern void iplist_init (iplist_t *list);
 
 extern unsigned long iplist_interval;
 extern unsigned long iplist_size;
