@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta28\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-11 16:35+0100\n"
+"POT-Creation-Date: 2006-12-12 22:03+0100\n"
 "PO-Revision-Date: 2006-12-02 10:13+0200\n"
 "Last-Translator: maksalaatikko <maksis@adrenaline-network.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -16,87 +16,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/builtincmd.c:108
+#: src/builtincmd.c:109
 #, c-format
 msgid "Usage: %s <nick> <warning>"
 msgstr "Käyttö: %s <nick> <varoitus>"
 
-#: src/builtincmd.c:115 src/builtincmd.c:313 src/builtincmd.c:379
-#: src/builtincmd.c:433 src/builtincmd.c:479 src/builtincmd.c:683
-#: src/builtincmd.c:733 src/builtincmd.c:1214 src/builtincmd.c:1311
-#: src/builtincmd.c:1367 src/builtincmd.c:1372 src/builtincmd.c:1418
-#: src/builtincmd.c:1484
+#: src/builtincmd.c:116 src/builtincmd.c:314 src/builtincmd.c:380
+#: src/builtincmd.c:434 src/builtincmd.c:480 src/builtincmd.c:684
+#: src/builtincmd.c:734 src/builtincmd.c:1215 src/builtincmd.c:1312
+#: src/builtincmd.c:1368 src/builtincmd.c:1373 src/builtincmd.c:1419
+#: src/builtincmd.c:1485
 #, c-format
 msgid "User %s not found."
 msgstr "Käyttäjää %s ei löytynyt."
 
-#: src/builtincmd.c:122
+#: src/builtincmd.c:123
 #, c-format
 msgid "%s is WARNING you: "
 msgstr "%s is WARNING you: "
 
-#: src/builtincmd.c:154
+#: src/builtincmd.c:155
 msgid "Hub shutdown in progress."
 msgstr "Hub shutdown in progress. / Hubi sammutetaan."
 
-#: src/builtincmd.c:172
+#: src/builtincmd.c:173
 #, c-format
 msgid "This is %s Version %s"
 msgstr "This is %s Version %s"
 
-#: src/builtincmd.c:184
+#: src/builtincmd.c:185
 #, c-format
 msgid "Usage: %s <message>"
 msgstr "Käyttö: %s <viesti>"
 
-#: src/builtincmd.c:205
+#: src/builtincmd.c:206
 #, c-format
 msgid "Message sent to %lu users."
 msgstr "Viesti lähetetty %lu:lle käyttäjälle."
 
-#: src/builtincmd.c:221 src/builtincmd.c:300 src/builtincmd.c:365
+#: src/builtincmd.c:222 src/builtincmd.c:301 src/builtincmd.c:366
 #, c-format
 msgid "Usage: %s <nick> <reason>"
 msgstr "Käyttö: %s <nick> <syy>"
 
-#: src/builtincmd.c:228
+#: src/builtincmd.c:229
 msgid "Report could not be sent. Reporting is disabled."
 msgstr "Report could not be sent. Reporting is disabled."
 
-#: src/builtincmd.c:247
+#: src/builtincmd.c:248
 #, c-format
 msgid "User %s (%s) reports %s (%s): "
 msgstr "Käyttäjä %s (%s) ilmiantaa käyttäjän %s (%s): "
 
-#: src/builtincmd.c:249
+#: src/builtincmd.c:250
 #, c-format
 msgid "User %s (%s) reports %s (not logged in): "
 msgstr "Käyttäjä %s (%s) ilmiantaa käyttäjän %s (ei hubissa): "
 
-#: src/builtincmd.c:261
+#: src/builtincmd.c:262
 #, c-format
 msgid "Report could not be sent, %s not found."
 msgstr "Report could not be sent, %s not found."
 
-#: src/builtincmd.c:263
+#: src/builtincmd.c:264
 msgid "Report could not be sent, target not found."
 msgstr "Report could not be sent, target not found."
 
-#: src/builtincmd.c:272
+#: src/builtincmd.c:273
 msgid "Report sent."
 msgstr "Report sent."
 
-#: src/builtincmd.c:284
+#: src/builtincmd.c:285
 #, c-format
 msgid "Your IP is %s\n"
 msgstr "Your IP is %s\n"
 
-#: src/builtincmd.c:319
+#: src/builtincmd.c:320
 #, c-format
 msgid "Kicked user %s ( ip %s ) because: %.*s"
 msgstr "Potkittiin käyttäjä %s ( ip %s ), koska : %.*s"
 
-#: src/builtincmd.c:331 src/builtincmd.c:397
+#: src/builtincmd.c:332 src/builtincmd.c:398
 #, c-format
 msgid ""
 "\n"
@@ -105,7 +105,7 @@ msgstr ""
 "\n"
 "Bannitaan käyttäjä %s ajaksi\n"
 
-#: src/builtincmd.c:333 src/builtincmd.c:399
+#: src/builtincmd.c:334 src/builtincmd.c:400
 msgid ""
 "\n"
 "Banning user forever"
@@ -113,7 +113,7 @@ msgstr ""
 "\n"
 "Käyttäjä bannattu pysyvästi"
 
-#: src/builtincmd.c:338
+#: src/builtincmd.c:339
 #, c-format
 msgid ""
 "\n"
@@ -122,7 +122,7 @@ msgstr ""
 "\n"
 "Et voi bannata käyttäjiä pidemmäksi aikaa kuin %s kick-komennolla."
 
-#: src/builtincmd.c:342 src/builtincmd.c:407
+#: src/builtincmd.c:343 src/builtincmd.c:408
 msgid ""
 "\n"
 "Sorry, you cannot ban."
@@ -130,17 +130,17 @@ msgstr ""
 "\n"
 "Sinä et voi bannia."
 
-#: src/builtincmd.c:372
+#: src/builtincmd.c:373
 #, c-format
 msgid "You were dropped by %s because: "
 msgstr "You were dropped by %s because: "
 
-#: src/builtincmd.c:385
+#: src/builtincmd.c:386
 #, c-format
 msgid "Dropped user %s (ip %s) because: %.*s"
 msgstr "Pudotettiin käyttäjä %s (ip %s) ja syynä oli: %.*s"
 
-#: src/builtincmd.c:403
+#: src/builtincmd.c:404
 #, c-format
 msgid ""
 "\n"
@@ -149,288 +149,288 @@ msgstr ""
 "\n"
 "Et voi bannata käyttäjää pidemmäksi aikaa kuin %s drop-komennolla."
 
-#: src/builtincmd.c:427 src/builtincmd.c:473 src/builtincmd.c:532
-#: src/builtincmd.c:1271 src/builtincmd.c:1305 src/pi_user.c:332
+#: src/builtincmd.c:428 src/builtincmd.c:474 src/builtincmd.c:533
+#: src/builtincmd.c:1272 src/builtincmd.c:1306 src/pi_user.c:331
 #, c-format
 msgid "Usage: %s <nick>"
 msgstr "Käyttö: %s <nick>"
 
-#: src/builtincmd.c:439
+#: src/builtincmd.c:440
 #, c-format
 msgid "User %s's putrid flesh stinks up the place..."
 msgstr "User %s's putrid flesh stinks up the place..."
 
-#: src/builtincmd.c:451
+#: src/builtincmd.c:452
 msgid "The hub is infested by the following zombie horde:\n"
 msgstr "Zombiet tällä hetkellä:\n"
 
-#: src/builtincmd.c:462
+#: src/builtincmd.c:463
 msgid "No zombies found!\n"
 msgstr "Zombieita ei löytynyt!\n"
 
-#: src/builtincmd.c:485
+#: src/builtincmd.c:486
 #, c-format
 msgid "User %s's putrid flesh is miraculously restored..."
 msgstr "User %s's putrid flesh is miraculously restored..."
 
-#: src/builtincmd.c:497 src/builtincmd.c:551 src/builtincmd.c:574
+#: src/builtincmd.c:498 src/builtincmd.c:552 src/builtincmd.c:575
 #, c-format
 msgid "Usage: %s <ip>"
 msgstr "Käyttö: %s <ip>"
 
-#: src/builtincmd.c:506 src/builtincmd.c:515
+#: src/builtincmd.c:507 src/builtincmd.c:516
 #, c-format
 msgid "User %s is using IP %s\n"
 msgstr "Käyttäjä %s käyttää IP:tä %s\n"
 
-#: src/builtincmd.c:510 src/builtincmd.c:519
+#: src/builtincmd.c:511 src/builtincmd.c:520
 #, c-format
 msgid "No one using IP %s found."
 msgstr "Ketään IP:tä %s käyttävää ei löytynyt."
 
-#: src/builtincmd.c:522 src/builtincmd.c:562 src/builtincmd.c:585
+#: src/builtincmd.c:523 src/builtincmd.c:563 src/builtincmd.c:586
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address."
 msgstr "\"%s\" ei tunnistettu IP-osoitteeksi."
 
-#: src/builtincmd.c:537
+#: src/builtincmd.c:538
 #, c-format
 msgid "Nick %s unbanned."
 msgstr "Nickin %s banni poistettu."
 
-#: src/builtincmd.c:539
+#: src/builtincmd.c:540
 #, c-format
 msgid "No ban for nick %s found."
 msgstr "Nickille %s ei löytynyt banneja."
 
-#: src/builtincmd.c:557 src/builtincmd.c:580
+#: src/builtincmd.c:558 src/builtincmd.c:581
 #, c-format
 msgid "IP %s unbanned."
 msgstr "IP:n %s banni poistettu."
 
-#: src/builtincmd.c:559 src/builtincmd.c:582
+#: src/builtincmd.c:560 src/builtincmd.c:583
 #, c-format
 msgid "No ban for IP %s found."
 msgstr "IP:lle %s ei löytynyt banneja."
 
-#: src/builtincmd.c:601 src/builtincmd.c:769
+#: src/builtincmd.c:602 src/builtincmd.c:770
 #, c-format
 msgid "Usage: %s <ip/nick> [<period>] <reason>"
 msgstr "Käyttö: %s <ip/nick> [<aika>] <syy>"
 
-#: src/builtincmd.c:619
+#: src/builtincmd.c:620
 #, c-format
 msgid "IP Banning user %s (ip %s) forever: %.*s"
 msgstr "Bannitaan käyttäjän %s IP (ip %s) pysyvästi: %.*s"
 
-#: src/builtincmd.c:622
+#: src/builtincmd.c:623
 #, c-format
 msgid "IP Banning user %s (ip %s) for %s: %.*s"
 msgstr "Bannitaan käyttäjän %s IP (ip %s) %s %.*s ajaksi"
 
-#: src/builtincmd.c:628
+#: src/builtincmd.c:629
 #, c-format
 msgid "User %s offline, found in iplog\n"
 msgstr "Käyttäjä %s ei ole hubissa, mutta löytyi ip-logista\n"
 
-#: src/builtincmd.c:631
+#: src/builtincmd.c:632
 #, c-format
 msgid "IP Banning %s (ip %s) forever: %.*s."
 msgstr "Bannitaan IP %s (ip %s) pysyvästi: %.*s."
 
-#: src/builtincmd.c:634
+#: src/builtincmd.c:635
 #, c-format
 msgid "IP Banning %s (ip %s) for %s: %.*s"
 msgstr "Bannitaan IP %s (ip %s) %s: %.*s ajaksi"
 
-#: src/builtincmd.c:641
+#: src/builtincmd.c:642
 #, c-format
 msgid "IP Banning %s forever: %.*s."
 msgstr "Bannitaan IP %s pysyvästi: %.*s."
 
-#: src/builtincmd.c:644
+#: src/builtincmd.c:645
 #, c-format
 msgid "IP Banning %s for %s: %.*s"
 msgstr "Bannitaan IP %s %s: %.*s ajaksi"
 
-#: src/builtincmd.c:648
+#: src/builtincmd.c:649
 #, c-format
 msgid "User not found or IP address not valid: %s\n"
 msgstr "Käyttäjää ei löytynyt tai IP-osoite ei ole kunnollinen: %s\n"
 
-#: src/builtincmd.c:666 src/builtincmd.c:717
+#: src/builtincmd.c:667 src/builtincmd.c:718
 #, c-format
 msgid "Usage: %s <nick> [<period>] <reason>"
 msgstr "Käyttö: %s <nick> [<aika>] <syy>"
 
-#: src/builtincmd.c:688
+#: src/builtincmd.c:689
 #, c-format
 msgid "Banned nick %s forever: %.*s"
 msgstr "Nick %s bannittu pysyvästi: %.*s"
 
-#: src/builtincmd.c:690
+#: src/builtincmd.c:691
 #, c-format
 msgid "Banned nick %s for %s: %.*s"
 msgstr "Nick %s bannittu %s %.*s ajaksi"
 
-#: src/builtincmd.c:737
+#: src/builtincmd.c:738
 #, c-format
 msgid "User %s not online, found in iplog.\n"
 msgstr "Käyttäjä %s ei ole hubissa, mutta löydettiin ip-logista.\n"
 
-#: src/builtincmd.c:746
+#: src/builtincmd.c:747
 #, c-format
 msgid "Banning user %s (ip %s) forever: %.*s"
 msgstr "Bannitaan käyttäjä %s (ip %s) pysyvästi: %.*s"
 
-#: src/builtincmd.c:749
+#: src/builtincmd.c:750
 #, c-format
 msgid "Banning user %s (ip %s) for %s: %.*s"
 msgstr "Bannitaan käyttäjä %s (ip %s) %s: %.*s ajaksi"
 
-#: src/builtincmd.c:785
+#: src/builtincmd.c:786
 #, c-format
 msgid "HARD Banning user %s (ip %s) forever: %.*s"
 msgstr "HARD-bannitaan käyttäjä %s (ip %s) pysyvästi: %.*s"
 
-#: src/builtincmd.c:788
+#: src/builtincmd.c:789
 #, c-format
 msgid "HARD Banning user %s (ip %s) for %s: %.*s"
 msgstr "HARD-bannitaan käyttäjä %s (ip %s) %s: %.*s ajaksi"
 
-#: src/builtincmd.c:795
+#: src/builtincmd.c:796
 #, c-format
 msgid "HARD Banning ip %s forever: %.*s"
 msgstr "HARD-bannitaan ip %s pysyvästi: %.*s"
 
-#: src/builtincmd.c:798
+#: src/builtincmd.c:799
 #, c-format
 msgid "HARD Banning ip %s for %s: %.*s"
 msgstr "HARD-bannitaan ip %s %s: %.*s ajaksi"
 
-#: src/builtincmd.c:803
+#: src/builtincmd.c:804
 #, c-format
 msgid "User not found or ip address not valid: %s\n"
 msgstr "Käyttäjää ei löytynyt tai IP-osoite ei ole kelvollinen: %s\n"
 
-#: src/builtincmd.c:818 src/builtincmd.c:849
+#: src/builtincmd.c:819 src/builtincmd.c:850
 #, c-format
 msgid "Usage: %s [<ip|nick>]"
 msgstr "Käyttö: %s [<ip|nick>]"
 
-#: src/builtincmd.c:824 src/builtincmd.c:855
+#: src/builtincmd.c:825 src/builtincmd.c:856
 msgid "No bans found."
 msgstr "Banneja ei löydetty."
 
-#: src/builtincmd.c:829 src/builtincmd.c:860
+#: src/builtincmd.c:830 src/builtincmd.c:861
 #, c-format
 msgid "No IP bans found for %s"
 msgstr "IP:lle %s ei löydetty banneja"
 
-#: src/builtincmd.c:834 src/builtincmd.c:865
+#: src/builtincmd.c:835 src/builtincmd.c:866
 #, c-format
 msgid "No Nick bans found for %s"
 msgstr "Nickille %s ei löydetty banneja"
 
-#: src/builtincmd.c:886
+#: src/builtincmd.c:887
 msgid "Available commands:\n"
 msgstr "Available commands / Käytettävissä olevat komennot:\n"
 
-#: src/builtincmd.c:892
+#: src/builtincmd.c:893
 msgid "Commands are preceded with ! or +\n"
 msgstr "Commands are preceded with ! or + / Komentoja edeltää ! tai +\n"
 
-#: src/builtincmd.c:911
+#: src/builtincmd.c:912
 #, c-format
 msgid "Command %s not found.\n"
 msgstr "Command %s not found.\n"
 
-#: src/builtincmd.c:930
+#: src/builtincmd.c:931
 #, c-format
 msgid "Usage: %s <group> <rights>...\n"
 msgstr "Käyttö: %s <ryhmä> <oikeudet>...\n"
 
-#: src/builtincmd.c:936
+#: src/builtincmd.c:937
 #, c-format
 msgid "Group %s already exists.\n"
 msgstr "Ryhmä %s on jo olemassa.\n"
 
-#: src/builtincmd.c:951 src/builtincmd.c:995 src/builtincmd.c:1696
+#: src/builtincmd.c:952 src/builtincmd.c:996 src/builtincmd.c:1697
 msgid "You are not allowed to assign rights.\n"
 msgstr "Et pysty määrittämään oikeuksia.\n"
 
-#: src/builtincmd.c:955 src/builtincmd.c:999
+#: src/builtincmd.c:956 src/builtincmd.c:1000
 msgid "You are not allowed to assign the following rights to this group: "
 msgstr "Et pysty määrittämään seuraavia oikeuksia tälle ryhmälle: "
 
-#: src/builtincmd.c:964
+#: src/builtincmd.c:965
 #, c-format
 msgid "Group %s created with: "
 msgstr "Ryhmä %s luotu: "
 
-#: src/builtincmd.c:979
+#: src/builtincmd.c:980
 #, c-format
 msgid "Usage: %s <group> <[+]right/-right>...\n"
 msgstr "Käyttö: %s <ryhmä> <[+]oikeus/-oikeus>...\n"
 
-#: src/builtincmd.c:985 src/builtincmd.c:1039 src/builtincmd.c:1091
-#: src/builtincmd.c:1131
+#: src/builtincmd.c:986 src/builtincmd.c:1040 src/builtincmd.c:1092
+#: src/builtincmd.c:1132
 #, c-format
 msgid "Group %s does not exist.\n"
 msgstr "Ryhmää %s ei ole olemassa.\n"
 
-#: src/builtincmd.c:1007
+#: src/builtincmd.c:1008
 msgid "You are not allowed to remove the following rights from this group: "
 msgstr "Et pysty poistamaan seuraavia oikeuksia tältä ryhmältä: "
 
-#: src/builtincmd.c:1018
+#: src/builtincmd.c:1019
 #, c-format
 msgid "Group %s modified. Current rights:"
 msgstr "Ryhmää %s muokattu. Nykyiset oikeudet:"
 
-#: src/builtincmd.c:1032
+#: src/builtincmd.c:1033
 #, c-format
 msgid "Usage: %s <group>"
 msgstr "Käyttö: %s <ryhmä>"
 
-#: src/builtincmd.c:1044
+#: src/builtincmd.c:1045
 #, c-format
 msgid "Group %s still has %ld users.\n"
 msgstr "Ryhmässä %s on yhä %ld käyttäjää.\n"
 
-#: src/builtincmd.c:1049
+#: src/builtincmd.c:1050
 #, c-format
 msgid "Group %s deleted.\n"
 msgstr "Ryhmä %s poistettu.\n"
 
-#: src/builtincmd.c:1094
+#: src/builtincmd.c:1095
 #, c-format
 msgid "Group %s: "
 msgstr "Ryhmä %s: "
 
-#: src/builtincmd.c:1122
+#: src/builtincmd.c:1123
 #, c-format
 msgid "Usage: %s <nick> <group> [<rights...>]"
 msgstr "Käyttö: %s <nick> <ryhmä> [<oikeudet...>]"
 
-#: src/builtincmd.c:1127
+#: src/builtincmd.c:1128
 #, c-format
 msgid "User %s already exists.\n"
 msgstr "Käyttäjätili %s on jo olemassa.\n"
 
-#: src/builtincmd.c:1141 src/builtincmd.c:1382
+#: src/builtincmd.c:1142 src/builtincmd.c:1383
 msgid "You are not allowed to assign a user to this group.\n"
 msgstr "Et pysty siirtämään käyttäjää tähän ryhmään.\n"
 
-#: src/builtincmd.c:1147 src/builtincmd.c:1209
+#: src/builtincmd.c:1148 src/builtincmd.c:1210
 msgid "You are not allowed to assign a user extra rights.\n"
 msgstr "Et pysty määrittämään käyttäjän ylimääräisiä oikeuksia.\n"
 
-#: src/builtincmd.c:1151
+#: src/builtincmd.c:1152
 msgid "You are not allowed to assign this user: "
 msgstr "Et pysty määrittämään tätä käyttäjää: "
 
-#: src/builtincmd.c:1162 src/builtincmd.c:1251
+#: src/builtincmd.c:1163 src/builtincmd.c:1252
 #, c-format
 msgid ""
 "User %s created with group %s.\n"
@@ -439,7 +439,7 @@ msgstr ""
 "Käyttäjä %s luotu ryhmään %s.\n"
 "Nykyiset oikeudet:"
 
-#: src/builtincmd.c:1176
+#: src/builtincmd.c:1177
 #, c-format
 msgid ""
 "You have been registered by %s. Please use !passwd <password> to set a "
@@ -448,7 +448,7 @@ msgstr ""
 "You have been registered by %s. Please use !passwd <password> to set a "
 "password and relogin to gain your new rights. You have been assigned:\n"
 
-#: src/builtincmd.c:1185
+#: src/builtincmd.c:1186
 msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
@@ -456,7 +456,7 @@ msgstr ""
 "Käyttäjä on jo kirjautunut sisään. Häntä on kehoitettu asettamaan salasana "
 "ja yhdistämään hubiin uudestaan.\n"
 
-#: src/builtincmd.c:1189
+#: src/builtincmd.c:1190
 #, c-format
 msgid ""
 "No user with nickname %s is currently logged in. Please notify the user "
@@ -465,49 +465,49 @@ msgstr ""
 "Hubissa ei ole tällä hetkellä nickillä %s olevaa käyttäjää. Ilmoita "
 "käyttäjälle itse hänen tunnuksistaan.\n"
 
-#: src/builtincmd.c:1203
+#: src/builtincmd.c:1204
 #, c-format
 msgid "Usage: %s <nick> <[+]right/-right>...\n"
 msgstr "Käyttö: %s <nick> <[+]oikeus/-oikeus>...\n"
 
-#: src/builtincmd.c:1224
+#: src/builtincmd.c:1225
 msgid "You are not allowed to assign the following rights to this user: "
 msgstr "Et pysty määrittämään seuraavia oikeuksia tälle käyttäjälle: "
 
-#: src/builtincmd.c:1231
+#: src/builtincmd.c:1232
 msgid "You are not allowed to touch: "
 msgstr "Et pysty koskemaan tähän käyttäjään: "
 
-#: src/builtincmd.c:1244
+#: src/builtincmd.c:1245
 #, c-format
 msgid "Warning! User %s is still awarded the following rights by his group:"
 msgstr ""
 "Varoitus! Käyttäjällä %s on yhä seuraavat oikeudet hänen ryhmänsä "
 "perusteella:"
 
-#: src/builtincmd.c:1258
+#: src/builtincmd.c:1259
 msgid ""
 "User is already logged in. Tell him to rejoin to gain all his new rights.\n"
 msgstr ""
 "Käyttäjä on jo hubissa. Kerro häntä yhdistämään hubiin uudestaan saadakseen "
 "uudet oikeutensa.\n"
 
-#: src/builtincmd.c:1276
+#: src/builtincmd.c:1277
 #, c-format
 msgid "User account %s does not exist.\n"
 msgstr "Käyttäjätiliä %s ei ole olemassa.\n"
 
-#: src/builtincmd.c:1282
+#: src/builtincmd.c:1283
 #, c-format
 msgid "You are not allowed to delete user %s.\n"
 msgstr "Et pysty poistamaan käyttäjätiliä %s.\n"
 
-#: src/builtincmd.c:1287
+#: src/builtincmd.c:1288
 #, c-format
 msgid "User account %s deleted.\n"
 msgstr "Käyttäjätili %s poistettu.\n"
 
-#: src/builtincmd.c:1291
+#: src/builtincmd.c:1292
 msgid ""
 "User is still logged in with all rights of the deleted account. Kick the "
 "user to take them away.\n"
@@ -515,59 +515,59 @@ msgstr ""
 "Käyttäjä on yhä hubissa ja hänellä on poistetun tilin oikeudet käytössä. "
 "Poista oikeudet potkaisemalla käyttäjä.\n"
 
-#: src/builtincmd.c:1313
+#: src/builtincmd.c:1314
 #, c-format
 msgid "User information for user %s\n"
 msgstr "Tiedot käyttäjästä %s\n"
 
-#: src/builtincmd.c:1317
+#: src/builtincmd.c:1318
 #, c-format
 msgid "Group %s, Rights: "
 msgstr "Ryhmä %s, Oikeudet: "
 
-#: src/builtincmd.c:1322
+#: src/builtincmd.c:1323
 msgid "Users password is NOT set.\n"
 msgstr "Käyttäjän salasanaa EI ole asetettu.\n"
 
-#: src/builtincmd.c:1323
+#: src/builtincmd.c:1324
 #, c-format
 msgid "User was registered by %s on %s"
 msgstr "Käyttäjän on rekisteröinyt %s päivänä %s"
 
-#: src/builtincmd.c:1330
+#: src/builtincmd.c:1331
 #, c-format
 msgid ", last login %s\n"
 msgstr ", kirjautunut edellisen kerran %s\n"
 
-#: src/builtincmd.c:1334
+#: src/builtincmd.c:1335
 msgid ", never logged in.\n"
 msgstr ", ei ole ikinä kirjautunut hubiin.\n"
 
-#: src/builtincmd.c:1340
+#: src/builtincmd.c:1341
 #, c-format
 msgid "Using Client %s version %s\n"
 msgstr "Käyttää clientin %s versiota %s\n"
 
-#: src/builtincmd.c:1348
+#: src/builtincmd.c:1349
 #, c-format
 msgid "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 msgstr "IP: %s Hubit: (%u, %u, %u), Slotit %u\n"
 
-#: src/builtincmd.c:1362
+#: src/builtincmd.c:1363
 #, c-format
 msgid "Usage: %s <nick> <group>"
 msgstr "Käyttö: %s <nick> <ryhmä>"
 
-#: src/builtincmd.c:1378
+#: src/builtincmd.c:1379
 msgid "You are not allowed to remove a user from this group.\n"
 msgstr "Et pysty poistamaan tässä ryhmässä olevien käyttäjätilejä.\n"
 
-#: src/builtincmd.c:1394
+#: src/builtincmd.c:1395
 #, c-format
 msgid "Moved user %s from group %s to %s\n"
 msgstr "Siirrettiin käyttäjä %s ryhmästä %s ryhmään %s\n"
 
-#: src/builtincmd.c:1410
+#: src/builtincmd.c:1411
 #, c-format
 msgid ""
 "Usage: %s [<nick>] <password>\n"
@@ -576,12 +576,12 @@ msgstr ""
 "Käyttö: %s [<nick>] <salasana>\n"
 " Jos nickiä ei laiteta, vaihtaa oman salasanasi."
 
-#: src/builtincmd.c:1424 src/builtincmd.c:1489
+#: src/builtincmd.c:1425 src/builtincmd.c:1490
 #, c-format
 msgid "You are not allowed to change %s's password\n"
 msgstr "Et pysty vaihtamaan käyttäjän %s salasanaa\n"
 
-#: src/builtincmd.c:1433
+#: src/builtincmd.c:1434
 msgid ""
 "The password is unacceptable, please choose another. You specified a known "
 "account name as your password.\n"
@@ -590,7 +590,7 @@ msgstr ""
 "olemassa olevan käyttäjätilin. The password is unacceptable, please choose "
 "another. You specified a known account name as your password.\n"
 
-#: src/builtincmd.c:1440
+#: src/builtincmd.c:1441
 msgid ""
 "The password is unacceptable, please choose another. You specified a logged "
 "in username as your password.\n"
@@ -599,23 +599,23 @@ msgstr ""
 "hubiin kirjautuneen käyttäjän nickin. The password is unacceptable, please "
 "choose another. You specified a logged in username as your password.\n"
 
-#: src/builtincmd.c:1445 src/builtincmd.c:1497
+#: src/builtincmd.c:1446 src/builtincmd.c:1498
 #, c-format
 msgid "No account for user %s.\n"
 msgstr "Käyttäjää %s ei ole rekisteröity.\n"
 
-#: src/builtincmd.c:1453
+#: src/builtincmd.c:1454
 #, c-format
 msgid ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
 msgstr ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
 
-#: src/builtincmd.c:1460 src/builtincmd.c:1520
+#: src/builtincmd.c:1461 src/builtincmd.c:1521
 msgid "Password set.\n"
 msgstr "Salasana asetettu / Password set.\n"
 
-#: src/builtincmd.c:1476
+#: src/builtincmd.c:1477
 #, c-format
 msgid ""
 "Usage: %s [<nick>]\n"
@@ -624,7 +624,7 @@ msgstr ""
 "Käyttö: %s [<nick>]\n"
 " Jos nickiä ei laiteta, vaihtaa oman salasanasi."
 
-#: src/builtincmd.c:1510
+#: src/builtincmd.c:1511
 #, c-format
 msgid ""
 "Your password was reset. It is now\n"
@@ -633,7 +633,7 @@ msgstr ""
 "Salasanasi nollattiin. Se on nyt \n"
 "%.*s\n"
 
-#: src/builtincmd.c:1514
+#: src/builtincmd.c:1515
 #, c-format
 msgid ""
 "The password of %s was reset. It is now\n"
@@ -642,66 +642,66 @@ msgstr ""
 "Käyttäjän %s salasana nollattiin. Se on nyt \n"
 "%.*s\n"
 
-#: src/builtincmd.c:1596 src/builtincmd.c:1760
+#: src/builtincmd.c:1597 src/builtincmd.c:1761
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr "%s !Tuntematon tyyppi!\n"
 
-#: src/builtincmd.c:1614 src/builtincmd.c:1645 src/builtincmd.c:1675
+#: src/builtincmd.c:1615 src/builtincmd.c:1646 src/builtincmd.c:1676
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr "Tuntematon arvo asetukselle %s\n"
 
-#: src/builtincmd.c:1669
+#: src/builtincmd.c:1670
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr "Käyttö: %s <asetus> <arvo>"
 
-#: src/builtincmd.c:1702
+#: src/builtincmd.c:1703
 msgid "You are not allowed to assign: "
 msgstr "Et pysty määrittämään: "
 
-#: src/builtincmd.c:1709
+#: src/builtincmd.c:1710
 msgid "You are not allowed to remove: "
 msgstr "Et pysty poistamaan: "
 
-#: src/builtincmd.c:1738
+#: src/builtincmd.c:1739
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr "\"%s\" ei ole kelvollinen IP-osoite.\n"
 
-#: src/builtincmd.c:1749
+#: src/builtincmd.c:1750
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr "Maksimiarvo tälle asetukselle on %s\n"
 
-#: src/builtincmd.c:1778
+#: src/builtincmd.c:1779
 msgid "All Data saved."
 msgstr "Kaikki tiedot tallennettu."
 
-#: src/builtincmd.c:1791
+#: src/builtincmd.c:1792
 msgid "Data reloaded."
 msgstr "Tiedot ladattu uudestaan."
 
-#: src/builtincmd.c:1807
+#: src/builtincmd.c:1808
 msgid "Errors during autosave:\n"
 msgstr "Errors during autosave:\n"
 
-#: src/builtincmd.c:1830
+#: src/builtincmd.c:1831
 msgid "Minimum length of a password."
 msgstr "Salasanan vähimmäispituus"
 
-#: src/builtincmd.c:1831
+#: src/builtincmd.c:1832
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr ""
 "Asetusten automaattisen tallennuksen ajanjakso. Aseta 0 poistaaksesi "
 "käytöstä."
 
-#: src/builtincmd.c:1832
+#: src/builtincmd.c:1833
 msgid "User to send report to. Can be a chatroom."
 msgstr "Käytäjä jolle ilmiannot lähetetään. Voi olla keskusteluhuone."
 
-#: src/builtincmd.c:1833
+#: src/builtincmd.c:1834
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
@@ -709,7 +709,7 @@ msgstr ""
 "Max banniaika, jonka voi antaa kick-komennolla (ja käyttämälä _ban_:a). Tämä "
 "ei vaikuta käyttäjään, joilla on ban-oikeus."
 
-#: src/builtincmd.c:1834
+#: src/builtincmd.c:1835
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
@@ -717,161 +717,161 @@ msgstr ""
 "Jos tämä on asetettu, käyttäjä, jolla ei ole ban-oikeutta voi bannata "
 "käyttämällä _ban_:a. Max aika voidaan asettaa asetuksella kickmaxbantime."
 
-#: src/builtincmd.c:1837
+#: src/builtincmd.c:1838
 msgid "Make the HubSec say something."
 msgstr "Laita HubSec sanomaan jotakin."
 
-#: src/builtincmd.c:1838
+#: src/builtincmd.c:1839
 msgid "Make the HubSec warn user."
 msgstr "Laita HubSec varoittamaan käyttäjää."
 
-#: src/builtincmd.c:1839
+#: src/builtincmd.c:1840
 msgid "Shut the hub down."
 msgstr "Sammuttaa hubin."
 
-#: src/builtincmd.c:1840
+#: src/builtincmd.c:1841
 msgid "Send a report to the OPs."
 msgstr "Send a report to the OPs. / Ilmianna käyttäjä operaattoreille"
 
-#: src/builtincmd.c:1841
+#: src/builtincmd.c:1842
 msgid "Displays the Aquila version."
 msgstr "Displays the Aquila version. / Näyttää Aquilan version"
 
-#: src/builtincmd.c:1842
+#: src/builtincmd.c:1843
 msgid "Shows you your IP address."
 msgstr "Shows you your IP address. / Näyttää IP-osoitteesi"
 
-#: src/builtincmd.c:1843
+#: src/builtincmd.c:1844
 msgid "Kick a user. Automatic short ban included."
 msgstr "Potkaise käyttäjä. Lyhyt banni lisätään automaattisesti."
 
-#: src/builtincmd.c:1844
+#: src/builtincmd.c:1845
 msgid "Drop a user. Automatic short ban included."
 msgstr "Pudottaa käyttäjän. Lyhyt banni lisätään automaattisesti."
 
-#: src/builtincmd.c:1845
+#: src/builtincmd.c:1846
 msgid "IP Ban a user by IP address."
 msgstr "Bannaa IP:n (arvoksi IP)."
 
-#: src/builtincmd.c:1846
+#: src/builtincmd.c:1847
 msgid "Nick ban a user by nick."
 msgstr "Bannaa käyttäjän nickin (laita arvoksi nick)."
 
-#: src/builtincmd.c:1847
+#: src/builtincmd.c:1848
 msgid "Ban a user by nick."
 msgstr "Bannaa käyttäjän (arvoksi nick)."
 
-#: src/builtincmd.c:1848
+#: src/builtincmd.c:1849
 msgid "Show ban by nick/IP."
 msgstr "Näyttää bannit tai voit myös laittaa arvoksi nick/IP)."
 
-#: src/builtincmd.c:1849
+#: src/builtincmd.c:1850
 msgid "Display help message."
 msgstr "Display help message. / Näyttää tämän help-viestin"
 
-#: src/builtincmd.c:1850
+#: src/builtincmd.c:1851
 msgid "Unban a nick."
 msgstr "Poista nickban."
 
-#: src/builtincmd.c:1851
+#: src/builtincmd.c:1852
 msgid "Unban an ip."
 msgstr "Poista IP-banni."
 
-#: src/builtincmd.c:1852
+#: src/builtincmd.c:1853
 msgid "Hardban an IP."
 msgstr "Laita IP:lle hardban."
 
-#: src/builtincmd.c:1853
+#: src/builtincmd.c:1854
 msgid "Unhardban an IP."
 msgstr "Poista IP:n hardban."
 
-#: src/builtincmd.c:1854
+#: src/builtincmd.c:1855
 #, fuzzy
 msgid "Show hard bans by nick/IP."
 msgstr "Näyttää bannit tai voit myös laittaa arvoksi nick/IP)."
 
-#: src/builtincmd.c:1855
+#: src/builtincmd.c:1856
 msgid "Zombie a user. Can't talk or pm."
 msgstr "Tee käyttäjästä Zombie. Ei voi lähettää viestejä."
 
-#: src/builtincmd.c:1856
+#: src/builtincmd.c:1857
 msgid "Show the zombie horde."
 msgstr "Listaa Zombiet."
 
-#: src/builtincmd.c:1857
+#: src/builtincmd.c:1858
 msgid "Unzombie a user. Can talk or pm again."
 msgstr "Palauttaa käyttäjän normaaliksi. Pystyy jälleen lähettämään viestejä."
 
-#: src/builtincmd.c:1858
+#: src/builtincmd.c:1859
 msgid "Returns the user using the IP."
 msgstr "Näytää annettulla IP:lla olevan käyttäjän ."
 
-#: src/builtincmd.c:1860
+#: src/builtincmd.c:1861
 msgid "Send a private message to all users."
 msgstr "Lähettää yksityisviestin kaikille käyttäjille."
 
-#: src/builtincmd.c:1862
+#: src/builtincmd.c:1863
 msgid "Add a user group."
 msgstr "Lisää käyttäjäryhmä."
 
-#: src/builtincmd.c:1863
+#: src/builtincmd.c:1864
 msgid "Delete a user group."
 msgstr "Poista käyttäjäryhmä."
 
-#: src/builtincmd.c:1864
+#: src/builtincmd.c:1865
 msgid "Edit the rights of a user group."
 msgstr "Muokkaa käyttäjäryhmän oikeuksia."
 
-#: src/builtincmd.c:1865
+#: src/builtincmd.c:1866
 msgid "List all groups with their rights."
 msgstr "Listaa kaikki ryhmät oikeuksineen."
 
-#: src/builtincmd.c:1867
+#: src/builtincmd.c:1868
 msgid "Add a user."
 msgstr "Lisää käyttäjätili."
 
-#: src/builtincmd.c:1868
+#: src/builtincmd.c:1869
 msgid "Delete a user."
 msgstr "Poista käyttäjätili."
 
-#: src/builtincmd.c:1869
+#: src/builtincmd.c:1870
 msgid "Edit the extra rights of a user."
 msgstr "Muokkaa käyttäjän ylimääräisiä oikeuksia."
 
-#: src/builtincmd.c:1870
+#: src/builtincmd.c:1871
 msgid "List all users of a user group."
 msgstr "Listaa annetun ryhmän kaikki käyttäjät."
 
-#: src/builtincmd.c:1871
+#: src/builtincmd.c:1872
 msgid "Show information of user."
 msgstr "Näyttää tietoa käyttäjästä / käyttäjätilistä."
 
-#: src/builtincmd.c:1872
+#: src/builtincmd.c:1873
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 "Siirtää käyttäjän uuteen ryhmään. Tulee voimaan uudelleen yhdistämisen "
 "jälkeen"
 
-#: src/builtincmd.c:1874
+#: src/builtincmd.c:1875
 msgid "Show configuration."
 msgstr "Näyttää nykyiset asetukset."
 
-#: src/builtincmd.c:1875
+#: src/builtincmd.c:1876
 msgid "Show configuration value help string."
 msgstr "Näyttää ohjeet asetusten laittamiseen."
 
-#: src/builtincmd.c:1876 src/builtincmd.c:1877
+#: src/builtincmd.c:1877 src/builtincmd.c:1878
 msgid "Set configuration values."
 msgstr "Aseta asetuksen arvo."
 
-#: src/builtincmd.c:1879
+#: src/builtincmd.c:1880
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 "Lataa tiedot asetustiedostoista. VAROITUS: Tallentamattomat muutokset "
 "häviävät."
 
-#: src/builtincmd.c:1880
+#: src/builtincmd.c:1881
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
@@ -879,15 +879,15 @@ msgstr ""
 "Tallentaa kaikki muutokset asetustiedostoihin. VAROITUS: Aikaisemmin "
 "tallennetut tiedot korvataan!"
 
-#: src/builtincmd.c:1882
+#: src/builtincmd.c:1883
 msgid "Change your password."
 msgstr "Vaihtaa oman salasanan."
 
-#: src/builtincmd.c:1883
+#: src/builtincmd.c:1884
 msgid "Let the hub generate a random password."
 msgstr "Anna hubin luoda satunnainen salasana"
 
-#: src/builtincmd.c:1885 src/builtincmd.c:1886
+#: src/builtincmd.c:1886 src/builtincmd.c:1887
 msgid "Let the hub CRASH!."
 msgstr ""
 
@@ -924,7 +924,7 @@ msgstr "Command not found: %s\n"
 msgid "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
 msgstr "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
 
-#: src/nmdc_protocol.c:101 src/nmdc_protocol.c:315
+#: src/nmdc_protocol.c:101 src/nmdc_protocol.c:352
 #, c-format
 msgid "<%s> Do not reconnect too fast, time remaining: %s|"
 msgstr "<%s> Do not reconnect too fast, time remaining: %s|"
@@ -933,23 +933,27 @@ msgstr "<%s> Do not reconnect too fast, time remaining: %s|"
 msgid "Protocol violation: Bad key."
 msgstr "Protocol violation: Bad key."
 
-#: src/nmdc_protocol.c:282 src/nmdc_protocol.c:330 src/nmdc_protocol.c:583
+#: src/nmdc_protocol.c:280 src/nmdc_protocol.c:342
+msgid "Nickname refused due to unacceptable characters."
+msgstr ""
+
+#: src/nmdc_protocol.c:297 src/nmdc_protocol.c:367 src/nmdc_protocol.c:620
 msgid "Your nickname is already in use."
 msgstr "Your nickname is already in use."
 
-#: src/nmdc_protocol.c:309
+#: src/nmdc_protocol.c:324
 msgid "Your account priviliges will not be awarded until you set a password."
 msgstr "Your account priviliges will not be awarded until you set a password."
 
-#: src/nmdc_protocol.c:336 src/nmdc_protocol.c:483 src/nmdc_protocol.c:589
+#: src/nmdc_protocol.c:373 src/nmdc_protocol.c:520 src/nmdc_protocol.c:626
 msgid "Another instance of you is connecting, bye!"
 msgstr "Another instance of you is connecting, bye!"
 
-#: src/nmdc_protocol.c:338 src/nmdc_protocol.c:485 src/nmdc_protocol.c:591
+#: src/nmdc_protocol.c:375 src/nmdc_protocol.c:522 src/nmdc_protocol.c:628
 msgid "Reconnecting."
 msgstr "Reconnecting."
 
-#: src/nmdc_protocol.c:349
+#: src/nmdc_protocol.c:386
 msgid ""
 "Cloning is not allowed. Another user is already logged in from this IP "
 "address."
@@ -957,33 +961,33 @@ msgstr ""
 "Cloning is not allowed. Another user is already logged in from this IP "
 "address."
 
-#: src/nmdc_protocol.c:357
+#: src/nmdc_protocol.c:394
 msgid "Do not reconnect too fast."
 msgstr "Do not reconnect too fast."
 
-#: src/nmdc_protocol.c:371 src/nmdc_protocol.c:395 src/nmdc_protocol.c:532
+#: src/nmdc_protocol.c:408 src/nmdc_protocol.c:432 src/nmdc_protocol.c:569
 #, c-format
 msgid "<%s> You have been banned by %s because: "
 msgstr "<%s> You have been banned by %s because: "
 
-#: src/nmdc_protocol.c:375 src/nmdc_protocol.c:399 src/nmdc_protocol.c:536
+#: src/nmdc_protocol.c:412 src/nmdc_protocol.c:436 src/nmdc_protocol.c:573
 #, c-format
 msgid "<%s> Time remaining %s|"
 msgstr "<%s> Time remaining %s|"
 
-#: src/nmdc_protocol.c:382 src/nmdc_protocol.c:406 src/nmdc_protocol.c:543
+#: src/nmdc_protocol.c:419 src/nmdc_protocol.c:443 src/nmdc_protocol.c:580
 msgid "Banned."
 msgstr "Banned."
 
-#: src/nmdc_protocol.c:459 src/nmdc_protocol.c:462
+#: src/nmdc_protocol.c:496 src/nmdc_protocol.c:499
 msgid "Bad password."
 msgstr "Bad password."
 
-#: src/nmdc_protocol.c:468
+#: src/nmdc_protocol.c:505
 msgid "Password retry overflow."
 msgstr "Password retry overflow."
 
-#: src/nmdc_protocol.c:515
+#: src/nmdc_protocol.c:552
 msgid ""
 "Your account priviliges will not be awarded until you set a password. Use !"
 "passwd or !pwgen."
@@ -991,161 +995,161 @@ msgstr ""
 "Your account priviliges will not be awarded until you set a password. Use !"
 "passwd or !pwgen."
 
-#: src/nmdc_protocol.c:613 src/nmdc_protocol.c:851
+#: src/nmdc_protocol.c:652 src/nmdc_protocol.c:890
 msgid "WARNING: You should use a client that uses tags!"
 msgstr "WARNING: You should use a client that uses tags!"
 
-#: src/nmdc_protocol.c:619 src/nmdc_protocol.c:860
+#: src/nmdc_protocol.c:658 src/nmdc_protocol.c:899
 msgid "This hub requires tags, please upgrade to a client that supports them."
 msgstr "This hub requires tags, please upgrade to a client that supports them."
 
-#: src/nmdc_protocol.c:628
+#: src/nmdc_protocol.c:667
 msgid "Your login was refused, your MyINFO seems corrupt."
 msgstr "Your login was refused, your MyINFO seems corrupt."
 
-#: src/nmdc_protocol.c:642 src/nmdc_protocol.c:724
+#: src/nmdc_protocol.c:681 src/nmdc_protocol.c:763
 msgid "Your login was refused."
 msgstr "Your login was refused."
 
-#: src/nmdc_protocol.c:749
+#: src/nmdc_protocol.c:788
 msgid "You are not allowed to chat."
 msgstr "You are not allowed to chat."
 
-#: src/nmdc_protocol.c:755
+#: src/nmdc_protocol.c:794
 msgid "Think before you talk and don't spam."
 msgstr "Think before you talk and don't spam."
 
-#: src/nmdc_protocol.c:763
+#: src/nmdc_protocol.c:802
 msgid "Your chat message was too long."
 msgstr "Your chat message was too long."
 
-#: src/nmdc_protocol.c:869
+#: src/nmdc_protocol.c:908
 msgid "Broken MyINFO, get lost."
 msgstr "Broken MyINFO, get lost."
 
-#: src/nmdc_protocol.c:884
+#: src/nmdc_protocol.c:923
 msgid "Sorry, you no longer satisfy the necessary requirements for this hub."
 msgstr "Sorry, you no longer satisfy the necessary requirements for this hub."
 
-#: src/nmdc_protocol.c:968
+#: src/nmdc_protocol.c:1007
 #, c-format
 msgid "Active searches are limited to %u every %u seconds."
 msgstr "Active searches are limited to %u every %u seconds."
 
-#: src/nmdc_protocol.c:971
+#: src/nmdc_protocol.c:1010
 #, c-format
 msgid "Passive searches are limited to %u every %u seconds."
 msgstr "Passive searches are limited to %u every %u seconds."
 
-#: src/nmdc_protocol.c:981
+#: src/nmdc_protocol.c:1020
 msgid "Your search message is too long."
 msgstr "Your search message is too long."
 
-#: src/nmdc_protocol.c:998
+#: src/nmdc_protocol.c:1037
 msgid "You claim to be active. Passive search DENIED."
 msgstr "You claim to be active. Passive search DENIED."
 
-#: src/nmdc_protocol.c:1014
+#: src/nmdc_protocol.c:1053
 msgid "You claim to be passive. Active search DENIED."
 msgstr "You claim to be passive. Active search DENIED."
 
-#: src/nmdc_protocol.c:1033
+#: src/nmdc_protocol.c:1072
 #, c-format
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr "Your client uses IP %s for searching, while you have IP %s\n"
 
-#: src/nmdc_protocol.c:1050
+#: src/nmdc_protocol.c:1089
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr "Do not repeat searches within %d seconds."
 
-#: src/nmdc_protocol.c:1232 src/nmdc_protocol.c:1311
+#: src/nmdc_protocol.c:1271 src/nmdc_protocol.c:1350
 msgid "You are not allowed to download."
 msgstr "You are not allowed to download."
 
-#: src/nmdc_protocol.c:1259 src/nmdc_protocol.c:1351
+#: src/nmdc_protocol.c:1298 src/nmdc_protocol.c:1390
 #, c-format
 msgid "You cannot download from %s."
 msgstr "You cannot download from %s."
 
-#: src/nmdc_protocol.c:1280
+#: src/nmdc_protocol.c:1319
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr "Your client uses IP %s for downloading, while you have IP %s\n"
 
-#: src/nmdc_protocol.c:1382
+#: src/nmdc_protocol.c:1421
 msgid "You are not allowed to send private messages."
 msgstr "You are not allowed to send private messages."
 
-#: src/nmdc_protocol.c:1391
+#: src/nmdc_protocol.c:1430
 msgid "Don't send private messages so fast."
 msgstr "Don't send private messages so fast."
 
-#: src/nmdc_protocol.c:1421
+#: src/nmdc_protocol.c:1460
 msgid "Bad From: nick. No faking."
 msgstr "Bad From: nick. No faking."
 
-#: src/nmdc_protocol.c:1423
+#: src/nmdc_protocol.c:1462
 msgid "Attempted PM faking."
 msgstr "Attempted PM faking."
 
-#: src/nmdc_protocol.c:1442
+#: src/nmdc_protocol.c:1481
 msgid "Bad display nick. No faking."
 msgstr "Bad display nick. No faking."
 
-#: src/nmdc_protocol.c:1444
+#: src/nmdc_protocol.c:1483
 msgid "Attempted display nick faking"
 msgstr "Attempted display nick faking"
 
-#: src/nmdc_protocol.c:1458
+#: src/nmdc_protocol.c:1497
 msgid "Sorry, you can only send private messages to operators."
 msgstr "Sorry, you can only send private messages to operators."
 
-#: src/nmdc_protocol.c:1490
+#: src/nmdc_protocol.c:1529
 msgid "You are not allowed to redirect users."
 msgstr "You are not allowed to redirect users."
 
-#: src/nmdc_protocol.c:1570 src/nmdc_protocol.c:1627
+#: src/nmdc_protocol.c:1609 src/nmdc_protocol.c:1666
 msgid "Redirect refused.\n"
 msgstr "Redirect refused.\n"
 
-#: src/nmdc_protocol.c:1598
+#: src/nmdc_protocol.c:1637
 msgid "You are not allowed to kick users."
 msgstr "You are not allowed to kick users."
 
-#: src/nmdc_protocol.c:1622
+#: src/nmdc_protocol.c:1661
 msgid "You were kicked."
 msgstr "You were kicked."
 
-#: src/nmdc_protocol.c:1648
+#: src/nmdc_protocol.c:1687
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr "Think before you ask HubINFO and don't spam.\n"
 
-#: src/nmdc_protocol.c:1702
+#: src/nmdc_protocol.c:1741
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Userlist request denied. Maximum 1 reload per %ds."
 
-#: src/nmdc_interface.c:875
+#: src/nmdc_interface.c:890
 #, c-format
 msgid "Rate Probation Violation (Last: %s)."
 msgstr "Rate Probation Violation (Last: %s)."
 
-#: src/nmdc_interface.c:879
+#: src/nmdc_interface.c:894
 #, c-format
 msgid "Rate Violation (Last: %s)."
 msgstr "Rate Violation (Last: %s)."
 
-#: src/nmdc_interface.c:898
+#: src/nmdc_interface.c:913
 #, c-format
 msgid "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"
 msgstr "Floodia havaittu: %s (%s) bannattiin: %.*s (Viimeinen rikkomus: %s)\n"
 
-#: src/nmdc_interface.c:921 src/nmdc_interface.c:951
+#: src/nmdc_interface.c:936 src/nmdc_interface.c:966
 msgid "WARNING: "
 msgstr "WARNING: "
 
-#: src/nmdc_interface.c:1064
+#: src/nmdc_interface.c:1113
 msgid ""
 "Period of chat messages. This controls how often a user can send a chat "
 "message. Keep this low."
@@ -1153,7 +1157,7 @@ msgstr ""
 "Chat-viestien ajanjakso. Tämä kontrolloi miten usein käyttäjät voivat "
 "lähettää viestejä mainchattiin. Pidä matalana."
 
-#: src/nmdc_interface.c:1067
+#: src/nmdc_interface.c:1116
 msgid ""
 "Burst of chat messages. This controls how many chat messages a user can "
 "'save up'. Keep this low."
@@ -1161,7 +1165,7 @@ msgstr ""
 "Chat-viestien burst. Tämä määrittää, että miten monta chat-viestiä käyttäjä "
 "voi 'säästää'. Pidä matalana."
 
-#: src/nmdc_interface.c:1070
+#: src/nmdc_interface.c:1119
 msgid ""
 "Period of searches. This controls how often an active user can search. Keep "
 "this reasonable."
@@ -1169,7 +1173,7 @@ msgstr ""
 "Hakujen ajanjakso. Tämä määrittää, että miten usein active-käyttäjä voi "
 "hakea. Pidä kohtuullisena."
 
-#: src/nmdc_interface.c:1073
+#: src/nmdc_interface.c:1122
 msgid ""
 "Burst of searches. This controls how many searches an active user can 'save "
 "up'. Keep this low."
@@ -1177,7 +1181,7 @@ msgstr ""
 "Hakujen burst. Tämä määrittää, että miten monta hakua active-käyttäjä voi "
 "'säästää'. Pidä matalana."
 
-#: src/nmdc_interface.c:1076
+#: src/nmdc_interface.c:1125
 msgid ""
 "Period of searches. This controls how often a passive user can search. Keep "
 "this reasonable."
@@ -1185,7 +1189,7 @@ msgstr ""
 "Hakujen ajanjakso. Tämä määrittää, että miten usein passive-käyttäjä voi "
 "hakea. Pidä kohtuullisena."
 
-#: src/nmdc_interface.c:1079
+#: src/nmdc_interface.c:1128
 msgid ""
 "Burst of searches. This controls how many searches a passive user can 'save "
 "up'. Keep this low."
@@ -1193,7 +1197,7 @@ msgstr ""
 "Hakujen burst. Tämä määrittää, että miten monta hakua passive-käyttäjä voi "
 "'säästää'. Pidä matalana."
 
-#: src/nmdc_interface.c:1082
+#: src/nmdc_interface.c:1131
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send to everyone. Keep this very high."
@@ -1202,7 +1206,7 @@ msgstr ""
 "lähettää MyINFO-viestin, joka lähetetään kaikille käyttäjille. Pidä erittäin "
 "korkeana."
 
-#: src/nmdc_interface.c:1085
+#: src/nmdc_interface.c:1134
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (everyone). Keep this at 1."
@@ -1210,7 +1214,7 @@ msgstr ""
 "MyINFO-viestien burst. Tämä määrittää, että miten monta MyINFO-viestiä "
 "käyttäjä voi 'säästää' (kaikille lähetettävät). Pidä arvona 1."
 
-#: src/nmdc_interface.c:1088
+#: src/nmdc_interface.c:1137
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send on to the ops only. Keep this very high."
@@ -1219,7 +1223,7 @@ msgstr ""
 "lähettää MyINFO-viestin, joka lähetetään vain OP:ille. Pidä erittäin "
 "korkeana."
 
-#: src/nmdc_interface.c:1091
+#: src/nmdc_interface.c:1140
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (OPs messages only). Keep this at 1."
@@ -1227,7 +1231,7 @@ msgstr ""
 "MyINFO-viestien burst. Tämä määrittää, että miten monta MyINFO-viestiä "
 "käyttäjä voi 'säästää' (vain OP:ille lähetettävät). Pidä arvona 1."
 
-#: src/nmdc_interface.c:1094
+#: src/nmdc_interface.c:1143
 msgid ""
 "Period of nicklist requests. This controls how often a user can refresh his "
 "userlist. Keep this high."
@@ -1235,7 +1239,7 @@ msgstr ""
 "Nicklistan päivityspyyntöjen ajanjakso. Tämä määrittää, että miten usein "
 "käyttäjä voi päivittää käyttäjälistan. Pidä korkeana."
 
-#: src/nmdc_interface.c:1097
+#: src/nmdc_interface.c:1146
 msgid ""
 "Burst of nicklist requests. This controls how many userlist refreshes a user "
 "can 'save up'. Keep this at 1."
@@ -1243,7 +1247,7 @@ msgstr ""
 "Nicklistan päivityspyyntöjen burst. Tämä määrittää, että miten monta "
 "käyttäjälistan päivitystä käyttäjä voi 'säästää'. Pidä arvona 1."
 
-#: src/nmdc_interface.c:1100
+#: src/nmdc_interface.c:1149
 msgid ""
 "Period of getinfo requests. This controls how often a user can request info "
 "on a user. Keep this low."
@@ -1251,7 +1255,7 @@ msgstr ""
 "Getinfo-pyyntöjen ajanjakso. Tämä määrittää, että miten usein käyttäjä voi "
 "pyytää tietoja toisesta käyttäjästä. Pidä matalana."
 
-#: src/nmdc_interface.c:1103
+#: src/nmdc_interface.c:1152
 msgid ""
 "Burst of getinfo requests. This controls how many getinfo requests a user "
 "can 'save up'."
@@ -1259,7 +1263,7 @@ msgstr ""
 "Getinfo-pyyntöjen burst. Tämä määrittää, että miten monta getinfo-pyyntöä "
 "käyttäjä voi 'säästää'."
 
-#: src/nmdc_interface.c:1106
+#: src/nmdc_interface.c:1155
 msgid ""
 "Period of downloads. This controls how often a user can initiate a download. "
 "Keep this low."
@@ -1267,7 +1271,7 @@ msgstr ""
 "Latausten ajanjakso. Tämä määrittää, että miten usein käyttäjä voi aloittaa "
 "latauksen. Pidä matalana."
 
-#: src/nmdc_interface.c:1109
+#: src/nmdc_interface.c:1158
 msgid ""
 "Burst of downloads. This controls how many downloads a user can 'save up'. "
 "Keep this reasonable."
@@ -1275,7 +1279,7 @@ msgstr ""
 "Latausten burst. Tämä määrittää, että miten monta latausta käyttäjä voi "
 "'säästää'. Pidä kohtuullisena."
 
-#: src/nmdc_interface.c:1112
+#: src/nmdc_interface.c:1161
 msgid ""
 "Period of connects. This controls how often the connect counter is "
 "refreshed. Keep this low."
@@ -1283,7 +1287,7 @@ msgstr ""
 "Yhdistämisten ajanjakso. Tämä määrittää, että miten usein yhdistämislaskuri "
 "nollautuu.Pidä matalana."
 
-#: src/nmdc_interface.c:1115
+#: src/nmdc_interface.c:1164
 msgid ""
 "Burst of connects. This controls how many new user connects can be saved up "
 "in idle time. Keep this low."
@@ -1291,7 +1295,7 @@ msgstr ""
 "Yhdistämisten burst. Tämä määrittää, että miten monta uusien käyttäjien "
 "yhdistämistä voidaan säästää toimettomana ollessa. Pidä matalana."
 
-#: src/nmdc_interface.c:1118
+#: src/nmdc_interface.c:1167
 msgid ""
 "Refill of connects. This controls how many new user connects are added each "
 "time the counter resets. Keep this low."
@@ -1299,7 +1303,7 @@ msgstr ""
 "Yhdistämisten uudelleentäyttyminen. Tämä määrittää, että miten monta uutta "
 "yhdistämistä lisätään joka kerta kun laskuri nollautuu. Pidä matalana."
 
-#: src/nmdc_interface.c:1122
+#: src/nmdc_interface.c:1171
 msgid ""
 "Period of passive search results. This controls how often the incoming "
 "passive search results counter is refreshed. Keep this low."
@@ -1307,7 +1311,7 @@ msgstr ""
 "Passive-hakutulosten ajanjakso. Tämä määrittää, että miten usein sisään "
 "tulevien passive-hakutulosten laskuri päivitetään. Pidä matalana."
 
-#: src/nmdc_interface.c:1125
+#: src/nmdc_interface.c:1174
 msgid ""
 "Burst of passive search results. This controls how many incoming passive "
 "search results can be saved up in idle time. Keep this equal to the search "
@@ -1317,7 +1321,7 @@ msgstr ""
 "hakutulosta voidaan säästää toimettomana ollessa. Pidä samana kuin hakemisen "
 "ajanjakso."
 
-#: src/nmdc_interface.c:1128
+#: src/nmdc_interface.c:1177
 msgid ""
 "Refill of passive search results. This controls how many incoming passive "
 "search results are added each time the counter resets. Keep this low."
@@ -1326,7 +1330,7 @@ msgstr ""
 "sisään tulevaa passive-hakutulosta lisätään joka kerta laskurin "
 "nollautuessa. Pidä matalana."
 
-#: src/nmdc_interface.c:1132
+#: src/nmdc_interface.c:1181
 msgid ""
 "Period of passive search results. This controls how often the outgoing "
 "passive search results counter is refreshed. Keep this low."
@@ -1334,7 +1338,7 @@ msgstr ""
 "Passive-hakutulosten ajanjakso. Tämä määrittää, että miten usein "
 "ulosmenevien passive-hakutulosten laskuri päivittyy. Pidä matalana."
 
-#: src/nmdc_interface.c:1135
+#: src/nmdc_interface.c:1184
 msgid ""
 "Burst of passive search results. This controls how many outgoing passive "
 "search results can be saved up in idle time. Keep this reasonably high."
@@ -1342,7 +1346,7 @@ msgstr ""
 "Passive-hakutulosten burst. Tämä määrittää, että miten monta lähtevää "
 "passive-hakutulosta voidaan säästää toimettomana aikana. Pidä melko korkeana."
 
-#: src/nmdc_interface.c:1138
+#: src/nmdc_interface.c:1187
 msgid ""
 "Refill of passive search results. This controls how many outgoing passive "
 "search results are added each time the counter resets. Keep this reasonably "
@@ -1352,7 +1356,7 @@ msgstr ""
 "lähtevää passive-hakutulosta lisätään joka kerta kun laskuri nollantuu. Pidä "
 "melko korkeana."
 
-#: src/nmdc_interface.c:1142
+#: src/nmdc_interface.c:1191
 msgid ""
 "Period of user warnings. This controls how often a warning is send to user "
 "that overstep limits."
@@ -1360,7 +1364,7 @@ msgstr ""
 "Käyttäjien varoittamisten ajanjakso. Tämä määrittää, että miten usein "
 "varoitus lähetetään rajoitukset ylittävälle käyttäjälle."
 
-#: src/nmdc_interface.c:1145
+#: src/nmdc_interface.c:1194
 msgid ""
 "Refill of user warnings. This controls how many warning a user gets within "
 "the period."
@@ -1368,7 +1372,7 @@ msgstr ""
 "Käyttäjien varoittamisten uudelleentäyttyminen. Tämä määrittää, että miten "
 "monta varoitusta käyttäjä saa tässä ajanjaksossa."
 
-#: src/nmdc_interface.c:1148
+#: src/nmdc_interface.c:1197
 msgid ""
 "Burst of user warnings. This controls how many warnings a user that overstep "
 "limits can save up."
@@ -1376,7 +1380,7 @@ msgstr ""
 "Käyttäjien varoittamisten burst. Tämä määrittää, että miten monta varoitusta "
 "rajoitukset ylittävä käyttäjä voi säästää ."
 
-#: src/nmdc_interface.c:1152
+#: src/nmdc_interface.c:1201
 msgid ""
 "Period of user violations. This controls how often a warning is send to user "
 "that overstep limits."
@@ -1384,7 +1388,7 @@ msgstr ""
 "Käyttäjien rikkomusten ajanjakso. Tämä määrittää, että miten usein varoitus "
 "lähetetään rajoitukset ylittävälle käyttäjälle."
 
-#: src/nmdc_interface.c:1155
+#: src/nmdc_interface.c:1204
 msgid ""
 "Refill of user violations. This controls how many warning a user gets within "
 "the period."
@@ -1392,7 +1396,7 @@ msgstr ""
 "Käyttäjien rikkomusten uudelleentäyttyminen. Tämä määrittää, että miten "
 "monta varoitusta käyttäjä saa tässä ajanjaksossa."
 
-#: src/nmdc_interface.c:1158
+#: src/nmdc_interface.c:1207
 msgid ""
 "Burst of user violations. This controls how many violations a user that "
 "overstep limits can save up."
@@ -1400,7 +1404,7 @@ msgstr ""
 "Käyttäjien rikkomusten burst. Tämä määrittää, että miten monta rikkomusta "
 "rajoitukset ylittävä käyttäjä voi säästää."
 
-#: src/nmdc_interface.c:1190
+#: src/nmdc_interface.c:1239
 msgid ""
 "Period of chat cache flush. This controls how often chat messages are sent "
 "to users. Keep this low."
@@ -1408,7 +1412,7 @@ msgstr ""
 "Chatin välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että miten usein "
 "chat-viestit lähetetään käyttäjille. Pidä matalana."
 
-#: src/nmdc_interface.c:1193
+#: src/nmdc_interface.c:1242
 msgid ""
 "Period of join cache flush. This controls how often users are notified of "
 "new joins."
@@ -1417,7 +1421,7 @@ msgstr ""
 "että miten usein käyttäjien nicklistaan lisätään hubiin liittyneet uudet "
 "käyttäjät."
 
-#: src/nmdc_interface.c:1196
+#: src/nmdc_interface.c:1245
 msgid ""
 "Period of update cache flush. This controls how often users are sent MyINFO "
 "updates. Keep this high."
@@ -1425,7 +1429,7 @@ msgstr ""
 "MyINFO päivitysten välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
 "miten usein käyttäjille lähetetään MyINFO-päivitykset. Pidä korkeana."
 
-#: src/nmdc_interface.c:1199
+#: src/nmdc_interface.c:1248
 msgid ""
 "Period of operator update cache flush. This controls how often operators are "
 "sent MyINFO updates. Keep this low."
@@ -1434,7 +1438,7 @@ msgstr ""
 "määrittää, että miten usein operaattoreille lähetetään MyINFO-päivitykset. "
 "Pidä matalana."
 
-#: src/nmdc_interface.c:1202
+#: src/nmdc_interface.c:1251
 msgid ""
 "Period of active search cache flush. This controls how often search messages "
 "are sent to active users."
@@ -1442,7 +1446,7 @@ msgstr ""
 "Active-hakujen välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
 "miten usein haut lähetetään active-käyttäjille."
 
-#: src/nmdc_interface.c:1205
+#: src/nmdc_interface.c:1254
 msgid ""
 "Period of passive search cache flush. This controls how often search "
 "messages are sent to passive users."
@@ -1450,7 +1454,7 @@ msgstr ""
 "Passive-hakujen välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
 "miten usein haut lähetetään passive-käyttäjille."
 
-#: src/nmdc_interface.c:1208
+#: src/nmdc_interface.c:1257
 msgid ""
 "Period of search results cache flush. This controls how often search results "
 "are sent to passive users."
@@ -1458,7 +1462,7 @@ msgstr ""
 "Hakutulosten välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että miten "
 "usein hakutulokset lähetetään passive-käyttäjille."
 
-#: src/nmdc_interface.c:1211
+#: src/nmdc_interface.c:1260
 msgid ""
 "Period of private messages cache flush. This controls how often private "
 "messages are sent to users. Keep this low."
@@ -1466,7 +1470,7 @@ msgstr ""
 "Yksityisviestien välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
 "miten usein yksityisviestit lähetetään käyttäjille. Pidä matalana."
 
-#: src/nmdc_interface.c:1215
+#: src/nmdc_interface.c:1264
 msgid ""
 "Period of active repeated search cache flush. This controls how often search "
 "messages are sent to active users."
@@ -1474,7 +1478,7 @@ msgstr ""
 "Active-uudelleenhakujen välimuistin tyhjennyksen ajanjakso. Tämä määrittää, "
 "että miten usein haut lähetetään active-käyttäjille."
 
-#: src/nmdc_interface.c:1219
+#: src/nmdc_interface.c:1268
 msgid ""
 "Period of passive repeated search cache flush. This controls how often "
 "search messages are sent to passive users."
@@ -1482,39 +1486,45 @@ msgstr ""
 "Passive-uudelleenhakujen välimuistin tyhjennyksen ajanjakso. Tämä määrittää, "
 "että miten usein uudelleenhaut lähetetään passive-käyttäjille."
 
-#: src/nmdc_interface.c:1231
+#: src/nmdc_interface.c:1281
 msgid "Allow multiple users from the same IP address."
 msgstr "Salli useampi käyttäjä samasta IP:sta. Arvoina 0 tai 1."
 
-#: src/nmdc_interface.c:1233
+#: src/nmdc_interface.c:1283
 msgid "Maximum length of a chat message."
 msgstr "Chat-viestin max pituus."
 
-#: src/nmdc_interface.c:1235
+#: src/nmdc_interface.c:1285
 msgid "Maximum length of a search message."
 msgstr "Hakusanan max pituus."
 
-#: src/nmdc_interface.c:1237
+#: src/nmdc_interface.c:1287
 msgid "Maximum length of a search result"
 msgstr "Hakutuloksen max pituus"
 
-#: src/nmdc_interface.c:1240
+#: src/nmdc_interface.c:1290
 msgid "Minimum time before a re-search is considered valid."
 msgstr "Aika, jonka jonka jälkeen uudelleenhaku lasketaan hyväksytyksi."
 
-#: src/nmdc_interface.c:1242
+#: src/nmdc_interface.c:1292
 msgid "Period during which a search is considered a re-search."
 msgstr "Uudelleenhaut muistetaan tältä ajalta."
 
-#: src/nmdc_interface.c:1244
+#: src/nmdc_interface.c:1294
 msgid "Maximum number of searches cached."
 msgstr "Välimuistissa olevien hakujen enimmäismäärä."
 
-#: src/nmdc_interface.c:1247
+#: src/nmdc_interface.c:1297
 msgid "This message is send to all banned users when they try to join."
 msgstr ""
 "Tämä viesti lähetetään bannatuille käyttäjille kun he yrittävät yhdistää "
 "hubiin."
+
+#: src/nmdc_interface.c:1301
+msgid ""
+"These are the characters allowed in a nick. An empty string means all "
+"characters. Does NOT support utf-8 character."
+msgstr ""
 
 #: src/plugin.c:188
 #, c-format
@@ -1561,40 +1571,40 @@ msgstr "%s %s lisännyt %s Viesti: %.*s\n"
 msgid "Error saving configuration to %s: %s\n"
 msgstr "Virhe asetuksien tallentamisessa tiedostoon %s: %s\n"
 
-#: src/utils.c:93
+#: src/utils.c:95
 #, c-format
 msgid "%u week, "
 msgid_plural "%u weeks, "
 msgstr[0] "%u viikko, "
 msgstr[1] "%u viikkoa, "
 
-#: src/utils.c:95
+#: src/utils.c:97
 #, c-format
 msgid "%u day, "
 msgid_plural "%u days, "
 msgstr[0] "%u päivä, "
 msgstr[1] "%u päivää, "
 
-#: src/pi_statistics.c:100
+#: src/pi_statistics.c:101
 msgid "CPU Unknown\n"
 msgstr "CPU Unknown / CPU tuntematon\n"
 
-#: src/pi_statistics.c:115
+#: src/pi_statistics.c:116
 #, c-format
 msgid "CPU%.1d: %.*s\n"
 msgstr "CPU%.1d: %.*s\n"
 
-#: src/pi_statistics.c:117
+#: src/pi_statistics.c:118
 #, c-format
 msgid "     Clock: %.*s MHz "
 msgstr "     Clock: %.*s MHz "
 
-#: src/pi_statistics.c:119
+#: src/pi_statistics.c:120
 #, c-format
 msgid "BogoMIPS: %.*s\n"
 msgstr "BogoMIPS: %.*s\n"
 
-#: src/pi_statistics.c:204
+#: src/pi_statistics.c:205
 #, c-format
 msgid ""
 "\n"
@@ -1603,17 +1613,17 @@ msgstr ""
 "\n"
 "Cpu Statistics at %s"
 
-#: src/pi_statistics.c:207
+#: src/pi_statistics.c:208
 #, c-format
 msgid " last hour %2.2f%%\n"
 msgstr " last hour %2.2f%%\n"
 
-#: src/pi_statistics.c:211
+#: src/pi_statistics.c:212
 #, c-format
 msgid " last minute %2.2f%%\n"
 msgstr " last minute %2.2f%%\n"
 
-#: src/pi_statistics.c:215
+#: src/pi_statistics.c:216
 #, c-format
 msgid ""
 " last 5 seconds %2.2f%%\n"
@@ -1622,32 +1632,32 @@ msgstr ""
 " last 5 seconds %2.2f%%\n"
 "\n"
 
-#: src/pi_statistics.c:219
+#: src/pi_statistics.c:220
 #, c-format
 msgid "Since boot %2.2f%%\n"
 msgstr "Since boot %2.2f%%\n"
 
-#: src/pi_statistics.c:320
+#: src/pi_statistics.c:321
 #, c-format
 msgid "Total traffic since boot: In %lu, Out %lu\n"
 msgstr "Total traffic since boot: In %lu, Out %lu\n"
 
-#: src/pi_statistics.c:329
+#: src/pi_statistics.c:330
 #, c-format
 msgid "In last %lu ms: In %f kbps, Out %f kbps\n"
 msgstr "In last %lu ms: In %f kbps, Out %f kbps\n"
 
-#: src/pi_statistics.c:340
+#: src/pi_statistics.c:341
 #, c-format
 msgid "Average over %d seconds: In %f kbps, Out %f kbps\n"
 msgstr "Average over %d seconds: In %f kbps, Out %f kbps\n"
 
-#: src/pi_statistics.c:379
+#: src/pi_statistics.c:380
 #, c-format
 msgid "Total Count: %lu, Total Memory: %lu\n"
 msgstr "Kokonaismäärä: %lu, Muistinkäyttö: %lu\n"
 
-#: src/pi_statistics.c:381
+#: src/pi_statistics.c:382
 #, c-format
 msgid ""
 "ZPipe users: %lu, ZLine users: %lu\n"
@@ -1656,51 +1666,51 @@ msgstr ""
 "ZPipe users: %lu, ZLine users: %lu\n"
 "\n"
 
-#: src/pi_statistics.c:383
+#: src/pi_statistics.c:384
 #, c-format
 msgid "Nicklist cache (last updated %lu seconds ago).\n"
 msgstr "Nicklist cache (last updated %lu seconds ago).\n"
 
-#: src/pi_statistics.c:386
+#: src/pi_statistics.c:387
 #, c-format
 msgid "  Nicklist length %lu (zpipe %lu, zline %lu)\n"
 msgstr "  Nicklist length %lu (zpipe %lu, zline %lu)\n"
 
-#: src/pi_statistics.c:388
+#: src/pi_statistics.c:389
 #, c-format
 msgid "  Infolist length %lu (zpipe %lu, zline %lu)\n"
 msgstr "  Infolist length %lu (zpipe %lu, zline %lu)\n"
 
-#: src/pi_statistics.c:391
+#: src/pi_statistics.c:392
 #, c-format
 msgid "  Nicklist length %lu\n"
 msgstr "  Nicklist length %lu\n"
 
-#: src/pi_statistics.c:392
+#: src/pi_statistics.c:393
 #, c-format
 msgid "  Infolist length %lu\n"
 msgstr "  Infolist length %lu\n"
 
-#: src/pi_statistics.c:402
+#: src/pi_statistics.c:403
 msgid "Warning: DEBUG build, cpu measurements highly inaccurate.\n"
 msgstr "Warning: DEBUG build, cpu measurements highly inaccurate.\n"
 
-#: src/pi_statistics.c:419
+#: src/pi_statistics.c:420
 #, c-format
 msgid "Allocated size: %llu (max: %llu)\n"
 msgstr "Allocated size: %llu (max: %llu)\n"
 
-#: src/pi_statistics.c:420
+#: src/pi_statistics.c:421
 #, c-format
 msgid "Allocated buffers: %lu (max %lu)\n"
 msgstr "Allocated buffers: %lu (max %lu)\n"
 
-#: src/pi_statistics.c:421
+#: src/pi_statistics.c:422
 #, c-format
 msgid " Users having buffered output: %lu\n"
 msgstr " Users having buffered output: %lu\n"
 
-#: src/pi_statistics.c:427
+#: src/pi_statistics.c:428
 msgid ""
 "\n"
 "Buffering clients:\n"
@@ -1708,21 +1718,21 @@ msgstr ""
 "\n"
 "Puskuroivat clientit:\n"
 
-#: src/pi_statistics.c:434
+#: src/pi_statistics.c:435
 #, c-format
 msgid "Real user %s without socket?\n"
 msgstr "Todellinen käyttäjä %s ilman socketia?\n"
 
-#: src/pi_statistics.c:447
+#: src/pi_statistics.c:448
 #, c-format
 msgid " %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"
 msgstr " %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"
 
-#: src/pi_statistics.c:458
+#: src/pi_statistics.c:459
 msgid " None.\n"
 msgstr " None.\n"
 
-#: src/pi_statistics.c:462
+#: src/pi_statistics.c:463
 #, c-format
 msgid ""
 "\n"
@@ -1739,59 +1749,59 @@ msgstr ""
 " Tavut jonossa keskimäärin %lu\n"
 " Kirjoitettavat tavut keskimäärin %lu\n"
 
-#: src/pi_statistics.c:474
+#: src/pi_statistics.c:475
 msgid "Warning: DEBUG build, cpu measurements higher as normal.\n"
 msgstr "Warning: DEBUG build, cpu measurements higher as normal.\n"
 
-#: src/pi_statistics.c:484
+#: src/pi_statistics.c:485
 #, c-format
 msgid "Total IPs remembered (roughly last %us): %lu\n"
 msgstr "Muistettavien IP:iden kokonaismäärä (suunnilleen viimeiset %us): %lu\n"
 
-#: src/pi_statistics.c:497
+#: src/pi_statistics.c:498
 msgid "Memory Usage:\n"
 msgstr "Memory Usage:\n"
 
-#: src/pi_statistics.c:505
+#: src/pi_statistics.c:506
 msgid "GNU LibC memory statistics:\n"
 msgstr "GNU LibC memory statistics:\n"
 
-#: src/pi_statistics.c:506
+#: src/pi_statistics.c:507
 #, c-format
 msgid " Total heap     : %lu (%s)\n"
 msgstr " Total heap     : %lu (%s)\n"
 
-#: src/pi_statistics.c:507
+#: src/pi_statistics.c:508
 #, c-format
 msgid " # Free chunks    : %lu\n"
 msgstr " # Free chunks    : %lu\n"
 
-#: src/pi_statistics.c:508
+#: src/pi_statistics.c:509
 #, c-format
 msgid " # Fastbin blocks : %lu\n"
 msgstr " # Fastbin blocks : %lu\n"
 
-#: src/pi_statistics.c:509
+#: src/pi_statistics.c:510
 #, c-format
 msgid " Total alloced space : %lu (%s)\n"
 msgstr " Tilaa varattu käyttöön kaikkiaan : %lu (%s)\n"
 
-#: src/pi_statistics.c:511
+#: src/pi_statistics.c:512
 #, c-format
 msgid " Total free space    : %lu (%s)\n"
 msgstr " Tilaa vapaana kaikkiaan    : %lu (%s)\n"
 
-#: src/pi_statistics.c:513
+#: src/pi_statistics.c:514
 #, c-format
 msgid " keepcost : %lu (%s)\n"
 msgstr " keepcost : %lu (%s)\n"
 
-#: src/pi_statistics.c:514
+#: src/pi_statistics.c:515
 #, c-format
 msgid " # MMAP regions : %lu\n"
 msgstr " # MMAP regions : %lu\n"
 
-#: src/pi_statistics.c:515
+#: src/pi_statistics.c:516
 #, c-format
 msgid ""
 " MMAP space     : %lu (%s)\n"
@@ -1800,67 +1810,67 @@ msgstr ""
 " MMAP space     : %lu (%s)\n"
 "\n"
 
-#: src/pi_statistics.c:519
+#: src/pi_statistics.c:520
 #, c-format
 msgid "%s stats:\n"
 msgstr "%s stats:\n"
 
-#: src/pi_statistics.c:520
+#: src/pi_statistics.c:521
 #, c-format
 msgid " Buffering memory: %lu\n"
 msgstr " Puskurointimuisti: %lu\n"
 
-#: src/pi_statistics.c:521
+#: src/pi_statistics.c:522
 #, c-format
 msgid " Cachelist size: %lu\n"
 msgstr " Cachelist size: %lu\n"
 
-#: src/pi_statistics.c:532
+#: src/pi_statistics.c:533
 #, c-format
 msgid "Booted at %.*s, up %lu seconds (%s)\n"
 msgstr "Booted at %.*s, up %lu seconds (%s)\n"
 
-#: src/pi_statistics.c:616
+#: src/pi_statistics.c:618
 msgid "Show buffer stats."
 msgstr "Näyttää puskurointitilastot"
 
-#: src/pi_statistics.c:617 src/pi_statistics.c:618
+#: src/pi_statistics.c:619 src/pi_statistics.c:620
 msgid "Show cache stats."
 msgstr "Show cache stats. / Näyttää välimuistin tilastot"
 
-#: src/pi_statistics.c:619
+#: src/pi_statistics.c:621
 msgid "Show cpu usage stats."
 msgstr "Show cpu usage stats. / Näyttää cpu:n käytön tilastot"
 
-#: src/pi_statistics.c:621
+#: src/pi_statistics.c:623
 msgid "Show nmdc protocol stats. Experts only."
 msgstr "Show nmdc protocol stats. Experts only."
 
-#: src/pi_statistics.c:622
+#: src/pi_statistics.c:624
 msgid "Show memory usage stats."
 msgstr "Show memory usage stats. / Näyttää muistinkäytön"
 
-#: src/pi_statistics.c:623
+#: src/pi_statistics.c:625
 msgid "Show connection stats."
 msgstr "Show connection stats / Näyttää yhteystilastot."
 
-#: src/pi_statistics.c:624
+#: src/pi_statistics.c:626
 msgid "Show uptime."
 msgstr "Show uptime. / Näyttää toiminta-ajan"
 
-#: src/pi_chatlog.c:49
+#: src/pi_chatlog.c:48
 msgid "No Chat History configured.\n"
 msgstr "No Chat History configured. / Keskusteluhistoria ei ole käytössä\n"
 
-#: src/pi_chatlog.c:53
+#: src/pi_chatlog.c:52
 msgid "Chat History:\n"
 msgstr "Chat History / Keskusteluhistoria:\n"
 
-#: src/pi_chatlog.c:121
+#: src/pi_chatlog.c:120
 msgid "Maximum number of chat history lines."
 msgstr "Keskusteluhistorian rivien enimmäismäärä."
 
-#: src/pi_chatlog.c:124
+#: src/pi_chatlog.c:123
 msgid "Command returns last chatlines."
 msgstr ""
 "Command returns last chatlines. / Näyttää mainchatin viimeisimmät viestit"
@@ -2385,53 +2395,53 @@ msgstr "Sorry, your login is not accepted from this IP (%s)"
 msgid "Sorry, the hub is full. It cannot accept more users from your class.\n"
 msgstr "Sorry, the hub is full. It cannot accept more users from your class.\n"
 
-#: src/pi_user.c:273 src/pi_user.c:303
+#: src/pi_user.c:272 src/pi_user.c:302
 #, c-format
 msgid "Usage: %s <nick> <ip/network>"
 msgstr "Käyttö: %s <nick> <ip/network>"
 
-#: src/pi_user.c:284
+#: src/pi_user.c:283
 #, c-format
 msgid "Please do not forget to assign the \"sourceverify\" right to user %s\n"
 msgstr ""
 "Tämä tulee voimaan vasta kun olet asenntanut \"sourceverify\" -oikeuden "
 "käyttäjälle %s\n"
 
-#: src/pi_user.c:287
+#: src/pi_user.c:286
 #, c-format
 msgid "User %s is now allowed to log in from %s\n"
 msgstr "Käyttäjä %s pystyy nyt kirjautumaan osoitteesta %s\n"
 
-#: src/pi_user.c:290 src/pi_user.c:318
+#: src/pi_user.c:289 src/pi_user.c:317
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address or network."
 msgstr "\"%s\" ei tunnistettu IP-ositteeksi tai verkoksi."
 
-#: src/pi_user.c:311
+#: src/pi_user.c:310
 #, c-format
 msgid "User %s is no longer allowed to log in from %s\n"
 msgstr "Käyttäjä %s ei pysty enää kirjautumaan osoitteesta %s\n"
 
-#: src/pi_user.c:314
+#: src/pi_user.c:313
 #, c-format
 msgid "Could not find source restriction \"%s\" for nick %s\n"
 msgstr "IP-rajoitusta \"%s\" ei löytynyt nickille %s\n"
 
-#: src/pi_user.c:337
+#: src/pi_user.c:336
 #, c-format
 msgid "Allow user %s from:\n"
 msgstr "Salli käyttäjä %s osoitteesta/verkosta:\n"
 
-#: src/pi_user.c:341
+#: src/pi_user.c:340
 #, c-format
 msgid " Source %s\n"
 msgstr " Lähde IP/Verkko %s\n"
 
-#: src/pi_user.c:345
+#: src/pi_user.c:344
 msgid " None."
 msgstr " Ei mitään."
 
-#: src/pi_user.c:359
+#: src/pi_user.c:358
 #, c-format
 msgid ""
 "Usage: !%s <clienttag> <minversion> <maxversion> <reason>\n"
@@ -2440,36 +2450,36 @@ msgstr ""
 "Käyttö: !%s <clientin tagi> <minversio> <maxversio> <syy>\n"
 "Laita versioksi 0, mikäli ei tarpeellinen."
 
-#: src/pi_user.c:378
+#: src/pi_user.c:377
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) added to banned list because: %s\n"
 msgstr "Client \"%s\" (%lf, %lf) lisätty bannilistaan syyllä: %s\n"
 
-#: src/pi_user.c:392
+#: src/pi_user.c:391
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) because: %.*s\n"
 msgstr "Client \"%s\" (%lf, %lf) koska: %.*s\n"
 
-#: src/pi_user.c:398
+#: src/pi_user.c:397
 msgid "No clients banned."
 msgstr "Yhtään clienttiä ei ole bannittu."
 
-#: src/pi_user.c:411
+#: src/pi_user.c:410
 #, c-format
 msgid "Usage: !%s <clientname> <min> <max>\n"
 msgstr "Käyttö: !%s <clientin nimi> <min> <max>\n"
 
-#: src/pi_user.c:419
+#: src/pi_user.c:418
 #, c-format
 msgid "Client \"%s\" removed from banlist\n"
 msgstr "Clientin \"%s\" poistettu bannilistasta\n"
 
-#: src/pi_user.c:421
+#: src/pi_user.c:420
 #, c-format
 msgid "Client \"%s\" not found in banlist\n"
 msgstr "Clientiä \"%s\" ei löydy bannilistasta\n"
 
-#: src/pi_user.c:463
+#: src/pi_user.c:462
 #, c-format
 msgid ""
 "WARNING: resourcelimit for this process allows a absolute maximum of %lu "
@@ -2479,7 +2489,7 @@ msgstr ""
 "lu käyttäjään, tällä hetkellä %lu asetettuma (järjestelmän ulimit "
 "mahdollisesti liian matala).\n"
 
-#: src/pi_user.c:473
+#: src/pi_user.c:472
 #, c-format
 msgid ""
 "WARNING: You are using an Aquila version based on select(). This limits the "
@@ -2490,7 +2500,7 @@ msgstr ""
 "hubin järkeväksi maksimikooksi %u. Tämän määrän ylittäminen voi kaataa "
 "hubin.\n"
 
-#: src/pi_user.c:480
+#: src/pi_user.c:479
 msgid ""
 "WARNING: You are using an Aquila version based on poll(). This limits the "
 "performance of your hub with larger sizes. Please consider moving to kernel "
@@ -2500,7 +2510,7 @@ msgstr ""
 "resurssien käyttöä suuremmilla käyttäjämäärillä. Harkitse 2.6 kernelin "
 "asentamista ja uutta glibc:ta.\n"
 
-#: src/pi_user.c:488
+#: src/pi_user.c:487
 msgid ""
 "WARNING: userlimit.registered equals userlimit.op. userlimit.registered "
 "includes the ops (since they are registered too): setting them equal means "
@@ -2511,117 +2521,117 @@ msgstr ""
 "yhtä  suuriksi tarkoittaa, että OP:t pääsevät hubiin, mutta muut "
 "rekisteröidyt käyttäjät eivät.\n"
 
-#: src/pi_user.c:522
+#: src/pi_user.c:521
 msgid "Maximum unregistered users."
 msgstr "Rekisteröitymättömien käyttäjien enimmäismäärä."
 
-#: src/pi_user.c:523
+#: src/pi_user.c:522
 msgid "Maximum registered users."
 msgstr "Rekisteröityneiden käyttäjien enimmäismäärä."
 
-#: src/pi_user.c:524
+#: src/pi_user.c:523
 msgid "Reserve place for this many ops in the registered users."
 msgstr ""
 "OP:iden enimmäismäärä (sisältyy rekisteröityneiden käyttäjien "
 "enimmäismäärään, eli laita pienempi arvo)."
 
-#: src/pi_user.c:528
+#: src/pi_user.c:527
 msgid "Minimum share requirement for unregistered users."
 msgstr "Vaadittava vähimmäisjako rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:529
+#: src/pi_user.c:528
 msgid "Minimum share requirement for registered users."
 msgstr "Vaadittava vähimmäisjako rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:530
+#: src/pi_user.c:529
 msgid "Minimum share requirement for OPS"
 msgstr "Vaadittava vähimmäisjako OP:ille"
 
-#: src/pi_user.c:532
+#: src/pi_user.c:531
 msgid "Minimum hubs for unregistered users."
 msgstr "Min hubit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:533
+#: src/pi_user.c:532
 msgid "Maximum hubs for unregistered users."
 msgstr "Max hubit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:534
+#: src/pi_user.c:533
 msgid "Minimum slots for unregistered users."
 msgstr "Min slotit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:535
+#: src/pi_user.c:534
 msgid "Maximum slots for unregistered users."
 msgstr "Max slotit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:536
+#: src/pi_user.c:535
 msgid "Minimum hubs/slot ratio for unregistered users."
 msgstr "Min hub/slot ratio rekisteröitymättömille."
 
-#: src/pi_user.c:538
+#: src/pi_user.c:537
 msgid "Minimum hubs for registered users."
 msgstr "Min hubit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:539
+#: src/pi_user.c:538
 msgid "Maximum hubs for registered users."
 msgstr "Max hubit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:540
+#: src/pi_user.c:539
 msgid "Minimum slots for registered users."
 msgstr "Min slotit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:541
+#: src/pi_user.c:540
 msgid "Maximum slots for registered users."
 msgstr "Max slotit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:542
+#: src/pi_user.c:541
 msgid "Minimum hubs/slot ratio for registered users."
 msgstr "Min hub/slot ratio rekisteröityneille."
 
-#: src/pi_user.c:544
+#: src/pi_user.c:543
 msgid "Minimum hubs for Operators."
 msgstr "Min hubit operaattoreille."
 
-#: src/pi_user.c:545
+#: src/pi_user.c:544
 msgid "Maximum hubs for Operators."
 msgstr "Max hubit operaattoreille."
 
-#: src/pi_user.c:546
+#: src/pi_user.c:545
 msgid "Minimum slots for Operators."
 msgstr "Min slotit operaattoreille."
 
-#: src/pi_user.c:547
+#: src/pi_user.c:546
 msgid "Maximum slots for Operators."
 msgstr "Max slotit operaattoreille."
 
-#: src/pi_user.c:548
+#: src/pi_user.c:547
 msgid "Minimum hubs/slot ratio for Operators."
 msgstr "Min hub/slot -suhde operaattoreille."
 
-#: src/pi_user.c:559
+#: src/pi_user.c:558
 msgid "Show logged in user counts."
 msgstr "Show logged in user counts."
 
-#: src/pi_user.c:561
+#: src/pi_user.c:560
 msgid "Ban a client."
 msgstr "Bannaa client."
 
-#: src/pi_user.c:562
+#: src/pi_user.c:561
 msgid "List client bans."
 msgstr "Listaa clientien bannit."
 
-#: src/pi_user.c:563
+#: src/pi_user.c:562
 msgid "Unban a client."
 msgstr "Poista clientin banni."
 
-#: src/pi_user.c:565
+#: src/pi_user.c:564
 msgid "Add a source IP restriction for a user."
 msgstr "Aseta IP-rajoitus käyttäjälle."
 
-#: src/pi_user.c:566
+#: src/pi_user.c:565
 msgid "Remove a source IP restriction for a user."
 msgstr "Poista IP-rajoitus käyttäjältä."
 
-#: src/pi_user.c:567
+#: src/pi_user.c:566
 msgid "Show source IP restrictions for a user."
 msgstr "Näytä käyttäjän IP-rajoitus."
 
@@ -2645,29 +2655,29 @@ msgstr "Muistettavien IP:iden määrä."
 msgid "List iplogs."
 msgstr "Listaa IP-logit."
 
-#: src/hub.c:170
+#: src/hub.c:171
 #, c-format
 msgid "<%s> Don't reconnect so fast.|"
 msgstr "<%s> Don't reconnect so fast.|"
 
-#: src/hub.c:186 src/hub.c:210 src/hub.c:232
+#: src/hub.c:187 src/hub.c:211 src/hub.c:233
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr "<%s> This hub is too busy, please try again later.|"
 
-#: src/hub.c:312 src/hub.c:445
+#: src/hub.c:313 src/hub.c:453
 msgid "Connection closed."
 msgstr "Connection closed."
 
-#: src/hub.c:536
+#: src/hub.c:544
 msgid "Error on read."
 msgstr "Virhe lukiessa."
 
-#: src/hub.c:558
+#: src/hub.c:566
 msgid "Timeout"
 msgstr "Aikakatkaisu"
 
-#: src/hub.c:566
+#: src/hub.c:574
 msgid "Socket error."
 msgstr "Socket error."
 

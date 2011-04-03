@@ -267,7 +267,6 @@ unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * out
 					    unsigned int argc, unsigned char **argv)
 {
   struct in_addr ip, netmask;
-  plugin_user_t *tgt;
 
   if (argc < 3) {
     bf_printf (output, _("Usage: %s <nick> <ip/network>"), argv[0]);

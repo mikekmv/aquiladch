@@ -172,6 +172,8 @@
 #define IPLIST_SIZE	8096
 #define IPLIST_TIME	30
 
+#define DEFAULT_NICKCHARS ""
+
 /*
  * Fork storm prevention: minimum second delay between forks
  */

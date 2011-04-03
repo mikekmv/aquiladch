@@ -41,7 +41,6 @@ unsigned long chatlogmax = 0;
 unsigned long pi_chatlog_handler_chatlog (plugin_user_t * user, buffer_t * output, void *dummy,
 					  unsigned int argc, unsigned char **argv)
 {
-  unsigned long l;
   buffer_t *b;
   string_list_entry_t *e;
 

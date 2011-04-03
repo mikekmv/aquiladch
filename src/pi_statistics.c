@@ -23,6 +23,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <limits.h>
 
 #ifdef HAVE_MALLOC_H
 #  include <malloc.h>
@@ -549,6 +550,7 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " redirect : %lu\n", nmdc_stats.redirect);
   bf_printf (output, " tokens : %lu\n", nmdc_stats.tokens);
   bf_printf (output, " brokenkey : %lu\n", nmdc_stats.brokenkey);
+  bf_printf (output, " badnick : %lu\n", nmdc_stats.badnick);
   bf_printf (output, " usednick : %lu\n", nmdc_stats.usednick);
   bf_printf (output, " softban : %lu\n", nmdc_stats.softban);
   bf_printf (output, " nickban : %lu\n", nmdc_stats.nickban);

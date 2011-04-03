@@ -1,6 +1,12 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Hardcode LC_NUMERIC to "C" to prevent problems with tag parsing.
+	Added nickchar controls, only for unregistered users.
+	Fixes to compile aquila on OS X
+	Added gcc 4.x.y warnings and fixes for them.
+	Fixed cachelist bug incase of kick.
+	Also, send update block zipped if possible.
 	Fixed bug in the nicklistcache that could cause disconnects.
 	Added UserIP2 support.
 	Increase buffersize a bit when using translatable strings.

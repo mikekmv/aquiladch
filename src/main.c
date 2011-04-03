@@ -26,6 +26,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <locale.h>
 
@@ -285,7 +286,11 @@ int main (int argc, char **argv)
   sigprocmask (SIG_BLOCK, &set, NULL);
 
 #if ENABLE_NLS
+  /* we adjust the language to the enviroment, but
+     the decimal point is hardcoded to .
+   */
   setlocale (LC_ALL, "");
+  setlocale (LC_NUMERIC, "C");
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 #endif

@@ -51,7 +51,7 @@
 **                                                                            **
 \******************************************************************************/
 
-#define SKIPTOCHAR(var, end, ch)	for (; *var && (*var != ch) && (var < end); *var++)
+#define SKIPTOCHAR(var, end, ch)	for (; *var && (*var != ch) && (var < end); var++)
 
 /******************************************************************************\
 **                                                                            **
@@ -259,6 +259,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
   banlist_entry_t *ban;
   user_t *existing_user;
   account_t *a;
+  unsigned char *c;
 
   if (tkn->type != TOKEN_VALIDATENICK)
     return 0;
@@ -268,6 +269,20 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 
   /* nick already used ? */
   do {
+    /* check nick for illegal characters */
+    for (c = tkn->argument; *c && nmdc_forbiddenchars[*c]; c++);
+    if (*c) {
+      bf_printf (output, "<%s> The nickname requested contains an illegal character: '%c'|",
+		 HubSec->nick, *c);
+      retval = server_write (u->parent, output);
+      proto_nmdc_user_redirect (u,
+				bf_buffer (__
+					   ("Nickname refused due to unacceptable characters.")));
+      nmdc_stats.badnick++;
+      retval = -1;
+      break;
+    }
+
     strncpy (u->nick, tkn->argument, NICKLENGTH);
     u->nick[NICKLENGTH - 1] = 0;
 
@@ -307,6 +322,28 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	proto_nmdc_user_say_string (HubSec, output,
 				    __
 				    ("Your account priviliges will not be awarded until you set a password."));
+      }
+    } else {
+      /* verify nick */
+      if (nickchars && *nickchars) {
+	c = tkn->argument;
+	while (*c && nickchar_map[*c])
+	  c++;
+	if (*c) {
+	  bf_strcat (output, "$ValidateDenide ");
+	  bf_strcat (output, u->nick);
+	  bf_strcat (output, "|");
+	  bf_printf (output,
+		     "<%s> The nickname requested contains an unacceptable character: '%c'|",
+		     HubSec->nick, *c);
+	  retval = server_write (u->parent, output);
+	  proto_nmdc_user_redirect (u,
+				    bf_buffer (__
+					       ("Nickname refused due to unacceptable characters.")));
+	  nmdc_stats.badnick++;
+	  retval = -1;
+	  break;
+	}
       }
     }
 
@@ -589,6 +626,8 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 				    __ ("Another instance of you is connecting, bye!"));
 	server_write (existing_user->parent, output);
 	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
+	*output->s = '\0';
+	output->e = output->s;
       }
       existing_user = NULL;
     }
@@ -900,7 +939,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       string_list_entry_t *entry;
 
       /* if entry in the stringlist, replace it */
-      if (entry = string_list_find (&cache.myinfoupdateop.messages, u)) {
+      if ((entry = string_list_find (&cache.myinfoupdateop.messages, u))) {
 	cache.myinfoupdateop.length -= bf_used (entry->data);
 	string_list_del (&cache.myinfoupdateop.messages, entry);
 

@@ -37,6 +37,7 @@
 
 #include "core_config.h"
 #include "iplist.h"
+#include "aqtime.h"
 
 #define HUB_INPUTBUFFER_SIZE	4096
 
@@ -368,6 +369,12 @@ int server_disconnect_user (client_t * cl, char *reason)
   if (!cl)
     return 0;
 
+  ASSERT (cl->state != HUB_STATE_CLOSED);
+  if (cl->state == HUB_STATE_CLOSED)
+    return 0;
+
+  cl->state = HUB_STATE_CLOSED;
+
   /* first disconnect on protocol level: parting messages can be written */
   cl->proto->user_disconnect (cl->user, reason);
 
@@ -406,7 +413,8 @@ int server_handle_output (esocket_t * es)
 {
   client_t *cl = (client_t *) es->context;
   buffer_t *b;
-  long w, l, o;
+  long w;
+  unsigned long l, o;
   unsigned long t;
   string_list_entry_t *e;
 
@@ -454,7 +462,7 @@ int server_handle_output (esocket_t * es)
       t += w;
       cl->offset += w;
       hubstats.TotalBytesSend += w;
-      if (w != l)
+      if ((unsigned) w != l)
 	break;
       o = 0;
     }

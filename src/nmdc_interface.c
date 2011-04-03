@@ -17,6 +17,13 @@
  *  
  */
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#ifdef HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+#endif
+#include <arpa/inet.h>
+
 #include "hub.h"
 
 #include "user.h"
@@ -37,6 +44,8 @@
 **                            GLOBAL VARIABLES                                **
 **                                                                            **
 \******************************************************************************/
+
+plugin_t *plugin_nmdc;
 
 cache_t cache;
 ratelimiting_t rates;
@@ -66,6 +75,12 @@ unsigned int srmaxlength;
 unsigned int researchmininterval, researchperiod, researchmaxcount;
 
 unsigned char *defaultbanmessage = NULL;
+
+unsigned char *nickchars;
+unsigned char nickchar_map[256];
+unsigned char nmdc_forbiddenchars[256];
+
+config_element_t *cfg_nickchars;
 
 leaky_bucket_t rate_warnings;
 
@@ -777,7 +792,7 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   server_write (u->parent, b);
   bf_free (b);
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->flags |= NMDC_FLAG_WASKICKED;
 
   if (u->state != PROTO_STATE_DISCONNECTED)
     server_disconnect_user (u->parent, "User forcemoved.");
@@ -806,7 +821,7 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
     bf_free (b);
   }
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->flags |= NMDC_FLAG_WASKICKED;
 
   server_disconnect_user (u->parent, "User dropped");
 
@@ -841,7 +856,7 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
     bf_strcat (b, "|");
   }
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->flags |= NMDC_FLAG_WASKICKED;
 
   server_write (u->parent, b);
   bf_free (b);
@@ -881,7 +896,7 @@ int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
 		 now->tv_sec + config.ViolationBantime);
   }
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->flags |= NMDC_FLAG_WASKICKED;
 
   /* send message */
   server_write (u->parent, buf);
@@ -1004,13 +1019,47 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 
 /******************************************************************************\
 **                                                                            **
+**                                Nicklist char handling                      **
+**                                                                            **
+\******************************************************************************/
+
+void nmdc_nickchar_rebuild ()
+{
+  unsigned char *c = nickchars;
+
+  if (!c || !*c) {
+    /* accept all chars */
+    memset (nickchar_map, 1, sizeof (nickchar_map));
+    return;
+  }
+
+  memset (nickchar_map, 0, sizeof (nickchar_map));
+
+  for (; *c; c++)
+    nickchar_map[*c] = 1;
+}
+
+unsigned long nmdc_event_config (plugin_user_t * user, void *dummy, unsigned long event,
+				 config_element_t * elem)
+{
+  if (elem == cfg_nickchars) {
+    nmdc_nickchar_rebuild ();
+    return PLUGIN_RETVAL_CONTINUE;
+  }
+
+  return PLUGIN_RETVAL_CONTINUE;
+}
+
+
+/******************************************************************************\
+**                                                                            **
 **                                INIT HANDLING                               **
 **                                                                            **
 \******************************************************************************/
 
 int proto_nmdc_init ()
 {
-  int i, l;
+  unsigned int i, l;
   unsigned char *s, *d;
   unsigned char lock[16 + sizeof (LOCK) + 2 + LOCKLENGTH + 2 + 1];
   struct timeval now;
@@ -1226,6 +1275,7 @@ int proto_nmdc_init ()
   researchperiod = DEFAULT_RESEARCH_PERIOD;
   researchmaxcount = DEFAULT_RESEARCH_MAXCOUNT;
   defaultbanmessage = strdup ("");
+  nickchars = strdup (DEFAULT_NICKCHARS);
 
   config_register ("hub.allowcloning", CFG_ELEM_UINT, &cloning,
 		   _("Allow multiple users from the same IP address."));
@@ -1246,6 +1296,10 @@ int proto_nmdc_init ()
   config_register ("nmdc.defaultbanmessage", CFG_ELEM_STRING, &defaultbanmessage,
 		   _("This message is send to all banned users when they try to join."));
 
+  cfg_nickchars = config_register ("nmdc.nickchars", CFG_ELEM_STRING, &nickchars,
+				   _
+				   ("These are the characters allowed in a nick. An empty string means all characters. Does NOT support utf-8 character."));
+
   /* further inits */
   memset (&hashlist, 0, sizeof (hashlist));
   hash_init (&hashlist);
@@ -1258,14 +1312,24 @@ int proto_nmdc_init ()
 
   banlist_init (&reconnectbanlist);
 
+  memset (nmdc_forbiddenchars, 1, sizeof (nmdc_forbiddenchars));
+  nmdc_forbiddenchars[' '] = 0;
+  nmdc_forbiddenchars['\0'] = 0;
+  nmdc_forbiddenchars['\n'] = 0;
+  nmdc_forbiddenchars['\t'] = 0;
+
   return 0;
 }
 
 int proto_nmdc_setup ()
 {
+
   HubSec = proto_nmdc_user_addrobot (config.HubSecurityNick, config.HubSecurityDesc);
   HubSec->flags |= PROTO_FLAG_HUBSEC;
   plugin_new_user ((plugin_private_t **) & HubSec->plugin_priv, HubSec, &nmdc_proto);
+
+  plugin_nmdc = plugin_register ("nmdc");
+  plugin_request (plugin_nmdc, PLUGIN_EVENT_CONFIG, (void *) &nmdc_event_config);
 
   return 0;
 }

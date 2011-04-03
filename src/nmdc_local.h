@@ -42,6 +42,10 @@ extern banlist_t reconnectbanlist;
 
 extern unsigned int cloning;
 
+extern unsigned char *nickchars;
+extern unsigned char nickchar_map[256];
+extern unsigned char nmdc_forbiddenchars[256];
+
 extern unsigned int chatmaxlength;
 extern unsigned int searchmaxlength;
 extern unsigned int srmaxlength;

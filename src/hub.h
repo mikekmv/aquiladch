@@ -35,6 +35,7 @@
 #define HUB_STATE_NORMAL	1
 #define HUB_STATE_BUFFERING	2
 #define HUB_STATE_OVERFLOW	3
+#define HUB_STATE_CLOSED	4
 
 typedef struct hub_statitics {
   unsigned long TotalBytesSend;

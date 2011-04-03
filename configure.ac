@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.10-pre3-beta35]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.10-pre3-beta36]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -23,7 +23,7 @@ then
 	case $GCC_VERSION in
 	3.3.*)  GCC_CFLAGS="-Wall -W -Wno-unused-parameter" ;;
 	3.4.*)	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter" ;;
-	4.1.*)	GCC_CFLAGS="" ;;
+	4.*.*)	GCC_CFLAGS="-Wall -Wextra -Wno-pointer-sign -Wno-unused-parameter" ;;
 	esac
 fi
 AC_SUBST(GCC_CFLAGS)

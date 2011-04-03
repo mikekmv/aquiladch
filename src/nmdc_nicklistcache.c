@@ -204,7 +204,7 @@ int nicklistcache_rebuild (struct timeval now)
 
 int nicklistcache_sendnicklist (user_t * target)
 {
-  buffer_t *b;
+  buffer_t *b = NULL;
 
   if ((now.tv_sec - cache.lastrebuild) > PROTOCOL_REBUILD_PERIOD)
     cache.needrebuild = 1;
@@ -248,7 +248,14 @@ int nicklistcache_sendnicklist (user_t * target)
 #else
     server_write_credit (target->parent, cache.infolist);
 #endif
-    b = bf_copy (cache.infolistupdate, 0);
+    if (target->supports & NMDC_SUPPORTS_ZPipe) {
+      zline (cache.infolistupdate, &b, NULL);
+    } else if (target->supports & NMDC_SUPPORTS_ZLine) {
+      zline (cache.infolistupdate, NULL, &b);
+    }
+    if ((!b) || (b == cache.infolistupdate))
+      b = bf_copy (cache.infolistupdate, 0);
+
     server_write_credit (target->parent, b);
     bf_free (b);
   } else {

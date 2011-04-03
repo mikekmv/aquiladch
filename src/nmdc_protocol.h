@@ -88,6 +88,7 @@ typedef struct {
   unsigned long redirect;	/* all redirects */
   unsigned long tokens;		/* all tokens processed */
   unsigned long brokenkey;	/* all users refused cuz of broken key */
+  unsigned long badnick;	/* all users refused cuz of illegal chars in nickname */
   unsigned long usednick;	/* all users refused cuz of nickname already used */
   unsigned long softban;
   unsigned long nickban;
