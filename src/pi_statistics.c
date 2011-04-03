@@ -75,15 +75,18 @@ procstat_t procstats[PROCSTAT_LEVELS][PROCSTAT_MEASUREMENTS + 1];
 unsigned int current[PROCSTAT_LEVELS];
 
 buffer_t *cpuinfo = NULL;
+unsigned int cpucount = 0;
 
 /************************* CPU FUNCTIONS ******************************************/
 
 void cpu_parse ()
 {
-  int i;
   FILE *fp;
   buffer_t *b;
   unsigned char buf[1024];
+
+  ASSERT (!cpuinfo);
+  ASSERT (!cpucount);
 
   b = bf_alloc (BUFSIZE);
 
@@ -93,11 +96,10 @@ void cpu_parse ()
     goto leave;
   }
 
-  i = 0;
   while (!feof (fp)) {
     fgets (buf, 1024, fp);
     if (!strncmp (buf, "model name", 10)) {
-      bf_printf (b, "CPU%.1d: %.*s\n", i++, strlen (buf) - 14, buf + 13);
+      bf_printf (b, "CPU%.1d: %.*s\n", cpucount++, strlen (buf) - 14, buf + 13);
     } else if (!strncmp (buf, "cpu MHz", 7)) {
       bf_printf (b, "     Clock: %.*s MHz ", strlen (buf) - 12, buf + 11);
     } else if (!strncmp (buf, "bogomips", 8)) {
@@ -161,7 +163,7 @@ float cpu_calc (procstat_t * old, procstat_t * new)
   real = TV_TO_MSEC (new->tv);
   real -= TV_TO_MSEC (old->tv);
 
-  return (100.0 * (float) used) / (float) real;
+  return ((100.0 * (float) used) / (float) real) / (float) cpucount;
 }
 
 float cpu_calculate (int seconds)

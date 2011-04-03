@@ -523,8 +523,8 @@ int proto_nmdc_user_free (user_t * user)
   };
 
   user->parent = NULL;
-  /* if the user was online, put him in the cachelist */
-  if (!(user->flags & NMDC_FLAG_WASONLINE)) {
+  /* if the user was online, put him in the cachelist. if he was kicked, don't. */
+  if (!(user->flags & NMDC_FLAG_WASONLINE) || (user->flags & NMDC_FLAG_WASKICKED)) {
     user->next = freelist;
     user->prev = NULL;
     freelist = user;
@@ -565,6 +565,7 @@ void proto_nmdc_user_cachefree ()
       bf_strcat (buf, u->nick);
       cache_queue (cache.myinfo, u, buf);
       bf_free (buf);
+      nicklistcache_deluser (u);
 
       /* remove from hashlist */
       hash_deluser (&cachehashlist, &u->hash);
@@ -587,6 +588,7 @@ user_t *proto_nmdc_user_find (unsigned char *nick)
 
 int proto_nmdc_user_disconnect (user_t * u)
 {
+  buffer_t *buf;
 
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
@@ -601,22 +603,26 @@ int proto_nmdc_user_disconnect (user_t * u)
     string_list_clear (&((nmdc_user_t *) u->pdata)->results.messages);
     string_list_clear (&((nmdc_user_t *) u->pdata)->privatemessages.messages);
 
-    u->flags |= NMDC_FLAG_WASONLINE;
 
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
-    nicklistcache_deluser (u);
     hash_deluser (&hashlist, &u->hash);
-    hash_adduser (&cachehashlist, u);
+
+    /* kicked users do not go on the cachehashlist */
+    if (u->flags & NMDC_FLAG_WASKICKED) {
+      nicklistcache_deluser (u);
+      buf = bf_alloc (8 + NICKLENGTH);
+      bf_strcat (buf, "$Quit ");
+      bf_strcat (buf, u->nick);
+      cache_queue (cache.myinfo, u, buf);
+      bf_free (buf);
+    } else {
+      hash_adduser (&cachehashlist, u);
+      u->flags |= NMDC_FLAG_WASONLINE;
+    }
   } else {
     /* if the returned user has same nick, but different user pointer, this is legal */
     ASSERT (u != hash_find_nick (&hashlist, u->nick, strlen (u->nick)));
-  }
-
-  /* clean out our MyINFO info */
-  if (u->MyINFO) {
-    bf_free (u->MyINFO);
-    u->MyINFO = NULL;
   }
 
   if (u->supports & NMDC_SUPPORTS_ZLine)
@@ -657,6 +663,8 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   server_write (u->parent, b);
   bf_free (b);
 
+  u->flags & NMDC_FLAG_WASKICKED;
+
   if (u->state != PROTO_STATE_DISCONNECTED)
     server_disconnect_user (u->parent);
 
@@ -683,6 +691,8 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
     server_write (u->parent, b);
     bf_free (b);
   }
+
+  u->flags & NMDC_FLAG_WASKICKED;
 
   server_disconnect_user (u->parent);
 
@@ -716,6 +726,8 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
     bf_strcat (b, config.Redirect);
     bf_strcat (b, "|");
   }
+
+  u->flags & NMDC_FLAG_WASKICKED;
 
   server_write (u->parent, b);
   bf_free (b);
@@ -798,6 +810,11 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 
     if (o->tthlist)
       free (o->tthlist);
+
+    if (o->MyINFO) {
+      bf_free (o->MyINFO);
+      o->MyINFO = NULL;
+    }
 
     if (o->plugin_priv)
       plugin_del_user ((plugin_private_t **) & o->plugin_priv);

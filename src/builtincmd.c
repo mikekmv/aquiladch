@@ -796,11 +796,16 @@ unsigned long handler_banlist (plugin_user_t * user, buffer_t * output, void *pr
 {
   struct in_addr ip;
 
-  if (argc < 2) {
-    bf_printf (output, "Usage: %s <ip/nick>", argv[0]);
+  if (argc < 1) {
+    bf_printf (output, "Usage: %s [<ip|nick>]", argv[0]);
     return 0;
   }
 
+  if (argc < 2) {
+    if (!plugin_banlist (output))
+      bf_printf (output, "No bans.");
+    goto leave;
+  }
   if (inet_aton (argv[1], &ip)) {
     if (!plugin_user_findipban (output, ip.s_addr)) {
       bf_printf (output, "No IP bans found for %s", inet_ntoa (ip));

@@ -503,6 +503,34 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   }
 }
 
+unsigned int plugin_banlist (buffer_t * output)
+{
+  unsigned long bucket, n;
+  banlist_entry_t *lst, *e;
+  struct in_addr ip, nm;
+  time_t now;
+
+  n = 0;
+  time (&now);
+  dlhashlist_foreach (&softbanlist.list_ip, bucket) {
+    lst = dllist_bucket (&softbanlist.list_ip, bucket);
+    dllist_foreach (lst, e) {
+      ip.s_addr = e->ip;
+      nm.s_addr = e->netmask;
+      if (e->expire) {
+	bf_printf (output, "%s %s Expires: ", e->nick, print_ip (ip, nm));
+	time_print (output, e->expire - now);
+	bf_printf (output, " Message: %.*s\n", bf_used (e->message), e->message->s);
+      } else {
+	bf_printf (output, "%s %s Message: %.*s\n", e->nick, print_ip (ip, nm),
+		   bf_used (e->message), e->message->s);
+      }
+      n++;
+    }
+  }
+  return (n > 0);
+}
+
 /******************************* UTILITIES: USER MANAGEMENT **************************************/
 
 unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message)

@@ -1682,6 +1682,17 @@ int pi_lua_cmdclean (lua_State * lua)
 }
 
 /******************************************************************************************
+ *  LUA local functions
+ */
+
+int pi_lua_hubversion (lua_State * lua)
+{
+  lua_pushstring (lua, HUBSOFT_NAME);
+  lua_pushstring (lua, AQUILA_VERSION);
+  return 2;
+}
+
+/******************************************************************************************
  *  LUA Function registration
  */
 
@@ -1765,6 +1776,9 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   /* config functions */
   {"SetConfig", pi_lua_setconfig,},
   {"GetConfig", pi_lua_getconfig,},
+
+  /* returns hub version */
+  {"getHubVersion", pi_lua_hubversion,},
 
   {NULL, NULL}
 };
