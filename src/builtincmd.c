@@ -860,20 +860,17 @@ unsigned long handler_hardbanlist (plugin_user_t * user, buffer_t * output, void
   }
 
   if (argc < 2) {
-    if (!plugin_banlist (output))
+    if (!plugin_hardbanlist (output))
       bf_printf (output, _("No bans found."));
     goto leave;
   }
   if (inet_aton (argv[1], &ip)) {
-    if (!plugin_user_findipban (output, ip.s_addr)) {
+    if (!plugin_user_findiphardban (output, ip.s_addr)) {
       bf_printf (output, _("No IP bans found for %s"), inet_ntoa (ip));
       goto leave;
     }
   } else {
-    if (!plugin_user_findnickban (output, argv[1])) {
-      bf_printf (output, _("No Nick bans found for %s"), argv[1]);
-      goto leave;
-    }
+    bf_printf (output, _("Sorry, \"%s\" is not a recognisable IP address."), argv[1]);
   }
 
 leave:

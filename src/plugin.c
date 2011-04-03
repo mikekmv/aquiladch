@@ -489,6 +489,38 @@ int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   }
 }
 
+int plugin_user_findiphardban (buffer_t * buf, unsigned long ip)
+{
+  struct in_addr ipa, netmask;
+  banlist_entry_t *ie;
+
+  ie = banlist_find_byip (&hardbanlist, ip);
+  if (!ie)
+    return 0;
+
+  ipa.s_addr = ie->ip;
+  netmask.s_addr = ie->netmask;
+  if (ie->expire) {
+    if (ie->nick[0]) {
+      return bf_printf (buf, _("Found IP ban by %s for %s (%s) for %lus because: %.*s"), ie->op,
+			print_ip (ipa, netmask), ie->nick, ie->expire - now.tv_sec,
+			bf_used (ie->message), ie->message->s);
+    } else {
+      return bf_printf (buf, _("Found IP ban by %s for %s for %lus because: %.*s"), ie->op,
+			print_ip (ipa, netmask), ie->expire - now.tv_sec, bf_used (ie->message),
+			ie->message->s);
+    }
+  } else {
+    if (ie->nick[0]) {
+      return bf_printf (buf, _("Found permanent ban by %s for %s (%s) because: %.*s"), ie->op,
+			print_ip (ipa, netmask), ie->nick, bf_used (ie->message), ie->message->s);
+    } else {
+      return bf_printf (buf, _("Found permanent ban by %s for %s because: %.*s"), ie->op,
+			print_ip (ipa, netmask), bf_used (ie->message), ie->message->s);
+    }
+  }
+}
+
 int plugin_banlist (buffer_t * output)
 {
   unsigned long bucket, n;

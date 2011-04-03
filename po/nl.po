@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-02-07 18:32+0100\n"
+"POT-Creation-Date: 2007-02-11 12:24+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -23,8 +23,8 @@ msgstr ""
 
 #: src/builtincmd.c:117 src/builtincmd.c:322 src/builtincmd.c:388
 #: src/builtincmd.c:442 src/builtincmd.c:488 src/builtincmd.c:692
-#: src/builtincmd.c:742 src/builtincmd.c:1227 src/builtincmd.c:1324
-#: src/builtincmd.c:1380 src/builtincmd.c:1431 src/builtincmd.c:1497
+#: src/builtincmd.c:742 src/builtincmd.c:1224 src/builtincmd.c:1321
+#: src/builtincmd.c:1377 src/builtincmd.c:1428 src/builtincmd.c:1494
 #, c-format
 msgid "User %s not found."
 msgstr "Grebruiker %s niet gevonden."
@@ -149,7 +149,7 @@ msgstr ""
 "Sorry, u kan gebruikers niet langer dan %s verbannen met een drop"
 
 #: src/builtincmd.c:436 src/builtincmd.c:482 src/builtincmd.c:541
-#: src/builtincmd.c:1284 src/builtincmd.c:1318 src/pi_user.c:335
+#: src/builtincmd.c:1281 src/builtincmd.c:1315 src/pi_user.c:335
 #, c-format
 msgid "Usage: %s <nick>"
 msgstr "Gebruik: %s <naam>"
@@ -188,6 +188,7 @@ msgid "No one using IP %s found."
 msgstr "Niemand met IP %s gevonden."
 
 #: src/builtincmd.c:531 src/builtincmd.c:571 src/builtincmd.c:594
+#: src/builtincmd.c:873
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address."
 msgstr "Sorry, \"%s\" is geen herkenbaar IP adres."
@@ -326,85 +327,85 @@ msgstr "Geen verbanning gevonden."
 msgid "No IP bans found for %s"
 msgstr "Geen IP verbanning gevonden voor %s"
 
-#: src/builtincmd.c:843 src/builtincmd.c:874
+#: src/builtincmd.c:843
 #, c-format
 msgid "No Nick bans found for %s"
 msgstr "Geen naam verbanning gevonden voor %s"
 
-#: src/builtincmd.c:895
+#: src/builtincmd.c:892
 msgid "Available commands:\n"
 msgstr "Beschikbare commandos:\n"
 
-#: src/builtincmd.c:901
+#: src/builtincmd.c:898
 msgid "Commands are preceded with ! or +\n"
 msgstr "Commandos worden voorafgegaan door ! of +\n"
 
-#: src/builtincmd.c:920
+#: src/builtincmd.c:917
 #, c-format
 msgid "Command %s not found.\n"
 msgstr "Commando %s niet gevonden\n"
 
-#: src/builtincmd.c:939
+#: src/builtincmd.c:936
 #, c-format
 msgid "Usage: %s <group> <rights>...\n"
 msgstr "Gebruik: %s <group> <rechten>...\n"
 
-#: src/builtincmd.c:945
+#: src/builtincmd.c:942
 #, c-format
 msgid "Group %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:960 src/builtincmd.c:1004 src/builtincmd.c:1764
+#: src/builtincmd.c:957 src/builtincmd.c:1001 src/builtincmd.c:1761
 msgid "You are not allowed to assign rights.\n"
 msgstr "U hebt het recht niet om rechten toe te wijzen.\n"
 
-#: src/builtincmd.c:964 src/builtincmd.c:1008
+#: src/builtincmd.c:961 src/builtincmd.c:1005
 msgid "You are not allowed to assign the following rights to this group: "
 msgstr ""
 "U hebt her recht niet om de volgende rechten aan deze groep toe te wijzen:"
 
-#: src/builtincmd.c:973
+#: src/builtincmd.c:970
 #, c-format
 msgid "Group %s created with: "
 msgstr "Groep %s aangemaakt met: "
 
-#: src/builtincmd.c:988
+#: src/builtincmd.c:985
 #, c-format
 msgid "Usage: %s <group> <[+]right/-right>...\n"
 msgstr "Gebruik: %s <group> <[+]recht/-recht>...\n"
 
-#: src/builtincmd.c:994 src/builtincmd.c:1048 src/builtincmd.c:1105
-#: src/builtincmd.c:1144
+#: src/builtincmd.c:991 src/builtincmd.c:1045 src/builtincmd.c:1102
+#: src/builtincmd.c:1141
 #, c-format
 msgid "Group %s does not exist.\n"
 msgstr "Groep %s bestaat niet.\n"
 
-#: src/builtincmd.c:1016
+#: src/builtincmd.c:1013
 msgid "You are not allowed to remove the following rights from this group: "
 msgstr ""
 "U hebt het recht niet om de volgende rechten van deze groep te verwijderen: "
 
-#: src/builtincmd.c:1027
+#: src/builtincmd.c:1024
 #, c-format
 msgid "Group %s modified. Current rights:"
 msgstr "Groep %s aangepast. Huidige rechten zijn:"
 
-#: src/builtincmd.c:1041
+#: src/builtincmd.c:1038
 #, c-format
 msgid "Usage: %s <group>"
 msgstr "Gebruik: %s <groep>"
 
-#: src/builtincmd.c:1053
+#: src/builtincmd.c:1050
 #, c-format
 msgid "Group %s still has %ld users.\n"
 msgstr "Groep %s heeft nog %ld gebruikers.\n"
 
-#: src/builtincmd.c:1058
+#: src/builtincmd.c:1055
 #, c-format
 msgid "Group %s deleted.\n"
 msgstr "Groep %s is verwijdered.\n"
 
-#: src/builtincmd.c:1108
+#: src/builtincmd.c:1105
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -412,31 +413,31 @@ msgid ""
 " "
 msgstr "Groep %s: "
 
-#: src/builtincmd.c:1135
+#: src/builtincmd.c:1132
 #, c-format
 msgid "Usage: %s <nick> <group> [<rights...>]"
 msgstr "Gebruik: %s <naam> <groep> [<rechten...>]"
 
-#: src/builtincmd.c:1140
+#: src/builtincmd.c:1137
 #, c-format
 msgid "User %s already exists.\n"
 msgstr "Gebruiker %s bestaat al.\n"
 
-#: src/builtincmd.c:1154 src/builtincmd.c:1395
+#: src/builtincmd.c:1151 src/builtincmd.c:1392
 msgid "You are not allowed to assign a user to this group.\n"
 msgstr "U hebt niet het recht om een gebruiker aan deze groep toe te voegen.\n"
 
-#: src/builtincmd.c:1160 src/builtincmd.c:1222
+#: src/builtincmd.c:1157 src/builtincmd.c:1219
 msgid "You are not allowed to assign a user extra rights.\n"
 msgstr "U hebt niet het recht om een gebruiker extra rechten toe te wijzen.\n"
 
-#: src/builtincmd.c:1164
+#: src/builtincmd.c:1161
 msgid "You are not allowed to assign this user: "
 msgstr ""
 "U hebt het recht niet om de volgende rechten toe te wijzen aan deze "
 "gebruiker: "
 
-#: src/builtincmd.c:1175 src/builtincmd.c:1264
+#: src/builtincmd.c:1172 src/builtincmd.c:1261
 #, c-format
 msgid ""
 "User %s created with group %s.\n"
@@ -445,7 +446,7 @@ msgstr ""
 "Gebruiker %s aangemaakt met groep %s.\n"
 "Huidige rechten:"
 
-#: src/builtincmd.c:1189
+#: src/builtincmd.c:1186
 #, c-format
 msgid ""
 "You have been registered by %s. Please use !passwd <password> to set a "
@@ -455,7 +456,7 @@ msgstr ""
 "een wachtwoord in te stellen en terug in te loggen om uw nieuwe rechten te "
 "verkrijgen. U bent de volgende rechten toegewezen:\n"
 
-#: src/builtincmd.c:1198
+#: src/builtincmd.c:1195
 msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
@@ -463,7 +464,7 @@ msgstr ""
 "Gebruiker is al ingelogd. Hij is aangeraden om een paswoord te zetten en "
 "opnieuw in te loggen.\n"
 
-#: src/builtincmd.c:1202
+#: src/builtincmd.c:1199
 #, c-format
 msgid ""
 "No user with nickname %s is currently logged in. Please notify the user "
@@ -472,51 +473,51 @@ msgstr ""
 "Geen gebruiker gevonden met naam %s. Gelieve zelf de gebruiker te "
 "verwittigen.\n"
 
-#: src/builtincmd.c:1216
+#: src/builtincmd.c:1213
 #, c-format
 msgid "Usage: %s <nick> <[+]right/-right>...\n"
 msgstr "Gebruik: %s <naam> <[+]recht/-recht>...\n"
 
-#: src/builtincmd.c:1237
+#: src/builtincmd.c:1234
 msgid "You are not allowed to assign the following rights to this user: "
 msgstr ""
 "U hebt niet het recht om de volgende rechten aan deze gebruiker toe te "
 "kennen: "
 
-#: src/builtincmd.c:1244
+#: src/builtincmd.c:1241
 msgid "You are not allowed to touch: "
 msgstr "U hebt geen toestemming om de volgende rechten te veranderen: "
 
-#: src/builtincmd.c:1257
+#: src/builtincmd.c:1254
 #, c-format
 msgid "Warning! User %s is still awarded the following rights by his group:"
 msgstr ""
 "Waarschuwing! Gebruiker %s krijgt de volgende rechten nog altijd van zijn "
 "groep:"
 
-#: src/builtincmd.c:1271
+#: src/builtincmd.c:1268
 msgid ""
 "User is already logged in. Tell him to rejoin to gain all his new rights.\n"
 msgstr ""
 "Gebruiker is al ingelogd. Vertel hem dat hij opnieuw moet inlogged om zijn "
 "rechten toegewezen te krijgen.\n"
 
-#: src/builtincmd.c:1289
+#: src/builtincmd.c:1286
 #, c-format
 msgid "User account %s does not exist.\n"
 msgstr "Gebruiker account %s bestaat niet.\n"
 
-#: src/builtincmd.c:1295
+#: src/builtincmd.c:1292
 #, c-format
 msgid "You are not allowed to delete user %s.\n"
 msgstr "U hebt niet de toestemming om gebruiker %s de verwijderen\n"
 
-#: src/builtincmd.c:1300
+#: src/builtincmd.c:1297
 #, c-format
 msgid "User account %s deleted.\n"
 msgstr "Gebruiker account %s verwijderd.\n"
 
-#: src/builtincmd.c:1304
+#: src/builtincmd.c:1301
 msgid ""
 "User is still logged in with all rights of the deleted account. Kick the "
 "user to take them away.\n"
@@ -524,64 +525,64 @@ msgstr ""
 "Gebruiker is nog altijd ingelogd met alle rechten van de verwijderde "
 "account. Kick de gebruiker om de rechten te verwijderen.\n"
 
-#: src/builtincmd.c:1326
+#: src/builtincmd.c:1323
 #, c-format
 msgid "User information for user %s\n"
 msgstr "Gebruiker informatie voor %s\n"
 
-#: src/builtincmd.c:1330
+#: src/builtincmd.c:1327
 #, c-format
 msgid "Group %s, Rights: "
 msgstr "Groep %s, Rechten: "
 
-#: src/builtincmd.c:1335
+#: src/builtincmd.c:1332
 msgid "Users password is NOT set.\n"
 msgstr "Gebruikers wachtwoord is NIET gezet.\n"
 
-#: src/builtincmd.c:1336
+#: src/builtincmd.c:1333
 #, c-format
 msgid "User was registered by %s on %s"
 msgstr "Gebruiker was geregistreerd door %s op %s"
 
-#: src/builtincmd.c:1343
+#: src/builtincmd.c:1340
 #, c-format
 msgid ", last login %s\n"
 msgstr ", laatste login %s\n"
 
-#: src/builtincmd.c:1347
+#: src/builtincmd.c:1344
 msgid ", never logged in.\n"
 msgstr ", nog nooit ingelogd.\n"
 
-#: src/builtincmd.c:1353
+#: src/builtincmd.c:1350
 #, c-format
 msgid "Using Client %s version %s\n"
 msgstr "Gebruikt Client %s versie %s\n"
 
-#: src/builtincmd.c:1361
+#: src/builtincmd.c:1358
 #, c-format
 msgid "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 msgstr "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 
-#: src/builtincmd.c:1375
+#: src/builtincmd.c:1372
 #, c-format
 msgid "Usage: %s <nick> <group>"
 msgstr "Gebruik: %s <nick> <groep>"
 
-#: src/builtincmd.c:1385
+#: src/builtincmd.c:1382
 #, fuzzy, c-format
 msgid "Group %s does not exist."
 msgstr "Groep %s bestaat niet.\n"
 
-#: src/builtincmd.c:1391
+#: src/builtincmd.c:1388
 msgid "You are not allowed to remove a user from this group.\n"
 msgstr "U hebt niet het recht om een gebruiker uit deze groep te verwijderen\n"
 
-#: src/builtincmd.c:1407
+#: src/builtincmd.c:1404
 #, c-format
 msgid "Moved user %s from group %s to %s\n"
 msgstr "Gebruiker %s is verplaatst van groep %s naar groep %s.\n"
 
-#: src/builtincmd.c:1423
+#: src/builtincmd.c:1420
 #, c-format
 msgid ""
 "Usage: %s [<nick>] <password>\n"
@@ -590,12 +591,12 @@ msgstr ""
 "Gebruik: %s [<naam>] <wachtwoord>\n"
 " Als er geen naam gespecifieerd is wordt je eigen wachtwoord aangepast."
 
-#: src/builtincmd.c:1437 src/builtincmd.c:1502
+#: src/builtincmd.c:1434 src/builtincmd.c:1499
 #, c-format
 msgid "You are not allowed to change %s's password\n"
 msgstr "U hebt niet het recht om het wachtwoord van %s te veranderen\n"
 
-#: src/builtincmd.c:1446
+#: src/builtincmd.c:1443
 msgid ""
 "The password is unacceptable, please choose another. You specified a known "
 "account name as your password.\n"
@@ -603,7 +604,7 @@ msgstr ""
 "Het wachtwoord is onaanvaardbaar, kies alstublief een ander. U specifieerde "
 "gekende account naam als uw wachtwoord.\n"
 
-#: src/builtincmd.c:1453
+#: src/builtincmd.c:1450
 msgid ""
 "The password is unacceptable, please choose another. You specified a logged "
 "in username as your password.\n"
@@ -611,12 +612,12 @@ msgstr ""
 "Het wachtwoord is onaanvaardbaar, kies alstublief een ander. U specifieerde "
 "een bestaande gebruikersnaam als wachtwoord.\n"
 
-#: src/builtincmd.c:1458 src/builtincmd.c:1510
+#: src/builtincmd.c:1455 src/builtincmd.c:1507
 #, c-format
 msgid "No account for user %s.\n"
 msgstr "Geen account voor gebruiker %s.\n"
 
-#: src/builtincmd.c:1466
+#: src/builtincmd.c:1463
 #, c-format
 msgid ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
@@ -624,11 +625,11 @@ msgstr ""
 "Het wachtwoord is onaanvaardbaar, kies alstublief een ander. Minimum lengte "
 "is %d\n"
 
-#: src/builtincmd.c:1473 src/builtincmd.c:1533
+#: src/builtincmd.c:1470 src/builtincmd.c:1530
 msgid "Password set.\n"
 msgstr "Wachtwoord aangepast.\n"
 
-#: src/builtincmd.c:1489
+#: src/builtincmd.c:1486
 #, c-format
 msgid ""
 "Usage: %s [<nick>]\n"
@@ -637,7 +638,7 @@ msgstr ""
 "Gebruik: %s [<naam>]\n"
 " Als er geen naam gespecifieerd is dan wordt je eigen wachtwoord aangepast."
 
-#: src/builtincmd.c:1523
+#: src/builtincmd.c:1520
 #, c-format
 msgid ""
 "Your password was reset. It is now\n"
@@ -646,7 +647,7 @@ msgstr ""
 "Uw wachtwoord is veranderd. Het is nu\n"
 "%.*s\n"
 
-#: src/builtincmd.c:1527
+#: src/builtincmd.c:1524
 #, c-format
 msgid ""
 "The password of %s was reset. It is now\n"
@@ -655,85 +656,85 @@ msgstr ""
 "Het wachtwoord van %s was veranderd. Het is nu\n"
 "%.*s\n"
 
-#: src/builtincmd.c:1580
+#: src/builtincmd.c:1577
 #, c-format
 msgid "Local is determined by variable %s and set to %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1582
+#: src/builtincmd.c:1579
 #, c-format
 msgid "Locale is set to %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1588
+#: src/builtincmd.c:1585
 #, c-format
 msgid ""
 "WARNING: decimal point is '%c', this will cause problems in parsing tags. "
 "Set LC_NUMERIC to \"C\""
 msgstr ""
 
-#: src/builtincmd.c:1664 src/builtincmd.c:1828
+#: src/builtincmd.c:1661 src/builtincmd.c:1825
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr "%s !Ongekend Type!\n"
 
-#: src/builtincmd.c:1682 src/builtincmd.c:1713 src/builtincmd.c:1743
+#: src/builtincmd.c:1679 src/builtincmd.c:1710 src/builtincmd.c:1740
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr "Sorry, ongekende configuratie waarde %s\n"
 
-#: src/builtincmd.c:1737
+#: src/builtincmd.c:1734
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr "Gebruik: %s <setting> <waarde>"
 
-#: src/builtincmd.c:1770
+#: src/builtincmd.c:1767
 msgid "You are not allowed to assign: "
 msgstr "U hebt niet het recht om de volgende rechten toe te wijzen: "
 
-#: src/builtincmd.c:1777
+#: src/builtincmd.c:1774
 msgid "You are not allowed to remove: "
 msgstr "U hebt niet het recht om de volgende rechten te verwijderen: "
 
-#: src/builtincmd.c:1806
+#: src/builtincmd.c:1803
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr "\"%s\" is geen geldig IP adres.\n"
 
-#: src/builtincmd.c:1817
+#: src/builtincmd.c:1814
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr "De maximale waarde voor dit element is %s\n"
 
-#: src/builtincmd.c:1832
+#: src/builtincmd.c:1829
 msgid "Configuration change denied.\n"
 msgstr ""
 
-#: src/builtincmd.c:1849
+#: src/builtincmd.c:1846
 msgid "All Data saved."
 msgstr "Alle data opgeslagen."
 
-#: src/builtincmd.c:1862
+#: src/builtincmd.c:1859
 msgid "Data reloaded."
 msgstr "Alle data geladen."
 
-#: src/builtincmd.c:1878
+#: src/builtincmd.c:1875
 msgid "Errors during autosave:\n"
 msgstr "Errors tijdens de autosave:\n"
 
-#: src/builtincmd.c:1901
+#: src/builtincmd.c:1898
 msgid "Minimum length of a password."
 msgstr "Minimum lengte van een wachtwoord."
 
-#: src/builtincmd.c:1902
+#: src/builtincmd.c:1899
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr "Tijd tussen autosaves, zet dit op 0 om autosave af te zetten."
 
-#: src/builtincmd.c:1903
+#: src/builtincmd.c:1900
 msgid "User to send report to. Can be a chatroom."
 msgstr "Gebruiker om rapport naar te zenden. Kan een chatroom zijn."
 
-#: src/builtincmd.c:1904
+#: src/builtincmd.c:1901
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
@@ -741,7 +742,7 @@ msgstr ""
 "Dit is de langste ban tijd die je kan opgeven met een kick (als je _BAN_ "
 "gebruikt). Dit heeft geen invloed op mensen met het ban recht."
 
-#: src/builtincmd.c:1905
+#: src/builtincmd.c:1902
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
@@ -750,164 +751,164 @@ msgstr ""
 "toch nog _BAN_ gebruiken. De maximum tijd kan worden gezet met "
 "kickmaybantime."
 
-#: src/builtincmd.c:1908
+#: src/builtincmd.c:1905
 msgid "Make the HubSec say something."
 msgstr "Laat de HubSec iets zeggen."
 
-#: src/builtincmd.c:1909
+#: src/builtincmd.c:1906
 msgid "Make the HubSec warn user."
 msgstr "Laat de HubSec een waarschuwing sturen naar een gebruiker."
 
-#: src/builtincmd.c:1910
+#: src/builtincmd.c:1907
 msgid "Shut the hub down."
 msgstr "Sluit de hub af."
 
-#: src/builtincmd.c:1911
+#: src/builtincmd.c:1908
 msgid "Send a report to the OPs."
 msgstr "Stuur een rapport naar de Operators."
 
-#: src/builtincmd.c:1912
+#: src/builtincmd.c:1909
 msgid "Displays the Aquila version."
 msgstr "Toon de Aquila versie."
 
-#: src/builtincmd.c:1913
+#: src/builtincmd.c:1910
 msgid "Shows you your IP address."
 msgstr "Toont u uw IP adres."
 
-#: src/builtincmd.c:1914
+#: src/builtincmd.c:1911
 msgid "Kick a user. Automatic short ban included."
 msgstr ""
 "Verwijder een gebruiker met een kick. Er wordt automatisch een korte ban "
 "toegevoegt."
 
-#: src/builtincmd.c:1915
+#: src/builtincmd.c:1912
 msgid "Drop a user. Automatic short ban included."
 msgstr ""
 "De verbinding met de gebruiker wordt verbroken. Er wordt automatisch een "
 "korten ban toegevoegt."
 
-#: src/builtincmd.c:1916
+#: src/builtincmd.c:1913
 msgid "IP Ban a user by IP address."
 msgstr "IP ban een IP address."
 
-#: src/builtincmd.c:1917
+#: src/builtincmd.c:1914
 msgid "Nick ban a user by nick."
 msgstr "Naam ban een gebruiker."
 
-#: src/builtincmd.c:1918
+#: src/builtincmd.c:1915
 msgid "Ban a user by nick."
 msgstr "Ban een gebruiker op naam."
 
-#: src/builtincmd.c:1919
+#: src/builtincmd.c:1916
 msgid "Show ban by nick/IP."
 msgstr "Toon bans voor een nick of IP."
 
-#: src/builtincmd.c:1920
+#: src/builtincmd.c:1917
 msgid "Display help message."
 msgstr "Toon de help boodschap."
 
-#: src/builtincmd.c:1921
+#: src/builtincmd.c:1918
 msgid "Unban a nick."
 msgstr "Ontban een naam."
 
-#: src/builtincmd.c:1922
+#: src/builtincmd.c:1919
 msgid "Unban an ip."
 msgstr "Ontban een IP adres."
 
-#: src/builtincmd.c:1923
+#: src/builtincmd.c:1920
 msgid "Hardban an IP."
 msgstr "Hard ban een IP."
 
-#: src/builtincmd.c:1924
+#: src/builtincmd.c:1921
 msgid "Unhardban an IP."
 msgstr "Verwijder een harde IP ban."
 
-#: src/builtincmd.c:1925
+#: src/builtincmd.c:1922
 msgid "Show hard bans by nick/IP."
 msgstr "Toon harde bans voor een nick of IP."
 
-#: src/builtincmd.c:1926
+#: src/builtincmd.c:1923
 msgid "Zombie a user. Can't talk or pm."
 msgstr "Zombie een gebruiker. Hij kan niet spreken of pm'en."
 
-#: src/builtincmd.c:1927
+#: src/builtincmd.c:1924
 msgid "Show the zombie horde."
 msgstr "Toon de zombie horde."
 
-#: src/builtincmd.c:1928
+#: src/builtincmd.c:1925
 msgid "Unzombie a user. Can talk or pm again."
 msgstr "Unzombie een gebruiker. Hij kan dan weer praten en pm'en."
 
-#: src/builtincmd.c:1929
+#: src/builtincmd.c:1926
 msgid "Returns the user using the IP."
 msgstr "Vind gebruikers aan de hand van een IP adres."
 
-#: src/builtincmd.c:1931
+#: src/builtincmd.c:1928
 msgid "Send a private message to all users."
 msgstr "Stuur een privee bericht naar alle gebruikers."
 
-#: src/builtincmd.c:1933
+#: src/builtincmd.c:1930
 msgid "Add a user group."
 msgstr "Creer een gebruikers groep."
 
-#: src/builtincmd.c:1934
+#: src/builtincmd.c:1931
 msgid "Delete a user group."
 msgstr "Verwijder een gebruikers groep."
 
-#: src/builtincmd.c:1935
+#: src/builtincmd.c:1932
 msgid "Edit the rights of a user group."
 msgstr "Pas de rechten van een gebruikers groep aan."
 
-#: src/builtincmd.c:1936
+#: src/builtincmd.c:1933
 msgid "List all groups with their rights."
 msgstr "Toon alle groepen en hun rechten."
 
-#: src/builtincmd.c:1938
+#: src/builtincmd.c:1935
 msgid "Add a user."
 msgstr "Voeg een gebruikers registratie toe."
 
-#: src/builtincmd.c:1939
+#: src/builtincmd.c:1936
 msgid "Delete a user."
 msgstr "Verwijder een gebruikers registratie."
 
-#: src/builtincmd.c:1940
+#: src/builtincmd.c:1937
 msgid "Edit the extra rights of a user."
 msgstr "Pas de extra rechten van een gebruiker aan."
 
-#: src/builtincmd.c:1941
+#: src/builtincmd.c:1938
 msgid "List all users of a user group."
 msgstr "Toon all gebruikers in een groep."
 
-#: src/builtincmd.c:1942
+#: src/builtincmd.c:1939
 msgid "Show information of user."
 msgstr "Toon gebruikers informatie."
 
-#: src/builtincmd.c:1943
+#: src/builtincmd.c:1940
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 "Verander gebruiker van groep. Opnieuw laten verbinden om de verandering te "
 "activeren."
 
-#: src/builtincmd.c:1945
+#: src/builtincmd.c:1942
 msgid "Show configuration."
 msgstr "Toon configuratie waarden."
 
-#: src/builtincmd.c:1946
+#: src/builtincmd.c:1943
 msgid "Show configuration value help string."
 msgstr "Toon configuration hulp."
 
-#: src/builtincmd.c:1947 src/builtincmd.c:1948
+#: src/builtincmd.c:1944 src/builtincmd.c:1945
 msgid "Set configuration values."
 msgstr "Zet configuratie waarden."
 
-#: src/builtincmd.c:1950
+#: src/builtincmd.c:1947
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 "Herlaad alle data uit files. WAARSCHUWING: Alle niet opgelagen veranderingen "
 "zullen verloren gaan."
 
-#: src/builtincmd.c:1951
+#: src/builtincmd.c:1948
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
@@ -915,23 +916,23 @@ msgstr ""
 "Save all veranderingen naar file. WAARSCHUWING: Alle vorige opgeslagen "
 "waarden gaan verloren."
 
-#: src/builtincmd.c:1953
+#: src/builtincmd.c:1950
 msgid "Change your password."
 msgstr "Verander je wachtwoord."
 
-#: src/builtincmd.c:1954
+#: src/builtincmd.c:1951
 msgid "Let the hub generate a random password."
 msgstr "Laat de hub een willekeurig wachtwoord voor je aanmaken."
 
-#: src/builtincmd.c:1956
+#: src/builtincmd.c:1953
 msgid "Set the locale of the hub."
 msgstr ""
 
-#: src/builtincmd.c:1957
+#: src/builtincmd.c:1954
 msgid "Get the locale of the hub."
 msgstr ""
 
-#: src/builtincmd.c:1960 src/builtincmd.c:1961
+#: src/builtincmd.c:1957 src/builtincmd.c:1958
 msgid "Let the hub CRASH!."
 msgstr "Doet de hub CRASHEN!"
 
@@ -1513,37 +1514,37 @@ msgstr "Verbinging met gebruiker %s (ip %s ) werd verbroken omdat: %.*s"
 msgid "Found permanent nick ban by %s for %s because: %.*s"
 msgstr ""
 
-#: src/plugin.c:473
+#: src/plugin.c:473 src/plugin.c:505
 #, fuzzy, c-format
 msgid "Found IP ban by %s for %s (%s) for %lus because: %.*s"
 msgstr "Tijdelijke IP Verbanning voor %s (ip %s)voor %s: %.*s"
 
-#: src/plugin.c:477
+#: src/plugin.c:477 src/plugin.c:509
 #, c-format
 msgid "Found IP ban by %s for %s for %lus because: %.*s"
 msgstr ""
 
-#: src/plugin.c:483
+#: src/plugin.c:483 src/plugin.c:515
 #, fuzzy, c-format
 msgid "Found permanent ban by %s for %s (%s) because: %.*s"
 msgstr "Verbinging met gebruiker %s (ip %s ) werd verbroken omdat: %.*s"
 
-#: src/plugin.c:486
+#: src/plugin.c:486 src/plugin.c:518
 #, c-format
 msgid "Found permanent ban by %s for %s because: %.*s"
 msgstr ""
 
-#: src/plugin.c:505 src/plugin.c:530
+#: src/plugin.c:537 src/plugin.c:562
 #, c-format
 msgid "%s %s by %s Expires: %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:508 src/plugin.c:533
+#: src/plugin.c:540 src/plugin.c:565
 #, c-format
 msgid "%s %s by %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:1024 src/plugin.c:1028 src/plugin.c:1033 src/plugin.c:1037
+#: src/plugin.c:1056 src/plugin.c:1060 src/plugin.c:1065 src/plugin.c:1069
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
 msgstr ""
@@ -2260,7 +2261,7 @@ msgid ""
 "Operators           %lu / %lu\n"
 " Total      %lu / %lu\n"
 " Peak             %lu\n"
-" Dropped          %lu\n"
+" Refused          %lu\n"
 " Buffering        %lu\n"
 msgstr ""
 

@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
 0.1.10:
+	Fixed hardbanlist (Report FleetCommand)
+	Changed "Dropped" into "Refused" for clarification in !statuser
 	Fix poll() bug.
 	Fix BSD configure bug.
 	Make release target work everywhere.

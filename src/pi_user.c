@@ -80,7 +80,7 @@ unsigned long pi_user_handler_userstat (plugin_user_t * user, buffer_t * output,
 		       "Operators           %lu / %lu\n"
 		       " Total      %lu / %lu\n"
 		       " Peak             %lu\n"
-		       " Dropped          %lu\n"
+		       " Refused          %lu\n"
 		       " Buffering        %lu\n"),
 	     user_unregistered_current, user_unregistered_max,
 	     user_registered_current, user_registered_max,

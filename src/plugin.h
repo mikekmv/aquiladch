@@ -152,7 +152,9 @@ extern int plugin_user_unzombie (plugin_user_t * user);
 
 extern int plugin_user_findnickban (buffer_t * buf, unsigned char *nick);
 extern int plugin_user_findipban (buffer_t * buf, unsigned long ip);
+extern int plugin_user_findiphardban (buffer_t * buf, unsigned long ip);
 extern int plugin_banlist (buffer_t *output);
+extern int plugin_hardbanlist (buffer_t *output);
 
 extern int plugin_report (buffer_t * message);
 extern int plugin_perror (unsigned char *format, ...);
