@@ -30,7 +30,7 @@
 #include "nmdc_utils.h"
 #include "cap.h"
 
-buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
+buffer_t *rebuild_myinfo (nmdc_user_t * u, buffer_t * b)
 {
   buffer_t *d;
   unsigned int l;
@@ -52,16 +52,16 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
     goto nuke;
 
   /* verify nick */
-  if (strncmp (s, u->nick, strlen (u->nick)))
+  if (strncmp (s, u->user.nick, strlen (u->user.nick)))
     goto nuke;
 
   /* verify nicklength */
-  s += strlen (u->nick);
+  s += strlen (u->user.nick);
   if ((s >= b->e) || (*s++ != ' '))
     goto nuke;
 
   /* append nick from clean copy */
-  bf_strcat (d, u->nick);
+  bf_strcat (d, u->user.nick);
   bf_strcat (d, " ");
 
   /* handle description */
@@ -88,12 +88,12 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
     if (e == b->e)
       goto nuke;
 
-    u->active = parse_tag (s, u);
+    u->user.active = parse_tag (s, u);
 
     l = s - t;
   } else {
     /* mark as tagless client */
-    u->active = -1;
+    u->user.active = -1;
     l = e - t;
   }
 
@@ -157,8 +157,8 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
   /* extrat sharesize */
   share = strtoll (s, NULL, 10);
   if (share >= 0LL) {
-    u->share = share;
-    if (!(u->rights & CAP_SHAREHIDE)) {
+    u->user.share = share;
+    if (!(u->user.rights & CAP_SHAREHIDE)) {
       /* include real sharesize */
       if ((l > config.MaxShareLength) && (!u->op))
 	l = config.MaxShareLength;
@@ -168,7 +168,7 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
       bf_strcat (d, "0");
     }
   } else {
-    u->share = 0;
+    u->user.share = 0;
     bf_strcat (d, "0");
   }
 
@@ -212,7 +212,7 @@ int nmdc_string_unescape (char *output, unsigned int j)
   return k - output;
 }
 
-int parse_tag (char *desc, user_t * user)
+int parse_tag (char *desc, nmdc_user_t * user)
 {
   char tmpbuf[2048];
   char *s, *e, *t;
@@ -251,8 +251,8 @@ int parse_tag (char *desc, user_t * user)
   t = strsep (&s, " ");
   if (!s)
     return -1;
-  strncpy (user->client, t, 64);
-  user->client[63] = 0;
+  strncpy (user->user.client, t, 64);
+  user->user.client[63] = 0;
 
   /* client version */
   t = strsep (&s, ":");		/* V: */
@@ -261,9 +261,9 @@ int parse_tag (char *desc, user_t * user)
   t = strsep (&s, ",");
   if (!s)
     return -1;
-  strncpy (user->versionstring, t, 64);
-  user->versionstring[63] = 0;
-  sscanf (t, "%lf", &user->version);
+  strncpy (user->user.versionstring, t, 64);
+  user->user.versionstring[63] = 0;
+  sscanf (t, "%lf", &user->user.version);
 
   /* client mode */
   t = strsep (&s, ":");		/* M: */
@@ -272,7 +272,7 @@ int parse_tag (char *desc, user_t * user)
   t = strsep (&s, ",");
   if (!t)
     return -1;
-  user->active = (tolower (*t) == 'a');
+  user->user.active = (tolower (*t) == 'a');
 
   /* hubs mode */
   t = strsep (&s, ",");
@@ -299,7 +299,7 @@ int parse_tag (char *desc, user_t * user)
     return -1;
   user->slots = strtol (t, &t, 0);
 
-  return user->active;
+  return user->user.active;
 }
 
 #ifdef ZLINES

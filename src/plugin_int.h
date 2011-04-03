@@ -25,6 +25,7 @@ typedef struct plugin_private plugin_private_t;
 #include "plugin.h"
 #include "hub.h"
 #include "proto.h"
+#include "dllist.h"
 
 /* main data storage per plugin.*/
 struct plugin {
@@ -36,6 +37,8 @@ struct plugin {
   unsigned long privates;
   unsigned long events;
   unsigned long robots;
+  
+  plugin_manager_t *manager;
 };
 
 /* plugin callback info */
@@ -64,21 +67,23 @@ struct plugin_private {
 };
 
 /* the main module manager data */
-typedef struct plugin_manager {
+struct plugin_manager {
+  dllist_entry_t list;
   plugin_t plugins;		/* all loaded plugins */
   plugin_private_t privates;	/* all active private data */
   unsigned long num;		/* number of loaded plugins */
-
+  proto_t *proto;
+  
   plugin_event_request_t eventhandles[PLUGIN_EVENT_NUMBER];	/* all handlers, per event */
-} plugin_manager_t;
+};
 
 
 /* internal entrypoints */
 
-extern unsigned long plugin_send_event (plugin_private_t *, unsigned long, void *);
-extern unsigned long plugin_new_user (plugin_private_t **, user_t * u, proto_t * p);
+extern unsigned long plugin_send_event (plugin_manager_t * manager, plugin_private_t *, unsigned long, void *);
+extern unsigned long plugin_new_user (plugin_manager_t *manager, plugin_private_t **, user_t * u);
 extern unsigned long plugin_del_user (plugin_private_t **);
-extern unsigned long plugin_update_user (user_t * u);
-extern int plugin_init ();
+extern unsigned long plugin_update_user (plugin_manager_t *manager, user_t * u);
+extern plugin_manager_t *plugin_init (proto_t *proto);
 
 #endif

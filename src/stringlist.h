@@ -28,12 +28,10 @@
 #define STRINGLIST_VERIFY(x)
 #endif
 
-struct user;
-
 typedef struct string_list_entry {
   struct string_list_entry *next, *prev;
   struct string_list_entry *hnext, *hprev;
-  struct user *user;
+  void *user;
   buffer_t *data;
 } string_list_entry_t;
 
@@ -44,10 +42,10 @@ typedef struct string_list {
 } string_list_t;
 
 inline void string_list_init (string_list_t * list);
-inline string_list_entry_t *string_list_add (string_list_t * list, struct user *user, buffer_t *);
+inline string_list_entry_t *string_list_add (string_list_t * list, void *user, buffer_t *);
 inline void string_list_del (string_list_t * list, string_list_entry_t * entry);
-inline void string_list_purge (string_list_t * list, struct user *user);
-inline string_list_entry_t *string_list_find (string_list_t * list, struct user *user);
+inline void string_list_purge (string_list_t * list, void *user);
+inline string_list_entry_t *string_list_find (string_list_t * list, void *user);
 inline void string_list_clear (string_list_t * list);
 inline void string_list_verify (string_list_t * list);
 

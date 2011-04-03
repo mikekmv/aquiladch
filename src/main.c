@@ -262,7 +262,10 @@ int main (int argc, char **argv)
 {
   int ret, cont;
   struct timeval to, tnow, tnext;
-  esocket_handler_t *h;
+  server_t *server;
+  plugin_manager_t *pm;
+  proto_t *proto;
+  plugin_t *plugin;
   sigset_t set;
 
   /* unbuffer the output */
@@ -294,23 +297,24 @@ int main (int argc, char **argv)
   /* initialize the global configuration */
   config_init ();
   accounts_init ();
-  plugin_init ();
-  command_init ();
-  builtincmd_init ();
-  server_init ();
-  nmdc_init ();
+  server = server_init (4);
+  proto = nmdc_init (server);
+  pm = plugin_init (proto);
 
-  /* initialize the plugins */
-  pi_iplog_init ();
-  pi_user_init ();
-  pi_chatroom_init ();
-  pi_statistics_init ();
-  pi_trigger_init ();
-  pi_chatlog_init ();
-  pi_statbot_init ();
-  pi_hublist_init ();
-  pi_configlock_init ();
-  plugin_config_load ();
+  command_init (pm);
+
+  plugin = builtincmd_init (pm);
+
+  pi_iplog_init (pm);
+  pi_user_init (pm);
+  pi_chatroom_init (pm);
+  pi_statistics_init (pm);
+  pi_trigger_init (pm);
+  pi_chatlog_init (pm);
+  pi_statbot_init (pm);
+  pi_hublist_init (pm);
+
+  plugin_config_load (plugin);
 
   /* add lowest member of the statistics */
   gettimeofday (&boottime, NULL);
@@ -318,21 +322,17 @@ int main (int argc, char **argv)
   /* initialize the random generator */
   srandom (boottime.tv_sec ^ boottime.tv_usec);
 
-  /* setup socket handler */
-  h = esocket_create_handler (4);
-  h->toval.tv_sec = 60;
-  h->toval.tv_usec = 0;
-
   /* setup server */
-  server_setup (h);
-  nmdc_setup (h);
+  server_setup (server);
+
+  nmdc_setup (pm);
   command_setup ();
-  pi_hublist_setup (h);
+  pi_hublist_setup (server->h);
 
 #ifdef ALLOW_LUA
 #ifdef HAVE_LUA_H
   /* lua must only be loaded last. */
-  pi_lua_init ();
+  pi_lua_init (pm);
 #endif
 #endif
 
@@ -346,7 +346,7 @@ int main (int argc, char **argv)
     to.tv_usec = 100000;
 
     /* wait until an event */
-    ret = esocket_select (h, &to);
+    ret = esocket_select (server->h, &to);
 
     /* 1s periodic cache flush */
     gettimeofday (&tnow, NULL);

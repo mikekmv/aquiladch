@@ -110,7 +110,6 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
 }
 
 
-/* FIXME check for duplicates */
 int command_register (unsigned char *name, command_handler_t * handler, unsigned long cap,
 		      unsigned char *help)
 {
@@ -335,7 +334,7 @@ unsigned long cmd_parser_priv (plugin_user_t * user, void *priv, unsigned long e
   for (; *c && (*c != ' '); c++);
   *c = '\0';
 
-  t = plugin_user_find (n);
+  t = plugin_user_find (cmdplug, n);
   if (!t)
     return PLUGIN_RETVAL_DROP;
 
@@ -357,24 +356,21 @@ unsigned long cmd_parser_main (plugin_user_t * user, void *priv, unsigned long e
 
 int command_setup ()
 {
-  config_element_t *hubsecnick;
   plugin_user_t *hubsec;
 
-  hubsecnick = config_find ("hubsecurity.nick");
-
-  hubsec = plugin_user_find (*hubsecnick->val.v_string);
+  hubsec = plugin_hubsec (cmdplug);
 
   plugin_robot_set_handler (hubsec, &cmd_parser_priv);
 
   return 0;
 }
 
-int command_init ()
+int command_init (plugin_manager_t * pm)
 {
   int i;
 
   /* register plugin and request all chat messages */
-  cmdplug = plugin_register ("CommandParser");
+  cmdplug = plugin_register (pm, "CommandParser");
   plugin_request (cmdplug, PLUGIN_EVENT_CHAT, &cmd_parser_main);
 
   /* init hashtable */

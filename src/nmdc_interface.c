@@ -27,7 +27,6 @@
 
 #include "aqtime.h"
 #include "nmdc_token.h"
-#include "nmdc_nicklistcache.h"
 #include "nmdc_local.h"
 
 /******************************************************************************\
@@ -39,10 +38,12 @@
 cache_t cache;
 ratelimiting_t rates;
 
-user_t *userlist = NULL;
+nmdc_user_t *userlist = NULL;
+
+server_t *nmdc_server;
 
 /* special users */
-user_t *HubSec;
+nmdc_user_t *HubSec;
 
 /* globals */
 unsigned int keylen = 0;
@@ -55,6 +56,9 @@ leaky_bucket_t connects;
 nmdc_stats_t nmdc_stats;
 
 banlist_t reconnectbanlist;
+banlist_t softbanlist;
+
+plugin_manager_t *nmdc_pluginmanager;
 
 unsigned int cloning;
 
@@ -67,12 +71,12 @@ unsigned char *defaultbanmessage = NULL;
 
 leaky_bucket_t rate_warnings;
 
-static user_t *freelist = NULL;
+static nmdc_user_t *freelist = NULL;
 hashlist_t hashlist;
 
 unsigned long cachelist_count = 0;
-user_t *cachelist = NULL;
-user_t *cachelist_last = NULL;
+nmdc_user_t *cachelist = NULL;
+nmdc_user_t *cachelist_last = NULL;
 hashlist_t cachehashlist;
 
 /******************************************************************************\
@@ -83,31 +87,38 @@ hashlist_t cachehashlist;
 
 
 /* function prototypes */
-int proto_nmdc_setup ();
-int proto_nmdc_init ();
-int proto_nmdc_handle_token (user_t * u, buffer_t * b);
-int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers);
+proto_t *proto_nmdc_setup ();
+proto_t *proto_nmdc_init ();
+int proto_nmdc_handle_token (nmdc_user_t * u, buffer_t * b);
+int proto_nmdc_handle_input (nmdc_user_t * user, buffer_t ** buffers);
 void proto_nmdc_flush_cache ();
-int proto_nmdc_user_disconnect (user_t * u, char *reason);
-int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t * message);
-int proto_nmdc_user_redirect (user_t * u, buffer_t * message);
-int proto_nmdc_user_drop (user_t * u, buffer_t * message);
-user_t *proto_nmdc_user_find (unsigned char *nick);
-user_t *proto_nmdc_user_alloc (void *priv);
-int proto_nmdc_user_free (user_t * user);
+int proto_nmdc_user_disconnect (nmdc_user_t * u, char *reason);
+int proto_nmdc_user_forcemove (nmdc_user_t * u, unsigned char *destination, buffer_t * message);
+int proto_nmdc_user_redirect (nmdc_user_t * u, buffer_t * message);
+int proto_nmdc_user_drop (nmdc_user_t * u, buffer_t * message);
+nmdc_user_t *proto_nmdc_user_find (unsigned char *nick);
+nmdc_user_t *proto_nmdc_user_find_ip (nmdc_user_t * last, unsigned long ip);
+nmdc_user_t *proto_nmdc_user_find_net (nmdc_user_t * last, unsigned long ip, unsigned long netmask);
+nmdc_user_t *proto_nmdc_user_alloc (void *priv, unsigned long ipaddress);
+int proto_nmdc_user_free (nmdc_user_t * user);
 
-user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *description);
-int proto_nmdc_user_delrobot (user_t * u);
+nmdc_user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *description);
+int proto_nmdc_user_delrobot (nmdc_user_t * u);
 
-int proto_nmdc_user_chat_all (user_t * u, buffer_t * message);
-int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message);
-int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message);
-int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t * message);
-int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, buffer_t * message);
-int proto_nmdc_user_raw (user_t * target, buffer_t * message);
+int proto_nmdc_user_chat_all (nmdc_user_t * u, buffer_t * message);
+int proto_nmdc_user_send (nmdc_user_t * u, nmdc_user_t * target, buffer_t * message);
+int proto_nmdc_user_send_direct (nmdc_user_t * u, nmdc_user_t * target, buffer_t * message);
+int proto_nmdc_user_priv (nmdc_user_t * u, nmdc_user_t * target, nmdc_user_t * source,
+			  buffer_t * message);
+int proto_nmdc_user_priv_direct (nmdc_user_t * u, nmdc_user_t * target, nmdc_user_t * source,
+				 buffer_t * message);
+int proto_nmdc_user_raw (nmdc_user_t * target, buffer_t * message);
 int proto_nmdc_user_raw_all (buffer_t * message);
 
-int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...);
+banlist_t *proto_nmdc_banlist_hard (void);
+banlist_t *proto_nmdc_banlist_soft (void);
+
+int proto_nmdc_warn (struct timeval *now, const char *message, ...);
 
 /******************************************************************************\
 **                                                                            **
@@ -118,33 +129,38 @@ int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...);
 /* callback structure init */
 /* *INDENT-OFF* */
 proto_t nmdc_proto = {
-	init: 			proto_nmdc_init,
-	setup:			proto_nmdc_setup,
+	init: 			(void *) proto_nmdc_init,
+	setup:			(void *) proto_nmdc_setup,
 	
-	handle_token:   	proto_nmdc_handle_token,
-	handle_input:		proto_nmdc_handle_input,
-	flush_cache:    	proto_nmdc_flush_cache,
+	handle_token:   	(void *) proto_nmdc_handle_token,
+	handle_input:		(void *) proto_nmdc_handle_input,
+	flush_cache:    	(void *) proto_nmdc_flush_cache,
 	
-        user_alloc:		proto_nmdc_user_alloc,
-        user_free:		proto_nmdc_user_free,
+        user_alloc:		(void *) proto_nmdc_user_alloc,
+        user_free:		(void *) proto_nmdc_user_free,
 
-	user_disconnect:	proto_nmdc_user_disconnect,
-	user_forcemove:		proto_nmdc_user_forcemove,
-	user_redirect:		proto_nmdc_user_redirect,
-	user_drop:		proto_nmdc_user_drop,
-	user_find:		proto_nmdc_user_find,
+	user_disconnect:	(void *) proto_nmdc_user_disconnect,
+	user_forcemove:		(void *) proto_nmdc_user_forcemove,
+	user_redirect:		(void *) proto_nmdc_user_redirect,
+	user_drop:		(void *) proto_nmdc_user_drop,
+	user_find:		(void *) proto_nmdc_user_find,
+	user_find_ip:		(void *) proto_nmdc_user_find_ip,
+	user_find_net:		(void *) proto_nmdc_user_find_net,
 	
-	robot_add:		proto_nmdc_user_addrobot,
-	robot_del:		proto_nmdc_user_delrobot,
+	robot_add:		(void *) proto_nmdc_user_addrobot,
+	robot_del:		(void *) proto_nmdc_user_delrobot,
 	
-	chat_main:		proto_nmdc_user_chat_all,
-	chat_send:		proto_nmdc_user_send,
-	chat_send_direct:	proto_nmdc_user_send_direct,
-	chat_priv:		proto_nmdc_user_priv,
-	chat_priv_direct:	proto_nmdc_user_priv_direct,
-	raw_send:		proto_nmdc_user_raw,
-	raw_send_all:		proto_nmdc_user_raw_all,
-	
+	chat_main:		(void *) proto_nmdc_user_chat_all,
+	chat_send:		(void *) proto_nmdc_user_send,
+	chat_send_direct:	(void *) proto_nmdc_user_send_direct,
+	chat_priv:		(void *) proto_nmdc_user_priv,
+	chat_priv_direct:	(void *) proto_nmdc_user_priv_direct,
+	raw_send:		(void *) proto_nmdc_user_raw,
+	raw_send_all:		(void *) proto_nmdc_user_raw_all,
+
+        get_banlist_hard:	proto_nmdc_banlist_hard,
+        get_banlist_soft:	proto_nmdc_banlist_soft,
+
 	name:			"NMDC"
 };
 /* *INDENT-ON* */
@@ -156,7 +172,23 @@ proto_t nmdc_proto = {
 **                                                                            **
 \******************************************************************************/
 
-int proto_nmdc_user_delrobot (user_t * u)
+banlist_t *proto_nmdc_banlist_hard ()
+{
+  return &nmdc_server->hardbanlist;
+}
+
+banlist_t *proto_nmdc_banlist_soft ()
+{
+  return &softbanlist;
+}
+
+/******************************************************************************\
+**                                                                            **
+**                            ROBOT HANDLING                                  **
+**                                                                            **
+\******************************************************************************/
+
+int proto_nmdc_user_delrobot (nmdc_user_t * u)
 {
   buffer_t *buf;
 
@@ -164,15 +196,15 @@ int proto_nmdc_user_delrobot (user_t * u)
     return -1;
 
   /* clear the user from all the relevant caches: not chat and not quit */
-  string_list_purge (&cache.myinfo.messages, u);
-  string_list_purge (&cache.myinfoupdate.messages, u);
-  string_list_purge (&cache.myinfoupdateop.messages, u);
-  string_list_purge (&cache.asearch.messages, u);
-  string_list_purge (&cache.psearch.messages, u);
+  string_list_purge (&cache.myinfo.messages, &u->user);
+  string_list_purge (&cache.myinfoupdate.messages, &u->user);
+  string_list_purge (&cache.myinfoupdateop.messages, &u->user);
+  string_list_purge (&cache.asearch.messages, &u->user);
+  string_list_purge (&cache.psearch.messages, &u->user);
 
   buf = bf_alloc (8 + NICKLENGTH);
   bf_strcat (buf, "$Quit ");
-  bf_strcat (buf, u->nick);
+  bf_strcat (buf, u->user.nick);
   bf_strcat (buf, "|");
 
   cache_queue (cache.myinfo, NULL, buf);
@@ -180,27 +212,27 @@ int proto_nmdc_user_delrobot (user_t * u)
 
   bf_free (buf);
 
-  plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
+  plugin_send_event (nmdc_pluginmanager, u->user.plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
   nicklistcache_deluser (u);
-  hash_deluser (&hashlist, &u->hash);
+  hash_deluser (&hashlist, &u->user.hash);
 
   if (u->MyINFO) {
     bf_free (u->MyINFO);
     u->MyINFO = NULL;
   }
 
-  if (u->plugin_priv)
-    plugin_del_user ((plugin_private_t **) & u->plugin_priv);
+  if (u->user.plugin_priv)
+    plugin_del_user ((plugin_private_t **) & u->user.plugin_priv);
 
   /* remove from the current user list */
-  if (u->next)
-    u->next->prev = u->prev;
+  if (u->user.next)
+    u->user.next->prev = u->user.prev;
 
-  if (u->prev) {
-    u->prev->next = u->next;
+  if (u->user.prev) {
+    u->user.prev->next = u->user.next;
   } else {
-    userlist = u->next;
+    userlist = (nmdc_user_t *) u->user.next;
   };
 
   free (u);
@@ -208,24 +240,24 @@ int proto_nmdc_user_delrobot (user_t * u)
   return 0;
 }
 
-user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *description)
+nmdc_user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *description)
 {
-  user_t *u;
+  nmdc_user_t *u;
   buffer_t *tmpbuf;
 
   /* create new context */
-  u = malloc (sizeof (user_t));
+  u = malloc (sizeof (nmdc_user_t));
   if (!u)
     return NULL;
-  memset (u, 0, sizeof (user_t));
+  memset (u, 0, sizeof (nmdc_user_t));
 
   u->state = PROTO_STATE_VIRTUAL;
 
   /* add user to the list... */
-  u->next = userlist;
-  if (u->next)
-    u->next->prev = u;
-  u->prev = NULL;
+  u->user.next = (user_t *) userlist;
+  if (u->user.next)
+    u->user.next->prev = &u->user;
+  u->user.prev = NULL;
 
   userlist = u;
 
@@ -237,15 +269,16 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
   bf_strcat (tmpbuf, description);
   bf_printf (tmpbuf, "$ $%c$$0$", 1);
 
-  strncpy (u->nick, nick, NICKLENGTH);
-  u->nick[NICKLENGTH - 1] = 0;
+  strncpy (u->user.nick, nick, NICKLENGTH);
+  u->user.nick[NICKLENGTH - 1] = 0;
   u->MyINFO = bf_copy (tmpbuf, 0);
   bf_free (tmpbuf);
 
-  u->rights = CAP_OP;
+  u->user.flags |= PROTO_FLAG_VIRTUAL;
+  u->user.rights = CAP_OP;
   u->op = 1;
 
-  hash_adduser (&hashlist, u);
+  hash_adduser (&hashlist, &u->user);
   nicklistcache_adduser (u);
 
   /* send it to the users */
@@ -261,10 +294,10 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
 **                                                                            **
 \******************************************************************************/
 
-void proto_nmdc_user_freelist_add (user_t * user)
+void proto_nmdc_user_freelist_add (nmdc_user_t * user)
 {
-  user->next = freelist;
-  user->prev = NULL;
+  user->user.next = (user_t *) freelist;
+  user->user.prev = NULL;
   freelist = user;
 }
 
@@ -272,10 +305,10 @@ void proto_nmdc_user_freelist_clear ()
 {
   /* destroy freelist */
   while (freelist) {
-    user_t *o;
+    nmdc_user_t *o;
 
     o = freelist;
-    freelist = freelist->next;
+    freelist = (nmdc_user_t *) freelist->user.next;
 
     if (o->tthlist)
       free (o->tthlist);
@@ -285,8 +318,8 @@ void proto_nmdc_user_freelist_clear ()
       o->MyINFO = NULL;
     }
 
-    if (o->plugin_priv)
-      plugin_del_user ((plugin_private_t **) & o->plugin_priv);
+    if (o->user.plugin_priv)
+      plugin_del_user ((plugin_private_t **) & o->user.plugin_priv);
 
     free (o);
   }
@@ -298,63 +331,63 @@ void proto_nmdc_user_freelist_clear ()
 **                                                                            **
 \******************************************************************************/
 
-void proto_nmdc_user_cachelist_add (user_t * user)
+void proto_nmdc_user_cachelist_add (nmdc_user_t * user)
 {
-  user->next = cachelist;
-  if (user->next) {
-    user->next->prev = user;
+  user->user.next = (user_t *) cachelist;
+  if (user->user.next) {
+    user->user.next->prev = (user_t *) user;
   } else {
     cachelist_last = user;
   }
-  user->prev = NULL;
+  user->user.prev = NULL;
   cachelist = user;
   cachelist_count++;
 }
 
-void proto_nmdc_user_cachelist_invalidate (user_t * u)
+void proto_nmdc_user_cachelist_invalidate (nmdc_user_t * u)
 {
-  u->joinstamp = 0;
-  hash_deluser (&cachehashlist, &u->hash);
+  u->user.joinstamp = 0;
+  hash_deluser (&cachehashlist, &u->user.hash);
 }
 
 void proto_nmdc_user_cachelist_clear ()
 {
   buffer_t *buf;
-  user_t *u, *p;
+  nmdc_user_t *u, *p;
   time_t now;
 
   time (&now);
   now -= config.DelayedLogout;
   for (u = cachelist_last; u; u = p) {
-    p = u->prev;
-    if (u->joinstamp >= (unsigned) now)
+    p = (nmdc_user_t *) u->user.prev;
+    if (u->user.joinstamp >= (unsigned) now)
       continue;
 
     /* a joinstamp of 0 means the user rejoined */
-    if (u->joinstamp) {
+    if (u->user.joinstamp) {
       /* queue the quit message */
       buf = bf_alloc (8 + NICKLENGTH);
       bf_strcat (buf, "$Quit ");
-      bf_strcat (buf, u->nick);
+      bf_strcat (buf, u->user.nick);
       cache_queue (cache.myinfo, NULL, buf);
       cache_queue (cache.myinfoupdateop, NULL, buf);
       bf_free (buf);
       nicklistcache_deluser (u);
 
       /* remove from hashlist */
-      hash_deluser (&cachehashlist, &u->hash);
+      hash_deluser (&cachehashlist, &u->user.hash);
     }
 
     /* remove from list */
-    if (u->next) {
-      u->next->prev = u->prev;
+    if (u->user.next) {
+      u->user.next->prev = u->user.prev;
     } else {
-      cachelist_last = u->prev;
+      cachelist_last = (nmdc_user_t *) u->user.prev;
     }
-    if (u->prev) {
-      u->prev->next = u->next;
+    if (u->user.prev) {
+      u->user.prev->next = u->user.next;
     } else {
-      cachelist = u->next;
+      cachelist = (nmdc_user_t *) u->user.next;
     };
     cachelist_count--;
 
@@ -370,7 +403,7 @@ void proto_nmdc_user_cachelist_clear ()
 **                                                                            **
 \******************************************************************************/
 
-unsigned int proto_nmdc_user_flush (user_t * u)
+unsigned int proto_nmdc_user_flush (nmdc_user_t * u)
 {
   buffer_t *b = NULL, *buffer;
   string_list_entry_t *le;
@@ -382,7 +415,7 @@ unsigned int proto_nmdc_user_flush (user_t * u)
 
   buffer = bf_alloc (10240);
 
-  for (le = ((nmdc_user_t *) u->pdata)->privatemessages.messages.first; le; le = le->next) {
+  for (le = u->privatemessages.messages.first; le; le = le->next) {
     /* data and length */
     b = le->data;
     bf_strncat (buffer, b->s, bf_used (b));
@@ -391,19 +424,19 @@ unsigned int proto_nmdc_user_flush (user_t * u)
     u->MessageCnt--;
     u->CacheException--;
   }
-  cache_clear ((((nmdc_user_t *) u->pdata)->privatemessages));
+  cache_clear ((u->privatemessages));
 
-  server_write (u->parent, buffer);
+  server_write (u->user.parent, buffer);
 
   bf_free (buffer);
 
   return 0;
 }
 
-__inline__ int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message)
+__inline__ int proto_nmdc_user_say (nmdc_user_t * u, buffer_t * b, buffer_t * message)
 {
   bf_strcat (b, "<");
-  bf_strcat (b, u->nick);
+  bf_strcat (b, u->user.nick);
   bf_strcat (b, "> ");
   for (; message; message = message->next)
     bf_strncat (b, message->s, bf_used (message));
@@ -413,10 +446,10 @@ __inline__ int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message
   return 0;
 }
 
-__inline__ int proto_nmdc_user_say_string (user_t * u, buffer_t * b, unsigned char *message)
+__inline__ int proto_nmdc_user_say_string (nmdc_user_t * u, buffer_t * b, unsigned char *message)
 {
   bf_strcat (b, "<");
-  bf_strcat (b, u->nick);
+  bf_strcat (b, u->user.nick);
   bf_strcat (b, "> ");
   bf_strcat (b, message);
   if (*(b->e - 1) == '\n')
@@ -425,7 +458,7 @@ __inline__ int proto_nmdc_user_say_string (user_t * u, buffer_t * b, unsigned ch
   return 0;
 }
 
-int proto_nmdc_user_chat_all (user_t * u, buffer_t * message)
+int proto_nmdc_user_chat_all (nmdc_user_t * u, buffer_t * message)
 {
   buffer_t *buf;
 
@@ -443,7 +476,7 @@ int proto_nmdc_user_chat_all (user_t * u, buffer_t * message)
   return 0;
 }
 
-int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
+int proto_nmdc_user_send (nmdc_user_t * u, nmdc_user_t * target, buffer_t * message)
 {
   buffer_t *buf;
 
@@ -454,7 +487,7 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
 
   proto_nmdc_user_say (u, buf, message);
 
-  cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
+  cache_queue (target->privatemessages, u, buf);
   cache_count (privatemessages, target);
   target->MessageCnt++;
   target->CacheException++;
@@ -464,7 +497,7 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
   return 0;
 }
 
-int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message)
+int proto_nmdc_user_send_direct (nmdc_user_t * u, nmdc_user_t * target, buffer_t * message)
 {
   buffer_t *buf;
 
@@ -475,14 +508,15 @@ int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message
 
   proto_nmdc_user_say (u, buf, message);
 
-  server_write (target->parent, buf);
+  server_write (target->user.parent, buf);
 
   bf_free (buf);
 
   return 0;
 }
 
-int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t * message)
+int proto_nmdc_user_priv (nmdc_user_t * u, nmdc_user_t * target, nmdc_user_t * source,
+			  buffer_t * message)
 {
   buffer_t *buf;
 
@@ -491,7 +525,7 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
 
   buf = bf_alloc (32 + 3 * NICKLENGTH + bf_used (message));
 
-  bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
+  bf_printf (buf, "$To: %s From: %s $<%s> ", target->user.nick, u->user.nick, source->user.nick);
   for (; message; message = message->next)
     bf_strncat (buf, message->s, bf_used (message));
   if (*(buf->e - 1) == '\n')
@@ -500,12 +534,12 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
     bf_strcat (buf, "|");
 
   if (target->state == PROTO_STATE_VIRTUAL) {
-    plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
+    plugin_send_event (nmdc_pluginmanager, target->user.plugin_priv, PLUGIN_EVENT_PM_IN, buf);
 
     bf_free (buf);
     return 0;
   }
-  cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
+  cache_queue (target->privatemessages, u, buf);
   cache_count (privatemessages, target);
 
   target->MessageCnt++;
@@ -516,7 +550,8 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
   return 0;
 }
 
-int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, buffer_t * message)
+int proto_nmdc_user_priv_direct (nmdc_user_t * u, nmdc_user_t * target, nmdc_user_t * source,
+				 buffer_t * message)
 {
   buffer_t *buf;
 
@@ -525,7 +560,7 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
 
   buf = bf_alloc (32 + 3 * NICKLENGTH + bf_used (message));
 
-  bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
+  bf_printf (buf, "$To: %s From: %s $<%s> ", target->user.nick, u->user.nick, source->user.nick);
   for (; message; message = message->next)
     bf_strncat (buf, message->s, bf_used (message));
   if (*(buf->e - 1) == '\n')
@@ -533,20 +568,20 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
   bf_strcat (buf, "|");
 
   if (target->state == PROTO_STATE_VIRTUAL) {
-    plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
+    plugin_send_event (nmdc_pluginmanager, target->user.plugin_priv, PLUGIN_EVENT_PM_IN, buf);
 
     bf_free (buf);
     return 0;
   }
 
-  server_write (target->parent, buf);
+  server_write (target->user.parent, buf);
 
   bf_free (buf);
 
   return 0;
 }
 
-int proto_nmdc_user_raw (user_t * target, buffer_t * message)
+int proto_nmdc_user_raw (nmdc_user_t * target, buffer_t * message)
 {
   buffer_t *buf;
 
@@ -555,7 +590,7 @@ int proto_nmdc_user_raw (user_t * target, buffer_t * message)
 
   buf = bf_copy (message, 0);
 
-  cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, target, buf);
+  cache_queue (target->privatemessages, target, buf);
   cache_count (privatemessages, target);
 
   target->MessageCnt++;
@@ -585,9 +620,9 @@ int proto_nmdc_user_raw_all (buffer_t * message)
 **                                                                            **
 \******************************************************************************/
 
-user_t *proto_nmdc_user_alloc (void *priv)
+nmdc_user_t *proto_nmdc_user_alloc (void *priv, unsigned long ipaddress)
 {
-  user_t *user;
+  nmdc_user_t *user;
 
   /* do we have a connect token? */
   if (!get_token (&rates.connects, &connects, now.tv_sec)) {
@@ -596,18 +631,16 @@ user_t *proto_nmdc_user_alloc (void *priv)
   }
 
   /* yes, create and init user */
-  user = malloc (sizeof (user_t) + sizeof (nmdc_user_t));
+  user = malloc (sizeof (nmdc_user_t));
   if (!user)
     return NULL;
-  memset (user, 0, sizeof (user_t) + sizeof (nmdc_user_t));
-
-  /* protocol private data */
-  user->pdata = ((void *) user) + sizeof (user_t);
+  memset (user, 0, sizeof (nmdc_user_t));
 
   user->tthlist = tth_list_alloc (researchmaxcount);
 
   user->state = PROTO_STATE_INIT;
-  user->parent = priv;
+  user->user.parent = priv;
+  user->user.ipaddress = ipaddress;
 
   init_bucket (&user->rate_warnings, now.tv_sec);
   init_bucket (&user->rate_violations, now.tv_sec);
@@ -624,10 +657,10 @@ user_t *proto_nmdc_user_alloc (void *priv)
   user->rate_violations.tokens = rates.violations.burst;
 
   /* add user to the list... */
-  user->next = userlist;
-  if (user->next)
-    user->next->prev = user;
-  user->prev = NULL;
+  user->user.next = (user_t *) userlist;
+  if (user->user.next)
+    user->user.next->prev = &user->user;
+  user->user.prev = NULL;
 
   userlist = user;
 
@@ -636,23 +669,23 @@ user_t *proto_nmdc_user_alloc (void *priv)
   return user;
 }
 
-int proto_nmdc_user_free (user_t * user)
+int proto_nmdc_user_free (nmdc_user_t * user)
 {
 
   /* remove from the current user list */
-  if (user->next)
-    user->next->prev = user->prev;
+  if (user->user.next)
+    user->user.next->prev = user->user.prev;
 
-  if (user->prev) {
-    user->prev->next = user->next;
+  if (user->user.prev) {
+    user->user.prev->next = user->user.next;
   } else {
-    userlist = user->next;
+    userlist = (nmdc_user_t *) user->user.next;
   };
 
-  user->parent = NULL;
+  user->user.parent = NULL;
 
   /* if the user was online, put him in the cachelist. if he was kicked, don't. */
-  if (!(user->flags & NMDC_FLAG_WASONLINE) || (user->flags & NMDC_FLAG_WASKICKED)) {
+  if (!(user->user.flags & NMDC_FLAG_WASONLINE) || (user->user.flags & NMDC_FLAG_WASKICKED)) {
     proto_nmdc_user_freelist_add (user);
   } else {
     proto_nmdc_user_cachelist_add (user);
@@ -663,51 +696,70 @@ int proto_nmdc_user_free (user_t * user)
   return 0;
 }
 
-
-user_t *proto_nmdc_user_find (unsigned char *nick)
+nmdc_user_t *proto_nmdc_user_find (unsigned char *nick)
 {
-  return hash_find_nick (&hashlist, nick, strlen (nick));
+  if (!nick) {
+    nmdc_user_t *u = userlist;
+
+    while (u && (u->state != PROTO_STATE_ONLINE))
+      u = (nmdc_user_t *) u->user.next;
+
+    return u;
+  }
+  return (nmdc_user_t *) hash_find_nick (&hashlist, nick, strlen (nick));
 }
 
-int proto_nmdc_user_disconnect (user_t * u, char *reason)
+nmdc_user_t *proto_nmdc_user_find_ip (nmdc_user_t * last, unsigned long ip)
+{
+  return (nmdc_user_t *) hash_find_ip_next (&hashlist, (user_t *) last, ip);
+}
+
+nmdc_user_t *proto_nmdc_user_find_net (nmdc_user_t * last, unsigned long ip, unsigned long netmask)
+{
+  return (nmdc_user_t *) hash_find_net_next (&hashlist, (user_t *) last, ip, netmask);
+}
+
+int proto_nmdc_user_disconnect (nmdc_user_t * u, char *reason)
 {
   buffer_t *buf;
 
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
-  plugin_send_event (u->plugin_priv, PLUGIN_EVENT_DISCONNECT, reason);
+  plugin_send_event (nmdc_pluginmanager, u->user.plugin_priv, PLUGIN_EVENT_DISCONNECT, reason);
 
   /* if user was online, clear out all stale data */
   if (u->state == PROTO_STATE_ONLINE) {
+    u->user.flags &= ~PROTO_FLAG_ONLINE;
+
     string_list_purge (&cache.myinfo.messages, u);
     string_list_purge (&cache.myinfoupdate.messages, u);
     string_list_purge (&cache.myinfoupdateop.messages, u);
     string_list_purge (&cache.asearch.messages, u);
     string_list_purge (&cache.psearch.messages, u);
-    string_list_clear (&((nmdc_user_t *) u->pdata)->results.messages);
-    string_list_clear (&((nmdc_user_t *) u->pdata)->privatemessages.messages);
+    string_list_clear (&u->results.messages);
+    string_list_clear (&u->privatemessages.messages);
 
-    plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
+    plugin_send_event (nmdc_pluginmanager, u->user.plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
-    hash_deluser (&hashlist, &u->hash);
+    hash_deluser (&hashlist, &u->user.hash);
 
     /* kicked users do not go on the cachehashlist */
-    if (u->flags & NMDC_FLAG_WASKICKED) {
+    if (u->user.flags & NMDC_FLAG_WASKICKED) {
       nicklistcache_deluser (u);
       buf = bf_alloc (8 + NICKLENGTH);
       bf_strcat (buf, "$Quit ");
-      bf_strcat (buf, u->nick);
+      bf_strcat (buf, u->user.nick);
       cache_queue (cache.myinfo, NULL, buf);
       cache_queue (cache.myinfoupdateop, NULL, buf);
       bf_free (buf);
     } else {
-      hash_adduser (&cachehashlist, u);
-      u->flags |= NMDC_FLAG_WASONLINE;
+      hash_adduser (&cachehashlist, (user_t *) u);
+      u->user.flags |= NMDC_FLAG_WASONLINE;
     }
   } else {
     /* if the returned user has same nick, but different user pointer, this is legal */
-    ASSERT (u != hash_find_nick (&hashlist, u->nick, strlen (u->nick)));
+    ASSERT (u != (nmdc_user_t *) hash_find_nick (&hashlist, u->user.nick, strlen (u->user.nick)));
   }
 
   if (u->supports & NMDC_SUPPORTS_ZLine)
@@ -721,14 +773,14 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
 }
 
 
-int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t * message)
+int proto_nmdc_user_forcemove (nmdc_user_t * u, unsigned char *destination, buffer_t * message)
 {
   buffer_t *b;
 
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
-  DPRINTF ("Redirecting user %s to %s because %.*s\n", u->nick, destination,
+  DPRINTF ("Redirecting user %s to %s because %.*s\n", u->user.nick, destination,
 	   (int) bf_used (message), message->s);
 
   if (u->MessageCnt)
@@ -745,20 +797,20 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
     bf_strcat (b, "|");
   }
 
-  server_write (u->parent, b);
+  server_write (u->user.parent, b);
   bf_free (b);
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->user.flags &= NMDC_FLAG_WASKICKED;
 
   if (u->state != PROTO_STATE_DISCONNECTED)
-    server_disconnect_user (u->parent, "User forcemoved.");
+    server_disconnect_user (u->user.parent, "User forcemoved.");
 
   nmdc_stats.forcemove++;
 
   return 0;
 }
 
-int proto_nmdc_user_drop (user_t * u, buffer_t * message)
+int proto_nmdc_user_drop (nmdc_user_t * u, buffer_t * message)
 {
   buffer_t *b;
 
@@ -773,20 +825,20 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
 
     proto_nmdc_user_say (HubSec, b, message);
 
-    server_write (u->parent, b);
+    server_write (u->user.parent, b);
     bf_free (b);
   }
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->user.flags &= NMDC_FLAG_WASKICKED;
 
-  server_disconnect_user (u->parent, "User dropped");
+  server_disconnect_user (u->user.parent, "User dropped");
 
   nmdc_stats.disconnect++;
 
   return 0;
 }
 
-int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
+int proto_nmdc_user_redirect (nmdc_user_t * u, buffer_t * message)
 {
   buffer_t *b;
 
@@ -794,7 +846,8 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
     return 0;
 
   /* call plugin first. it can do custom redirects */
-  if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, message) != PLUGIN_RETVAL_CONTINUE) {
+  if (plugin_send_event (nmdc_pluginmanager, u->user.plugin_priv, PLUGIN_EVENT_REDIRECT, message) !=
+      PLUGIN_RETVAL_CONTINUE) {
     return 0;
   }
 
@@ -812,64 +865,72 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
     bf_strcat (b, "|");
   }
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->user.flags &= NMDC_FLAG_WASKICKED;
 
-  server_write (u->parent, b);
+  server_write (u->user.parent, b);
   bf_free (b);
 
   if (u->state != PROTO_STATE_DISCONNECTED)
-    server_disconnect_user (u->parent, "User redirected");
+    server_disconnect_user (u->user.parent, "User redirected");
 
   nmdc_stats.redirect++;
 
   return 0;
 }
 
-int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
+int proto_nmdc_violation (nmdc_user_t * u, struct timeval *now, char *reason)
 {
   buffer_t *buf, *report;
   struct in_addr addr;
+  nmdc_user_t *t;
 
   /* if there are still tokens left, just return */
   if (get_token (&rates.violations, &u->rate_violations, now->tv_sec))
     return 0;
 
   /* never do this for owners! */
-  if (u->rights & CAP_OWNER)
+  if (u->user.rights & CAP_OWNER)
     return 0;
 
   /* user is in violation */
 
   /* if he is only a short time online, this is most likely a spammer and he will be hardbanned */
   buf = bf_alloc (128);
-  if ((u->joinstamp - now->tv_sec) < config.ProbationPeriod) {
+  if ((u->user.joinstamp - now->tv_sec) < config.ProbationPeriod) {
     bf_printf (buf, _("Rate Probation Violation (Last: %s)."), reason);
-    banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf, 0);
+    banlist_add (&nmdc_server->hardbanlist, HubSec->user.nick, u->user.nick, u->user.ipaddress,
+		 0xFFFFFFFF, buf, 0);
 
   } else {
     bf_printf (buf, _("Rate Violation (Last: %s)."), reason);
-    banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf,
-		 now->tv_sec + config.ViolationBantime);
+    banlist_add (&nmdc_server->hardbanlist, HubSec->user.nick, u->user.nick, u->user.ipaddress,
+		 0xFFFFFFFF, buf, now->tv_sec + config.ViolationBantime);
   }
 
-  u->flags &= NMDC_FLAG_WASKICKED;
+  u->user.flags &= NMDC_FLAG_WASKICKED;
 
   /* send message */
-  server_write (u->parent, buf);
+  server_write (u->user.parent, buf);
 
   /* disconnect the user */
   if (u->state != PROTO_STATE_DISCONNECTED)
-    server_disconnect_user (u->parent, buf->s);
+    server_disconnect_user (u->user.parent, buf->s);
 
   nmdc_stats.userviolate++;
 
   report = bf_alloc (1024);
 
-  addr.s_addr = u->ipaddress;
-  bf_printf (report, _("Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"), u->nick,
-	     inet_ntoa (addr), bf_used (buf), buf->s, reason);
+  addr.s_addr = u->user.ipaddress;
+  bf_printf (report, _("Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"),
+	     u->user.nick, inet_ntoa (addr), bf_used (buf), buf->s, reason);
 
-  plugin_report (report);
+  t =
+    (nmdc_user_t *) hash_find_nick (&hashlist, config.SysReportTarget,
+				    strlen (config.SysReportTarget));
+  if (!t)
+    return 0;
+
+  proto_nmdc_user_priv_direct (HubSec, t, HubSec, buf);
 
   bf_free (report);
   bf_free (buf);
@@ -877,7 +938,7 @@ int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
   return -1;
 }
 
-int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *message, ...)
+int proto_nmdc_user_warn (nmdc_user_t * u, struct timeval *now, const char *message, ...)
 {
   buffer_t *buf;
   va_list ap;
@@ -888,7 +949,7 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
 
   buf = bf_alloc (10240);
 
-  bf_printf (buf, "<%s>", HubSec->nick);
+  bf_printf (buf, "<%s>", HubSec->user.nick);
   bf_printf (buf, _("WARNING: "));
 
   va_start (ap, message);
@@ -897,20 +958,22 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
 
   bf_strcat (buf, "|");
 
-  server_write (u->parent, buf);
+  server_write (u->user.parent, buf);
 
   bf_free (buf);
 
   return 1;
 }
 
-int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...)
+int proto_nmdc_warn (struct timeval *now, const char *message, ...)
 {
-  user_t *u;
+  nmdc_user_t *u;
   buffer_t *buf;
   va_list ap;
 
-  u = hash_find_nick (&hashlist, config.SysReportTarget, strlen (config.SysReportTarget));
+  u =
+    (nmdc_user_t *) hash_find_nick (&hashlist, config.SysReportTarget,
+				    strlen (config.SysReportTarget));
   if (!u)
     return 0;
 
@@ -932,8 +995,13 @@ int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...)
   return 1;
 }
 
+/******************************************************************************\
+**                                                                            **
+**                                INPUT HANDLING                              **
+**                                                                            **
+\******************************************************************************/
 
-int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
+int proto_nmdc_handle_input (nmdc_user_t * user, buffer_t ** buffers)
 {
   buffer_t *b;
 
@@ -954,9 +1022,9 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
     if (proto_nmdc_handle_token (user, b) < 0) {
       /* This should never happen! On an EPIPE, server_write should do this.
          if (errno == EPIPE)
-         server_disconnect_user (user->parent, "EPIPE");
+         server_disconnect_user (user->user.parent, _("EPIPE"));
        */
-      ASSERT (!((errno == EPIPE) && user->parent));
+      ASSERT (!((errno == EPIPE) && user->user.parent));
       bf_free (b);
       break;
     }
@@ -979,7 +1047,7 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 **                                                                            **
 \******************************************************************************/
 
-int proto_nmdc_init ()
+proto_t *proto_nmdc_init ()
 {
   int i, l;
   unsigned char *s, *d;
@@ -1185,15 +1253,18 @@ int proto_nmdc_init ()
   memset (&nmdc_stats, 0, sizeof (nmdc_stats_t));
 
   banlist_init (&reconnectbanlist);
+  banlist_init (&softbanlist);
 
-  return 0;
+  return &nmdc_proto;
 }
 
-int proto_nmdc_setup ()
+proto_t *proto_nmdc_setup ()
 {
   HubSec = proto_nmdc_user_addrobot (config.HubSecurityNick, config.HubSecurityDesc);
-  HubSec->flags |= PROTO_FLAG_HUBSEC;
-  plugin_new_user ((plugin_private_t **) & HubSec->plugin_priv, HubSec, &nmdc_proto);
+  plugin_new_user (nmdc_pluginmanager, (plugin_private_t **) & HubSec->user.plugin_priv,
+		   &HubSec->user);
 
-  return 0;
+  nmdc_proto.HubSec = &HubSec->user;
+
+  return &nmdc_proto;
 }

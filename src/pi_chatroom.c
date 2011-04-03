@@ -129,7 +129,7 @@ chatroom_t *chatroom_new (unsigned char *name, unsigned long rights, unsigned lo
   room->members.next = &room->members;
   room->members.prev = &room->members;
 
-  room->user = plugin_robot_add (name, description, handler);
+  room->user = plugin_robot_add (plugin_chatroom, name, description, handler);
 
   /* link */
   room->next = chatrooms.next;
@@ -177,7 +177,7 @@ unsigned int chatroom_save (unsigned char *filename)
 
   fp = fopen (filename, "w+");
   if (!fp) {
-    plugin_perror ("ERROR saving %s", filename);
+    plugin_perror (plugin_chatroom, "ERROR saving %s", filename);
     return errno;
   }
 
@@ -200,7 +200,7 @@ unsigned int chatroom_load (unsigned char *filename)
 
   fp = fopen (filename, "r+");
   if (!fp) {
-    plugin_perror ("ERROR loading %s", filename);
+    plugin_perror (plugin_chatroom, "ERROR loading %s", filename);
     return errno;
   }
 
@@ -470,7 +470,7 @@ unsigned long pi_chatroom_event_pm (plugin_user_t * user, void *dummy, unsigned 
   buf->s++;
 
   /* find user. */
-  source = plugin_user_find (n);
+  source = plugin_user_find (plugin_chatroom, n);
   if (!source)
     goto leave;
 
@@ -534,7 +534,7 @@ unsigned long pi_chatroom_event_load (plugin_user_t * user, buffer_t * output, v
 
 /********************************* INIT *************************************/
 
-int pi_chatroom_init ()
+int pi_chatroom_init (plugin_manager_t * pm)
 {
   chatrooms.next = &chatrooms;
   chatrooms.prev = &chatrooms;
@@ -543,7 +543,7 @@ int pi_chatroom_init ()
 
   /* config_register ("chatroom.file",  CFG_ELEM_STRING, &pi_chatroom_savefile, "Save file for chatrooms."); */
 
-  plugin_chatroom = plugin_register ("chatroom");
+  plugin_chatroom = plugin_register (pm, "chatroom");
 
   plugin_request (plugin_chatroom, PLUGIN_EVENT_LOGIN,
 		  (plugin_event_handler_t *) & pi_chatroom_event_login);

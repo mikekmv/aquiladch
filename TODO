@@ -1,4 +1,10 @@
 
+Cleanup:
+	- move softbanlist to nmdc module.
+
+Requests:
+	- make whoip accept ranges
+
 Develstatus:
 	- create some sort of external statistics support.
 	- fix the unregsitered/registered/op counter?

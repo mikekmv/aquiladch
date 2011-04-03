@@ -117,7 +117,7 @@ unsigned int trigger_cache (trigger_t * trigger)
 
   fp = fopen (trigger->file, "r");
   if (!fp) {
-    plugin_perror ("ERROR loading trigger file %s", trigger->file);
+    plugin_perror (plugin_trigger, "ERROR loading trigger file %s", trigger->file);
     return errno;
   }
 
@@ -302,7 +302,7 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
 	  break;
 	case RULE_FLAG_PM | RULE_FLAG_BC:
 	  tgt = NULL;
-	  while (plugin_user_next (&tgt))
+	  while (plugin_user_next (plugin_trigger, &tgt))
 	    plugin_user_priv (NULL, tgt, NULL, r->trigger->text, 0);
 	  break;
 	default:
@@ -428,7 +428,7 @@ int trigger_save (unsigned char *file)
 
   fp = fopen (file, "w+");
   if (!fp) {
-    plugin_perror ("ERROR: saving %s", file);
+    plugin_perror (plugin_trigger, "ERROR: saving %s", file);
     return errno;
   }
 
@@ -480,7 +480,7 @@ int trigger_load (unsigned char *file)
 
   fp = fopen (file, "r+");
   if (!fp) {
-    plugin_perror ("ERROR: loading file %s", file);
+    plugin_perror (plugin_trigger, "ERROR: loading file %s", file);
     return errno;
   }
 
@@ -822,7 +822,7 @@ unsigned long pi_trigger_event_load (plugin_user_t * user, buffer_t * output, vo
 /************************************************************************************************/
 
 /* init */
-int pi_trigger_init ()
+int pi_trigger_init (plugin_manager_t * pm)
 {
 
   pi_trigger_SaveFile = strdup ("trigger.conf");
@@ -834,7 +834,7 @@ int pi_trigger_init ()
   ruleListLogin.next = &ruleListLogin;
   ruleListLogin.prev = &ruleListLogin;
 
-  plugin_trigger = plugin_register ("trigger");
+  plugin_trigger = plugin_register (pm, "trigger");
   plugin_request (plugin_trigger, PLUGIN_EVENT_LOGIN, &pi_trigger_login);
 
   command_register ("triggeradd", &pi_trigger_handler_triggeradd, CAP_CONFIG, _("Add a trigger."));

@@ -14,3 +14,5 @@ aqdtinstall: aqdtinstall.in
 	chmod +x ${@}.tmp
 	mv ${@}.tmp $@
 
+mrproper: clean
+	-rm -f *.gcov *.gcno *.gcda

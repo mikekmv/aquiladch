@@ -34,8 +34,7 @@ inline void string_list_init (string_list_t * list)
   list->size = 0;
 }
 
-inline string_list_entry_t *string_list_add (string_list_t * list, struct user *user,
-					     buffer_t * data)
+inline string_list_entry_t *string_list_add (string_list_t * list, void *user, buffer_t * data)
 {
   string_list_entry_t *entry;
 
@@ -87,7 +86,7 @@ inline void string_list_del (string_list_t * list, string_list_entry_t * entry)
   list->count--;
 }
 
-inline void string_list_purge (string_list_t * list, struct user *user)
+inline void string_list_purge (string_list_t * list, void *user)
 {
   string_list_entry_t *entry, *next;
 
@@ -104,7 +103,7 @@ inline void string_list_purge (string_list_t * list, struct user *user)
   STRINGLIST_VERIFY (list);
 }
 
-inline string_list_entry_t *string_list_find (string_list_t * list, struct user *user)
+inline string_list_entry_t *string_list_find (string_list_t * list, void *user)
 {
   string_list_entry_t *entry, *next;
 

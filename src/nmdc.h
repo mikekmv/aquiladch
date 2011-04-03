@@ -20,8 +20,10 @@
 #ifndef _NMDC_H_
 #define _NMDC_H_
 
-extern int nmdc_init ();
-extern int nmdc_setup (esocket_handler_t * h);
+#include "hub.h"
+#include "plugin.h"
 
+extern proto_t *nmdc_init (server_t * server);
+extern int nmdc_setup (plugin_manager_t *pm);
 
 #endif

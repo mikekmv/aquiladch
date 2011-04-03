@@ -366,8 +366,23 @@ buffer_t *bf_copy (buffer_t * src, unsigned long extra)
 
 int bf_strcat (buffer_t * dst, unsigned char *data)
 {
-  /* FIXME could be optimized to run over the data only once */
-  return bf_strncat (dst, data, strlen ((char *) data));
+  unsigned char *e, *c;
+
+  /* copy data */
+  e = dst->buffer + dst->size;
+  c = dst->e;
+  while (*data && c < e)
+    *c++ = *data++;
+
+  /* terminate if possible */
+  if (c < e)
+    *c = '\0';
+
+  /* update buffer_t and return bytes written */
+  e = dst->e;
+  dst->e = c;
+
+  return c - e;
 }
 
 int bf_strncat (buffer_t * dst, unsigned char *data, unsigned long length)
@@ -406,7 +421,7 @@ int bf_printf (buffer_t * dst, const char *format, ...)
 
   /* print to the buffer */
   va_start (ap, format);
-  retval = vsnprintf (gettext (dst->e), available, format, ap);
+  retval = vsnprintf ((char *) gettext (dst->e), available, format, ap);
   va_end (ap);
 
   /* make sure dst->e is always valid */
@@ -425,7 +440,7 @@ int bf_vprintf (buffer_t * dst, const char *format, va_list ap)
     return 0;
 
   /* print to the buffer */
-  retval = vsnprintf (gettext (dst->e), available, format, ap);
+  retval = vsnprintf ((char *) gettext (dst->e), available, format, ap);
 
   /* make sure dst->e is always valid */
   dst->e += (retval > available) ? available : retval;
@@ -433,10 +448,10 @@ int bf_vprintf (buffer_t * dst, const char *format, va_list ap)
   return retval;
 }
 
-buffer_t *bf_buffer (unsigned char *text)
+buffer_t *bf_buffer (const char *text)
 {
-  static_buf.buffer = static_buf.s = text;
-  static_buf.e = text + strlen ((char *) text);
+  static_buf.buffer = static_buf.s = (unsigned char *) text;
+  static_buf.e = (unsigned char *) text + strlen ((char *) text);
   static_buf.size = static_buf.s - static_buf.e;
   static_buf.refcnt = 1;
 

@@ -35,6 +35,19 @@
 #include "core_config.h"
 #include "hashlist_func.h"
 
+/*
+ *    user_t -> plugin_priv -> plugin_user_t
+ *    
+ */
+
+#define USERT_TO_PLUGINPRIV(usr)	((plugin_private_t *) usr->plugin_priv)
+#define USERT_TO_PLUGINUSER(usr)	(&((plugin_private_t *) usr->plugin_priv)->user)
+#define USERT_TO_PROTO(usr)		(((plugin_private_t *) usr->plugin_priv)->proto)
+
+#define PLUGINPRIV(user) ((plugin_private_t *) (user)->private)
+#define USERT(user) 	PLUGINPRIV(user)->parent
+#define PROTO(user)	PLUGINPRIV(user)->proto
+
 unsigned char *ConfigFile;
 unsigned char *HardBanFile;
 unsigned char *SoftBanFile;
@@ -42,11 +55,6 @@ unsigned char *AccountsFile;
 
 unsigned char *KickBanRedirect;
 
-extern user_t *HubSec;
-extern hashlist_t hashlist;
-extern user_t *userlist;
-
-plugin_manager_t *manager;
 unsigned long pluginIDs;
 
 cap_array_t plugin_supports[] = {
@@ -59,13 +67,41 @@ cap_array_t plugin_supports[] = {
   {NULL, 0, NULL}
 };
 
+dllist_entry_t managerlist;
+
+plugin_manager_t *plugin_manager_find (proto_t * proto)
+{
+  plugin_manager_t *m;
+
+  dllist_foreach (&managerlist, m)
+    if (m->proto == proto)
+    return m;
+};
+
 /******************************* UTILITIES: REPORING **************************************/
 
-unsigned int plugin_perror (unsigned char *format, ...)
+unsigned int plugin_report (plugin_t * plugin, buffer_t * message)
+{
+  user_t *u;
+  proto_t *proto = plugin->manager->proto;
+
+  if (!*config.SysReportTarget)
+    return EINVAL;
+
+  u = proto->user_find (config.SysReportTarget);
+
+  if (!u)
+    return EINVAL;
+
+  return proto->chat_priv (proto->HubSec, u, proto->HubSec, message);
+}
+
+unsigned int plugin_perror (plugin_t * plugin, unsigned char *format, ...)
 {
   va_list ap;
   int retval;
   buffer_t *b;
+  proto_t *proto = plugin->manager->proto;
 
   b = bf_alloc (1024);
 
@@ -75,78 +111,67 @@ unsigned int plugin_perror (unsigned char *format, ...)
 
   bf_printf (b, ": %s", strerror (errno));
 
-  retval = plugin_report (b);
+  retval = plugin_report (plugin, b);
 
   bf_free (b);
 
   return retval;
 }
 
-unsigned int plugin_report (buffer_t * message)
-{
-  user_t *u;
-
-  if (!*config.SysReportTarget)
-    return EINVAL;
-
-  u = hash_find_nick (&hashlist, config.SysReportTarget, strlen (config.SysReportTarget));
-
-  if (!u)
-    return EINVAL;
-
-  return ((plugin_private_t *) u->plugin_priv)->proto->chat_priv (HubSec, u, HubSec, message);
-}
-
 /******************************* UTILITIES: USER MANAGEMENT **************************************/
 
-unsigned int plugin_user_next (plugin_user_t ** user)
+unsigned int plugin_user_next (plugin_t * plugin, plugin_user_t ** user)
 {
-  user_t *u = *user ? ((plugin_private_t *) (*user)->private)->parent->next : userlist;
+  user_t *u = *user ? USERT (*user)->next : plugin->manager->proto->user_find (NULL);
 
-  while (u && (u->state != PROTO_STATE_ONLINE))
-    u = u->next;
+  //while (u && !(u->flags & PROTO_FLAG_ONLINE))
+  //  u = u->next;
 
   *user = u ? &((plugin_private_t *) u->plugin_priv)->user : NULL;
 
   return (*user != NULL);
 }
 
-plugin_user_t *plugin_user_find (unsigned char *name)
+plugin_user_t *plugin_user_find (plugin_t * plugin, unsigned char *name)
 {
   user_t *u;
+  proto_t *proto = plugin->manager->proto;
 
-  u = hash_find_nick (&hashlist, name, strlen (name));
+  u = proto->user_find (name);
   if (!u)
     return NULL;
 
-  return &((plugin_private_t *) u->plugin_priv)->user;
+  return USERT_TO_PLUGINUSER (u);
 }
 
-plugin_user_t *plugin_user_find_ip (plugin_user_t * last, unsigned long ip)
+plugin_user_t *plugin_user_find_ip (plugin_t * plugin, plugin_user_t * last, unsigned long ip)
 {
   user_t *u = last ? ((plugin_private_t *) (last)->private)->parent : NULL;
 
-  u = hash_find_ip_next (&hashlist, u, ip);
-  if (!u)
-    return NULL;
+  plugin->manager->proto->user_find_ip (u, ip);
 
-  return &((plugin_private_t *) u->plugin_priv)->user;
+  return USERT_TO_PLUGINUSER (u);
 }
 
-plugin_user_t *plugin_user_find_net (plugin_user_t * last, unsigned long ip, unsigned long netmask)
+plugin_user_t *plugin_user_find_net (plugin_t * plugin, plugin_user_t * last, unsigned long ip,
+				     unsigned long netmask)
 {
   user_t *u = last ? ((plugin_private_t *) (last)->private)->parent : NULL;
 
-  u = hash_find_net_next (&hashlist, u, ip, netmask);
-  if (!u)
-    return NULL;
+  plugin->manager->proto->user_find_net (u, ip, netmask);
 
   return &((plugin_private_t *) u->plugin_priv)->user;
 }
 
 buffer_t *plugin_user_getmyinfo (plugin_user_t * user)
 {
-  return ((user_t *) ((plugin_private_t *) user->private)->parent)->MyINFO;
+  //return ((nmdc_user_t *) ((plugin_private_t *) user->private)->parent)->MyINFO;
+  return NULL;
+}
+
+plugin_user_t *plugin_hubsec (plugin_t * plugin)
+{
+  return USERT_TO_PLUGINUSER (plugin->manager->proto->HubSec);
 }
 
 /******************************* UTILITIES: KICK/BAN **************************************/
@@ -158,12 +183,12 @@ unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message)
   if (!user)
     return 0;
 
-  u = ((plugin_private_t *) user->private)->parent;
+  u = USERT (user);
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  return ((plugin_private_t *) user->private)->proto->user_drop (u, message);
+  return PROTO (user)->user_drop (u, message);
 }
 
 unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message)
@@ -171,27 +196,27 @@ unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_
   user_t *u;
   buffer_t *b;
   unsigned int retval;
+  proto_t *proto = PROTO (op);
 
   if (!user)
     return 0;
 
-  u = ((plugin_private_t *) user->private)->parent;
+  u = USERT (user);
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
-	       message, now.tv_sec + config.defaultKickPeriod);
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), u->nick,
+	       u->ipaddress, 0xffffffff, message, now.tv_sec + config.defaultKickPeriod);
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, _("You have been kicked by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
-	     bf_used (message), message->s);
+  bf_printf (b, _("You have been kicked by %s because: %.*s\n"),
+	     (op ? op->nick : proto->HubSec->nick), bf_used (message), message->s);
 
-  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_KICK, b);
+  plugin_send_event (plugin_manager_find (proto), PLUGINPRIV (user), PLUGIN_EVENT_KICK, b);
 
-  retval =
-    ((plugin_private_t *) u->plugin_priv)->proto->user_forcemove (u, config.KickBanRedirect, b);
+  retval = proto->user_forcemove (u, config.KickBanRedirect, b);
 
   bf_free (b);
 
@@ -204,27 +229,27 @@ unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer
   user_t *u;
   buffer_t *b;
   unsigned int retval;
+  proto_t *proto = PROTO (op);
 
   if (!user)
     return 0;
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
-	       message, period ? now.tv_sec + period : 0);
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), u->nick,
+	       u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
-	     bf_used (message), message->s);
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"),
+	     (op ? op->nick : proto->HubSec->nick), bf_used (message), message->s);
 
-  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
+  plugin_send_event (plugin_manager_find (proto), PLUGINPRIV (user), PLUGIN_EVENT_BAN, b);
 
-  retval =
-    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+  retval = proto->user_forcemove (u, config.KickBanRedirect, b);
 
   bf_free (b);
 
@@ -240,10 +265,10 @@ unsigned int plugin_user_unban (plugin_user_t * user)
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  banlist_del_bynick (&softbanlist, u->nick);
+  banlist_del_bynick (PROTO (user)->get_banlist_soft (), u->nick);
   return 0;
 }
 
@@ -277,60 +302,70 @@ unsigned int plugin_user_unzombie (plugin_user_t * user)
   return 0;
 }
 
-unsigned int plugin_unban (unsigned char *nick)
+unsigned int plugin_unban (plugin_user_t * op, unsigned char *nick)
 {
+  proto_t *proto = PROTO (op);
+
   if (!nick)
     return 0;
 
-  return banlist_del_bynick (&softbanlist, nick);
+  return banlist_del_bynick (proto->get_banlist_soft (), nick);
 }
 
 unsigned int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask,
 			    buffer_t * message, unsigned long period)
 {
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
-	       period ? now.tv_sec + period : 0);
+  proto_t *proto = PROTO (op);
+
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), "", ip, netmask,
+	       message, period ? now.tv_sec + period : 0);
   return 0;
 }
 
-unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask)
+unsigned int plugin_unban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask)
 {
-  return banlist_del_byip (&softbanlist, ip, netmask);
+  return banlist_del_byip (PROTO (op)->get_banlist_soft (), ip, netmask);
 }
 
 unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message,
 			      unsigned long period)
 {
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, 0L, 0L, message,
-	       period ? now.tv_sec + period : 0);
+  proto_t *proto = PROTO (op);
+
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), nick, 0L, 0L,
+	       message, period ? now.tv_sec + period : 0);
   return 0;
 }
 
 unsigned int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip,
 			 unsigned long netmask, buffer_t * message, unsigned long period)
 {
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, ip, netmask, message,
-	       period ? now.tv_sec + period : 0);
+  proto_t *proto = PROTO (op);
+
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), nick, ip, netmask,
+	       message, period ? now.tv_sec + period : 0);
   return 0;
 }
 
-unsigned int plugin_unban_nick (unsigned char *nick)
+unsigned int plugin_unban_nick (plugin_user_t * op, unsigned char *nick)
 {
-  banlist_del_bynick (&softbanlist, nick);
+  banlist_del_bynick (PROTO (op)->get_banlist_soft (), nick);
   return 0;
 }
 
-unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask)
+unsigned int plugin_unban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask)
 {
-  banlist_del_byip (&hardbanlist, ip, netmask);
+  banlist_del_byip (PROTO (op)->get_banlist_hard (), ip, netmask);
   return 0;
 }
 
 unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask,
 				 buffer_t * message, unsigned long period)
 {
-  banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
-	       period ? now.tv_sec + period : 0);
+  proto_t *proto = PROTO (op);
+
+  banlist_add (proto->get_banlist_hard (), (op ? op->nick : proto->HubSec->nick), "", ip, netmask,
+	       message, period ? now.tv_sec + period : 0);
   return 0;
 }
 
@@ -340,27 +375,27 @@ unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, b
   user_t *u;
   buffer_t *b;
   unsigned int retval;
+  proto_t *proto = PROTO (op);
 
   if (!user)
     return 0;
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
-	       message, period ? now.tv_sec + period : 0);
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), u->nick,
+	       u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
-	     bf_used (message), message->s);
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"),
+	     (op ? op->nick : proto->HubSec->nick), bf_used (message), message->s);
 
-  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
+  plugin_send_event (plugin_manager_find (proto), PLUGINPRIV (user), PLUGIN_EVENT_BAN, b);
 
-  retval =
-    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+  retval = proto->user_forcemove (u, config.KickBanRedirect, b);
 
   bf_free (b);
 
@@ -373,27 +408,27 @@ unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buff
   user_t *u;
   buffer_t *b;
   unsigned int retval;
+  proto_t *proto = PROTO (op);
 
   if (!user)
     return 0;
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, 0L, 0L, message,
-	       period ? now.tv_sec + period : 0);
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), u->nick, 0L, 0L,
+	       message, period ? now.tv_sec + period : 0);
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
-	     bf_used (message), message->s);
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"),
+	     (op ? op->nick : proto->HubSec->nick), bf_used (message), message->s);
 
-  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
+  plugin_send_event (plugin_manager_find (proto), PLUGINPRIV (user), PLUGIN_EVENT_BAN, b);
 
-  retval =
-    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+  retval = proto->user_forcemove (u, config.KickBanRedirect, b);
 
   bf_free (b);
 
@@ -406,35 +441,36 @@ unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t
   user_t *u;
   buffer_t *b;
   unsigned int retval;
+  proto_t *proto = PROTO (op);
 
   if (!user)
     return 0;
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
-	       message, period ? now.tv_sec + period : 0);
+  banlist_add (proto->get_banlist_soft (), (op ? op->nick : proto->HubSec->nick), u->nick,
+	       u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
 
   b = bf_alloc (265 + bf_used (message));
 
-  bf_printf (b, _("You have been banned by %s because: %.*s\n"), (op ? op->nick : HubSec->nick),
-	     bf_used (message), message->s);
-  retval =
-    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+  bf_printf (b, _("You have been banned by %s because: %.*s\n"),
+	     (op ? op->nick : proto->HubSec->nick), bf_used (message), message->s);
+  retval = proto->user_forcemove (u, config.KickBanRedirect, b);
 
   bf_free (b);
 
   return retval;
 }
 
-unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
+unsigned int plugin_user_findnickban (plugin_user_t * op, buffer_t * buf, unsigned char *nick)
 {
   banlist_entry_t *ne;
+  proto_t *proto = PROTO (op);
 
-  ne = banlist_find_bynick (&softbanlist, nick);
+  ne = banlist_find_bynick (proto->get_banlist_soft (), nick);
   if (!ne)
     return 0;
 
@@ -447,12 +483,13 @@ unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
   }
 }
 
-unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
+unsigned int plugin_user_findipban (plugin_user_t * op, buffer_t * buf, unsigned long ip)
 {
   struct in_addr ipa, netmask;
   banlist_entry_t *ie;
+  proto_t *proto = PROTO (op);
 
-  ie = banlist_find_byip (&softbanlist, ip);
+  ie = banlist_find_byip (proto->get_banlist_soft (), ip);
   if (!ie)
     return 0;
 
@@ -468,15 +505,16 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   }
 }
 
-unsigned int plugin_banlist (buffer_t * output)
+unsigned int plugin_banlist (plugin_user_t * op, buffer_t * output)
 {
   unsigned long bucket, n;
   banlist_entry_t *lst, *e;
   struct in_addr ip, nm;
+  proto_t *proto = PROTO (op);
 
   n = 0;
-  dlhashlist_foreach (&softbanlist.list_ip, bucket) {
-    lst = dllist_bucket (&softbanlist.list_ip, bucket);
+  dlhashlist_foreach (&(proto->get_banlist_soft ()->list_ip), bucket) {
+    lst = dllist_bucket (&(proto->get_banlist_soft ()->list_ip), bucket);
     dllist_foreach (lst, e) {
       ip.s_addr = e->ip;
       nm.s_addr = e->netmask;
@@ -519,7 +557,7 @@ unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message)
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
   return ((plugin_private_t *) user->private)->proto->user_redirect (u, message);
@@ -535,7 +573,7 @@ unsigned int plugin_user_forcemove (plugin_user_t * user, unsigned char *destina
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  if (u->state == PROTO_STATE_VIRTUAL)
+  if (u->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
   if (!destination || !*destination)
@@ -549,11 +587,12 @@ unsigned int plugin_user_forcemove (plugin_user_t * user, unsigned char *destina
 unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message)
 {
   user_t *u;
+  proto_t *proto = PROTO (src);
 
   if (src) {
-    u = ((plugin_private_t *) src->private)->parent;
+    u = USERT (src);
   } else {
-    u = HubSec;
+    u = proto->HubSec;
   }
 
   /* delete trailing \n */
@@ -561,7 +600,7 @@ unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message)
     message->s[bf_used (message) - 1] = '\0';
     message->e--;
   }
-  return ((plugin_private_t *) u->plugin_priv)->proto->chat_main (u, message);
+  return proto->chat_main (u, message);
 }
 
 unsigned int plugin_user_raw (plugin_user_t * tgt, buffer_t * message)
@@ -571,7 +610,7 @@ unsigned int plugin_user_raw (plugin_user_t * tgt, buffer_t * message)
   if (!tgt)
     return 0;
 
-  u = ((plugin_private_t *) tgt->private)->parent;
+  u = USERT (tgt);
 
   /* delete trailing \n */
   if (bf_used (message) && (message->s[bf_used (message) - 1] == '\n')) {
@@ -579,11 +618,11 @@ unsigned int plugin_user_raw (plugin_user_t * tgt, buffer_t * message)
     message->e--;
   }
 
-  return ((plugin_private_t *) u->plugin_priv)->proto->raw_send (u, message);
+  return PROTO (tgt)->raw_send (u, message);
 }
 
 
-unsigned int plugin_user_raw_all (buffer_t * message)
+unsigned int plugin_user_raw_all (plugin_t * plugin, buffer_t * message)
 {
   /* delete trailing \n */
   if (bf_used (message) && (message->s[bf_used (message) - 1] == '\n')) {
@@ -591,18 +630,19 @@ unsigned int plugin_user_raw_all (buffer_t * message)
     message->e--;
   }
 
-  return ((plugin_private_t *) HubSec->plugin_priv)->proto->raw_send_all (message);
+  return plugin->manager->proto->raw_send_all (message);
 }
 
 unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buffer_t * message,
 				int direct)
 {
   user_t *u, *t;
+  proto_t *proto = PROTO (target);
 
   if (src) {
-    u = ((plugin_private_t *) src->private)->parent;
+    u = USERT (src);
   } else {
-    u = HubSec;
+    u = proto->HubSec;
   }
 
   /* delete trailing \n */
@@ -611,24 +651,24 @@ unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buf
     message->e--;
   }
 
-  t = ((plugin_private_t *) target->private)->parent;
+  t = USERT (target);
 
-  if (t->state == PROTO_STATE_VIRTUAL)
+  if (t->flags & PROTO_FLAG_VIRTUAL)
     return 0;
 
-  return direct ? ((plugin_private_t *) u->plugin_priv)->proto->chat_send_direct (u, t, message) :
-    ((plugin_private_t *) u->plugin_priv)->proto->chat_send (u, t, message);
+  return direct ? proto->chat_send_direct (u, t, message) : proto->chat_send (u, t, message);
 }
 
 unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plugin_user_t * user,
 			       buffer_t * message, int direct)
 {
   user_t *u, *t, *s;
+  proto_t *proto = PROTO (target);
 
   if (src) {
-    u = ((plugin_private_t *) src->private)->parent;
+    u = USERT (src);
   } else {
-    u = HubSec;
+    u = proto->HubSec;
   }
 
   /* delete trailing \n */
@@ -637,16 +677,15 @@ unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plug
     message->e--;
   }
 
-  t = ((plugin_private_t *) target->private)->parent;
+  t = USERT (target);
 
   if (user) {
-    s = ((plugin_private_t *) user->private)->parent;
+    s = USERT (user);
   } else {
-    s = HubSec;
+    s = proto->HubSec;
   }
 
-  return direct ? ((plugin_private_t *) target->private)->proto->chat_priv_direct (u, t, s, message)
-    : ((plugin_private_t *) target->private)->proto->chat_priv (u, t, s, message);
+  return direct ? proto->chat_priv_direct (u, t, s, message) : proto->chat_priv (u, t, s, message);
 }
 
 unsigned int plugin_user_printf (plugin_user_t * user, const char *format, ...)
@@ -668,17 +707,16 @@ unsigned int plugin_user_printf (plugin_user_t * user, const char *format, ...)
 }
 
 /******************************* ROBOTS EVENTS *******************************************/
-/* FIXME */
-extern proto_t nmdc_proto;
-plugin_user_t *plugin_robot_add (unsigned char *name, unsigned char *description,
+
+plugin_user_t *plugin_robot_add (plugin_t * plugin, unsigned char *name, unsigned char *description,
 				 plugin_event_handler_t * handler)
 {
   user_t *u;
   plugin_private_t *priv;
 
-  u = nmdc_proto.robot_add (name, description);
+  u = plugin->manager->proto->robot_add (name, description);
   u->rights |= CAP_KEY;
-  plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
+  plugin_new_user (plugin->manager, (plugin_private_t **) & u->plugin_priv, u);
 
   priv = ((plugin_private_t *) u->plugin_priv);
   priv->handler = handler;
@@ -692,10 +730,9 @@ int plugin_robot_remove (plugin_user_t * robot)
 {
   user_t *u;
 
-  u = ((plugin_private_t *) robot->private)->parent;
+  u = USERT (robot);
 
-  /* does the plugin_del_user */
-  ((plugin_private_t *) robot->private)->proto->robot_del (u);
+  PROTO (robot)->robot_del (u);
 
   return 0;
 }
@@ -732,6 +769,7 @@ int plugin_parse (plugin_user_t * user, buffer_t * buf)
 int plugin_request (plugin_t * plugin, unsigned long event, plugin_event_handler_t * handler)
 {
   plugin_event_request_t *request;
+  plugin_manager_t *manager = plugin->manager;
 
   if (event > PLUGIN_EVENT_NUMBER)
     return -1;
@@ -756,6 +794,7 @@ int plugin_request (plugin_t * plugin, unsigned long event, plugin_event_handler
 int plugin_ignore (plugin_t * plugin, unsigned long event, plugin_event_handler_t * handler)
 {
   plugin_event_request_t *request;
+  plugin_manager_t *manager = plugin->manager;
 
   for (request = manager->eventhandles[event].next; request != &manager->eventhandles[event];
        request = request->next)
@@ -811,7 +850,7 @@ void *plugin_retrieve (plugin_t * plugin, plugin_user_t * user)
 
 /******************************* REGISTER/UNREGISTER *******************************************/
 
-plugin_t *plugin_register (const char *name)
+plugin_t *plugin_register (plugin_manager_t * manager, const char *name)
 {
   plugin_t *plugin;
 
@@ -829,6 +868,7 @@ plugin_t *plugin_register (const char *name)
   plugin->next = manager->plugins.next;
   plugin->prev = &manager->plugins;
   plugin->next->prev = plugin;
+  plugin->manager = manager;
   manager->plugins.next = plugin;
 
   return plugin;
@@ -837,6 +877,7 @@ plugin_t *plugin_register (const char *name)
 int plugin_unregister (plugin_t * plugin)
 {
   plugin_private_t *p;
+  plugin_manager_t *manager = plugin->manager;
 
   /* force clearing of all private data */
   for (p = manager->privates.next; p != &manager->privates; p = p->next)
@@ -861,12 +902,14 @@ int plugin_unregister (plugin_t * plugin)
 
 /******************************* ENTRYPOINT *******************************************/
 
-unsigned long plugin_user_event (plugin_user_t * user, unsigned long event, void *token)
+unsigned long plugin_user_event (plugin_t * plugin, plugin_user_t * user, unsigned long event,
+				 void *token)
 {
-  return plugin_send_event (((plugin_private_t *) user->private), event, token);
+  return plugin_send_event (plugin->manager, ((plugin_private_t *) user->private), event, token);
 }
 
-unsigned long plugin_send_event (plugin_private_t * priv, unsigned long event, void *token)
+unsigned long plugin_send_event (plugin_manager_t * manager, plugin_private_t * priv,
+				 unsigned long event, void *token)
 {
   unsigned long retval = PLUGIN_RETVAL_CONTINUE;
   plugin_event_request_t *r, *e;
@@ -898,38 +941,53 @@ unsigned long plugin_send_event (plugin_private_t * priv, unsigned long event, v
 
 /****************************** CORE USERMANAGEMENT ******************************************/
 
-unsigned long plugin_update_user (user_t * u)
+#include "nmdc_local.h"
+unsigned long plugin_update_user (plugin_manager_t * manager, user_t * u)
 {
-  if ((((plugin_private_t *) u->plugin_priv)->user.share == u->share) &&
-      (((plugin_private_t *) u->plugin_priv)->user.active == u->active) &&
-      (((plugin_private_t *) u->plugin_priv)->user.slots == u->slots) &&
-      (((plugin_private_t *) u->plugin_priv)->user.hubs[0] == u->hubs[0]) &&
-      (((plugin_private_t *) u->plugin_priv)->user.hubs[1] == u->hubs[1]) &&
-      (((plugin_private_t *) u->plugin_priv)->user.hubs[2] == u->hubs[2]) &&
-      (((plugin_private_t *) u->plugin_priv)->user.ipaddress == u->ipaddress) &&
-      (((plugin_private_t *) u->plugin_priv)->user.op == u->op) &&
-      (((plugin_private_t *) u->plugin_priv)->user.flags == u->flags) &&
-      (((plugin_private_t *) u->plugin_priv)->user.supports == u->supports) &&
-      (((plugin_private_t *) u->plugin_priv)->user.rights == u->rights))
+  plugin_user_t *user;
+  nmdc_user_t *nmdc;
+
+  ASSERT (u);
+  if (!u)
     return 0;
 
-  ((plugin_private_t *) u->plugin_priv)->user.share = u->share;
-  ((plugin_private_t *) u->plugin_priv)->user.active = u->active;
-  ((plugin_private_t *) u->plugin_priv)->user.slots = u->slots;
-  ((plugin_private_t *) u->plugin_priv)->user.hubs[0] = u->hubs[0];
-  ((plugin_private_t *) u->plugin_priv)->user.hubs[1] = u->hubs[1];
-  ((plugin_private_t *) u->plugin_priv)->user.hubs[2] = u->hubs[2];
-  ((plugin_private_t *) u->plugin_priv)->user.ipaddress = u->ipaddress;
-  ((plugin_private_t *) u->plugin_priv)->user.op = u->op;
-  ((plugin_private_t *) u->plugin_priv)->user.flags = u->flags;
-  ((plugin_private_t *) u->plugin_priv)->user.rights = u->rights;
-  ((plugin_private_t *) u->plugin_priv)->user.supports = u->supports;
+  user = USERT_TO_PLUGINUSER (u);
 
-  return plugin_send_event (((plugin_private_t *) u->plugin_priv), PLUGIN_EVENT_UPDATE, NULL);
+  if (manager->proto->name[0] == 'N')
+    nmdc = (nmdc_user_t *) u;
+
+  if ((user->share == u->share) &&
+      (user->active == u->active) &&
+      (!nmdc ||
+       ((user->slots == nmdc->slots) &&
+	(user->hubs[0] == nmdc->hubs[0]) &&
+	(user->hubs[1] == nmdc->hubs[1]) && (user->hubs[2] == nmdc->hubs[2])
+       )
+      ) &&
+      (user->ipaddress == u->ipaddress) &&
+      (user->op == (u->rights & CAP_KEY)) &&
+      (user->flags == u->flags) && (user->rights == u->rights))
+    return 0;
+
+  user->share = u->share;
+  user->active = u->active;
+  if (nmdc) {
+    user->slots = nmdc->slots;
+    user->hubs[0] = nmdc->hubs[0];
+    user->hubs[1] = nmdc->hubs[1];
+    user->hubs[2] = nmdc->hubs[2];
+  }
+  user->ipaddress = u->ipaddress;
+  user->op = (u->rights & CAP_KEY);
+  user->flags = u->flags;
+  user->rights = u->rights;
+
+  return plugin_send_event (manager, ((plugin_private_t *) u->plugin_priv), PLUGIN_EVENT_UPDATE,
+			    NULL);
 }
 
 
-unsigned long plugin_new_user (plugin_private_t ** priv, user_t * u, proto_t * p)
+unsigned long plugin_new_user (plugin_manager_t * manager, plugin_private_t ** priv, user_t * u)
 {
 
   ASSERT (!*priv);
@@ -943,11 +1001,11 @@ unsigned long plugin_new_user (plugin_private_t ** priv, user_t * u, proto_t * p
   ((plugin_private_t *) u->plugin_priv)->user.version = u->version;
 
   (*priv)->parent = u;
-  (*priv)->proto = p;
+  (*priv)->proto = manager->proto;
   (*priv)->user.private = *priv;
   (*priv)->store = (void *) (((char *) *priv) + sizeof (plugin_private_t));
 
-  return plugin_update_user (u);
+  return plugin_update_user (manager, u);
 }
 
 
@@ -963,7 +1021,7 @@ unsigned long plugin_del_user (plugin_private_t ** priv)
 
 /******************************* INIT *******************************************/
 
-unsigned int plugin_config_save (buffer_t * output)
+unsigned int plugin_config_save (plugin_t * plugin, buffer_t * output)
 {
   int retval = 0;
 
@@ -976,38 +1034,39 @@ unsigned int plugin_config_save (buffer_t * output)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), AccountsFile,
 	       strerror (retval));
 
-  retval = banlist_save (&hardbanlist, HardBanFile);
+  retval = banlist_save (plugin->manager->proto->get_banlist_hard (), HardBanFile);
   if (retval)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), HardBanFile, strerror (retval));
 
-  retval = banlist_save (&softbanlist, SoftBanFile);
+  retval = banlist_save (plugin->manager->proto->get_banlist_soft (), SoftBanFile);
   if (retval)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), SoftBanFile, strerror (retval));
 
-  plugin_send_event (NULL, PLUGIN_EVENT_SAVE, output);
+  plugin_send_event (plugin->manager, NULL, PLUGIN_EVENT_SAVE, output);
 
   return 0;
 }
 
-unsigned int plugin_config_load ()
+unsigned int plugin_config_load (plugin_t * plugin)
 {
   config_load (ConfigFile);
   accounts_load (AccountsFile);
-  banlist_clear (&hardbanlist);
-  banlist_load (&hardbanlist, HardBanFile);
-  banlist_clear (&softbanlist);
-  banlist_load (&softbanlist, SoftBanFile);
+  banlist_clear (plugin->manager->proto->get_banlist_hard ());
+  banlist_load (plugin->manager->proto->get_banlist_hard (), HardBanFile);
+  banlist_clear (plugin->manager->proto->get_banlist_soft ());
+  banlist_load (plugin->manager->proto->get_banlist_soft (), SoftBanFile);
 
-  plugin_send_event (NULL, PLUGIN_EVENT_LOAD, NULL);
+  plugin_send_event (plugin->manager, NULL, PLUGIN_EVENT_LOAD, NULL);
 
   return 0;
 }
 
 /******************************* INIT *******************************************/
 
-int plugin_init ()
+plugin_manager_t *plugin_init (proto_t * proto)
 {
   int i;
+  plugin_manager_t *manager;
 
   pluginIDs = 0;
 
@@ -1020,15 +1079,17 @@ int plugin_init ()
   manager->privates.next = &manager->privates;
   manager->privates.prev = &manager->privates;
   for (i = 0; i < PLUGIN_EVENT_NUMBER; i++) {
-    manager->eventhandles[i].next = &manager->eventhandles[i];
-    manager->eventhandles[i].prev = &manager->eventhandles[i];
+    manager->eventhandles[i].next = &(manager->eventhandles[i]);
+    manager->eventhandles[i].prev = &(manager->eventhandles[i]);
   }
   manager->num = PLUGIN_MAX_PLUGINS;
+
+  manager->proto = proto;
 
   ConfigFile = strdup (DEFAULT_SAVEFILE);
   HardBanFile = strdup (DEFAULT_HARDBANFILE);
   SoftBanFile = strdup (DEFAULT_SOFTBANFILE);
   AccountsFile = strdup (DEFAULT_ACCOUNTSFILE);
 
-  return 0;
+  return manager;
 }

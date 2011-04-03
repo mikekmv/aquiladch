@@ -109,7 +109,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 				    unsigned long event, buffer_t * token);
 
 
-#define PLUGIN_USER_FIND(arg) 	( (pi_lua_eventuser && !strcmp(arg, pi_lua_eventuser->nick)) ? pi_lua_eventuser : plugin_user_find (arg) )
+#define PLUGIN_USER_FIND(arg) 	( (pi_lua_eventuser && !strcmp(arg, pi_lua_eventuser->nick)) ? pi_lua_eventuser : plugin_user_find (plugin_lua, arg) )
 
 #define PUSH_TABLE_ENTRY(ctx, name, entry)  { lua_pushstring (ctx, name); lua_pushstring (ctx, entry); lua_settable(ctx, -3); }
 #define PUSH_TABLE_ENTRY_NUMBER(ctx, name, entry)  { lua_pushstring (ctx, name); lua_pushnumber (ctx, entry); lua_settable(ctx, -3); }
@@ -296,7 +296,7 @@ int pi_lua_setconfig (lua_State * lua)
       lua_error (lua);
   }
 
-  plugin_user_event (NULL, PLUGIN_EVENT_CONFIG, elem);
+  plugin_user_event (plugin_lua, NULL, PLUGIN_EVENT_CONFIG, elem);
 
   return 1;
 }
@@ -627,7 +627,7 @@ int pi_lua_user_kick (lua_State * lua)
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
   plugin_user_t *u;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -653,7 +653,7 @@ int pi_lua_user_drop (lua_State * lua)
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
   plugin_user_t *u;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -681,7 +681,7 @@ int pi_lua_user_ban (lua_State * lua)
   plugin_user_t *u;
   unsigned long period;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -711,7 +711,7 @@ int pi_lua_user_bannick (lua_State * lua)
   plugin_user_t *u;
   unsigned long period;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -741,7 +741,7 @@ int pi_lua_user_banip (lua_State * lua)
   plugin_user_t *u;
   unsigned long period;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -771,7 +771,7 @@ int pi_lua_user_banip_hard (lua_State * lua)
   plugin_user_t *u;
   unsigned long period;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -855,7 +855,7 @@ int pi_lua_unban (lua_State * lua)
 {
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
 
-  lua_pushboolean (lua, plugin_unban (nick));
+  lua_pushboolean (lua, plugin_unban (plugin_hubsec (plugin_lua), nick));
 
   return 1;
 }
@@ -864,7 +864,7 @@ int pi_lua_unbannick (lua_State * lua)
 {
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
 
-  lua_pushboolean (lua, plugin_unban_nick (nick));
+  lua_pushboolean (lua, plugin_unban_nick (plugin_hubsec (plugin_lua), nick));
 
   return 1;
 }
@@ -879,7 +879,7 @@ int pi_lua_unbanip (lua_State * lua)
     lua_error (lua);
   }
 
-  lua_pushboolean (lua, plugin_unban_ip (ia.s_addr, netmask.s_addr));
+  lua_pushboolean (lua, plugin_unban_ip (plugin_hubsec (plugin_lua), ia.s_addr, netmask.s_addr));
 
   return 1;
 }
@@ -894,7 +894,8 @@ int pi_lua_unbanip_hard (lua_State * lua)
     lua_error (lua);
   }
 
-  lua_pushboolean (lua, plugin_unban_ip_hard (ia.s_addr, netmask.s_addr));
+  lua_pushboolean (lua,
+		   plugin_unban_ip_hard (plugin_hubsec (plugin_lua), ia.s_addr, netmask.s_addr));
 
   return 1;
 }
@@ -904,7 +905,7 @@ int pi_lua_user_zombie (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *u;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -921,7 +922,7 @@ int pi_lua_user_unzombie (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   plugin_user_t *u;
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -940,7 +941,7 @@ int pi_lua_findnickban (lua_State * lua)
 
   b = bf_alloc (10240);
 
-  if (plugin_user_findnickban (b, nick)) {
+  if (plugin_user_findnickban (plugin_hubsec (plugin_lua), b, nick)) {
     lua_pushstring (lua, b->s);
   } else {
     lua_pushnil (lua);
@@ -964,7 +965,7 @@ int pi_lua_findipban (lua_State * lua)
 
   b = bf_alloc (10240);
 
-  if (plugin_user_findipban (b, ia.s_addr)) {
+  if (plugin_user_findipban (plugin_hubsec (plugin_lua), b, ia.s_addr)) {
     lua_pushstring (lua, b->s);
   } else {
     lua_pushnil (lua);
@@ -983,7 +984,7 @@ int pi_lua_report (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_report (b);
+  plugin_report (plugin_lua, b);
 
   bf_free (b);
 
@@ -1003,7 +1004,9 @@ int pi_lua_sendtoall (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
+  if (!u)
+    u = plugin_hubsec (plugin_lua);
 
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
@@ -1023,7 +1026,7 @@ int pi_lua_sendtonick (lua_State * lua)
   unsigned char *dest = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
 
-  s = plugin_user_find (src);
+  s = plugin_user_find (plugin_lua, src);
   /* s can be NULL, wil become hubsec */
 
   d = PLUGIN_USER_FIND (dest);
@@ -1050,14 +1053,14 @@ int pi_lua_sendpmtoall (lua_State * lua)
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
   /* send to all users */
   i = 0;
-  while (plugin_user_next (&tgt)) {
+  while (plugin_user_next (plugin_lua, &tgt)) {
     /* weird is i set direct to 1 it doesn't work. */
     plugin_user_priv (u, tgt, u, b, 0);
     i++;
@@ -1077,7 +1080,7 @@ int pi_lua_sendpmtonick (lua_State * lua)
   unsigned char *dest = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
 
-  s = plugin_user_find (src);
+  s = plugin_user_find (plugin_lua, src);
   /* s can be NULL, wil become hubsec */
 
   d = PLUGIN_USER_FIND (dest);
@@ -1127,7 +1130,7 @@ int pi_lua_rawtoall (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  lua_pushboolean (lua, plugin_user_raw_all (b));
+  lua_pushboolean (lua, plugin_user_raw_all (plugin_lua, b));
 
   bf_free (b);
 
@@ -1417,7 +1420,7 @@ unsigned long pi_lua_robot_event_handler (plugin_user_t * user, void *dummy,
 
     bf_printf (buf, _("LUA ERROR ('%s'): %s\n"), ctx->name, error);
 
-    plugin_report (buf);
+    plugin_report (plugin_lua, buf);
 
     bf_free (buf);
 
@@ -1444,7 +1447,15 @@ int pi_lua_addbot (lua_State * lua)
   unsigned char *description = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *function = (unsigned char *) luaL_checkstring (lua, 3);
 
-  /* FIXME verify functon */
+  /* verify functoin */
+  lua_pushstring (lua, function);
+  lua_gettable (lua, LUA_GLOBALSINDEX);
+  if (lua_isnil (lua, -1)) {
+    lua_remove (lua, -1);
+    lua_pushstring (lua, "No such LUA function.");
+    return lua_error (lua);
+  }
+  lua_remove (lua, -1);
 
   for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
     if (ctx->l == lua)
@@ -1452,7 +1463,7 @@ int pi_lua_addbot (lua_State * lua)
 
   assert (ctx != &lua_list);
 
-  u = plugin_robot_add (nick, description, pi_lua_robot_event_handler);
+  u = plugin_robot_add (plugin_lua, nick, description, pi_lua_robot_event_handler);
 
   if (!u) {
     lua_pushboolean (lua, 0);
@@ -1485,7 +1496,7 @@ int pi_lua_delbot (lua_State * lua)
 
   assert (ctx != &lua_list);
 
-  u = plugin_user_find (nick);
+  u = plugin_user_find (plugin_lua, nick);
 
   for (robot = ctx->robots.next; robot != &ctx->robots; robot = robot->next) {
     if (robot->robot == u)
@@ -1598,7 +1609,7 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
 
     bf_printf (buf, _("LUA ERROR ('%s'): %s\n"), ctx->name, error);
 
-    plugin_report (buf);
+    plugin_report (plugin_lua, buf);
 
     bf_free (buf);
   } else {
@@ -2112,7 +2123,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 
       bf_printf (buf, _("LUA ERROR ('%s'): %s\n"), ctx->name, error);
 
-      plugin_report (buf);
+      plugin_report (plugin_lua, buf);
 
       bf_free (buf);
 
@@ -2140,7 +2151,7 @@ unsigned long pi_lua_event_save (plugin_user_t * user, buffer_t * output, void *
 
   fp = fopen (pi_lua_savefile, "w+");
   if (!fp) {
-    plugin_perror (__ ("LUA: ERROR saving %s"), pi_lua_savefile);
+    plugin_perror (plugin_lua, __ ("LUA: ERROR saving %s"), pi_lua_savefile);
     return PLUGIN_RETVAL_CONTINUE;
   }
 
@@ -2171,7 +2182,7 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
   /* load scripts */
   fp = fopen (pi_lua_savefile, "r+");
   if (!fp) {
-    plugin_perror ("LUA: ERROR loading %s", pi_lua_savefile);
+    plugin_perror (plugin_lua, "LUA: ERROR loading %s", pi_lua_savefile);
     return PLUGIN_RETVAL_CONTINUE;
   }
 
@@ -2186,7 +2197,7 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
 
     pi_lua_load (buf, buffer);
     if (bf_used (buf)) {
-      plugin_report (buf);
+      plugin_report (plugin_lua, buf);
       bf_clear (buf);
     }
     fgets (buffer, sizeof (buffer), fp);
@@ -2200,7 +2211,7 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
 
 /******************************* INIT *******************************************/
 
-int pi_lua_init ()
+int pi_lua_init (plugin_manager_t * pm)
 {
   pi_lua_savefile = strdup ("lua.conf");
   pi_lua_eventmap = 0;
@@ -2218,7 +2229,7 @@ int pi_lua_init ()
   pi_lua_command_list.name = NULL;
   pi_lua_command_list.lua = NULL;
 
-  plugin_lua = plugin_register ("lua");
+  plugin_lua = plugin_register (pm, "lua");
 
   plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
   plugin_request (plugin_lua, PLUGIN_EVENT_SAVE, (plugin_event_handler_t *) & pi_lua_event_save);

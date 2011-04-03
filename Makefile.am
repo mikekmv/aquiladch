@@ -67,3 +67,6 @@ cygsrc: cygdist/${CYGCRYPT_SRC} cygdist/${CYGWIN1_SRC} cygdist/${CYGZ_SRC}
 	@mkdir -p cygsrc
 	cp $^ cygsrc/
 
+mrproper:
+	make -C src mrproper
+	make -C tools mrproper

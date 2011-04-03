@@ -79,9 +79,9 @@ unsigned long pi_statbot_handler_statbot (plugin_user_t * user, buffer_t * outpu
 
 /********************************* INIT *************************************/
 
-int pi_statbot_init ()
+int pi_statbot_init (plugin_manager_t * pm)
 {
-  plugin_statbot = plugin_register ("statbot");
+  plugin_statbot = plugin_register (pm, "statbot");
 
   command_register ("statbot", &pi_statbot_handler_statbot, 0,
 		    _("Command returns info for the statbot."));

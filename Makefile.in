@@ -682,6 +682,10 @@ cygdist: aquila-${VERSION}-cygbin.tgz
 cygsrc: cygdist/${CYGCRYPT_SRC} cygdist/${CYGWIN1_SRC} cygdist/${CYGZ_SRC}
 	@mkdir -p cygsrc
 	cp $^ cygsrc/
+
+mrproper:
+	make -C src mrproper
+	make -C tools mrproper
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
