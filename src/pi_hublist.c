@@ -175,6 +175,7 @@ int pi_hublist_handle_input (esocket_t * s)
   pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
 
   buf = bf_alloc (PI_HUBLIST_BUFFER_SIZE);
+  output = NULL;
 
   /* read data */
   n = read (s->socket, buf->s, PI_HUBLIST_BUFFER_SIZE);
@@ -217,7 +218,6 @@ int pi_hublist_handle_input (esocket_t * s)
 		 buf->s);
       plugin_report (output);
     }
-    bf_free (output);
     goto leave;
   }
 
@@ -270,8 +270,6 @@ int pi_hublist_handle_input (esocket_t * s)
     DPRINTF ("pi_hublist: write: %.*s", (int) bf_used (buf), buf->s);
   }
 
-  bf_free (output);
-
   if (ctx->flags & PI_HUBLIST_FLAGS_REPORT) {
     bf_clear (buf);
     bf_printf (buf, _("Registered at hublist %s\n"), ctx->address);
@@ -282,6 +280,8 @@ int pi_hublist_handle_input (esocket_t * s)
 #endif
 
 leave:
+  if (output)
+    bf_free (output);
   bf_free (buf);
 
   free (ctx->address);

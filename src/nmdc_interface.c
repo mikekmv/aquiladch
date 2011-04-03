@@ -324,6 +324,7 @@ void proto_nmdc_user_cachelist_clear ()
   buffer_t *buf;
   user_t *u, *p;
   time_t now;
+  unsigned int op;
 
   time (&now);
   now -= config.DelayedLogout;
@@ -345,6 +346,9 @@ void proto_nmdc_user_cachelist_clear ()
 
       /* remove from hashlist */
       hash_deluser (&cachehashlist, &u->hash);
+
+      if (u->op)
+	op++;
     }
 
     /* remove from list */
@@ -1111,20 +1115,20 @@ int proto_nmdc_init ()
 		   ("Period of user warnings. This controls how often a warning is send to user that overstep limits."));
   config_register ("rate.warnings.refill", CFG_ELEM_ULONG, &rates.warnings.refill,
 		   _
-		   ("Period of user warnings. This controls how many warning a user gets within the period."));
+		   ("Refill of user warnings. This controls how many warning a user gets within the period."));
   config_register ("rate.warnings.burst", CFG_ELEM_ULONG, &rates.warnings.burst,
 		   _
-		   ("Period of user warnings. This controls how many warnings a user that overstep limits can save up."));
+		   ("Burst of user warnings. This controls how many warnings a user that overstep limits can save up."));
 
   config_register ("rate.violations.period", CFG_ELEM_ULONG, &rates.violations.period,
 		   _
 		   ("Period of user violations. This controls how often a warning is send to user that overstep limits."));
   config_register ("rate.violations.refill", CFG_ELEM_ULONG, &rates.violations.refill,
 		   _
-		   ("Period of user violations. This controls how many warning a user gets within the period."));
+		   ("Refill of user violations. This controls how many warning a user gets within the period."));
   config_register ("rate.violations.burst", CFG_ELEM_ULONG, &rates.violations.burst,
 		   _
-		   ("Period of user violations. This controls how many violations a user that overstep limits can save up."));
+		   ("Burst of user violations. This controls how many violations a user that overstep limits can save up."));
 
   /* cache stuff */
   memset ((void *) &cache, 0, sizeof (cache_t));

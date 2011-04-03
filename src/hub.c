@@ -380,7 +380,7 @@ int server_disconnect_user (client_t * cl, char *reason)
   }
 
   if (cl->outgoing.count) {
-    ASSERT (cl->outgoing.first);
+    STRINGLIST_VERIFY (&cl->outgoing);
     buf_mem -= cl->outgoing.size;
     buffering--;
   }
@@ -405,8 +405,8 @@ int server_disconnect_user (client_t * cl, char *reason)
 int server_handle_output (esocket_t * es)
 {
   client_t *cl = (client_t *) es->context;
-  buffer_t *b, *n;
-  long w, l;
+  buffer_t *b;
+  long w, l, o;
   unsigned long t;
   string_list_entry_t *e;
 
@@ -417,12 +417,20 @@ int server_handle_output (esocket_t * es)
 
   buf_mem -= cl->outgoing.size;
 
+  o = cl->offset;
   /* write out as much data as possible */
   for (e = cl->outgoing.first; e; e = cl->outgoing.first) {
-    for (b = e->data; b; b = n) {
-      /* write data */
-      l = bf_used (b) - cl->offset;
-      w = send (es->socket, b->s + cl->offset, l, 0);
+    b = e->data;
+    /* skip buffers we wrote already */
+    while (b && (bf_used (b) < o)) {
+      o -= bf_used (b);
+      b = b->next;
+    }
+    ASSERT (b);
+    /* write out data in buffer chain */
+    for (b = e->data; b; b = b->next) {
+      l = bf_used (b) - o;
+      w = send (es->socket, b->s + o, l, 0);
       if (w < 0) {
 	switch (errno) {
 	  case EAGAIN:
@@ -430,34 +438,28 @@ int server_handle_output (esocket_t * es)
 	    break;
 	  case EPIPE:
 	  case ECONNRESET:
-	    e->data = b;
 	    buf_mem += cl->outgoing.size;
 	    server_disconnect_user (cl, __ ("Connection closed."));
 	    return -1;
 	  default:
-	    e->data = b;
 	    buf_mem += cl->outgoing.size;
 	    return -1;
 	}
 	w = 0;
 	break;
       }
-      hubstats.TotalBytesSend += w;
       t += w;
+      cl->offset += w;
+      hubstats.TotalBytesSend += w;
       if (w != l)
 	break;
-      cl->offset = 0;
-
-      /* store "next" pointer and free buffer memory */
-      n = b->next;
-      ASSERT (cl->outgoing.size >= bf_used (b));
-      cl->outgoing.size -= bf_used (b);
-      bf_free_single (b);
+      o = 0;
     }
-    e->data = b;
     if (b)
       break;
 
+    /* prepare for next buffer */
+    cl->offset = 0;
     string_list_del (&cl->outgoing, e);
   }
   if (cl->credit) {
@@ -471,9 +473,6 @@ int server_handle_output (esocket_t * es)
 
   /* still not all data written */
   if (b) {
-    if (w > 0)
-      cl->offset += w;
-
     if ((cl->state == HUB_STATE_OVERFLOW)
 	&& ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit))) {
       esocket_settimeout (cl->es, config.TimeoutBuffering);

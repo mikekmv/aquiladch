@@ -1,6 +1,19 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Added fi_OP.po (Thanks maksalaatikko!)
+	Support \" in arguments. (Req FleetCommand)
+	No longer tag the user for asearch exception when sending
+		an oplist.
+	Added command !hardbanlist
+	Fix the ban deletion messages. (Thanks FleetCommand).
+	Make lua commands translatable. (Thanks maksalaatikko).
+	Rewrote server_handle_output. No longer partial string frees.
+	Fixed messages of rate.violations and rate.warnings (Thanks
+		maksalaatikko)
+	Added ASSERT in bf_append
+	Fix ASSERT in banlist_find_bynick_next
+	!userrestrict always look up rights with the accountname.
 	Fix bug with flushtimer that goes berserk.
 	Fix bugs with long output.
 	Use correct string for gettext in bf_printf/bf_vprintf

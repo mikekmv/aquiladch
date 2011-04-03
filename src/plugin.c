@@ -288,9 +288,8 @@ unsigned int plugin_unban (unsigned char *nick)
 unsigned int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask,
 			    buffer_t * message, unsigned long period)
 {
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
-	       period ? now.tv_sec + period : 0);
-  return 0;
+  return banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
+		      period ? now.tv_sec + period : 0) != NULL;
 }
 
 unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask)
@@ -301,37 +300,32 @@ unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask)
 unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message,
 			      unsigned long period)
 {
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, 0L, 0L, message,
-	       period ? now.tv_sec + period : 0);
-  return 0;
+  return banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, 0L, 0L, message,
+		      period ? now.tv_sec + period : 0) != NULL;
 }
 
 unsigned int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip,
 			 unsigned long netmask, buffer_t * message, unsigned long period)
 {
-  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, ip, netmask, message,
-	       period ? now.tv_sec + period : 0);
-  return 0;
+  return banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, ip, netmask, message,
+		      period ? now.tv_sec + period : 0) != NULL;
 }
 
 unsigned int plugin_unban_nick (unsigned char *nick)
 {
-  banlist_del_bynick (&softbanlist, nick);
-  return 0;
+  return banlist_del_bynick (&softbanlist, nick);
 }
 
 unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask)
 {
-  banlist_del_byip (&hardbanlist, ip, netmask);
-  return 0;
+  return banlist_del_byip (&hardbanlist, ip, netmask);
 }
 
 unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask,
 				 buffer_t * message, unsigned long period)
 {
-  banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
-	       period ? now.tv_sec + period : 0);
-  return 0;
+  return banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
+		      period ? now.tv_sec + period : 0) != NULL;
 }
 
 unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
@@ -477,6 +471,31 @@ unsigned int plugin_banlist (buffer_t * output)
   n = 0;
   dlhashlist_foreach (&softbanlist.list_ip, bucket) {
     lst = dllist_bucket (&softbanlist.list_ip, bucket);
+    dllist_foreach (lst, e) {
+      ip.s_addr = e->ip;
+      nm.s_addr = e->netmask;
+      if (e->expire) {
+	bf_printf (output, _("%s %s by %s Expires: %s Message: %.*s\n"), e->nick, print_ip (ip, nm),
+		   e->op, time_print (e->expire - now.tv_sec), bf_used (e->message), e->message->s);
+      } else {
+	bf_printf (output, _("%s %s by %s Message: %.*s\n"), e->nick, print_ip (ip, nm), e->op,
+		   bf_used (e->message), e->message->s);
+      }
+      n++;
+    }
+  }
+  return (n > 0);
+}
+
+unsigned int plugin_hardbanlist (buffer_t * output)
+{
+  unsigned long bucket, n;
+  banlist_entry_t *lst, *e;
+  struct in_addr ip, nm;
+
+  n = 0;
+  dlhashlist_foreach (&hardbanlist.list_ip, bucket) {
+    lst = dllist_bucket (&hardbanlist.list_ip, bucket);
     dllist_foreach (lst, e) {
       ip.s_addr = e->ip;
       nm.s_addr = e->netmask;

@@ -2223,9 +2223,9 @@ int pi_lua_init ()
   plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
   plugin_request (plugin_lua, PLUGIN_EVENT_SAVE, (plugin_event_handler_t *) & pi_lua_event_save);
 
-  command_register ("luastat", &handler_luastat, CAP_CONFIG, "Show lua stats.");
-  command_register ("luaload", &handler_luaload, CAP_CONFIG, "Load a lua script.");
-  command_register ("luaremove", &handler_luaclose, CAP_CONFIG, "Remove a lua script.");
+  command_register ("luastat", &handler_luastat, CAP_CONFIG, _("Show lua stats."));
+  command_register ("luaload", &handler_luaload, CAP_CONFIG, _("Load a lua script."));
+  command_register ("luaremove", &handler_luaclose, CAP_CONFIG, _("Remove a lua script."));
 
   pi_lua_event_load (NULL, NULL, NULL, 0, NULL);
 

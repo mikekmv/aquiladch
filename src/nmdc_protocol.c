@@ -667,6 +667,10 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	existing_user->tthlist = NULL;
       }
 
+      /* restore zombie flag */
+      if (existing_user->flags & PROTO_FLAG_ZOMBIE)
+	u->flags |= PROTO_FLAG_ZOMBIE;
+
       /* queue the old userentry for deletion */
       proto_nmdc_user_cachelist_invalidate (existing_user);
 

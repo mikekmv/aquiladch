@@ -221,6 +221,11 @@ unsigned char *string_escape (unsigned char *in)
 	*c++ = '\\';
 	*c++ = 'n';
 	break;
+      case '\"':
+      case '\'':
+	*c++ = '\\';
+	*c++ = *in;
+	break;
       default:
 	*c++ = *in;
     }

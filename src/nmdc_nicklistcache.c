@@ -256,9 +256,11 @@ int nicklistcache_sendoplist (user_t * target)
 {
   nicklistcache_rebuild (now);
 
-  /* write out to all users except target. */
-  target->SearchCnt++;
-  target->CacheException++;
+  /* write out to all users except target. 
+     FIXME this wouldn't help since we don't tag the oplist as send by the user...
+     target->SearchCnt++;
+     target->CacheException++;
+   */
 
   /* we set the user to NULL so we don't get deleted by a search from this user */
   cache_queue (cache.asearch, NULL, cache.oplist);

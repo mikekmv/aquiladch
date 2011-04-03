@@ -275,13 +275,14 @@ unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * out
   }
 
   if (parse_ip (argv[2], &ip, &netmask)) {
+    account_t *a;
+
     banlist_add (&sourcelist, user->nick, argv[1], ip.s_addr, netmask.s_addr, bf_buffer (""), 0);
-    if ((tgt = plugin_user_find (argv[1]))) {
-      if (!(tgt->rights & CAP_SOURCEVERIFY)) {
-	bf_printf (output,
-		   _("Please do not forget to assign the \"sourceverify\" right to user %s\n"),
-		   argv[1]);
-      }
+    a = account_find (argv[1]);
+    if (!((a->rights | a->classp->rights) & CAP_SOURCEVERIFY)) {
+      bf_printf (output,
+		 _("Please do not forget to assign the \"sourceverify\" right to user %s\n"),
+		 argv[1]);
     }
     bf_printf (output, _("User %s is now allowed to log in from %s\n"), argv[1],
 	       print_ip (ip, netmask));

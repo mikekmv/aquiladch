@@ -840,6 +840,37 @@ leave:
   return 0;
 }
 
+unsigned long handler_hardbanlist (plugin_user_t * user, buffer_t * output, void *priv,
+				   unsigned int argc, unsigned char **argv)
+{
+  struct in_addr ip;
+
+  if (argc < 1) {
+    bf_printf (output, _("Usage: %s [<ip|nick>]"), argv[0]);
+    return 0;
+  }
+
+  if (argc < 2) {
+    if (!plugin_banlist (output))
+      bf_printf (output, _("No bans found."));
+    goto leave;
+  }
+  if (inet_aton (argv[1], &ip)) {
+    if (!plugin_user_findipban (output, ip.s_addr)) {
+      bf_printf (output, _("No IP bans found for %s"), inet_ntoa (ip));
+      goto leave;
+    }
+  } else {
+    if (!plugin_user_findnickban (output, argv[1])) {
+      bf_printf (output, _("No Nick bans found for %s"), argv[1]);
+      goto leave;
+    }
+  }
+
+leave:
+  return 0;
+}
+
 /* help command */
 #include "hash.h"
 extern command_t cmd_sorted;
@@ -1819,6 +1850,7 @@ int builtincmd_init ()
   command_register ("unbanip",    &handler_unbanip,      CAP_BAN,     _("Unban an ip."));
   command_register ("baniphard",  &handler_banhard,      CAP_BANHARD, _("Hardban an IP."));
   command_register ("unbaniphard",&handler_unbanip_hard, CAP_BANHARD, _("Unhardban an IP."));
+  command_register ("hardbanlist",&handler_hardbanlist,  CAP_BANHARD, _("Show hard bans by nick/IP."));
   command_register ("zombie",     &handler_zombie,       CAP_KICK,    _("Zombie a user. Can't talk or pm."));
   command_register ("zombielist", &handler_zombielist,   CAP_KICK,    _("Show the zombie horde."));
   command_register ("unzombie",   &handler_unzombie,     CAP_KICK,    _("Unzombie a user. Can talk or pm again."));

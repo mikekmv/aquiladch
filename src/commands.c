@@ -200,7 +200,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
 {
   unsigned int hash, i;
   buffer_t *local;
-  unsigned char *c, t;
+  unsigned char *c, t, *d;
   unsigned int argc = 0;
   unsigned char *argv[COMMAND_MAX_ARGS];
   command_t *cmd;
@@ -222,20 +222,19 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
   if ((*c != '+') && (*c != '!'))
     return PLUGIN_RETVAL_CONTINUE;
 
-  /*  switch to local buffer copy so we can modify it. */
-  local = bf_copy (token, 1);
-  local->e = '\0';
-  c = local->s + (c - token->s);
-
   /* parse command. */
   DPRINTF ("CMD: %s\n", c);
-
   c++;
+
+  /*  switch to local buffer copy so we can modify it. */
+  local = bf_alloc (bf_used (token) + 1);
+  local->e = '\0';
+  d = local->s + (c - token->s);
+
   while (*c && (argc < (COMMAND_MAX_ARGS - 1))) {
-    argv[argc] = c;
+    argv[argc] = d;
     /* if argument starts with a ' or a " include everything until next matching quote. */
     if ((*c == '\'') || (*c == '\"')) {
-      argv[argc]++;
       t = *c++;
       while (*c) {
 	if (*c == t)
@@ -245,19 +244,23 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
 	  if (!*++c)
 	    break;
 	}
-	c++;
+	*d++ = *c++;
       }
       /* terminate after quote */
-      if (*c == t)
-	*c++ = '\0';
+      if (*c == t) {
+	c++;
+	*d++ = '\0';
+      }
     };
     /* skip until next space */
     while (*c && (*c != ' '))
-      c++;
+      *d++ = *c++;
 
     /* replace space with terminator */
     if (*c)
-      *c++ = '\0';
+      c++;
+
+    *d++ = '\0';
 
     /* skip any following space */
     while (*c && (*c == ' '))
@@ -271,7 +274,8 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
 
   /* string wasn't completely parsed, but we are running out of argv spaces. all the rest in one argument. */
   if (*c && (argc == (COMMAND_MAX_ARGS - 1))) {
-    argv[argc++] = c;
+    argv[argc++] = d;
+    strncpy (d, c, bf_unused (local));
   }
 
   for (i = argc; i < COMMAND_MAX_ARGS; i++)

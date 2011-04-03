@@ -173,8 +173,10 @@ int bf_append (buffer_t ** buffer, buffer_t * b)
 
   /* append to list */
   l = *buffer;
-  while (l->next)
+  while (l->next) {
+    ASSERT (b->refcnt == l->refcnt);
     l = l->next;
+  }
   l->next = b;
   b->prev = l;
 

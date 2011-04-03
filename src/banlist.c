@@ -272,7 +272,7 @@ banlist_entry_t *banlist_find_bynick_next (banlist_t * list, banlist_entry_t * o
   unsigned char n[NICKLENGTH];
   unsigned int i;
 
-  ASSERT (!*nick);
+  ASSERT (*nick);
 
 repeat:
   i = nicktolower (n, nick);
