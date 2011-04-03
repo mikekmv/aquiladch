@@ -62,6 +62,8 @@ typedef struct {
   unsigned long PasswdRetry;
   unsigned long PasswdBantime;
 
+  unsigned long ReconnectBantime;
+
 } config_t;
 
 extern config_t config;

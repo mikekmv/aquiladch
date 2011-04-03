@@ -66,6 +66,8 @@ int core_config_init ()
   config.PasswdRetry = DEFAULT_PASSWDRETRY;
   config.PasswdBantime = DEFAULT_PASSWDBANTIME;
 
+  config.ReconnectBantime = DEFAULT_RECONNECTBANTIME;
+
   config_register ("NMDC.ListenPort",    CFG_ELEM_UINT,   &config.ListenPort,      "Port on which the hub will listen.");
   config_register ("NMDC.ListenAddress", CFG_ELEM_IP,     &config.ListenAddress,   "IP on which the hub will listen, set to 0.0.0.0 for all.");
   config_register ("NMDC.ExtraPorts",    CFG_ELEM_STRING, &config.NMDCExtraPorts,  "Extra NMDC ports to listen on.");
@@ -86,6 +88,11 @@ int core_config_init ()
   config_register ("Redirect",           CFG_ELEM_STRING, &config.Redirect,        "Redirection target.");
   config_register ("KickBanRedirect",    CFG_ELEM_STRING, &config.KickBanRedirect, "Redirection target in case of kick or ban.");
   config_register ("KickAutoBanLength",  CFG_ELEM_ULONG,  &config.defaultKickPeriod, "Length of automatic temporary ban after a kick.");
+
+  config_register ("hub.PasswdRetries",  CFG_ELEM_ULONG,  &config.PasswdRetry, "Maximum number of retries a user is allowed for his password.");
+  config_register ("hub.PasswdBantime",  CFG_ELEM_ULONG,  &config.PasswdBantime, "Length of automatic ban on too many retries (in seconds).");
+
+  config_register ("hub.ReconnectBantime",  CFG_ELEM_ULONG,  &config.ReconnectBantime, "Users can only reconnect after this period (in seconds). This is counted from the previous login time, not logout.");
 
   config_register ("hub.SysReportTarget", CFG_ELEM_STRING, &config.SysReportTarget, "The hub sends all error messages here.");
 

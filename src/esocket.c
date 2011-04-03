@@ -984,13 +984,6 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     perror ("ESocket: epoll_wait: ");
     return -1;
   }
-  gettimeofday (&now, NULL);
-  now.tv_sec += h->toval.tv_sec;
-  now.tv_usec += h->toval.tv_usec;
-  if (now.tv_usec > 1000000) {
-    now.tv_sec += now.tv_usec / 1000000;
-    now.tv_usec = now.tv_usec % 1000000;
-  }
   for (i = 0; i < num; i++) {
     activity = events[i].events;
     s = events[i].data.ptr;
@@ -1005,7 +998,6 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
       assert (!err);
 
-      s->to = now;
       if (h->types[s->type].error)
 	h->types[s->type].error (s);
       if (s->state == SOCKSTATE_FREED)
@@ -1014,7 +1006,6 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	continue;
     }
     if (activity & EPOLLIN) {
-      s->to = now;
       if (h->types[s->type].input)
 	h->types[s->type].input (s);
       if (s->state == SOCKSTATE_FREED)
@@ -1023,7 +1014,6 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	continue;
     }
     if (activity & EPOLLOUT) {
-      s->to = now;
       switch (s->state) {
 	case SOCKSTATE_CONNECTED:
 	  if (h->types[s->type].output)

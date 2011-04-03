@@ -52,28 +52,31 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__aquila_SOURCES_DIST = buffer.c esocket.c stringlist.c rbt.c \
 	utils.c hash.c dllist.c leakybucket.c config.c hub.c \
-	core_config.c hashlist.c user.c banlist.c banlistclient.c \
-	plugin.c commands.c builtincmd.c cap.c nmdc_token.c \
-	nmdc_protocol.c nmdc_utils.c nmdc.c pi_user.c pi_statistics.c \
+	core_config.c nmdc_token.c nmdc_protocol.c \
+	nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c \
+	hashlist.c user.c banlist.c banlistclient.c plugin.c \
+	commands.c builtincmd.c cap.c pi_user.c pi_statistics.c \
 	pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c \
 	pi_iplog.c pi_hublist.c pi_lua.c main.c searchlist.c \
 	stacktrace.c getaddrinfo.c banlist.h
-@LUA_TRUE@am__objects_1 = pi_lua.$(OBJEXT)
-@DEBUG_TRUE@am__objects_2 = stacktrace.$(OBJEXT)
-@GETADDRINFO_TRUE@am__objects_3 = getaddrinfo.$(OBJEXT)
+am__objects_1 = nmdc_token.$(OBJEXT) nmdc_protocol.$(OBJEXT) \
+	nmdc_nicklistcache.$(OBJEXT) nmdc_utils.$(OBJEXT) \
+	nmdc.$(OBJEXT) nmdc_interface.$(OBJEXT)
+@LUA_TRUE@am__objects_2 = pi_lua.$(OBJEXT)
+@DEBUG_TRUE@am__objects_3 = stacktrace.$(OBJEXT)
+@GETADDRINFO_TRUE@am__objects_4 = getaddrinfo.$(OBJEXT)
 am_aquila_OBJECTS = buffer.$(OBJEXT) esocket.$(OBJEXT) \
 	stringlist.$(OBJEXT) rbt.$(OBJEXT) utils.$(OBJEXT) \
 	hash.$(OBJEXT) dllist.$(OBJEXT) leakybucket.$(OBJEXT) \
 	config.$(OBJEXT) hub.$(OBJEXT) core_config.$(OBJEXT) \
-	hashlist.$(OBJEXT) user.$(OBJEXT) banlist.$(OBJEXT) \
-	banlistclient.$(OBJEXT) plugin.$(OBJEXT) commands.$(OBJEXT) \
-	builtincmd.$(OBJEXT) cap.$(OBJEXT) nmdc_token.$(OBJEXT) \
-	nmdc_protocol.$(OBJEXT) nmdc_utils.$(OBJEXT) nmdc.$(OBJEXT) \
+	$(am__objects_1) hashlist.$(OBJEXT) user.$(OBJEXT) \
+	banlist.$(OBJEXT) banlistclient.$(OBJEXT) plugin.$(OBJEXT) \
+	commands.$(OBJEXT) builtincmd.$(OBJEXT) cap.$(OBJEXT) \
 	pi_user.$(OBJEXT) pi_statistics.$(OBJEXT) \
 	pi_chatroom.$(OBJEXT) pi_trigger.$(OBJEXT) \
 	pi_chatlog.$(OBJEXT) pi_statbot.$(OBJEXT) pi_iplog.$(OBJEXT) \
-	pi_hublist.$(OBJEXT) $(am__objects_1) main.$(OBJEXT) \
-	searchlist.$(OBJEXT) $(am__objects_2) $(am__objects_3)
+	pi_hublist.$(OBJEXT) $(am__objects_2) main.$(OBJEXT) \
+	searchlist.$(OBJEXT) $(am__objects_3) $(am__objects_4)
 aquila_OBJECTS = $(am_aquila_OBJECTS)
 aquila_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -195,10 +198,11 @@ target_alias = @target_alias@
 @LUA_FALSE@LUA_SOURCES = 
 @LUA_TRUE@LUA_SOURCES = pi_lua.c
 AM_CFLAGS = $(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_LUA@ @LUA_INCLUDES@
-EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c
+EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h nmdc_local.h
 CLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
-aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c nmdc_token.c nmdc_protocol.c nmdc_utils.c nmdc.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) banlist.h
+NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
+aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) banlist.h
 aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@
 all: all-am
 
@@ -283,6 +287,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/leakybucket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmdc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmdc_interface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmdc_nicklistcache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmdc_protocol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmdc_token.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmdc_utils.Po@am__quote@

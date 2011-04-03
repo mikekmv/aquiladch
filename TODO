@@ -1,5 +1,7 @@
 
 Develstatus:
+	- add min reconnection prevention
+	- start search buckets empty
 	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files
 	- language suppport

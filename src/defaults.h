@@ -98,6 +98,8 @@
 #define DEFAULT_PASSWDRETRY		3
 #define DEFAULT_PASSWDBANTIME		300
 
+#define DEFAULT_RECONNECTBANTIME	120
+
 #ifdef DEBUG
 #include "stacktrace.h"
 #define DPRINTF	printf

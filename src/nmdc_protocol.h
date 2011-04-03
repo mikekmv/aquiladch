@@ -23,6 +23,7 @@
 #include "stringlist.h"
 #include "cap.h"
 #include "leakybucket.h"
+#include "nmdc_nicklistcache.h"
 
 #define PROTOCOL_REBUILD_PERIOD	3
 
@@ -35,72 +36,6 @@
 
 #define NMDC_SUPPORTS_ZPipe		1024	/* */
 #define NMDC_SUPPORTS_ZLine		2048	/* */
-
-
-/* define extra size of nicklist infobuffer. when this extra space is full, 
- * nicklist is rebuild. keep this relatively small to reduce bw overhead.
- * the actual space will grow with the number of users logged in.
- * the number is used to shift the size.
- *  3 corresponds to a 12.5 % extra size before rebuild.
- */
-#define NICKLISTCACHE_SPARE	3
-
-
-typedef struct {
-  string_list_t messages;
-  unsigned long length;
-  leaky_bucket_t timer;
-  leaky_bucket_type_t timertype;
-} cache_element_t;
-
-#define cache_queue(element, user, buffer)	{string_list_add (&(element).messages , user, buffer); (element).length += bf_size (buffer);}
-//#define cache_count(element, user, buffer)	{(element).messages.count++; (element).messages.size += bf_size (buffer); (element).length += bf_size (buffer);}
-#define cache_count(element, user)		{ if (cache.element.messages.count < ((nmdc_user_t *) user->pdata)->element.messages.count) cache.element.messages.count = ((nmdc_user_t *) user->pdata)->element.messages.count; if (cache.element.messages.size < ((nmdc_user_t *) user->pdata)->element.messages.size) cache.element.messages.size = ((nmdc_user_t *) user->pdata)->element.messages.size; if (cache.element.length < ((nmdc_user_t *) user->pdata)->element.length) cache.element.length = ((nmdc_user_t *) user->pdata)->element.length ;}
-#define cache_purge(element, user)		{string_list_entry_t *entry = string_list_find (&(element).messages, user); while (entry) { (element).length -= bf_size (entry->data); string_list_del (&(element).messages, entry); entry = string_list_find (&(element).messages, user); };}
-#define cache_clear(element)			{string_list_clear (&(element).messages); (element).length = 0;}
-
-typedef struct {
-  /*
-   *    Normal communication caching
-   */
-  cache_element_t chat;		/* chatmessages */
-  cache_element_t myinfo;	/* my info messages */
-  cache_element_t myinfoupdate;	/* my info update messages */
-  cache_element_t myinfoupdateop;	/* my info update messages for ops. not shortened and immediate */
-  cache_element_t asearch;	/* active search list */
-  cache_element_t psearch;	/* passive search list */
-  cache_element_t aresearch;	/* active search list */
-  cache_element_t presearch;	/* passive search list */
-  cache_element_t results;	/* results */
-  cache_element_t privatemessages;	/* privatemessages */
-
-  /*
-   *
-   */
-  unsigned long ZpipeSupporters;
-  unsigned long ZlineSupporters;
-
-  /*
-   *  nicklist caching
-   */
-  unsigned long usercount;
-  unsigned long lastrebuild;
-  unsigned long needrebuild;
-  buffer_t *nicklist;
-  buffer_t *oplist;
-  buffer_t *infolist;
-  buffer_t *hellolist;
-#ifdef ZLINES
-  buffer_t *infolistzline;
-  buffer_t *nicklistzline;
-  buffer_t *infolistzpipe;
-  buffer_t *nicklistzpipe;
-#endif
-  buffer_t *infolistupdate;
-  unsigned long length_estimate;
-  unsigned long length_estimate_op;
-  unsigned long length_estimate_info;
-} cache_t;
 
 #define NMDC_FLAG_DELAYEDNICKLIST	0x00010000
 #define NMDC_FLAG_BOT			0x00020000
