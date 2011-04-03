@@ -822,6 +822,7 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
 int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
 {
   buffer_t *buf, *report;
+  struct in_addr addr;
 
   /* if there are still tokens left, just return */
   if (get_token (&rates.violations, &u->rate_violations, now->tv_sec))
@@ -858,8 +859,9 @@ int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason)
 
   report = bf_alloc (1024);
 
-  bf_printf (report, "Flood detected: %s was banned: %.*s (Last violation: %s)\n", u->nick,
-	     bf_used (buf), buf->s, reason);
+  addr.s_addr = u->ipaddress;
+  bf_printf (report, "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n", u->nick,
+	     inet_ntoa (addr), bf_used (buf), buf->s, reason);
 
   plugin_report (report);
 
@@ -907,11 +909,11 @@ int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...)
   if (!u)
     return 0;
 
-  if (!get_token (&rates.warnings, &rate_warnings, now->tv_sec)) {
+  if (!get_token (&rates.warnings, &rate_warnings, now->tv_sec))
     return 0;
-  }
 
   buf = bf_alloc (10240);
+
   bf_printf (buf, "WARNING: ");
 
   va_start (ap, message);
@@ -1167,6 +1169,8 @@ int proto_nmdc_init ()
   hash_init (&hashlist);
   hash_init (&cachehashlist);
   token_init ();
+  init_bucket (&rate_warnings, now.tv_sec);
+  rate_warnings.tokens = rates.warnings.burst;
 
   memset (&nmdc_stats, 0, sizeof (nmdc_stats_t));
 

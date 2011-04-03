@@ -43,6 +43,10 @@
 #define TRIGGER_FLAG_CACHED	1
 #define TRIGGER_FLAG_READALWAYS 2
 
+
+#define RULE_FLAG_PM		1
+#define RULE_FLAG_BC		2
+
 #define TRIGGER_RULE_LOGIN	1
 #define TRIGGER_RULE_COMMAND	2
 
@@ -76,6 +80,7 @@ typedef struct trigger_rule {
   unsigned char *arg;
   unsigned char *help;
   unsigned long cap;
+  unsigned long flags;
 } trigger_rule_t;
 
 /* local data */
@@ -278,6 +283,7 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
 				  unsigned int argc, unsigned char **argv)
 {
   trigger_rule_t *r;
+  plugin_user_t *tgt;
 
   for (r = ruleListCommand.next; r != &ruleListCommand; r = r->next) {
     if (strcmp (argv[0], r->arg))
@@ -286,8 +292,23 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
     r->trigger->usecnt++;
 
     trigger_verify (r->trigger);
-    if (bf_used (r->trigger->text))
-      bf_printf (output, "%.*s", bf_used (r->trigger->text), r->trigger->text->s);
+    if (bf_used (r->trigger->text)) {
+      switch (r->flags & (RULE_FLAG_PM | RULE_FLAG_BC)) {
+	case RULE_FLAG_BC:
+	  plugin_user_say (NULL, r->trigger->text);
+	  break;
+	case RULE_FLAG_PM:
+	  plugin_user_priv (NULL, user, NULL, r->trigger->text, 0);
+	  break;
+	case RULE_FLAG_PM | RULE_FLAG_BC:
+	  tgt = NULL;
+	  while (plugin_user_next (&tgt))
+	    plugin_user_priv (NULL, tgt, NULL, r->trigger->text, 0);
+	  break;
+	default:
+	  bf_printf (output, "%.*s", bf_used (r->trigger->text), r->trigger->text->s);
+      }
+    }
     break;
   };
 
@@ -313,7 +334,7 @@ unsigned long pi_trigger_login (plugin_user_t * user, void *dummy, unsigned long
 }
 
 trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned long cap,
-				     unsigned char *arg, unsigned char *help)
+				     unsigned long flags, unsigned char *arg, unsigned char *help)
 {
   trigger_rule_t *rule;
   trigger_rule_t *list;
@@ -329,6 +350,7 @@ trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned
   t->refcnt++;
   rule->type = type;
   rule->cap = cap;
+  rule->flags |= flags;
   if (help)
     rule->help = strdup (help);
 
@@ -426,12 +448,12 @@ int trigger_save (unsigned char *file)
   }
 
   for (rule = ruleListLogin.next; rule != &ruleListLogin; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %lu\n", rule->trigger->name, rule->type, rule->cap);
+    fprintf (fp, "rule %s %lu %lu %lu\n", rule->trigger->name, rule->type, rule->cap, rule->flags);
   }
 
   for (rule = ruleListCommand.next; rule != &ruleListCommand; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %lu %s %s\n", rule->trigger->name, rule->type, rule->cap, rule->arg,
-	     rule->help ? (char *) rule->help : "");
+    fprintf (fp, "rule %s %lu %lu %lu %s %s\n", rule->trigger->name, rule->type, rule->cap,
+	     rule->flags, rule->arg, rule->help ? (char *) rule->help : "");
   }
 
   fclose (fp);
@@ -466,6 +488,7 @@ int trigger_load (unsigned char *file)
     if (buffer[i] == '\n')
       buffer[i] = '\0';
 
+    flags = 0;
     switch (buffer[0]) {
       case 't':
 	{
@@ -486,12 +509,13 @@ int trigger_load (unsigned char *file)
 	  break;
 	switch (type) {
 	  case TRIGGER_RULE_LOGIN:
-	    sscanf (buffer, "rule %s %lu %lu", name, &type, &cap);
-	    rule = trigger_rule_create (trigger, TRIGGER_RULE_LOGIN, cap, NULL, NULL);
+	    sscanf (buffer, "rule %s %lu %lu %lu", name, &type, &cap, &flags);
+	    rule = trigger_rule_create (trigger, TRIGGER_RULE_LOGIN, cap, flags, NULL, NULL);
 	    break;
 	  case TRIGGER_RULE_COMMAND:
-	    sscanf (buffer, "rule %s %lu %lu %s %n", name, &type, &cap, cmd, &offset);
-	    rule = trigger_rule_create (trigger, TRIGGER_RULE_COMMAND, cap, cmd, buffer + offset);
+	    sscanf (buffer, "rule %s %lu %lu %lu %s %n", name, &type, &cap, &flags, cmd, &offset);
+	    rule =
+	      trigger_rule_create (trigger, TRIGGER_RULE_COMMAND, cap, flags, cmd, buffer + offset);
 	    break;
 	}
 	break;
@@ -600,7 +624,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   trigger_t *t;
   trigger_rule_t *r;
   unsigned char *arg, *help;
-  unsigned long cap = 0, ncap = 0, capstart = 0;
+  unsigned long cap = 0, ncap = 0, capstart = 0, flags = 0;
 
   if (argc < 3)
     goto printhelp;
@@ -610,14 +634,14 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     return 0;
   }
 
-  if (!strcmp (argv[2], "login")) {
+  if (!strcasecmp (argv[2], "login")) {
     if (argc < 4)
       goto printhelp;
     type = TRIGGER_RULE_LOGIN;
     help = argv[3];
     capstart = 4;
     arg = NULL;
-  } else if (!strcmp (argv[2], "command")) {
+  } else if (!strcasecmp (argv[2], "command")) {
     if (argc < 5)
       goto printhelp;
     type = TRIGGER_RULE_COMMAND;
@@ -629,10 +653,27 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     return 0;
   }
 
-  command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, capstart, &cap, &ncap);
-  cap &= ~ncap;
+  while (argv[capstart] && ((argv[capstart][0] == 'p') || (argv[capstart][0] == 'b'))) {
+    if (!strcasecmp (argv[capstart], "pm")) {
+      flags |= RULE_FLAG_PM;
+      capstart++;
+      continue;
+    }
+    if (!strcasecmp (argv[capstart], "broadcast")) {
+      flags |= RULE_FLAG_BC;
+      capstart++;
+      continue;
+    }
+  }
 
-  r = trigger_rule_create (t, type, cap, arg, help);
+  if (argv[capstart] && !strcasecmp (argv[capstart], "rights")) {
+    capstart++;
+    command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, capstart, &cap,
+			 &ncap);
+    cap &= ~ncap;
+  }
+
+  r = trigger_rule_create (t, type, cap, flags, arg, help);
   if (r) {
     bf_printf (output, "Rule for trigger %s created successfully.", argv[1]);
   } else {
@@ -642,7 +683,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   return 0;
 
 printhelp:
-  bf_printf (output, "Usage: %s <name> <type> [<arg>] <help> [<cap>]\n"
+  bf_printf (output, "Usage: %s <name> <type> [<arg>] <help> [<pm>] [<broadcast>] ][rights <cap>]\n"
 	     "   name: name of the trigger\n"
 	     "   type: one of:\n"
 	     "      - login   : the trigger will be triggered on user login, provide capabilties after type\n"
@@ -650,7 +691,9 @@ printhelp:
 	     "                    then a help msg for the command, followed by any required capabilities\n"
 	     "   arg: depends on type\n"
 	     "   help: help message for command\n"
-	     "   cap: capabilities required to activate rule\n", argv[0]);
+	     "   pm: always send trigger as a private message\n"
+	     "   broadcast: send this to all users\n"
+	     "   rights: capabilities required to activate rule\n", argv[0]);
   return 0;
 }
 
@@ -688,19 +731,27 @@ unsigned long pi_trigger_handler_ruledel (plugin_user_t * user, buffer_t * outpu
 unsigned int rule_show (buffer_t * buf, trigger_rule_t * rule)
 {
 
+  bf_printf (buf, "  Rule %lu type ", rule->id);
   switch (rule->type) {
     case TRIGGER_RULE_COMMAND:
-      bf_printf (buf, "  Rule %lu type command %s, cap ", rule->id, rule->arg);
-      command_flags_print ((command_flag_t *) Capabilities, buf, rule->cap);
-      bf_strcat (buf, "\n");
+      bf_printf (buf, "command %s, ", rule->arg);
       break;
 
     case TRIGGER_RULE_LOGIN:
-      bf_printf (buf, "  Rule %lu type login, cap ", rule->id);
-      command_flags_print ((command_flag_t *) Capabilities, buf, rule->cap);
-      bf_strcat (buf, "\n");
+      bf_printf (buf, "login, ");
       break;
+
+    default:
+      bf_printf (buf, "Unknown, ");
   }
+  if (rule->flags & RULE_FLAG_PM)
+    bf_printf (buf, "pm, ");
+  if (rule->flags & RULE_FLAG_BC)
+    bf_printf (buf, "broadcast, ");
+  bf_printf (buf, " cap ");
+  command_flags_print ((command_flag_t *) Capabilities, buf, rule->cap);
+  bf_strcat (buf, "\n");
+
   return bf_used (buf);
 }
 
