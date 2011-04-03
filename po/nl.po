@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-11-30 23:50+0100\n"
+"POT-Creation-Date: 2006-12-01 18:47+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -357,78 +357,82 @@ msgstr ""
 
 #: src/builtincmd.c:920 src/builtincmd.c:964 src/builtincmd.c:1649
 msgid "You are not allowed to assign rights.\n"
-msgstr ""
+msgstr "U hebt het recht niet om rechten toe te wijzen.\n"
 
 #: src/builtincmd.c:924 src/builtincmd.c:968
 msgid "You are not allowed to assign the following rights to this group: "
 msgstr ""
+"U hebt her recht niet om de volgende rechten aan deze groep toe te wijzen:"
 
 #: src/builtincmd.c:933
 #, c-format
 msgid "Group %s created with: "
-msgstr ""
+msgstr "Groep %s aangemaakt met: "
 
 #: src/builtincmd.c:948
 #, c-format
 msgid "Usage: %s <group> <[+]right/-right>...\n"
-msgstr ""
+msgstr "Gebruik: %s <group> <[+]recht/-recht>...\n"
 
 #: src/builtincmd.c:954 src/builtincmd.c:1008 src/builtincmd.c:1060
 #: src/builtincmd.c:1100
 #, c-format
 msgid "Group %s does not exist.\n"
-msgstr ""
+msgstr "Groep %s bestaat niet.\n"
 
 #: src/builtincmd.c:976
 msgid "You are not allowed to remove the following rights from this group: "
 msgstr ""
+"U hebt het recht niet om de volgende rechten van deze groep te verwijderen: "
 
 #: src/builtincmd.c:987
 #, c-format
 msgid "Group %s modified. Current rights:"
-msgstr ""
+msgstr "Groep %s aangepast. Huidige rechten zijn:"
 
 #: src/builtincmd.c:1001
 #, c-format
 msgid "Usage: %s <group>"
-msgstr ""
+msgstr "Gebruik: %s <groep>"
 
 #: src/builtincmd.c:1013
 #, c-format
 msgid "Group %s still has %ld users.\n"
-msgstr ""
+msgstr "Groep %s heeft nog %ld gebruikers.\n"
 
 #: src/builtincmd.c:1018
 #, c-format
 msgid "Group %s deleted.\n"
-msgstr ""
+msgstr "Groep %s is verwijdered.\n"
 
 #: src/builtincmd.c:1063
 #, c-format
 msgid "Group %s: "
-msgstr ""
+msgstr "Groep %s: "
 
 #: src/builtincmd.c:1091
 #, c-format
 msgid "Usage: %s <nick> <group> [<rights...>]"
-msgstr ""
+msgstr "Gebruik: %s <naam> <groep> [<rechten...>]"
 
 #: src/builtincmd.c:1096
 #, c-format
 msgid "User %s already exists.\n"
-msgstr ""
+msgstr "Gebruiker %s bestaat al.\n"
 
 #: src/builtincmd.c:1110 src/builtincmd.c:1350
 msgid "You are not allowed to assign a user to this group.\n"
-msgstr ""
+msgstr "U hebt niet het recht om een gebruiker aan deze groep toe te voegen.\n"
 
 #: src/builtincmd.c:1116 src/builtincmd.c:1178
 msgid "You are not allowed to assign a user extra rights.\n"
-msgstr ""
+msgstr "U hebt niet het recht om een gebruiker extra rechten toe te wijzen.\n"
 
 #: src/builtincmd.c:1120
 msgid "You are not allowed to assign this user: "
 msgstr ""
+"U hebt het recht niet om de volgende rechten toe te wijzen aan deze "
+"gebruiker: "
 
 #: src/builtincmd.c:1131 src/builtincmd.c:1220
 #, c-format
@@ -436,6 +440,8 @@ msgid ""
 "User %s created with group %s.\n"
 "Current rights:"
 msgstr ""
+"Gebruiker %s aangemaakt met groep %s.\n"
+"Huidige rechten:"
 
 #: src/builtincmd.c:1145
 #, c-format
@@ -443,12 +449,17 @@ msgid ""
 "You have been registered by %s. Please use !passwd <password> to set a "
 "password and relogin to gain your new rights. You have been assigned:\n"
 msgstr ""
+"U bent geregistreerd door %s. Gelieve !passwd <wachtwoord> te gebruiken om "
+"een wachtwoord in te stellen en terug in te loggen om uw nieuwe rechten te "
+"verkrijgen. U bent de volgende rechten toegewezen:\n"
 
 #: src/builtincmd.c:1154
 msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
 msgstr ""
+"Gebruiker is al ingelogd. Hij is aangeraden om een paswoord te zetten en "
+"opnieuw in te loggen.\n"
 
 #: src/builtincmd.c:1158
 #, c-format
@@ -456,11 +467,13 @@ msgid ""
 "No user with nickname %s is currently logged in. Please notify the user "
 "yourself.\n"
 msgstr ""
+"Geen gebruiker gevonden met naam %s. Gelieve zelf de gebruiker te "
+"verwittigen.\n"
 
 #: src/builtincmd.c:1172
 #, c-format
 msgid "Usage: %s <nick> <[+]right/-right>...\n"
-msgstr ""
+msgstr "Gebruik: %s <naam> <[+]recht/-recht>...\n"
 
 #: src/builtincmd.c:1193
 msgid "You are not allowed to assign the following rights to this user: "
@@ -860,6 +873,10 @@ msgstr ""
 msgid "Unknown %s.\n"
 msgstr ""
 
+#: src/commands.c:142
+msgid "No help available."
+msgstr ""
+
 #: src/commands.c:304
 #, c-format
 msgid "Command not found: %s\n"
@@ -867,7 +884,7 @@ msgstr ""
 
 #: src/nmdc_protocol.c:96
 #, c-format
-msgid "<%s> This hub is running %s Version %s (Uptime .%.3lu).|"
+msgid "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
 msgstr ""
 
 #: src/nmdc_protocol.c:101 src/nmdc_protocol.c:314
@@ -877,6 +894,32 @@ msgstr ""
 
 #: src/nmdc_protocol.c:239
 msgid "Protocol violation: Bad key."
+msgstr ""
+
+#: src/nmdc_protocol.c:281 src/nmdc_protocol.c:329 src/nmdc_protocol.c:583
+msgid "Your nickname is already in use."
+msgstr ""
+
+#: src/nmdc_protocol.c:308
+msgid "Your account priviliges will not be awarded until you set a password."
+msgstr ""
+
+#: src/nmdc_protocol.c:335 src/nmdc_protocol.c:483 src/nmdc_protocol.c:589
+msgid "Another instance of you is connecting, bye!"
+msgstr ""
+
+#: src/nmdc_protocol.c:337 src/nmdc_protocol.c:485
+msgid "Reconnecting."
+msgstr ""
+
+#: src/nmdc_protocol.c:348
+msgid ""
+"Cloning is not allowed. Another user is already logged in from this IP "
+"address."
+msgstr ""
+
+#: src/nmdc_protocol.c:356
+msgid "Do not reconnect too fast."
 msgstr ""
 
 #: src/nmdc_protocol.c:370 src/nmdc_protocol.c:394 src/nmdc_protocol.c:532
@@ -889,16 +932,165 @@ msgstr ""
 msgid "<%s> Time remaining %s|"
 msgstr ""
 
+#: src/nmdc_protocol.c:381 src/nmdc_protocol.c:405 src/nmdc_protocol.c:543
+msgid "Banned."
+msgstr ""
+
+#: src/nmdc_protocol.c:459
+msgid "Bad password."
+msgstr ""
+
+#: src/nmdc_protocol.c:462
+msgid "Bad password"
+msgstr ""
+
+#: src/nmdc_protocol.c:468
+msgid "Password retry overflow."
+msgstr ""
+
+#: src/nmdc_protocol.c:515
+msgid ""
+"Your account priviliges will not be awarded until you set a password. Use !"
+"passwd or !pwgen."
+msgstr ""
+
+#: src/nmdc_protocol.c:591
+msgid "Reconnecting"
+msgstr ""
+
+#: src/nmdc_protocol.c:613 src/nmdc_protocol.c:843
+msgid "WARNING: You should use a client that uses tags!"
+msgstr ""
+
+#: src/nmdc_protocol.c:619 src/nmdc_protocol.c:852
+msgid "This hub requires tags, please upgrade to a client that supports them."
+msgstr ""
+
+#: src/nmdc_protocol.c:628
+msgid "Your login was refused, your MyINFO seems corrupt."
+msgstr ""
+
+#: src/nmdc_protocol.c:642 src/nmdc_protocol.c:716
+msgid "Your login was refused."
+msgstr ""
+
+#: src/nmdc_protocol.c:741
+msgid "You are not allowed to chat."
+msgstr ""
+
+#: src/nmdc_protocol.c:747
+msgid "Think before you talk and don't spam."
+msgstr ""
+
+#: src/nmdc_protocol.c:755
+msgid "Your chat message was too long."
+msgstr ""
+
+#: src/nmdc_protocol.c:861
+msgid "Broken MyINFO, get lost."
+msgstr ""
+
+#: src/nmdc_protocol.c:877
+msgid "Sorry, you no longer satisfy the necessary requirements for this hub."
+msgstr ""
+
+#: src/nmdc_protocol.c:961
+#, c-format
+msgid "Active searches are limited to %u every %u seconds."
+msgstr ""
+
+#: src/nmdc_protocol.c:964
+#, c-format
+msgid "Passive searches are limited to %u every %u seconds."
+msgstr ""
+
+#: src/nmdc_protocol.c:974
+msgid "Your search message is too long."
+msgstr ""
+
+#: src/nmdc_protocol.c:991
+msgid "You claim to be active. Passive search DENIED."
+msgstr ""
+
+#: src/nmdc_protocol.c:1007
+msgid "You claim to be passive. Active search DENIED."
+msgstr ""
+
+#: src/nmdc_protocol.c:1026
+#, c-format
+msgid "Your client uses IP %s for searching, while you have IP %s\n"
+msgstr ""
+
+#: src/nmdc_protocol.c:1043
+#, c-format
+msgid "Do not repeat searches within %d seconds."
+msgstr ""
+
+#: src/nmdc_protocol.c:1226 src/nmdc_protocol.c:1305
+msgid "You are not allowed to download."
+msgstr ""
+
+#: src/nmdc_protocol.c:1253 src/nmdc_protocol.c:1345
+#, c-format
+msgid "You cannot download from %s."
+msgstr ""
+
+#: src/nmdc_protocol.c:1274
+#, c-format
+msgid "Your client uses IP %s for downloading, while you have IP %s\n"
+msgstr ""
+
+#: src/nmdc_protocol.c:1376
+msgid "You are not allowed to send private messages."
+msgstr ""
+
+#: src/nmdc_protocol.c:1385
+msgid "Don't send private messages so fast."
+msgstr ""
+
 #: src/nmdc_protocol.c:1415
 msgid "Bad From: nick. No faking."
+msgstr ""
+
+#: src/nmdc_protocol.c:1417
+msgid "Attempted PM faking."
 msgstr ""
 
 #: src/nmdc_protocol.c:1436
 msgid "Bad display nick. No faking."
 msgstr ""
 
+#: src/nmdc_protocol.c:1438
+msgid "Attempted display nick faking"
+msgstr ""
+
+#: src/nmdc_protocol.c:1452
+msgid "Sorry, you can only send private messages to operators."
+msgstr ""
+
+#: src/nmdc_protocol.c:1484
+msgid "You are not allowed to redirect users."
+msgstr ""
+
+#: src/nmdc_protocol.c:1564 src/nmdc_protocol.c:1621
+msgid "Redirect refused.\n"
+msgstr ""
+
+#: src/nmdc_protocol.c:1592
+msgid "You are not allowed to kick users."
+msgstr ""
+
 #: src/nmdc_protocol.c:1616
 msgid "You were kicked."
+msgstr ""
+
+#: src/nmdc_protocol.c:1642
+msgid "Think before you ask HubINFO and don't spam.\n"
+msgstr ""
+
+#: src/nmdc_protocol.c:1697
+#, c-format
+msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr ""
 
 #: src/nmdc_interface.c:846
@@ -918,6 +1110,286 @@ msgstr ""
 
 #: src/nmdc_interface.c:892 src/nmdc_interface.c:922
 msgid "WARNING: "
+msgstr ""
+
+#: src/nmdc_interface.c:1033
+msgid ""
+"Period of chat messages. This controls how often a user can send a chat "
+"message. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1036
+msgid ""
+"Burst of chat messages. This controls how many chat messages a user can "
+"'save up'. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1039
+msgid ""
+"Period of searches. This controls how often an active user can search. Keep "
+"this reasonable."
+msgstr ""
+
+#: src/nmdc_interface.c:1042
+msgid ""
+"Burst of searches. This controls how many searches an active user can 'save "
+"up'. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1045
+msgid ""
+"Period of searches. This controls how often a passive user can search. Keep "
+"this reasonable."
+msgstr ""
+
+#: src/nmdc_interface.c:1048
+msgid ""
+"Burst of searches. This controls how many searches a passive user can 'save "
+"up'. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1051
+msgid ""
+"Period of MyINFO messages. This controls how often a user can send a MyINFO "
+"message that is send to everyone. Keep this very high."
+msgstr ""
+
+#: src/nmdc_interface.c:1054
+msgid ""
+"Burst of MyINFO messages. This controls how many MyINFO messages a user can "
+"'save up' (everyone). Keep this at 1."
+msgstr ""
+
+#: src/nmdc_interface.c:1057
+msgid ""
+"Period of MyINFO messages. This controls how often a user can send a MyINFO "
+"message that is send on to the ops only. Keep this very high."
+msgstr ""
+
+#: src/nmdc_interface.c:1060
+msgid ""
+"Burst of MyINFO messages. This controls how many MyINFO messages a user can "
+"'save up' (OPs messages only). Keep this at 1."
+msgstr ""
+
+#: src/nmdc_interface.c:1063
+msgid ""
+"Period of nicklist requests. This controls how often a user can refresh his "
+"userlist. Keep this high."
+msgstr ""
+
+#: src/nmdc_interface.c:1066
+msgid ""
+"Burst of nicklist requests. This controls how many userlist refreshes a user "
+"can 'save up'. Keep this at 1."
+msgstr ""
+
+#: src/nmdc_interface.c:1069
+msgid ""
+"Period of getinfo requests. This controls how often a user can request info "
+"on a user. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1072
+msgid ""
+"Burst of getinfo requests. This controls how many getinfo requests a user "
+"can 'save up'."
+msgstr ""
+
+#: src/nmdc_interface.c:1075
+msgid ""
+"Period of downloads. This controls how often a user can initiate a download. "
+"Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1078
+msgid ""
+"Burst of downloads. This controls how many downloads a user can 'save up'. "
+"Keep this reasonable."
+msgstr ""
+
+#: src/nmdc_interface.c:1081
+msgid ""
+"Period of connects. This controls how often the connect counter is "
+"refreshed. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1084
+msgid ""
+"Burst of connects. This controls how many new user connects can be saved up "
+"in idle time. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1087
+msgid ""
+"Refill of connects. This controls how many new user connects are added each "
+"time the counter resets. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1091
+msgid ""
+"Period of passive search results. This controls how often the incoming "
+"passive search results counter is refreshed. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1094
+msgid ""
+"Burst of passive search results. This controls how many incoming passive "
+"search results can be saved up in idle time. Keep this equal to the search "
+"period."
+msgstr ""
+
+#: src/nmdc_interface.c:1097
+msgid ""
+"Refill of passive search results. This controls how many incoming passive "
+"search results are added each time the counter resets. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1101
+msgid ""
+"Period of passive search results. This controls how often the outgoing "
+"passive search results counter is refreshed. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1104
+msgid ""
+"Burst of passive search results. This controls how many outgoing passive "
+"search results can be saved up in idle time. Keep this reasonably high."
+msgstr ""
+
+#: src/nmdc_interface.c:1107
+msgid ""
+"Refill of passive search results. This controls how many outgoing passive "
+"search results are added each time the counter resets. Keep this reasonably "
+"high."
+msgstr ""
+
+#: src/nmdc_interface.c:1111
+msgid ""
+"Period of user warnings. This controls how often a warning is send to user "
+"that overstep limits."
+msgstr ""
+
+#: src/nmdc_interface.c:1114
+msgid ""
+"Period of user warnings. This controls how many warning a user gets within "
+"the period."
+msgstr ""
+
+#: src/nmdc_interface.c:1117
+msgid ""
+"Period of user warnings. This controls how many warnings a user that "
+"overstep limits can save up."
+msgstr ""
+
+#: src/nmdc_interface.c:1121
+msgid ""
+"Period of user violations. This controls how often a warning is send to user "
+"that overstep limits."
+msgstr ""
+
+#: src/nmdc_interface.c:1124
+msgid ""
+"Period of user violations. This controls how many warning a user gets within "
+"the period."
+msgstr ""
+
+#: src/nmdc_interface.c:1127
+msgid ""
+"Period of user violations. This controls how many violations a user that "
+"overstep limits can save up."
+msgstr ""
+
+#: src/nmdc_interface.c:1159
+msgid ""
+"Period of chat cache flush. This controls how often chat messages are sent "
+"to users. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1162
+msgid ""
+"Period of join cache flush. This controls how often users are notified of "
+"new joins."
+msgstr ""
+
+#: src/nmdc_interface.c:1165
+msgid ""
+"Period of update cache flush. This controls how often users are sent MyINFO "
+"updates. Keep this high."
+msgstr ""
+
+#: src/nmdc_interface.c:1168
+msgid ""
+"Period of operator update cache flush. This controls how often operators are "
+"sent MyINFO updates. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1171
+msgid ""
+"Period of active search cache flush. This controls how often search messages "
+"are sent to active users."
+msgstr ""
+
+#: src/nmdc_interface.c:1174
+msgid ""
+"Period of passive search cache flush. This controls how often search "
+"messages are sent to passive users."
+msgstr ""
+
+#: src/nmdc_interface.c:1177
+msgid ""
+"Period of search results cache flush. This controls how often search results "
+"are sent to passive users."
+msgstr ""
+
+#: src/nmdc_interface.c:1180
+msgid ""
+"Period of private messages cache flush. This controls how often private "
+"messages are sent to users. Keep this low."
+msgstr ""
+
+#: src/nmdc_interface.c:1184
+msgid ""
+"Period of active repeated search cache flush. This controls how often search "
+"messages are sent to active users."
+msgstr ""
+
+#: src/nmdc_interface.c:1188
+msgid ""
+"Period of passive repeated search cache flush. This controls how often "
+"search messages are sent to passive users."
+msgstr ""
+
+#: src/nmdc_interface.c:1200
+msgid "Allow multiple users from the same IP address."
+msgstr ""
+
+#: src/nmdc_interface.c:1202
+msgid "Maximum length of a chat message."
+msgstr ""
+
+#: src/nmdc_interface.c:1204
+msgid "Maximum length of a search message."
+msgstr ""
+
+#: src/nmdc_interface.c:1206
+msgid "Maximum length of a search result"
+msgstr ""
+
+#: src/nmdc_interface.c:1209
+msgid "Minimum time before a re-search is considered valid."
+msgstr ""
+
+#: src/nmdc_interface.c:1211
+msgid "Period during which a search is considered a re-search."
+msgstr ""
+
+#: src/nmdc_interface.c:1213
+msgid "Maximum number of searches cached."
+msgstr ""
+
+#: src/nmdc_interface.c:1216
+msgid "This message is send to all banned users when they try to join."
 msgstr ""
 
 #: src/plugin.c:188
@@ -964,6 +1436,20 @@ msgstr ""
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
 msgstr ""
+
+#: src/utils.c:93
+#, c-format
+msgid "%u week, "
+msgid_plural "%u weeks, "
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/utils.c:95
+#, c-format
+msgid "%u day, "
+msgid_plural "%u days, "
+msgstr[0] ""
+msgstr[1] ""
 
 #: src/pi_statistics.c:100
 msgid "CPU Unknown\n"
@@ -1402,9 +1888,34 @@ msgstr ""
 msgid "Register at hublists."
 msgstr ""
 
+#: src/pi_lua.c:164 src/pi_lua.c:240
+msgid "Unknown config value."
+msgstr ""
+
+#: src/pi_lua.c:222 src/pi_lua.c:295
+msgid "Element Type not supported."
+msgstr ""
+
+#: src/pi_lua.c:274 src/pi_lua.c:809 src/pi_lua.c:838 src/pi_lua.c:878
+#: src/pi_lua.c:893 src/pi_lua.c:961
+msgid "Not a valid IP address.\n"
+msgstr ""
+
 #: src/pi_lua.c:1418 src/pi_lua.c:1599 src/pi_lua.c:2113
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
+msgstr ""
+
+#: src/pi_lua.c:1630
+msgid "No such LUA function."
+msgstr ""
+
+#: src/pi_lua.c:1638
+msgid "Command failed to register."
+msgstr ""
+
+#: src/pi_lua.c:1646
+msgid "Could not allocate memory."
 msgstr ""
 
 #: src/pi_lua.c:1885 src/pi_lua.c:1910
@@ -1455,6 +1966,11 @@ msgstr ""
 #: src/pi_lua.c:2058
 #, c-format
 msgid "Lua script '%s' not found.\n"
+msgstr ""
+
+#: src/pi_lua.c:2143
+#, c-format
+msgid "LUA: ERROR saving %s"
 msgstr ""
 
 #: src/pi_trigger.c:546
@@ -1899,4 +2415,317 @@ msgstr ""
 
 #: src/pi_iplog.c:157
 msgid "List iplogs."
+msgstr ""
+
+#: src/hub.c:170
+#, c-format
+msgid "<%s> Don't reconnect so fast.|"
+msgstr ""
+
+#: src/hub.c:185 src/hub.c:209 src/hub.c:231
+#, c-format
+msgid "<%s> This hub is too busy, please try again later.|"
+msgstr ""
+
+#: src/hub.c:312 src/hub.c:435
+msgid "Connection closed."
+msgstr ""
+
+#: src/hub.c:533
+msgid "Error on read."
+msgstr ""
+
+#: src/hub.c:555
+msgid "Timeout"
+msgstr ""
+
+#: src/hub.c:563
+msgid "Socket error."
+msgstr ""
+
+#: src/cap.c:28
+msgid "Default capabilities: chat, pmop, dl and search."
+msgstr ""
+
+#: src/cap.c:29
+msgid "Default REG capabilities: chat, search, pm, dl."
+msgstr ""
+
+#: src/cap.c:30
+msgid "Default VIP capabilities: chat, search, pm, dl, share."
+msgstr ""
+
+#: src/cap.c:31
+msgid "Default KVIP capabilities: chat, search, pm, dl, share, kick."
+msgstr ""
+
+#: src/cap.c:32
+msgid "Default OP capabilities: chat, search, pm, dl, share, key, kick, ban."
+msgstr ""
+
+#: src/cap.c:33
+msgid ""
+"Default CHEEF capabilities: chat, search, pm, dl, share, key, kick, ban, "
+"user."
+msgstr ""
+
+#: src/cap.c:34
+msgid ""
+"Default ADMIN capabilities: chat, search, pm, dl, share, key, kick, ban, "
+"user, group, inherit, config."
+msgstr ""
+
+#: src/cap.c:35
+msgid "Everything. All powerfull. Mostly, capable of hardbanning."
+msgstr ""
+
+#: src/cap.c:37
+msgid "Allows the user to chat in main window."
+msgstr ""
+
+#: src/cap.c:38
+msgid "Allows user to search the hub for files."
+msgstr ""
+
+#: src/cap.c:39
+msgid "Allows the user to send private messages to OPs only."
+msgstr ""
+
+#: src/cap.c:40
+msgid "Allows the user to send private messages to anyone."
+msgstr ""
+
+#: src/cap.c:41
+msgid "Allows user to download files."
+msgstr ""
+
+#: src/cap.c:42
+msgid "Allows users to circumvent the share requirements."
+msgstr ""
+
+#: src/cap.c:43
+msgid "Awards the user the much desired \"key\"."
+msgstr ""
+
+#: src/cap.c:44
+msgid "Allows the user to kick other users."
+msgstr ""
+
+#: src/cap.c:45
+msgid "Allows the user to ban other users."
+msgstr ""
+
+#: src/cap.c:46
+msgid "Allows the user to edit the configuratoin of the hub."
+msgstr ""
+
+#: src/cap.c:47
+msgid "Allows the user to use the \"say\" command."
+msgstr ""
+
+#: src/cap.c:48
+msgid "Allows the user to add new users."
+msgstr ""
+
+#: src/cap.c:49
+msgid "Allows the user to add new groups."
+msgstr ""
+
+#: src/cap.c:50
+msgid "Allows the user to awards rights he posseses to users or groups."
+msgstr ""
+
+#: src/cap.c:51
+msgid ""
+"Allows the user to hardban IPs. A hardban is a bit like firewalling the IP."
+msgstr ""
+
+#: src/cap.c:52
+msgid "This users does not need a tag to get in the hub."
+msgstr ""
+
+#: src/cap.c:53
+msgid "This hides the share of the user for all excepts ops."
+msgstr ""
+
+#: src/cap.c:54
+msgid ""
+"This blocks everyone from downloading from this user. Only works for active "
+"users."
+msgstr ""
+
+#: src/cap.c:55
+msgid "Users with this right can post messages as large as they want."
+msgstr ""
+
+#: src/cap.c:56
+msgid "Users with this right are not subject to search limitations."
+msgstr ""
+
+#: src/cap.c:57
+msgid ""
+"Users with this right are only allowed into the hub if their source IP is "
+"listed for their nick in the userrestict list."
+msgstr ""
+
+#: src/cap.c:58
+msgid "Users with this right are allowed to redirect users."
+msgstr ""
+
+#: src/cap.c:59
+msgid ""
+"Users with this right are allowed to use locallan ips (and avoid ctm and "
+"asearch checks)."
+msgstr ""
+
+#: src/core_config.c:77
+msgid "Port on which the hub will listen."
+msgstr ""
+
+#: src/core_config.c:78
+msgid "IP on which the hub will listen, set to 0.0.0.0 for all."
+msgstr ""
+
+#: src/core_config.c:79
+msgid "Extra NMDC ports to listen on."
+msgstr ""
+
+#: src/core_config.c:80
+msgid "A hostname (or IP address) where your machine will be reachable."
+msgstr ""
+
+#: src/core_config.c:81
+msgid "Name of the hub"
+msgstr ""
+
+#: src/core_config.c:82
+msgid "Description of the hub."
+msgstr ""
+
+#: src/core_config.c:83
+msgid "Owner of the hub."
+msgstr ""
+
+#: src/core_config.c:84
+msgid "Name of the Hub Security bot."
+msgstr ""
+
+#: src/core_config.c:85
+msgid "Description of the Hub Security bot."
+msgstr ""
+
+#: src/core_config.c:87
+msgid "Maximum Length of the users description field."
+msgstr ""
+
+#: src/core_config.c:88
+msgid "Maximum length of the users tag field."
+msgstr ""
+
+#: src/core_config.c:89
+msgid "Maximum length of the users speed field."
+msgstr ""
+
+#: src/core_config.c:90
+msgid "Maximum length of the users email address field."
+msgstr ""
+
+#: src/core_config.c:91
+msgid "Maximum length of the users sharesize field."
+msgstr ""
+
+#: src/core_config.c:92
+msgid ""
+"Kick the user if the tag is too long. If this is not set, the tag will be "
+"hidden."
+msgstr ""
+
+#: src/core_config.c:94
+msgid "Redirection target."
+msgstr ""
+
+#: src/core_config.c:95
+msgid "Redirection target in case of kick or ban."
+msgstr ""
+
+#: src/core_config.c:96
+msgid "Length of automatic temporary ban after a kick."
+msgstr ""
+
+#: src/core_config.c:98
+msgid "Maximum number of retries a user is allowed for his password."
+msgstr ""
+
+#: src/core_config.c:99
+msgid "Length of automatic ban on too many retries (in seconds)."
+msgstr ""
+
+#: src/core_config.c:101
+msgid ""
+"Users can only reconnect after this period (in seconds). This is counted "
+"from the previous login time, not logout."
+msgstr ""
+
+#: src/core_config.c:103
+msgid ""
+"Users that go offline for shorter than this period do not appear to go "
+"offline. On rejoing they will get their rate counters back."
+msgstr ""
+
+#: src/core_config.c:105
+msgid "The hub sends all error messages here."
+msgstr ""
+
+#: src/core_config.c:107
+msgid ""
+"If a user has more data buffered than this setting, he has limited time to "
+"read it all."
+msgstr ""
+
+#: src/core_config.c:108
+msgid ""
+"If a user has more data buffered than this setting, no more will be allowed."
+msgstr ""
+
+#: src/core_config.c:109
+msgid ""
+"If the hub is buffering more than this setting, no more will be allowed."
+msgstr ""
+
+#: src/core_config.c:111
+msgid ""
+"If the hub start buffering for a user, after this many milliseconds, the "
+"user will be disconnected."
+msgstr ""
+
+#: src/core_config.c:112
+msgid ""
+"If the hub start buffering for a user and the amount exceed hub."
+"BufferSoftLimit, he wil be disconnected after this many milliseconds."
+msgstr ""
+
+#: src/core_config.c:114
+msgid ""
+"If a user violates the rate controls too much, he will be banned for this "
+"amount of time."
+msgstr ""
+
+#: src/core_config.c:115
+msgid ""
+"If the user violatest the rate controls too much within this period after "
+"joining, he will be hardbanned permanently."
+msgstr ""
+
+#: src/core_config.c:117
+msgid "These are the rights of an unregistered user."
+msgstr ""
+
+#: src/core_config.c:119
+msgid ""
+"This is the minimum time before an IP address is allowed to reconnect to the "
+"hub."
+msgstr ""
+
+#: src/core_config.c:120
+msgid "This is the number of IP address to remember."
 msgstr ""

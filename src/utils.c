@@ -89,20 +89,11 @@ char *time_print (unsigned long s)
 
   total = 0;
 
-  if (weeks) {
-    if (weeks > 1) {
-      total += snprintf (buffer, 512, __ ("%u weeks, "), weeks);
-    } else {
-      total += snprintf (buffer, 512, __ ("%u week, "), weeks);
-    }
-  }
-  if (days) {
-    if (days > 1) {
-      total += snprintf (buffer, 512 - total, __ ("%u days, "), days);
-    } else {
-      total += snprintf (buffer, 512 - total, __ ("%u day, "), days);
-    }
-  }
+  if (weeks)
+    total += snprintf (buffer, 512, ngettext ("%u week, ", "%u weeks, ", weeks), weeks);
+  if (days)
+    total += snprintf (buffer, 512 - total, ngettext ("%u day, ", "%u days, ", days), days);
+
   if ((hours || minutes || seconds) || (!(weeks || days)))
     total += snprintf (buffer, 512 - total, "%02u:%02u:%02u", hours, minutes, seconds);
 

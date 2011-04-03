@@ -1,6 +1,11 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Now use correct keywords for gettext string parsing.
+	Added all nmdc_interface.c and core_config.c configs to gettext.
+	Added gettext supports on caps
+	Fixed time_print to use ngettext for correct multiples.
+	Fixed time_print in greeting.
 	Added gettext.h to dist.
 	Fix crash in time_print
 	Added gettext support

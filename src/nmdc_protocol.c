@@ -93,7 +93,7 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
 
   bf_strncat (output, u->lock, LOCKLENGTH);
   bf_strncat (output, "]] Pk=Aquila|", 13);
-  bf_printf (output, _("<%s> This hub is running %s Version %s (Uptime .%.3lu).|"), HubSec->nick,
+  bf_printf (output, _("<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"), HubSec->nick,
 	     HUBSOFT_NAME, AQUILA_VERSION, time_print (tnow.tv_sec), tnow.tv_usec / 1000);
 
   /* check for a reconnect ban */

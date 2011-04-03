@@ -1029,71 +1029,102 @@ int proto_nmdc_init ()
   init_bucket_type (&rates.violations, 20, 10, 3);
 
   config_register ("rate.chat.period", CFG_ELEM_ULONG, &rates.chat.period,
-		   "Period of chat messages. This controls how often a user can send a chat message. Keep this low.");
+		   _
+		   ("Period of chat messages. This controls how often a user can send a chat message. Keep this low."));
   config_register ("rate.chat.burst", CFG_ELEM_ULONG, &rates.chat.burst,
-		   "Burst of chat messages. This controls how many chat messages a user can 'save up'. Keep this low.");
+		   _
+		   ("Burst of chat messages. This controls how many chat messages a user can 'save up'. Keep this low."));
   config_register ("rate.activesearch.period", CFG_ELEM_ULONG, &rates.asearch.period,
-		   "Period of searches. This controls how often an active user can search. Keep this reasonable.");
+		   _
+		   ("Period of searches. This controls how often an active user can search. Keep this reasonable."));
   config_register ("rate.activesearch.burst", CFG_ELEM_ULONG, &rates.asearch.burst,
-		   "Burst of searches. This controls how many searches an active user can 'save up'. Keep this low.");
+		   _
+		   ("Burst of searches. This controls how many searches an active user can 'save up'. Keep this low."));
   config_register ("rate.passivesearch.period", CFG_ELEM_ULONG, &rates.psearch.period,
-		   "Period of searches. This controls how often a passive user can search. Keep this reasonable.");
+		   _
+		   ("Period of searches. This controls how often a passive user can search. Keep this reasonable."));
   config_register ("rate.passivesearch.burst", CFG_ELEM_ULONG, &rates.psearch.burst,
-		   "Burst of searches. This controls how many searches a passive user can 'save up'. Keep this low.");
+		   _
+		   ("Burst of searches. This controls how many searches a passive user can 'save up'. Keep this low."));
   config_register ("rate.myinfo.period", CFG_ELEM_ULONG, &rates.myinfo.period,
-		   "Period of MyINFO messages. This controls how often a user can send a MyINFO message that is send to everyone. Keep this very high.");
+		   _
+		   ("Period of MyINFO messages. This controls how often a user can send a MyINFO message that is send to everyone. Keep this very high."));
   config_register ("rate.myinfo.burst", CFG_ELEM_ULONG, &rates.myinfo.burst,
-		   "Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up' (everyone). Keep this at 1.");
+		   _
+		   ("Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up' (everyone). Keep this at 1."));
   config_register ("rate.myinfoop.period", CFG_ELEM_ULONG, &rates.myinfoop.period,
-		   "Period of MyINFO messages. This controls how often a user can send a MyINFO message that is send on to the ops only. Keep this very high.");
+		   _
+		   ("Period of MyINFO messages. This controls how often a user can send a MyINFO message that is send on to the ops only. Keep this very high."));
   config_register ("rate.myinfoop.burst", CFG_ELEM_ULONG, &rates.myinfoop.burst,
-		   "Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up' (OPs messages only). Keep this at 1.");
+		   _
+		   ("Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up' (OPs messages only). Keep this at 1."));
   config_register ("rate.getnicklist.period", CFG_ELEM_ULONG, &rates.getnicklist.period,
-		   "Period of nicklist requests. This controls how often a user can refresh his userlist. Keep this high.");
+		   _
+		   ("Period of nicklist requests. This controls how often a user can refresh his userlist. Keep this high."));
   config_register ("rate.getnicklist.burst", CFG_ELEM_ULONG, &rates.getnicklist.burst,
-		   "Burst of nicklist requests. This controls how many userlist refreshes a user can 'save up'. Keep this at 1.");
+		   _
+		   ("Burst of nicklist requests. This controls how many userlist refreshes a user can 'save up'. Keep this at 1."));
   config_register ("rate.getinfo.period", CFG_ELEM_ULONG, &rates.getinfo.period,
-		   "Period of getinfo requests. This controls how often a user can request info on a user. Keep this low.");
+		   _
+		   ("Period of getinfo requests. This controls how often a user can request info on a user. Keep this low."));
   config_register ("rate.getinfo.burst", CFG_ELEM_ULONG, &rates.getinfo.burst,
-		   "Burst of getinfo requests. This controls how many getinfo requests a user can 'save up'.");
+		   _
+		   ("Burst of getinfo requests. This controls how many getinfo requests a user can 'save up'."));
   config_register ("rate.download.period", CFG_ELEM_ULONG, &rates.downloads.period,
-		   "Period of downloads. This controls how often a user can initiate a download. Keep this low.");
+		   _
+		   ("Period of downloads. This controls how often a user can initiate a download. Keep this low."));
   config_register ("rate.download.burst", CFG_ELEM_ULONG, &rates.downloads.burst,
-		   "Burst of downloads. This controls how many downloads a user can 'save up'. Keep this reasonable.");
+		   _
+		   ("Burst of downloads. This controls how many downloads a user can 'save up'. Keep this reasonable."));
   config_register ("rate.connect.period", CFG_ELEM_ULONG, &rates.connects.period,
-		   "Period of connects. This controls how often the connect counter is refreshed. Keep this low.");
+		   _
+		   ("Period of connects. This controls how often the connect counter is refreshed. Keep this low."));
   config_register ("rate.connect.burst", CFG_ELEM_ULONG, &rates.connects.burst,
-		   "Burst of connects. This controls how many new user connects can be saved up in idle time. Keep this low.");
+		   _
+		   ("Burst of connects. This controls how many new user connects can be saved up in idle time. Keep this low."));
   config_register ("rate.connect.refill", CFG_ELEM_ULONG, &rates.connects.refill,
-		   "Refill of connects. This controls how many new user connects are added each time the counter resets. Keep this low.");
+		   _
+		   ("Refill of connects. This controls how many new user connects are added each time the counter resets. Keep this low."));
 
   config_register ("rate.results_in.period", CFG_ELEM_ULONG, &rates.psresults_in.period,
-		   "Period of passive search results. This controls how often the incoming passive search results counter is refreshed. Keep this low.");
+		   _
+		   ("Period of passive search results. This controls how often the incoming passive search results counter is refreshed. Keep this low."));
   config_register ("rate.results_in.burst", CFG_ELEM_ULONG, &rates.psresults_in.burst,
-		   "Burst of passive search results. This controls how many incoming passive search results can be saved up in idle time. Keep this equal to the search period.");
+		   _
+		   ("Burst of passive search results. This controls how many incoming passive search results can be saved up in idle time. Keep this equal to the search period."));
   config_register ("rate.results_in.refill", CFG_ELEM_ULONG, &rates.psresults_in.refill,
-		   "Refill of passive search results. This controls how many incoming passive search results are added each time the counter resets. Keep this low.");
+		   _
+		   ("Refill of passive search results. This controls how many incoming passive search results are added each time the counter resets. Keep this low."));
 
   config_register ("rate.results_out.period", CFG_ELEM_ULONG, &rates.psresults_out.period,
-		   "Period of passive search results. This controls how often the outgoing passive search results counter is refreshed. Keep this low.");
+		   _
+		   ("Period of passive search results. This controls how often the outgoing passive search results counter is refreshed. Keep this low."));
   config_register ("rate.results_out.burst", CFG_ELEM_ULONG, &rates.psresults_out.burst,
-		   "Burst of passive search results. This controls how many outgoing passive search results can be saved up in idle time. Keep this reasonably high.");
+		   _
+		   ("Burst of passive search results. This controls how many outgoing passive search results can be saved up in idle time. Keep this reasonably high."));
   config_register ("rate.results_out.refill", CFG_ELEM_ULONG, &rates.psresults_out.refill,
-		   "Refill of passive search results. This controls how many outgoing passive search results are added each time the counter resets. Keep this reasonably high.");
+		   _
+		   ("Refill of passive search results. This controls how many outgoing passive search results are added each time the counter resets. Keep this reasonably high."));
 
   config_register ("rate.warnings.period", CFG_ELEM_ULONG, &rates.warnings.period,
-		   "Period of user warnings. This controls how often a warning is send to user that overstep limits.");
+		   _
+		   ("Period of user warnings. This controls how often a warning is send to user that overstep limits."));
   config_register ("rate.warnings.refill", CFG_ELEM_ULONG, &rates.warnings.refill,
-		   "Period of user warnings. This controls how many warning a user gets within the period.");
+		   _
+		   ("Period of user warnings. This controls how many warning a user gets within the period."));
   config_register ("rate.warnings.burst", CFG_ELEM_ULONG, &rates.warnings.burst,
-		   "Period of user warnings. This controls how many warnings a user that overstep limits can save up.");
+		   _
+		   ("Period of user warnings. This controls how many warnings a user that overstep limits can save up."));
 
   config_register ("rate.violations.period", CFG_ELEM_ULONG, &rates.violations.period,
-		   "Period of user violations. This controls how often a warning is send to user that overstep limits.");
+		   _
+		   ("Period of user violations. This controls how often a warning is send to user that overstep limits."));
   config_register ("rate.violations.refill", CFG_ELEM_ULONG, &rates.violations.refill,
-		   "Period of user violations. This controls how many warning a user gets within the period.");
+		   _
+		   ("Period of user violations. This controls how many warning a user gets within the period."));
   config_register ("rate.violations.burst", CFG_ELEM_ULONG, &rates.violations.burst,
-		   "Period of user violations. This controls how many violations a user that overstep limits can save up.");
+		   _
+		   ("Period of user violations. This controls how many violations a user that overstep limits can save up."));
 
   /* cache stuff */
   memset ((void *) &cache, 0, sizeof (cache_t));
@@ -1124,27 +1155,37 @@ int proto_nmdc_init ()
   init_bucket (&cache.privatemessages.timer, now.tv_sec);
 
   config_register ("cache.chat.period", CFG_ELEM_ULONG, &cache.chat.timertype.period,
-		   "Period of chat cache flush. This controls how often chat messages are sent to users. Keep this low.");
+		   _
+		   ("Period of chat cache flush. This controls how often chat messages are sent to users. Keep this low."));
   config_register ("cache.join.period", CFG_ELEM_ULONG, &cache.myinfo.timertype.period,
-		   "Period of join cache flush. This controls how often users are notified of new joins.");
+		   _
+		   ("Period of join cache flush. This controls how often users are notified of new joins."));
   config_register ("cache.update.period", CFG_ELEM_ULONG, &cache.myinfoupdate.timertype.period,
-		   "Period of update cache flush. This controls how often users are sent MyINFO updates. Keep this high.");
+		   _
+		   ("Period of update cache flush. This controls how often users are sent MyINFO updates. Keep this high."));
   config_register ("cache.updateop.period", CFG_ELEM_ULONG, &cache.myinfoupdateop.timertype.period,
-		   "Period of operator update cache flush. This controls how often operators are sent MyINFO updates. Keep this low.");
+		   _
+		   ("Period of operator update cache flush. This controls how often operators are sent MyINFO updates. Keep this low."));
   config_register ("cache.activesearch.period", CFG_ELEM_ULONG, &cache.asearch.timertype.period,
-		   "Period of active search cache flush. This controls how often search messages are sent to active users.");
+		   _
+		   ("Period of active search cache flush. This controls how often search messages are sent to active users."));
   config_register ("cache.passivesearch.period", CFG_ELEM_ULONG, &cache.psearch.timertype.period,
-		   "Period of passive search cache flush. This controls how often search messages are sent to passive users.");
+		   _
+		   ("Period of passive search cache flush. This controls how often search messages are sent to passive users."));
   config_register ("cache.results.period", CFG_ELEM_ULONG, &cache.results.timertype.period,
-		   "Period of search results cache flush. This controls how often search results are sent to passive users.");
+		   _
+		   ("Period of search results cache flush. This controls how often search results are sent to passive users."));
   config_register ("cache.pm.period", CFG_ELEM_ULONG, &cache.privatemessages.timertype.period,
-		   "Period of private messages cache flush. This controls how often private messages are sent to users. Keep this low.");
+		   _
+		   ("Period of private messages cache flush. This controls how often private messages are sent to users. Keep this low."));
 
   config_register ("cache.activeresearch.period", CFG_ELEM_ULONG, &cache.aresearch.timertype.period,
-		   "Period of active repeated search cache flush. This controls how often search messages are sent to active users.");
+		   _
+		   ("Period of active repeated search cache flush. This controls how often search messages are sent to active users."));
   config_register ("cache.passiveresearch.period", CFG_ELEM_ULONG,
 		   &cache.presearch.timertype.period,
-		   "Period of passive repeated search cache flush. This controls how often search messages are sent to passive users.");
+		   _
+		   ("Period of passive repeated search cache flush. This controls how often search messages are sent to passive users."));
 
   cloning = DEFAULT_CLONING;
   chatmaxlength = DEFAULT_MAXCHATLENGTH;
@@ -1156,23 +1197,23 @@ int proto_nmdc_init ()
   defaultbanmessage = strdup ("");
 
   config_register ("hub.allowcloning", CFG_ELEM_UINT, &cloning,
-		   "Allow multiple users from the same IP address.");
+		   _("Allow multiple users from the same IP address."));
   config_register ("nmdc.maxchatlength", CFG_ELEM_UINT, &chatmaxlength,
-		   "Maximum length of a chat message.");
+		   _("Maximum length of a chat message."));
   config_register ("nmdc.maxsearchlength", CFG_ELEM_UINT, &searchmaxlength,
-		   "Maximum length of a search message.");
+		   _("Maximum length of a search message."));
   config_register ("nmdc.maxsrlength", CFG_ELEM_UINT, &srmaxlength,
-		   "Maximum length of a search result");
+		   _("Maximum length of a search result"));
 
   config_register ("nmdc.researchinterval", CFG_ELEM_UINT, &researchmininterval,
-		   "Minimum time before a re-search is considered valid.");
+		   _("Minimum time before a re-search is considered valid."));
   config_register ("nmdc.researchperiod", CFG_ELEM_UINT, &researchperiod,
-		   "Period during which a search is considered a re-search.");
+		   _("Period during which a search is considered a re-search."));
   config_register ("nmdc.researchmaxcount", CFG_ELEM_UINT, &researchmaxcount,
-		   "Maximum number of searches cached.");
+		   _("Maximum number of searches cached."));
 
   config_register ("nmdc.defaultbanmessage", CFG_ELEM_STRING, &defaultbanmessage,
-		   "This message is send to all banned users when they try to join.");
+		   _("This message is send to all banned users when they try to join."));
 
   /* further inits */
   memset (&hashlist, 0, sizeof (hashlist));

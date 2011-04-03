@@ -57,7 +57,7 @@ unsigned int command_flags_help (command_flag_t * flags, buffer_t * buf)
   unsigned int j;
 
   for (j = 0; flags[j].flag != 0; j++)
-    bf_printf (buf, "%s : %s\n", flags[j].name, flags[j].help);
+    bf_printf (buf, "%s : %s\n", flags[j].name, gettext (flags[j].help));
 
   return 0;
 }
