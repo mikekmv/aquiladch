@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Fixes in server_handle_output().
 	Added aqdtinstall Ubuntu support.
 	rights list with space between "" now works too.
 		( "search,pm pmop" dl )

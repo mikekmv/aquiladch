@@ -410,6 +410,9 @@ int server_handle_output (esocket_t * es)
   unsigned long t;
   string_list_entry_t *e;
 
+  if (!cl->outgoing.count)
+    return 0;
+
   DPRINTF (" %p Writing output (%u, %lu)...", cl->user, cl->outgoing.count, cl->offset);
   w = 0;
   t = 0;
@@ -428,7 +431,7 @@ int server_handle_output (esocket_t * es)
     }
     ASSERT (b);
     /* write out data in buffer chain */
-    for (b = e->data; b; b = b->next) {
+    for (; b; b = b->next) {
       l = bf_used (b) - o;
       w = send (es->socket, b->s + o, l, 0);
       if (w < 0) {
@@ -489,12 +492,13 @@ int server_handle_output (esocket_t * es)
   DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
 
   /* all data was written, we don't need the output event anymore */
-  if (!cl->outgoing.count) {
-    esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
-    esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
-    buffering--;
-    cl->state = HUB_STATE_NORMAL;
-  }
+  ASSERT (!cl->outgoing.count);
+
+  esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
+  esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
+  buffering--;
+  cl->state = HUB_STATE_NORMAL;
+
   return 0;
 }
 
