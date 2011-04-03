@@ -130,43 +130,45 @@ unsigned long pi_configlock_event_config (plugin_user_t * user, void *dummy, uns
 
   for (lock = locklist; lock && (lock->elem != elem); lock = lock->next);
 
-  if (lock)
-    switch (elem->type) {
-      case CFG_ELEM_PTR:
-	*elem->val.v_ptr = lock->data.v_ptr;
-	break;
-      case CFG_ELEM_LONG:
-	*elem->val.v_long = lock->data.v_long;
-	break;
-      case CFG_ELEM_ULONG:
-      case CFG_ELEM_CAP:
-      case CFG_ELEM_MEMSIZE:
-	*elem->val.v_ulong = lock->data.v_ulong;
-	break;
-      case CFG_ELEM_BYTESIZE:
-      case CFG_ELEM_ULONGLONG:
-	*elem->val.v_ulonglong = lock->data.v_ulonglong;
-	break;
-      case CFG_ELEM_INT:
-	*elem->val.v_int = lock->data.v_int;
-	break;
-      case CFG_ELEM_UINT:
-	*elem->val.v_uint = lock->data.v_uint;
-	break;
-      case CFG_ELEM_DOUBLE:
-	*elem->val.v_double = lock->data.v_double;
-	break;
-      case CFG_ELEM_STRING:
-	if (*elem->val.v_string)
-	  free (*elem->val.v_string);
-	*elem->val.v_string = strdup (lock->data.v_ptr);
-	break;
-      case CFG_ELEM_IP:
-	*elem->val.v_ip = lock->data.v_ip;
-	break;
-    }
+  if (!lock)
+    return PLUGIN_RETVAL_CONTINUE;
 
-  return PLUGIN_RETVAL_CONTINUE;
+  switch (elem->type) {
+    case CFG_ELEM_PTR:
+      *elem->val.v_ptr = lock->data.v_ptr;
+      break;
+    case CFG_ELEM_LONG:
+      *elem->val.v_long = lock->data.v_long;
+      break;
+    case CFG_ELEM_ULONG:
+    case CFG_ELEM_CAP:
+    case CFG_ELEM_MEMSIZE:
+      *elem->val.v_ulong = lock->data.v_ulong;
+      break;
+    case CFG_ELEM_BYTESIZE:
+    case CFG_ELEM_ULONGLONG:
+      *elem->val.v_ulonglong = lock->data.v_ulonglong;
+      break;
+    case CFG_ELEM_INT:
+      *elem->val.v_int = lock->data.v_int;
+      break;
+    case CFG_ELEM_UINT:
+      *elem->val.v_uint = lock->data.v_uint;
+      break;
+    case CFG_ELEM_DOUBLE:
+      *elem->val.v_double = lock->data.v_double;
+      break;
+    case CFG_ELEM_STRING:
+      if (*elem->val.v_string)
+	free (*elem->val.v_string);
+      *elem->val.v_string = strdup (lock->data.v_ptr);
+      break;
+    case CFG_ELEM_IP:
+      *elem->val.v_ip = lock->data.v_ip;
+      break;
+  }
+
+  return PLUGIN_RETVAL_DROP;
 }
 
 

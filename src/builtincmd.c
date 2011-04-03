@@ -1817,10 +1817,13 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
       bf_printf (output, _("%s !Unknown Type!\n"), elem->name);
   }
 
+  if (plugin_user_event (user, PLUGIN_EVENT_CONFIG, elem) != PLUGIN_RETVAL_CONTINUE) {
+    bf_printf (output, _("Configuration change denied.\n"));
+  }
+
   bf_printf (output, "New: ");
   printconfig (output, elem);
 
-  plugin_user_event (user, PLUGIN_EVENT_CONFIG, elem);
 
 leave:
   return 0;

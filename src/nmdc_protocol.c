@@ -369,12 +369,13 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	retval = -1;
 	break;
       } else {
-	proto_nmdc_user_say_string (HubSec, output,
+	buffer_t *buf = bf_alloc (256);
+
+	proto_nmdc_user_say_string (HubSec, buf,
 				    __ ("Another instance of you is connecting, bye!"));
-	server_write (existing_user->parent, output);
+	server_write (existing_user->parent, buf);
 	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
-	*output->s = '\0';
-	output->e = output->s;
+	bf_free (buf);
       }
     }
 
@@ -516,12 +517,12 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 
     /* check if users exists, if so, redirect old */
     if ((existing_user = hash_find_nick (&hashlist, u->nick, strlen (u->nick)))) {
-      proto_nmdc_user_say_string (HubSec, output,
-				  __ ("Another instance of you is connecting, bye!"));
-      server_write (existing_user->parent, output);
+      buffer_t *buf = bf_alloc (256);
+
+      proto_nmdc_user_say_string (HubSec, buf, __ ("Another instance of you is connecting, bye!"));
+      server_write (existing_user->parent, buf);
       server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
-      *output->s = '\0';
-      output->e = output->s;
+      bf_free (buf);
     }
 
     /* assign rights */
@@ -622,12 +623,13 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	retval = -1;
 	break;
       } else {
-	proto_nmdc_user_say_string (HubSec, output,
+	buffer_t *buf = bf_alloc (256);
+
+	proto_nmdc_user_say_string (HubSec, buf,
 				    __ ("Another instance of you is connecting, bye!"));
-	server_write (existing_user->parent, output);
+	server_write (existing_user->parent, buf);
 	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
-	*output->s = '\0';
-	output->e = output->s;
+	bf_free (buf);
       }
       existing_user = NULL;
     }

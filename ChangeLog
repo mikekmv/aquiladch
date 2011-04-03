@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Print message with configuration value is locked (req Malte).
+	Add some extra stats for !statcache
+	Fixed bug with buffer reuse. Don't do it.
 	Added some DEBUG code.
 	Fix bug in locale settings.
 	Added commands getlocale/setlocale.
