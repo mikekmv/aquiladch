@@ -406,7 +406,6 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " cacherebuild : %lu\n", nmdc_stats.cacherebuild);
   bf_printf (output, " userjoin : %lu\n", nmdc_stats.userjoin);
   bf_printf (output, " userpart : %lu\n", nmdc_stats.userpart);
-  bf_printf (output, " banned : %lu\n", nmdc_stats.banned);
   bf_printf (output, " forcemove : %lu\n", nmdc_stats.forcemove);
   bf_printf (output, " disconnect : %lu\n", nmdc_stats.disconnect);
   bf_printf (output, " redirect : %lu\n", nmdc_stats.redirect);

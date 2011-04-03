@@ -70,34 +70,17 @@ unsigned char *pi_lua_savefile;
 
 plugin_t *plugin_lua = NULL;
 
-/* 
- * robot contexts
- */
-
-typedef struct lua_robot_context {
-  struct lua_robot_context *next, *prev;
-
-  plugin_user_t *robot;
-  unsigned char *handler;
-} lua_robot_context_t;
-
-/*
- * script contexts
- */
-
 unsigned int lua_ctx_cnt, lua_ctx_peak;
+
 typedef struct lua_context {
   struct lua_context *next, *prev;
 
   lua_State *l;
   unsigned char *name;
   unsigned long long eventmap;
-
-  lua_robot_context_t robots;
 } lua_context_t;
 
 lua_context_t lua_list;
-
 
 unsigned int pi_lua_close (unsigned char *name);
 
@@ -201,22 +184,7 @@ int pi_lua_getconfig (lua_State * lua)
       lua_pushstring (lua, format_size (*elem->val.v_ulonglong));
       break;
 
-    case CFG_ELEM_MEMSIZE:
-      lua_pushstring (lua, format_size (*elem->val.v_ulong));
-      break;
-
     case CFG_ELEM_CAP:
-      {
-	buffer_t *b = bf_alloc (1024);
-
-	command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b,
-			     *elem->val.v_ulong);
-
-	lua_pushstring (lua, b->s);
-
-	bf_free (b);
-      }
-      break;
     case CFG_ELEM_PTR:
       lua_pushstring (lua, "Element Type not supported.");
       lua_error (lua);
@@ -281,14 +249,6 @@ int pi_lua_setconfig (lua_State * lua)
       break;
 
     case CFG_ELEM_PTR:
-      {
-	unsigned long caps = 0, ncaps = 0;
-
-	parserights (value, &caps, &ncaps);
-
-	*elem->val.v_ulong = caps;
-      }
-      break;
     case CFG_ELEM_CAP:
     default:
       lua_pushstring (lua, "Element Type not supported.");
@@ -446,18 +406,6 @@ int pi_lua_userisop (lua_State * lua)
   return 1;
 }
 
-int pi_lua_userisonline (lua_State * lua)
-{
-  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
-  plugin_user_t *user;
-
-  user = PLUGIN_USER_FIND (nick);
-
-  lua_pushboolean (lua, (user != NULL));
-
-  return 1;
-}
-
 int pi_lua_userisactive (lua_State * lua)
 {
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
@@ -593,6 +541,39 @@ int pi_lua_getusermyinfo (lua_State * lua)
   return 1;
 }
 
+
+/******************************************************************************************
+ *  LUA Functions Bot handling
+ */
+
+
+int pi_lua_addbot (lua_State * lua)
+{
+  plugin_user_t *u;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *description = (unsigned char *) luaL_checkstring (lua, 2);
+
+  u = plugin_robot_add (nick, description, NULL);
+
+  lua_pushboolean (lua, (u != NULL));
+
+  return 1;
+}
+
+int pi_lua_delbot (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *u;
+
+  u = plugin_user_find (nick);
+
+  if (u)
+    plugin_robot_remove (u);
+
+  lua_pushboolean (lua, (u != NULL));
+
+  return 1;
+}
 
 /******************************************************************************************
  *  LUA Functions User handling
@@ -1335,177 +1316,6 @@ leave:
 }
 
 /******************************************************************************************
- *  LUA Functions Bot handling
- */
-
-unsigned long pi_lua_robot_event_handler (plugin_user_t * user, void *dummy,
-					  unsigned long event, buffer_t * token)
-{
-  int result = PLUGIN_RETVAL_CONTINUE;
-  lua_context_t *ctx;
-  lua_robot_context_t *robot;
-
-  for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next) {
-    for (robot = ctx->robots.next; robot != &ctx->robots; robot = robot->next) {
-      if (robot->robot == user)
-	break;
-    }
-    if (robot->robot == user)
-      break;
-  }
-  ASSERT (ctx != &lua_list);
-  ASSERT (robot != &ctx->robots);
-
-  /* clear stack */
-  lua_settop (ctx->l, 0);
-
-  /* specify function to call */
-  /* lua 5.1 
-     lua_getfield (ctx->l, LUA_GLOBALSINDEX, command);
-   */
-
-  /* lua 5.0 */
-  lua_pushstring (ctx->l, robot->handler);
-  lua_gettable (ctx->l, LUA_GLOBALSINDEX);
-
-  /* push arguments */
-  lua_pushstring (ctx->l, (user ? user->nick : (unsigned char *) ""));
-  if (event == PLUGIN_EVENT_CONFIG) {
-    config_element_t *elem = (config_element_t *) token;
-
-    lua_pushstring (ctx->l, (elem ? elem->name : (unsigned char *) ""));
-  } else {
-    lua_pushstring (ctx->l, (token ? token->s : (unsigned char *) ""));
-  }
-  lua_pushstring (ctx->l, pi_lua_eventnames[event]);
-
-  /* call funtion. */
-  result = lua_pcall (ctx->l, 2, 1, 0);
-  if (result) {
-    unsigned char *error = (unsigned char *) luaL_checkstring (ctx->l, 1);
-    buffer_t *buf;
-
-    DPRINTF ("LUA ERROR: %s\n", error);
-
-    buf = bf_alloc (32 + strlen (error) + strlen (ctx->name));
-
-    bf_printf (buf, "LUA ERROR ('%s'): %s\n", ctx->name, error);
-
-    plugin_report (buf);
-
-    bf_free (buf);
-
-    /* do not drop message if handler failed */
-    result = PLUGIN_RETVAL_CONTINUE;
-  }
-
-  /* retrieve return value */
-  if (lua_isboolean (ctx->l, -1)) {
-    result = lua_toboolean (ctx->l, -1);
-    lua_remove (ctx->l, -1);
-  }
-
-  return result;
-}
-
-int pi_lua_addbot (lua_State * lua)
-{
-  plugin_user_t *u;
-  lua_context_t *ctx;
-  lua_robot_context_t *robot;
-
-  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
-  unsigned char *description = (unsigned char *) luaL_checkstring (lua, 2);
-  unsigned char *function = (unsigned char *) luaL_checkstring (lua, 3);
-
-  /* FIXME verify functon */
-
-  for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
-    if (ctx->l == lua)
-      break;
-
-  assert (ctx != &lua_list);
-
-  u = plugin_robot_add (nick, description, pi_lua_robot_event_handler);
-
-  if (!u) {
-    lua_pushboolean (lua, 0);
-    return 1;
-  }
-
-  robot = malloc (sizeof (lua_robot_context_t));
-  robot->robot = u;
-  robot->handler = strdup (function);
-
-  robot->next = ctx->robots.next;
-  robot->next->prev = robot;
-  robot->prev = &ctx->robots;
-  robot->prev->next = robot;
-
-  lua_pushboolean (lua, (u != NULL));
-  return 1;
-}
-
-int pi_lua_delbot (lua_State * lua)
-{
-  lua_context_t *ctx;
-  lua_robot_context_t *robot;
-  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
-  plugin_user_t *u;
-
-  for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
-    if (ctx->l == lua)
-      break;
-
-  assert (ctx != &lua_list);
-
-  u = plugin_user_find (nick);
-
-  for (robot = ctx->robots.next; robot != &ctx->robots; robot = robot->next) {
-    if (robot->robot == u)
-      break;
-  }
-
-  if (robot == &ctx->robots) {
-    lua_pushboolean (lua, 0);
-    return 1;
-  }
-
-  plugin_robot_remove (robot->robot);
-
-  robot->next->prev = robot->prev;
-  robot->prev->next = robot->next;
-
-  free (robot->handler);
-  free (robot);
-
-  lua_pushboolean (lua, 1);
-
-  return 1;
-}
-
-void pi_lua_initbot (lua_context_t * ctx)
-{
-  ctx->robots.next = &ctx->robots;
-  ctx->robots.prev = &ctx->robots;
-}
-
-void pi_lua_purgebots (lua_context_t * ctx)
-{
-  lua_robot_context_t *robot;
-
-  for (robot = ctx->robots.next; robot != &ctx->robots; robot = ctx->robots.next) {
-    plugin_robot_remove (robot->robot);
-
-    robot->next->prev = robot->prev;
-    robot->prev->next = robot->next;
-
-    free (robot->handler);
-    free (robot);
-  }
-}
-
-/******************************************************************************************
  *  LUA Functions Custom Command Handling
  */
 
@@ -1705,7 +1515,6 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"GetUserMyINFO", pi_lua_getusermyinfo,},
 
   {"UserIsOP", pi_lua_userisop,},
-  {"UserIsOnline", pi_lua_userisonline,},
   {"UserIsActive", pi_lua_userisactive,},
   {"UserIsRegistered", pi_lua_userisregistered,},
   {"UserIsZombie", pi_lua_useriszombie,},
@@ -1845,6 +1654,15 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
     goto error;
   }
+
+  result = lua_pcall (l, 0, LUA_MULTRET, 0);
+  if (result) {
+    unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
+
+    bf_printf (output, "LUA ERROR: %s\n", error);
+
+    goto error;
+  }
   // alloc and init context
   ctx = malloc (sizeof (lua_context_t));
   ctx->l = l;
@@ -1856,20 +1674,10 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
   ctx->prev = lua_list.prev;
   ctx->prev->next = ctx;
   ctx->next->prev = ctx;
-  pi_lua_initbot (ctx);
 
   lua_ctx_cnt++;
   if (lua_ctx_peak > lua_ctx_cnt)
     lua_ctx_peak = lua_ctx_cnt;
-
-  result = lua_pcall (l, 0, LUA_MULTRET, 0);
-  if (result) {
-    unsigned char *error = (unsigned char *) luaL_checkstring (l, 1);
-
-    bf_printf (output, "LUA ERROR: %s\n", error);
-
-    goto late_error;
-  }
 
   /* determine eventhandlers */
   for (i = 0; pi_lua_eventnames[i] != NULL; i++) {
@@ -1897,14 +1705,6 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
   return 1;
 
-late_error:
-  ctx->next->prev = ctx->prev;
-  ctx->prev->next = ctx->next;
-  pi_lua_purgebots (ctx);
-  free (ctx->name);
-  free (ctx);
-  lua_ctx_cnt--;
-
 error:
   lua_close (l);
   return 0;
@@ -1921,7 +1721,6 @@ unsigned int pi_lua_close (unsigned char *name)
       continue;
 
     pi_lua_cmdclean (ctx->l);
-    pi_lua_purgebots (ctx);
 
     lua_close (ctx->l);
     free (ctx->name);

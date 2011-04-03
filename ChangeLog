@@ -1,23 +1,14 @@
 This is the Aquila Changelog.
 
-0.1.10-pre1:
-	Make stuff compile on cygwin again.
-	Make banned users a seperate counter from forcemoves.
-	Added CFG_ELEM_CAP support to LUA Set/GetConfig
-	Split up active/passive search intervals (Req MrFantastic2006)
-	Prevent endless password guessing (Req maksalaatikko)
-	Seperate !report target from sysreport target
-	Rename !rulelist to !triggerlist (suggestion Cyber_Ninja)
-	Extended lua support:
-		- LUA function UserIsOnline()
-		- improved Bot handling. now supports event handling.
+0.1.9-2:
+	Fixing defaults.
 
 0.1.9:
 	!ban kicks user again. (Thanks DZ, Bliss)
 	Fixed printing of hub.buffer*limit while setting. (Thanks Charmed)
 	Added uptime to hub greeting. (request Charmed)
 	Fix building on armv5b-unknown-linux-gnu (Thanks Malte1)
-	Fix debug build without zline. (Thanks Malte1)
+	Fix debug build without zline. (thanks Malte1)
 	Fix $GetNickList reate warning. (Thanks DZ)
 	Fix ZLib detection bugs
 	Fixed bug in !pwgen (thanks Charmed)

@@ -1,9 +1,13 @@
 
 Develstatus:
+	- make banned users a seperate counter from forcemoves
+	- seperate !report target from sysreport target
+	- log bad password login attempts.
 	- detect changes in *.conf files
 	- language suppport
 	- Add some sort of command "context" support. 
 		(allow !help and !leave etc to work in chatrooms)
+	- prevent endless password guessing (Req maksalaatikko)
 	- Fix the crash if the clock is set back...
 	- add nick checking for insane chars as spaces  ( $|<>:?*"/\)
 	- split up proto_nmdc_state_online
