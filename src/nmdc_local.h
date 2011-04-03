@@ -83,6 +83,6 @@ extern void proto_nmdc_user_cachelist_add (user_t *user);
 extern void proto_nmdc_user_cachelist_invalidate (user_t *u);
 extern void proto_nmdc_user_cachelist_clear ();
 
-extern int proto_nmdc_violation (user_t * u, struct timeval *now);
+extern int proto_nmdc_violation (user_t * u, struct timeval *now, char *reason);
 
 #endif
