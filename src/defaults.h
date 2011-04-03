@@ -32,23 +32,41 @@
 
 #define HUBSOFT_NAME		"Aquila"
 
+/*
+ * These values determine the size and mask of the configuration value
+ *   hash tables.
+ * CONFIG_NAMELENGTH determines the max namelength of a config value.
+ */
+
 #define CONFIG_HASHSIZE		32
 #define CONFIG_HASHMASK		(CONFIG_HASHSIZE - 1)
 #define CONFIG_NAMELENGTH	64
 
+/*
+ *  Determine the Lock string and the length of the random data in the lock.
+ */
 #define LOCK	 HUBSOFT_NAME
 #define LOCKLENGTH 4
+
+/*
+ * Default hubname, description and owner
+ */
 
 #define HUBNAME  "Capitol"
 #define HUBDESC  "Licat volare si super tergum Aquila volat."
 #define HUBOWNER "Unknown"
 
+/*
+ * These are generic settings in the hub. modifying them can influence memory usage.
+ */
 #define NICKLENGTH  64
 #define PASSWDLENGTH 8
 #define BUFSIZE 65536
 #define MAX_TOKEN_SIZE 65535
 
-#define DEFAULT_MAX_OUTGOINGBUFFERS 10
+/*
+ *  Buffering defaults. 
+ */
 #define DEFAULT_BUFFER_SOFTLIMIT    40*1024
 #define DEFAULT_BUFFER_HARDLIMIT    100*1024
 #define DEFAULT_BUFFER_TOTALLIMIT    100*1024*1024
@@ -57,23 +75,47 @@
 #define DEFAULT_TIMEOUT_BUFFERING   30000
 #define DEFAULT_TIMEOUT_OVERFLOW    10000
 
+/*
+ * Research stuff
+ */
+#define DEFAULT_RESEARCH_MININTERVAL	60
+#define DEFAULT_RESEARCH_PERIOD		7200
+#define DEFAULT_RESEARCH_MAXCOUNT	120
+
+/*
+ * Default settings for listening port, ip and address.
+ */
 #define DEFAULT_PORT	      411
 #define DEFAULT_IP	      0L
 #define DEFAULT_ADDRESS	      "localhost"
 #define NMDC_EXTRA_PORTS      ""
 
+/*
+ * Hub security defaults.
+ */
+
 #define DEFAULT_HUBSECURITY_NICK     		"Aquila"
 #define DEFAULT_HUBSECURITY_DESCRIPTION		"His attribute is the lightning bolt and the eagle is both his symbol and his messenger."
 
-#define DEFAULT_SAVEFILE      "hub.conf"
-
+/*
+ * Filenames of the core savefiles.
+ */
+#define DEFAULT_SAVEFILE        "hub.conf"
 #define DEFAULT_HARDBANFILE	"hardban.conf"
 #define DEFAULT_SOFTBANFILE	"softban.conf"
-#define DEFAULT_NICKBANFILE	"nickban.conf"
 #define DEFAULT_ACCOUNTSFILE	"accounts.conf"
 
 #define DEFAULT_REDIRECT	""
+
+/*
+ * Where to send reports...
+ */
+#define DEFAULT_REPORTTARGET	""
 #define DEFAULT_SYSREPORTTARGET ""
+
+/*
+ * Default TAG field length settings
+ */
 
 #define DEFAULT_MAXDESCRIPTIONLENGTH	11
 #define DEFAULT_MAXTAGLENGTH		50
@@ -81,6 +123,10 @@
 #define DEFAULT_MAXEMAILLENGTH		50
 #define DEFAULT_MAXSHARELENGTH		13	/* should be in the PetaByte range */
 #define DEFAULT_DROPONTAGTOOLONG	1
+
+/*
+ * More settings...
+ */
 
 #define DEFAULT_KICKPERIOD		300
 

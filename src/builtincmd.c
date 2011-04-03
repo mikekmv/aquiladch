@@ -1741,7 +1741,7 @@ int builtincmd_init ()
   /* *INDENT-OFF* */
   MinPwdLength        = DEFAULT_MINPWDLENGTH;
   AutoSaveInterval    = DEFAULT_AUTOSAVEINTERVAL;
-  ReportTarget      = strdup ("");
+  ReportTarget      = strdup (DEFAULT_REPORTTARGET);
   KickMaxBanTime      = 0;
   KickNoBanMayBan      = 0;
   

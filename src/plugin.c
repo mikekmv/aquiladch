@@ -37,7 +37,6 @@
 unsigned char *ConfigFile;
 unsigned char *HardBanFile;
 unsigned char *SoftBanFile;
-unsigned char *NickBanFile;
 unsigned char *AccountsFile;
 
 unsigned char *KickBanRedirect;
@@ -1029,7 +1028,6 @@ int plugin_init ()
   ConfigFile = strdup (DEFAULT_SAVEFILE);
   HardBanFile = strdup (DEFAULT_HARDBANFILE);
   SoftBanFile = strdup (DEFAULT_SOFTBANFILE);
-  NickBanFile = strdup (DEFAULT_NICKBANFILE);
   AccountsFile = strdup (DEFAULT_ACCOUNTSFILE);
 
   return 0;

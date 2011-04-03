@@ -931,9 +931,9 @@ int proto_nmdc_init ()
   chatmaxlength = DEFAULT_MAXCHATLENGTH;
   searchmaxlength = DEFAULT_MAXSEARCHLENGTH;
   srmaxlength = DEFAULT_MAXSRLENGTH;
-  researchmininterval = 60;
-  researchperiod = 1200;
-  researchmaxcount = 5;
+  researchmininterval = DEFAULT_RESEARCH_MININTERVAL;
+  researchperiod = DEFAULT_RESEARCH_PERIOD;
+  researchmaxcount = DEFAULT_RESEARCH_MAXCOUNT;
   defaultbanmessage = strdup ("");
 
   config_register ("hub.allowcloning", CFG_ELEM_UINT, &cloning,
