@@ -31,6 +31,10 @@ __inline__ int get_token (leaky_bucket_type_t * type, leaky_bucket_t * bucket, t
   if (bucket->lasteval != now) {
     unsigned long t;
 
+    /* bad setting, but it shouldn't cause a crash */
+    if (!type->period)
+      return 0;
+
     t = ((now - bucket->timestamp) / type->period);
     bucket->timestamp += type->period * t;
     bucket->lasteval = now;

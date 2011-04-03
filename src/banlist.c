@@ -156,7 +156,7 @@ unsigned int banlist_del_byip (banlist_t * list, uint32_t ip, uint32_t netmask)
   if (e)
     banlist_del (list, e);
 
-  return 1;
+  return (e != NULL);
 }
 
 unsigned int banlist_del_bynick (banlist_t * list, unsigned char *nick)
@@ -167,7 +167,7 @@ unsigned int banlist_del_bynick (banlist_t * list, unsigned char *nick)
   if (e)
     banlist_del (list, e);
 
-  return 1;
+  return (e != NULL);
 }
 
 

@@ -33,11 +33,23 @@
 #endif
 
 #define PI_HUBLIST_BUFFER_SIZE 	4096
+#define PI_HUBLIST_TIMEOUT 10000
+
+
+#define PI_HUBLIST_FLAGS_REPORT    1
+
+
+typedef struct pi_hublist_ctx {
+  unsigned char *address;
+  unsigned long flags;
+} pi_hublist_ctx_t;
 
 unsigned char *pi_hublist_lists;
 
 struct timeval pi_hublist_savetime;
 unsigned long pi_hublist_interval;
+unsigned long pi_hublist_silent;
+
 unsigned int pi_hublist_es_type;
 esocket_handler_t *pi_hublist_handler;
 
@@ -46,25 +58,24 @@ extern long users_total;
 static int escape_string (buffer_t * output)
 {
   int i, j;
-  char *l, *k, *e;
+  unsigned char *l, *e;
   buffer_t *tmpbuf;
 
   tmpbuf = bf_copy (output, 0);
 
   l = tmpbuf->s;
-  k = output->s;
   e = output->buffer + output->size - 10;
   j = bf_used (tmpbuf);
   bf_clear (output);
 
   /* do not escape first $ character */
-  if (*k == '$') {
-    k++;
+  if (*l == '$') {
     l++;
+    output->e++;
     j--;
   };
 
-  for (i = 0; (i < j) && (k < e); i++)
+  for (i = 0; (i < j) && (output->e < e); i++)
     switch (l[i]) {
       case 0:
       case 5:
@@ -80,18 +91,19 @@ static int escape_string (buffer_t * output)
     }
 
   if (bf_unused (output) > 0)
-    *output->e++ = '\0';
+    *output->e = '\0';
 
   return bf_used (output);
 }
 
 
-int pi_hublist_update (buffer_t * output)
+int pi_hublist_update (buffer_t * output, unsigned long flags)
 {
   int result;
   unsigned int port;
-  unsigned char *lists, *l, *p, *c;
+  unsigned char *lists, *l, *p;
   esocket_t *s;
+  pi_hublist_ctx_t *ctx;
 
   lists = strdup (pi_hublist_lists);
 
@@ -99,9 +111,12 @@ int pi_hublist_update (buffer_t * output)
     if (!strlen (l))
       continue;
 
-    c = strdup (l);
+    ctx = malloc (sizeof (pi_hublist_ctx_t));
+    memset (ctx, 0, sizeof (pi_hublist_ctx_t));
+    ctx->address = strdup (l);
+    ctx->flags = flags;
 
-    DPRINTF ("hublist Registering at %s\n", l);
+    DPRINTF ("pi_hublist: hublist Registering at %s\n", l);
     /* extract port */
     p = strchr (l, ':');
     if (p) {
@@ -113,29 +128,29 @@ int pi_hublist_update (buffer_t * output)
     /* create esocket */
     s =
       esocket_new (pi_hublist_handler, pi_hublist_es_type, AF_INET, SOCK_STREAM, 0,
-		   (unsigned long long) c);
+		   (unsigned long long) ctx);
 
     /* connect */
     if ((result = esocket_connect (s, l, port)) != 0) {
       if (result > 0) {
 	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, gai_strerror (result));
-	DPRINTF ("%s", output->s);
+	DPRINTF ("pi_hublist: connect: %s", output->s);
       } else {
 	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, strerror (-result));
-	DPRINTF ("%s", output->s);
+	DPRINTF ("pi_hublist: connect: %s", output->s);
       }
       esocket_close (s);
-      free (c);
+      free (ctx->address);
+      free (ctx);
       esocket_remove_socket (s);
       continue;
     };
-    esocket_settimeout (s, 10);
+    esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
   };
 
   free (lists);
   return 0;
 };
-
 
 int pi_hublist_handle_input (esocket_t * s)
 {
@@ -145,16 +160,18 @@ int pi_hublist_handle_input (esocket_t * s)
   struct sockaddr_in local;
   char *t, *l, *k;
   config_element_t *hubname, *hostname, *listenport, *hubdesc;
+  pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
 
   buf = bf_alloc (PI_HUBLIST_BUFFER_SIZE);
 
   // read data
   n = read (s->socket, buf->s, PI_HUBLIST_BUFFER_SIZE);
-  if (n < 0) {
+  if (n <= 0) {
     bf_clear (buf);
-    bf_printf (buf, "Hublist update ERROR: %s: read: %s\n", (char *) s->context, strerror (errno));
-    DPRINTF ("%s", buf->s);
-    plugin_report (buf);
+    bf_printf (buf, "Hublist update ERROR: %s: read: %s\n", ctx->address, strerror (errno));
+    DPRINTF ("pi_hublist: read: %*s", (int) bf_used (buf), buf->s);
+    if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
+      plugin_report (buf);
     goto leave;
   }
   buf->e = buf->s + n;
@@ -163,10 +180,10 @@ int pi_hublist_handle_input (esocket_t * s)
   n = sizeof (local);
   if (getsockname (s->socket, (struct sockaddr *) &local, &n)) {
     bf_clear (buf);
-    bf_printf (buf, "Hublist update ERROR: %s: gethostname: %s\n", (char *) s->context,
-	       strerror (errno));
-    DPRINTF ("%s", buf->s);
-    plugin_report (buf);
+    bf_printf (buf, "Hublist update ERROR: %s: gethostname: %s\n", ctx->address, strerror (errno));
+    DPRINTF ("pi_hublist: read: %*s", (int) bf_used (buf), buf->s);
+    if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
+      plugin_report (buf);
     goto leave;
   }
   port = ntohs (local.sin_port);
@@ -180,9 +197,12 @@ int pi_hublist_handle_input (esocket_t * s)
 
   /* verify pointers */
   if (!t || (j >= PI_HUBLIST_BUFFER_SIZE)) {
-    bf_clear (output);
-    bf_printf (output, "Hublist update ERROR: %s: illegal input %*s\n", bf_used (buf), buf->s);
-    plugin_report (output);
+    if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT)) {
+      bf_clear (output);
+      bf_printf (output, "Hublist update ERROR: %s: illegal input %*s\n", (int) bf_used (buf),
+		 buf->s);
+      plugin_report (output);
+    }
     bf_free (output);
     goto leave;
   }
@@ -225,23 +245,33 @@ int pi_hublist_handle_input (esocket_t * s)
 	     *hubdesc->val.v_string ? *hubdesc->val.v_string : (unsigned char *) "",
 	     users_total, 0LL);
 
+  DPRINTF ("pi_hublist:  Send: %*s\n", (int) bf_used (output), output->s);
+
   n = write (s->socket, output->s, bf_used (output));
   if (n < 0) {
-    bf_printf (buf, "Hublist update ERROR: %s: write: %s\n", (char *) s->context, strerror (errno));
-    plugin_report (buf);
-    DPRINTF ("%s", buf->s);
+    bf_clear (buf);
+    bf_printf (buf, "Hublist update ERROR: %s: write: %s\n", ctx->address, strerror (errno));
+    if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
+      plugin_report (buf);
+    DPRINTF ("pi_hublist: write: %*s", (int) bf_used (buf), buf->s);
   }
 
   bf_free (output);
 
+  if (ctx->flags & PI_HUBLIST_FLAGS_REPORT) {
+    bf_clear (buf);
+    bf_printf (buf, "Registered at hublist %s\n", ctx->address);
+    plugin_report (buf);
+  }
 #ifdef DEBUG
-  DPRINTF (" -- Registered at hublist %s\n", (char *) s->context);
+  DPRINTF ("pi_hublist:  -- Registered at hublist %s\n", ctx->address);
 #endif
 
 leave:
   bf_free (buf);
 
-  free ((char *) s->context);
+  free (ctx->address);
+  free (ctx);
   esocket_close (s);
   esocket_remove_socket (s);
 
@@ -251,17 +281,22 @@ leave:
 int pi_hublist_handle_error (esocket_t * s)
 {
   buffer_t *buf;
+  pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
 
-  if (!s->error)
+  if (!s->error) {
+    esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
     return 0;
+  }
 
   buf = bf_alloc (10240);
 
-  bf_printf (buf, "Hublist update ERROR: %s: %s.\n", (char *) s->context, strerror (s->error));
-  plugin_report (buf);
-  DPRINTF ("%s", buf->s);
+  bf_printf (buf, "Hublist update ERROR: %s: %s.\n", ctx->address, strerror (s->error));
+  if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
+    plugin_report (buf);
+  DPRINTF ("pi_hublist: error: %*s", (int) bf_used (buf), buf->s);
 
-  free ((char *) s->context);
+  free (ctx->address);
+  free (ctx);
   esocket_close (s);
   esocket_remove_socket (s);
 
@@ -273,12 +308,15 @@ int pi_hublist_handle_error (esocket_t * s)
 int pi_hublist_handle_timeout (esocket_t * s)
 {
   buffer_t *buf = bf_alloc (10240);
+  pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
 
-  bf_printf (buf, "Hublist update ERROR: %s: Timed out.\n", (char *) s->context);
-  plugin_report (buf);
-  DPRINTF ("%s", buf->s);
+  bf_printf (buf, "Hublist update ERROR: %s: Timed out.\n", ctx->address);
+  if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
+    plugin_report (buf);
+  DPRINTF ("pi_hublist: timeout: %*s", (int) bf_used (buf), buf->s);
 
-  free ((char *) s->context);
+  free (ctx->address);
+  free (ctx);
   esocket_close (s);
   esocket_remove_socket (s);
 
@@ -305,9 +343,9 @@ unsigned long pi_hublist_handle_update (plugin_user_t * user, void *ctxt, unsign
     bf_printf (output, "Errors during hublist update:\n");
     l = bf_used (output);
 
-    pi_hublist_update (output);
+    pi_hublist_update (output, 0);
 
-    if (bf_used (output) != l) {
+    if ((bf_used (output) != l) && (!pi_hublist_silent)) {
       plugin_report (output);
     }
     bf_free (output);
@@ -320,7 +358,8 @@ unsigned long pi_hublist_handler_hublist (plugin_user_t * user, buffer_t * outpu
 					  unsigned int argc, unsigned char **argv)
 {
   gettimeofday (&pi_hublist_savetime, NULL);
-  pi_hublist_update (output);
+
+  pi_hublist_update (output, PI_HUBLIST_FLAGS_REPORT);
 
   return 0;
 }
@@ -346,12 +385,15 @@ int pi_hublist_init ()
   gettimeofday (&pi_hublist_savetime, NULL);
 
   pi_hublist_interval = 0;
+  pi_hublist_silent = 0;
   pi_hublist_lists = strdup ("");
 
   config_register ("hublist.lists", CFG_ELEM_STRING, &pi_hublist_lists,
 		   "list of hublist addresses.");
   config_register ("hublist.interval", CFG_ELEM_ULONG, &pi_hublist_interval,
 		   "Interval of hublist updates.");
+  config_register ("hublist.silent", CFG_ELEM_ULONG, &pi_hublist_silent,
+		   "Do not report errors when hublist registration fails (Use with caution!).");
 
   command_register ("hublist", &pi_hublist_handler_hublist, CAP_CONFIG, "Register at hublists.");
 

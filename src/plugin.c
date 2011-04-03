@@ -49,6 +49,15 @@ extern user_t *userlist;
 plugin_manager_t *manager;
 unsigned long pluginIDs;
 
+cap_array_t plugin_supports[] = {
+  {"NoGetINFO", 1, ""},
+  {"NoHello", 2, ""},
+  {"UserCommand", 4, ""},
+  {"UserIP2", 8, ""},
+  {"QuickList", 16, ""},
+  {"TTHSearch", 32, ""},
+  {NULL, 0, NULL}
+};
 
 /******************************* UTILITIES: REPORING **************************************/
 
@@ -102,6 +111,11 @@ plugin_user_t *plugin_user_find_ip (plugin_user_t * last, unsigned long ip)
     return NULL;
 
   return &((plugin_private_t *) u->plugin_priv)->user;
+}
+
+buffer_t *plugin_user_getmyinfo (plugin_user_t * user)
+{
+  return ((user_t *) ((plugin_private_t *) user->private)->parent)->MyINFO;
 }
 
 /******************************* UTILITIES: KICK/BAN **************************************/
@@ -401,7 +415,7 @@ unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
     return bf_printf (buf, "Found nick ban by %s for %s for %lus because: %.*s", ne->op, ne->nick,
 		      ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
   } else {
-    return bf_printf (buf, "Found permanent nick ban by for %s because: %.*s", ne->op, ne->nick,
+    return bf_printf (buf, "Found permanent nick ban by %s for %s because: %.*s", ne->op, ne->nick,
 		      bf_used (ne->message), ne->message->s);
   }
 }
@@ -833,6 +847,7 @@ unsigned long plugin_update_user (user_t * u)
       (((plugin_private_t *) u->plugin_priv)->user.ipaddress == u->ipaddress) &&
       (((plugin_private_t *) u->plugin_priv)->user.op == u->op) &&
       (((plugin_private_t *) u->plugin_priv)->user.flags == u->flags) &&
+      (((plugin_private_t *) u->plugin_priv)->user.supports == u->supports) &&
       (((plugin_private_t *) u->plugin_priv)->user.rights == u->rights))
     return 0;
 
@@ -846,6 +861,7 @@ unsigned long plugin_update_user (user_t * u)
   ((plugin_private_t *) u->plugin_priv)->user.op = u->op;
   ((plugin_private_t *) u->plugin_priv)->user.flags = u->flags;
   ((plugin_private_t *) u->plugin_priv)->user.rights = u->rights;
+  ((plugin_private_t *) u->plugin_priv)->user.supports = u->supports;
 
   return plugin_send_event (((plugin_private_t *) u->plugin_priv), PLUGIN_EVENT_UPDATE, NULL);
 }

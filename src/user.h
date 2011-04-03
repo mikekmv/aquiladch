@@ -38,11 +38,14 @@ typedef struct account {
 
   unsigned char nick[NICKLENGTH];
   unsigned char passwd[NICKLENGTH];
+  unsigned char op[NICKLENGTH];
   unsigned long rights;
   unsigned int class;
   unsigned long id;
 
   unsigned int refcnt;		/* usually 1 or 0 : user is logged in or not */
+  time_t	regged;
+  time_t	lastlogin;
 
   account_type_t *classp;
 } account_t;
@@ -52,7 +55,7 @@ extern account_type_t *account_type_find (unsigned char *name);
 extern unsigned int account_type_del (account_type_t *);
 extern account_type_t *account_type_find_byid (unsigned long id);
 
-extern account_t *account_add (account_type_t * type, unsigned char *nick);
+extern account_t *account_add (account_type_t * type, unsigned char *op, unsigned char *nick);
 extern account_t *account_find (unsigned char *nick);
 extern unsigned int account_set_type (account_t * a, account_type_t * new);
 extern unsigned int account_del (account_t * a);

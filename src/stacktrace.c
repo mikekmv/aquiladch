@@ -98,6 +98,12 @@ extern void U_STACK_TRACE (void);
 # define ADDRESSLIST_SIZE 20
 #endif
 
+#ifdef DUMP_CORE
+#define GCORE	"gcore core\n"
+#else
+#define GCORE	""
+#endif
+
 /*************************************************************************
  * Globals
  *
@@ -496,7 +502,7 @@ void StackTrace (void)
 
   if (DumpStack ("gdb -q %s %d 2>/dev/null <<EOF\n"
 		 "set prompt\n"
-		 "where\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "where\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
     return;
 
 # elif defined(PLATFORM_FREEBSD)
@@ -509,6 +515,7 @@ void StackTrace (void)
   if (DumpStack ("gdb -q %s %d 2>/dev/null <<EOF\n"
 		 "set prompt\n"
 		 "where\n"
+		 GCORE
 		 "detach\n"
 		 "shell kill -CONT %d\n"
 		 "quit\n" "EOF\n", global_progname, (int) getpid (), (int) getpid ()))
@@ -534,7 +541,7 @@ void StackTrace (void)
 
   if (DumpStack ("gdb -q %s %d 2>/dev/null <<EOF\n"
 		 "set prompt\n"
-		 "where\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "where\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
     return;
 
 #  if defined(PLATFORM_HPUX) && defined(USE_BUILTIN)
@@ -567,7 +574,8 @@ void StackTrace (void)
 		 "up\n"
 		 "set \\$x--\n"
 		 "end\n"
-		 "echo ---\\n\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "echo ---\\n\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname,
+		 (int) getpid ()))
     return;
 
 # elif defined(PLATFORM_OSF)
@@ -578,7 +586,7 @@ void StackTrace (void)
 
   if (DumpStack ("gdb -q %s %d 2>/dev/null <<EOF\n"
 		 "set prompt\n"
-		 "where\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "where\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
     return;
 
 # elif defined(PLATFORM_SCO)
@@ -600,7 +608,7 @@ void StackTrace (void)
 
   if (DumpStack ("gdb -q %s %d 2>/dev/null <<EOF\n"
 		 "set prompt\n"
-		 "where\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "where\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
     return;
 
 # elif defined(PLATFORM_SOLARIS)
@@ -615,7 +623,8 @@ void StackTrace (void)
 		 "up\n"
 		 "set \\$x--\n"
 		 "end\n"
-		 "echo ---\\n\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "echo ---\\n\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname,
+		 (int) getpid ()))
     return;
 
   if (DumpStack ("/usr/proc/bin/pstack %d", (int) getpid ()))
@@ -650,7 +659,8 @@ void StackTrace (void)
 		 "up\n"
 		 "set \\$x--\n"
 		 "end\n"
-		 "echo ---\\n\n" "detach\n" "quit\n" "EOF\n", global_progname, (int) getpid ()))
+		 "echo ---\\n\n" GCORE "detach\n" "quit\n" "EOF\n", global_progname,
+		 (int) getpid ()))
     return;
 
 # endif

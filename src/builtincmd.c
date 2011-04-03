@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
@@ -1046,7 +1047,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
     }
   }
 
-  account = account_add (type, argv[1]);
+  account = account_add (type, user->nick, argv[1]);
   account->rights |= cap;
 
   bf_printf (output, "User %s created with group %s.\nCurrent rights:", account->nick, type->name);
@@ -1195,7 +1196,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   if (!target) {
     bf_printf (output, "User %s is not online.\n", argv[1]);
   } else {
-    bf_printf (output, "User information for user %s.\n", target->nick);
+    bf_printf (output, "User information for user %s\n", target->nick);
   };
 
   if ((account = account_find (argv[1]))) {
@@ -1203,16 +1204,30 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
     command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 			 account->rights | account->classp->rights);
     bf_strcat (output, "\n");
+    if (!account->passwd[0])
+      bf_printf (output, "Users password is NOT set.\n");
+    bf_printf (output, "User was registered by %s on %s", account->op, ctime (&account->regged));
+    /* eat newline */
+    if (output->e[-1] == '\n') {
+      output->e[-1] = 0;
+      --output->e;
+    }
+    if (account->lastlogin) {
+      bf_printf (output, ", last login %s\n", ctime (&account->lastlogin));
+      if (output->e[-2] == '\n')
+	output->e[-2] = '.';
+    } else {
+      bf_printf (output, ", never logged in.\n");
+    }
   }
 
   if (target) {
     in.s_addr = target->ipaddress;
-    bf_printf (output, "IP %s\n", inet_ntoa (in));
     bf_printf (output, "Using Client %s version %s\n", target->client, target->versionstring);
     bf_printf (output, "Client claims to be %s and is sharing %s (%llu bytes)\n",
 	       target->active ? "active" : "passive", format_size (target->share), target->share);
-    bf_printf (output, "Hubs: (%u, %u, %u), Slots %u\n", target->hubs[0], target->hubs[1],
-	       target->hubs[2], target->slots);
+    bf_printf (output, "IP: %s Hubs: (%u, %u, %u), Slots %u\n", inet_ntoa (in), target->hubs[0],
+	       target->hubs[1], target->hubs[2], target->slots);
   };
 
   return 0;
@@ -1263,6 +1278,7 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
 {
   account_t *account = NULL;
   unsigned char *passwd;
+  plugin_user_t *bad;
 
   if (argc < 2) {
     bf_printf (output,
@@ -1285,6 +1301,18 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
     }
   } else {
     passwd = argv[1];
+    account = account_find (argv[1]);
+    if (account) {
+      bf_printf (output,
+		 "The password is unacceptable, please choose another. You specified a known account name as your password.\n");
+      goto leave;
+    }
+    bad = plugin_user_find (argv[1]);
+    if (bad) {
+      bf_printf (output,
+		 "The password is unacceptable, please choose another. You specified a logged in username as your password.\n");
+      goto leave;
+    }
     account = account_find (user->nick);
     if (!account) {
       bf_printf (output, "No account for user %s.\n", user->nick);
@@ -1293,7 +1321,7 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
   }
 
 
-  if ((strlen (passwd) < MinPwdLength) || !strcmp (passwd, account->passwd)) {
+  if ((strlen (passwd) < MinPwdLength) || (!strcmp (passwd, account->passwd))) {
     bf_printf (output,
 	       "The password is unacceptable, please choose another. Minimum length is %d\n",
 	       MinPwdLength);

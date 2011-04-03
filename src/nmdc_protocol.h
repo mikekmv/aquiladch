@@ -54,7 +54,8 @@ typedef struct {
 } cache_element_t;
 
 #define cache_queue(element, user, buffer)	{string_list_add (&(element).messages , user, buffer); (element).length += bf_size (buffer);}
-#define cache_count(element, user, buffer)	{(element).messages.count++; (element).messages.size += bf_size (buffer); (element).length += bf_size (buffer);}
+//#define cache_count(element, user, buffer)	{(element).messages.count++; (element).messages.size += bf_size (buffer); (element).length += bf_size (buffer);}
+#define cache_count(element, user)		{ if (cache.element.messages.count < ((nmdc_user_t *) user->pdata)->element.messages.count) cache.element.messages.count = ((nmdc_user_t *) user->pdata)->element.messages.count; if (cache.element.messages.size < ((nmdc_user_t *) user->pdata)->element.messages.size) cache.element.messages.size = ((nmdc_user_t *) user->pdata)->element.messages.size; if (cache.element.length < ((nmdc_user_t *) user->pdata)->element.length) cache.element.length = ((nmdc_user_t *) user->pdata)->element.length ;}
 #define cache_purge(element, user)		{string_list_entry_t *entry = string_list_find (&(element).messages, user); while (entry) { (element).length -= bf_size (entry->data); string_list_del (&(element).messages, entry); entry = string_list_find (&(element).messages, user); };}
 #define cache_clear(element)			{string_list_clear (&(element).messages); (element).length = 0;}
 

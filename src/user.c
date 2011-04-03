@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <strings.h>
 #include <errno.h>
+#include <time.h>
 
 #include "../config.h"
 #ifdef HAVE_CRYPT_H
@@ -98,7 +99,7 @@ unsigned int account_type_del (account_type_t * t)
   return 0;
 }
 
-account_t *account_add (account_type_t * type, unsigned char *nick)
+account_t *account_add (account_type_t * type, unsigned char *op, unsigned char *nick)
 {
   account_t *a;
 
@@ -106,8 +107,12 @@ account_t *account_add (account_type_t * type, unsigned char *nick)
   memset (a, 0, sizeof (account_t));
   strncpy (a->nick, nick, NICKLENGTH);
   a->nick[NICKLENGTH - 1] = 0;
+  strncpy (a->op, op, NICKLENGTH);
+  a->op[NICKLENGTH - 1] = 0;
   a->rights = 0;
   a->id = account_ids++;
+  time (&a->regged);
+  a->lastlogin = 0;
 
   a->next = accounts;
   if (a->next)
@@ -229,7 +234,8 @@ unsigned int accounts_load (const unsigned char *filename)
       case 'A':
 	a = malloc (sizeof (account_t));
 	memset (a, 0, sizeof (account_t));
-	sscanf (buffer, "A %s %s %lu %u %lu", a->nick, a->passwd, &a->rights, &a->class, &a->id);
+	sscanf (buffer, "A %s %s %lu %u %lu %s %lu %lu", a->nick, a->passwd, &a->rights, &a->class,
+		&a->id, a->op, &a->regged, &a->lastlogin);
 
 	if ((oa = account_find (a->nick)))
 	  account_del (oa);
@@ -283,8 +289,9 @@ unsigned int accounts_save (const unsigned char *filename)
     fprintf (fp, "T %s %lu %d\n", t->name, t->rights, t->id);
 
   for (a = accounts; a; a = a->next)
-    fprintf (fp, "A %s %s %lu %d %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd, a->rights,
-	     a->class, a->id);
+    fprintf (fp, "A %s %s %lu %d %lu %s %lu %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd,
+	     a->rights, a->class, a->id, a->op[0] ? a->op : (unsigned char *) HUBSOFT_NAME,
+	     a->regged ? a->regged : time (NULL), a->lastlogin);
 
   fclose (fp);
   return 0;

@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "buffer.h"
+#include "cap.h"
 
 #define	PLUGIN_EVENT_LOGIN	  0
 #define	PLUGIN_EVENT_SEARCH	  1
@@ -70,9 +71,12 @@ typedef struct plugin_user {
   unsigned int flags;
   unsigned long rights;
   unsigned char nick[NICKLENGTH];
-
+  unsigned long supports;
+  
   void *private;
 } plugin_user_t;
+
+extern cap_array_t plugin_supports[];
 
 /* callback */
 typedef unsigned long (plugin_event_handler_t) (plugin_user_t *, void *, unsigned long event,
@@ -107,6 +111,8 @@ extern unsigned int plugin_user_next (plugin_user_t ** user);
 /* user management */
 extern plugin_user_t *plugin_user_find (unsigned char *name);
 extern plugin_user_t *plugin_user_find_ip (plugin_user_t *last, unsigned long ip);
+extern buffer_t * plugin_user_getmyinfo (plugin_user_t *user);
+
 extern unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message);
 extern unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message);
 extern unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer_t * message,

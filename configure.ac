@@ -2,8 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.9-pre10]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.9-pre11]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
+AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
 
@@ -70,6 +71,10 @@ AC_ARG_ENABLE(testcoverage,
 if test x$debug = xtrue;
 then
 	sCFLAGS="${sCFLAGS} -g${GDB} -O0"
+	if test x$GDB = xgdb
+	then
+		sCFLAGS="${sCFLAGS} -DDUMP_CORE"
+	fi
 fi;
 
 if test "${sCFLAGS}" != ""
@@ -208,7 +213,7 @@ AC_CHECK_LIB([lua$with_lua_suffix],
              [],
              [$LUA_LIBS $lua_extra_libs])
 
-AC_MSG_CHECKING([for liblua version 5.0.x ])
+AC_MSG_CHECKING([for liblua version 5.0.x])
 save_CPPFLAGS="$CPPFLAGS"
 save_LIBS="$LIBS"
 CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
@@ -279,12 +284,46 @@ AM_CONDITIONAL(GETADDRINFO, test "$ac_cv_func_getaddrinfo$ac_cv_func_getnameinfo
 if test "${ALLOW_EPOLL}" != "" ;
 then
 	AC_CHECK_FUNCS([epoll_wait])
+	if test "$ac_cv_func_epoll_wait" != yes ;
+	then
+		unset ALLOW_EPOLL
+	else
+		AC_MSG_CHECKING([if epoll_wait implemented])
+		AC_RUN_IFELSE(
+			[AC_LANG_PROGRAM([[#include <sys/epoll.h>
+					   #include <errno.h>
+					]],
+				[[
+					struct epoll_event event;
+					int fd = epoll_create(1);
+					int retval = epoll_wait (fd, &event, 1, 0);
+					if (retval <0) {
+						perror (errno);
+						exit (errno);
+					};
+					exit (0);
+				]])],
+			[AC_MSG_RESULT([yes])],
+			[AC_MSG_RESULT([no]) 
+			 unset ALLOW_EPOLL]
+		)
+	fi	
+	
 fi
 
 if test "${ALLOW_POLL}" != "" ;
 then
 	AC_CHECK_FUNCS([poll])
 fi
+
+case "${host}" in
+  *-*-cygwin*)
+  	CYGWIN_LDFLAGS="-Wl,--subsystem,windows";
+	;;
+  *)
+	;;
+esac
+AC_SUBST(CYGWIN_LDFLAGS)  
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
@@ -294,6 +333,8 @@ AC_OUTPUT
 
 echo "-------------------------------------------------------------------------------"
 echo "                            Aquila configuration"
+
+echo    "   HOST                                             " $host
 
 echo -n "   DEBUG Support                                     "
 if test x$debug = xtrue

@@ -353,39 +353,39 @@ int nicklistcache_sendnicklist (user_t * target)
   if (!(target->supports & NMDC_SUPPORTS_NoHello)) {
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
-      server_write (target->parent, cache.nicklistzpipe);
+      server_write_credit (target->parent, cache.nicklistzpipe);
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
-      server_write (target->parent, cache.nicklistzline);
+      server_write_credit (target->parent, cache.nicklistzline);
     } else {
-      server_write (target->parent, cache.nicklist);
+      server_write_credit (target->parent, cache.nicklist);
     }
 #else
-    server_write (target->parent, cache.nicklist);
+    server_write_credit (target->parent, cache.nicklist);
 #endif
   } else {
     if (!(target->supports & NMDC_SUPPORTS_NoGetINFO)) {
-      server_write (target->parent, cache.nicklist);
+      server_write_credit (target->parent, cache.nicklist);
     }
   }
   /* always send the oplist */
-  server_write (target->parent, cache.oplist);
+  server_write_credit (target->parent, cache.oplist);
 
   /* clients that support NoGetINFO get a infolist and a infolistupdate, other get a  hello list update */
   if (target->supports & NMDC_SUPPORTS_NoGetINFO) {
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
-      server_write (target->parent, cache.infolistzpipe);
+      server_write_credit (target->parent, cache.infolistzpipe);
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
-      server_write (target->parent, cache.infolistzline);
+      server_write_credit (target->parent, cache.infolistzline);
     } else {
-      server_write (target->parent, cache.infolist);
+      server_write_credit (target->parent, cache.infolist);
     }
 #else
-    server_write (target->parent, cache.infolist);
+    server_write_credit (target->parent, cache.infolist);
 #endif
-    server_write (target->parent, cache.infolistupdate);
+    server_write_credit (target->parent, cache.infolistupdate);
   } else {
-    server_write (target->parent, cache.hellolist);
+    server_write_credit (target->parent, cache.hellolist);
   }
 
   return 0;
@@ -545,6 +545,8 @@ __inline__ int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message
   bf_strcat (b, u->nick);
   bf_strcat (b, "> ");
   bf_strncat (b, message->s, bf_used (message));
+  if (*(b->e - 1) == '\n')
+    b->e--;
   bf_strcat (b, "|");
   return 0;
 }
@@ -555,6 +557,8 @@ __inline__ int proto_nmdc_user_say_string (user_t * u, buffer_t * b, unsigned ch
   bf_strcat (b, u->nick);
   bf_strcat (b, "> ");
   bf_strcat (b, message);
+  if (*(b->e - 1) == '\n')
+    b->e--;
   bf_strcat (b, "|");
   return 0;
 }
@@ -588,8 +592,9 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
 
   proto_nmdc_user_say (u, buf, message);
 
-  cache_count (cache.privatemessages, target, buf);
+  //cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
+  cache_count (privatemessages, target);
   target->MessageCnt++;
   target->CacheException++;
 
@@ -627,6 +632,8 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
   bf_strncat (buf, message->s, bf_used (message));
+  if (*(buf->e - 1) == '\n')
+    buf->e--;
   if (buf->e[-1] != '|')
     bf_strcat (buf, "|");
 
@@ -636,9 +643,10 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
     bf_free (buf);
     return 0;
   }
-
-  cache_count (cache.privatemessages, target, buf);
+  //cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
+  cache_count (privatemessages, target);
+
   target->MessageCnt++;
   target->CacheException++;
 
@@ -658,6 +666,8 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
   bf_strncat (buf, message->s, bf_used (message));
+  if (*(buf->e - 1) == '\n')
+    buf->e--;
   bf_strcat (buf, "|");
 
   if (target->state == PROTO_STATE_VIRTUAL) {
@@ -683,8 +693,10 @@ int proto_nmdc_user_raw (user_t * target, buffer_t * message)
 
   buf = bf_copy (message, 0);
 
-  cache_count (cache.privatemessages, target, buf);
+  //cache_count (cache.privatemessages, target, buf);
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, target, buf);
+  cache_count (privatemessages, target);
+
   target->MessageCnt++;
   target->CacheException++;
 
@@ -972,7 +984,9 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
 
   bf_strncat (output, u->lock, LOCKLENGTH);
   bf_strncat (output, "]] Pk=Aquila|", 13);
-  bf_strcat (output, "<HubSoft> This hub is running Aquila Version " AQUILA_VERSION ".|");
+  bf_strcat (output, "<");
+  bf_strcat (output, HubSec->nick);
+  bf_strcat (output, "> This hub is running Aquila Version " AQUILA_VERSION ".|");
   retval = server_write (u->parent, output);
 
   u->state = PROTO_STATE_SENDLOCK;
@@ -1359,6 +1373,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       break;
     }
 
+    time (&a->lastlogin);
     /* welcome user */
     if (u->op)
       bf_printf (output, "$LogedIn %s|", u->nick);
@@ -1369,7 +1384,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     if (!a->passwd[0])
       proto_nmdc_user_say (HubSec, output,
 			   bf_buffer
-			   ("Your account priviliges will not be awarded until you set a password."));
+			   ("Your account priviliges will not be awarded until you set a password. Use !passwd or !pwgen."));
 
     u->state = PROTO_STATE_HELLO;
     server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
@@ -1897,8 +1912,9 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	}
 
 	/* queue search result with the correct user */
-	cache_count (cache.results, t, b);
+	//cache_count (cache.results, t, b);
 	cache_queue (((nmdc_user_t *) t->pdata)->results, u, b);
+	cache_count (results, t);
 	t->ResultCnt++;
 	t->CacheException++;
 
@@ -1939,7 +1955,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	cache_queue (((nmdc_user_t *) u->pdata)->privatemessages, u, t->MyINFO);
-	cache_count (cache.privatemessages, u, t->MyINFO);
+	//cache_count (cache.privatemessages, u, t->MyINFO);
+	cache_count (privatemessages, u);
 	u->MessageCnt++;
 	u->CacheException++;
 
@@ -2008,7 +2025,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	   * \0 termination should not be necessary
 	   */
 	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-	  cache_count (cache.privatemessages, t, b);
+	  //cache_count (cache.privatemessages, t, b);
+	  cache_count (privatemessages, t);
 	  t->MessageCnt++;
 	  t->CacheException++;
 	};
@@ -2075,7 +2093,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	   * \0 termination should not be necessary
 	   */
 	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-	  cache_count (cache.privatemessages, t, b);
+	  //cache_count (cache.privatemessages, t, b);
+	  cache_count (privatemessages, t);
 	  t->MessageCnt++;
 	  t->CacheException++;
 	}
@@ -2103,10 +2122,6 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 	}
 
-	if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_PM_OUT, b) != PLUGIN_RETVAL_CONTINUE) {
-	  nmdc_stats.pmoutevent++;
-	  break;
-	}
 
 	c = tkn->argument;
 	n = tkn->argument;
@@ -2153,13 +2168,18 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	l = c - n;
 
 	if (strncmp (u->nick, n, l)) {
-	  bf_printf (output, "Bad From: nick. No faking.");
+	  bf_printf (output, "Bad display nick. No faking.");
 	  retval = server_write (u->parent, output);
 	  server_disconnect_user (u->parent);
 	  nmdc_stats.pmbadsource++;
 	  retval = -1;
 	  break;
 	};
+
+	if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_PM_OUT, b) != PLUGIN_RETVAL_CONTINUE) {
+	  nmdc_stats.pmoutevent++;
+	  break;
+	}
 
 	/* do not send if only PMOP and target is not an OP */
 	if ((!(u->rights & CAP_PM)) && (!t->op)) {
@@ -2177,7 +2197,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	   * \0 termination should not be necessary
 	   */
 	  cache_queue (((nmdc_user_t *) t->pdata)->privatemessages, u, b);
-	  cache_count (cache.privatemessages, t, b);
+	  //cache_count (cache.privatemessages, t, b);
+	  cache_count (privatemessages, t);
 	  t->MessageCnt++;
 	  t->CacheException++;
 	}
@@ -2199,7 +2220,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	/* find first "$Who:" token */
 	//for (; *c && (*c != '$'); ++c);
-	SKIPTOCHAR (c, b->e, ' ');
+	SKIPTOCHAR (c, b->e, '$');
 	if (!*c++)
 	  break;
 
@@ -2305,7 +2326,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
       {
 	config_element_t *share, *slot, *hub, *users, *owner;
 
-	share = config_find ("sharemin.unregistered.min");
+	share = config_find ("sharemin.unregistered");
 	slot = config_find ("slot.unregistered.min");
 	hub = config_find ("hub.unregistered.max");
 	users = config_find ("userlimit.unregistered");
@@ -2693,17 +2714,18 @@ void proto_nmdc_flush_cache ()
 	      || (u->MessageCnt && pm))) {
 	/* we need to copy this buffer cuz it could be buffered during write
 	   and it is changed at every call to proto_nmdc_build_buffer */
-	DPRINTF (" Exception (%p): res (%lu, %lu) [%d], pm (%lu, %lu), buf (%lu / %lu)\n", u,
+	b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
+	proto_nmdc_build_buffer (b, u, as, ps, ch, pm, res);
+	BF_VERIFY (b);
+
+	DPRINTF (" Exception (%p): res (%lu, %lu) [%d], pm (%lu, %lu), buf (%lu / %lu / %lu)\n", u,
 		 cache.results.length + cache.results.messages.count,
 		 ((nmdc_user_t *) u->pdata)->results.length +
 		 ((nmdc_user_t *) u->pdata)->results.messages.count, u->ResultCnt,
 		 cache.privatemessages.length + cache.privatemessages.messages.count,
 		 ((nmdc_user_t *) u->pdata)->privatemessages.length +
 		 ((nmdc_user_t *) u->pdata)->privatemessages.messages.count,
-		 bf_used (buf_exception), buf_exception->size);
-	b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
-	proto_nmdc_build_buffer (b, u, as, ps, ch, pm, res);
-	BF_VERIFY (b);
+		 bf_used (buf_exception), bf_used (b), buf_exception->size);
 
 	if (bf_used (b))
 	  if (server_write (u->parent, b) > 0)

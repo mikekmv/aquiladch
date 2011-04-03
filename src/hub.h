@@ -32,6 +32,10 @@
 
 /* local timeouts */
 
+#define HUB_STATE_NORMAL	1
+#define HUB_STATE_BUFFERING	2
+#define HUB_STATE_OVERFLOW	3
+
 typedef struct hub_statitics {
   unsigned long TotalBytesSend;
   unsigned long TotalBytesReceived;
@@ -48,7 +52,8 @@ typedef struct client {
   esocket_t *es;
   buffer_t *buffers;		/* contains read but unparsed buffers */
   string_list_t outgoing;
-  unsigned long offset;
+  unsigned long offset, credit;
+  unsigned int state;
 
   user_t *user;
 } client_t;
@@ -64,6 +69,7 @@ extern int server_init ();
 extern int server_setup (esocket_handler_t *);
 extern int server_disconnect_user (client_t *);
 extern int server_write (client_t *, buffer_t *);
+extern int server_write_credit (client_t *, buffer_t *);
 extern int server_settimeout (client_t * cl, unsigned long timeout);
 extern int server_add_port (esocket_handler_t * h, proto_t * proto,  unsigned long address, int port);
 

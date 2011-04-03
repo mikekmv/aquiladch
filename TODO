@@ -1,5 +1,9 @@
 
 Develstatus:
+	- Add some sort of command "context" support. 
+		(allow !help and !leave etc to work in chatrooms)
+	- prevent endless password guessing (Req maksalaatikko)
+	- add date & regging op to the accounts (Req maksalaatikko)
 	- add some directory locks. no two aquila instances from the same configs...
 	- check on doubly loaded scripts
 	- Fix the crash if the clock is set back...

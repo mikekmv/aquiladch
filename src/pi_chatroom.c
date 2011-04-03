@@ -490,6 +490,15 @@ unsigned long pi_chatroom_event_pm (plugin_user_t * user, void *dummy, unsigned 
     }
   }
 
+  if ((*buf->s == '!') || (*buf->s == '+')) {
+    if (!strncmp (buf->s + 1, "leave", 4)) {
+      m = chatroom_member_find (room, source);
+      chatroom_member_del (room, m);
+      plugin_user_priv (room->user, m->user, NULL, bf_buffer ("You left the room."), 0);
+      goto leave;
+    }
+  }
+
   /* send as pm to all users */
   for (m = room->members.next; m != &(room->members); m = m->next)
     if (m->user != source) {

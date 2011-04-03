@@ -1,6 +1,56 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	Added configure check to see if epoll_wait is implemented.
+	Changed config type for hub.buffer* to BYTESIZE.
+	Changed the default timeouts for buffering and overflow.
+	Added daemonizing, changing working directory and pid file options.
+	Cleanup userinfo layout, removed period after nick for clickability (Req FleetCommand)
+	Added regging op, reg time and lastlogin time to accounts. (Req maksalaatikko)
+	timeoutbuffering and timeoutoverflow are now configurable.
+	Refuse nick of logged in or regged user as password.
+	Mention in !userinfo if password is not set. (Req maksalaatikko)
+	Added (hidden) !leave command to chatrooms. (Req abaddon)
+	Added command suggestion when passwd is not yet set (Req maksalaatikko);
+	Verify PM before sending event.
+	Fixed crash in leackybucket with bad setting. (Report maksalaatikko)
+	Added statefulness to buffering system: more aggressive timouts.
+	Fix bug in credit system.
+	Fix bug in cygwin platform settings
+	Added hublist.silent setting to ignore errors during hublist. (Request maksalaatikko)
+	Fix bug in cygdist target.
+	If platform is cygwin, build aquila as a windows program. (This gets
+		rid of the shell window).
+	If epoll_wait is absent, ALLOW_EPOLL is disabled.
+	Changed cache_count macro to limit wasting buffer memory.
+	Fix bug in banlist_del_* (Thanks FleetCommand)
+	Initial version string now printed by hubsec iso HubSoft.
+	Added cygdist and cygsrc targets for cygwin distribution.
+	Fixed buferring system. Softban onw only triggers fast timeout, hardlimit triggers data dropping
+		and BufferTotalLimit limits total buffering space of the hub.
+	LUA function GetUserMyINFO()
+	Changed buffering system. Now has soft and hardlimit. Softlimit increases 
+		timeout to 1s before disconnect, hardlimit drops data. configurable.
+		Added config options hub.BufferSoftLimit, hub.BufferHardLimit
+	Added a GetUserSupports() LUA function. (Request PotHead)
+	Added a statmem command that returns the amoun tof buffered output data.
+	Fixed crash in banlist (Thanks curse).
+	Fixed bug in FORCEMOVE, it works again now.(Thanks Zexx86)
+	esocket_close now sets state to SOCKSTATE_CLOSED.
+	Added buffer clearing before writing out error message in pi_hublist.c
+	Fixed possible out of bound writing in pi_hublist.c (at read returning 0 bytes). (Thanks FleetCommand)
+	At ASSERT, stracetrace now coredumps.
+	Fixed some debug printfs in the pi_hublist code.
+	Removed stacktrace handler for signals: doesn't work anyway.
+	Fix pi_hublist default timeout.
+	Auto-remove trailing newlines in chat/pm messages.
+	Fixed a bunch of esocket bugs:
+		- consistancy over epoll/poll/select
+		- correctly init esocket->error on error event
+		- fix default timeout calculation
+	Fixed hublist registering key generation.
+	Added reporting of hublist registering when started with !hublist cmd.
+	Increased OVERFLOW timeout. Could be dangerous.
 	Fix: don't use timer.reset if time is equal.
 	Fixed: Chat* lua commands from hubsec in script init crashed hub on boot.
 	Added GetUserGroup, GroupFind and AccountFind functions.

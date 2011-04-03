@@ -94,6 +94,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 #define PLUGIN_USER_FIND(arg) 	( (pi_lua_eventuser && !strcmp(arg, pi_lua_eventuser->nick)) ? pi_lua_eventuser : plugin_user_find (arg) )
 
 #define PUSH_TABLE_ENTRY(ctx, name, entry)  { lua_pushstring (ctx, name); lua_pushstring (ctx, entry); lua_settable(ctx, -3); }
+#define PUSH_TABLE_ENTRY_NUMBER(ctx, name, entry)  { lua_pushstring (ctx, name); lua_pushnumber (ctx, entry); lua_settable(ctx, -3); }
 
 
 /******************************* LUA INTERFACE *******************************************/
@@ -497,6 +498,45 @@ int pi_lua_getusergroup (lua_State * lua)
 
 leave:
   lua_pushnil (lua);
+
+  return 1;
+}
+
+int pi_lua_getusersupports (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+  buffer_t *b;
+
+  user = PLUGIN_USER_FIND (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    b = bf_alloc (10240);
+    command_flags_print ((command_flag_t *) (plugin_supports), b, user->supports);
+    lua_pushlstring (lua, b->s, bf_used (b));
+    bf_free (b);
+  }
+
+  return 1;
+}
+
+
+int pi_lua_getusermyinfo (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+  buffer_t *b;
+
+  user = PLUGIN_USER_FIND (nick);
+
+  if (!user) {
+    lua_pushnil (lua);
+  } else {
+    b = plugin_user_getmyinfo (user);
+    lua_pushlstring (lua, b->s, bf_used (b));
+  }
 
   return 1;
 }
@@ -1060,16 +1100,30 @@ int pi_lua_rawtoall (lua_State * lua)
 int pi_lua_account_create (lua_State * lua)
 {
   unsigned int retval = 0;
+  lua_context_t *ctx;
   account_type_t *grp;
   account_t *acc;
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *group = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *op = NULL;
+
+  if (lua_gettop (lua) > 2)
+    op = (unsigned char *) luaL_checkstring (lua, 3);
 
   grp = account_type_find (group);
   if (!grp)
     goto leave;
 
-  acc = account_add (grp, nick);
+  if (!op) {
+    for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
+      if (ctx->l == lua)
+	break;
+
+    assert (ctx != &lua_list);
+    op = ctx->name;
+  }
+
+  acc = account_add (grp, op, nick);
   if (!acc)
     goto leave;
 
@@ -1164,7 +1218,11 @@ int pi_lua_account_find (lua_State * lua)
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
   PUSH_TABLE_ENTRY (lua, "rights", b->s);
   bf_free (b);
+
   PUSH_TABLE_ENTRY (lua, "group", acc->classp->name);
+  PUSH_TABLE_ENTRY (lua, "op", acc->op);
+  PUSH_TABLE_ENTRY_NUMBER (lua, "registered", acc->regged);
+  PUSH_TABLE_ENTRY_NUMBER (lua, "lastlogin", acc->lastlogin);
 
   return 1;
 leave:
@@ -1453,6 +1511,8 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"GetUserHubs", pi_lua_getuserhubs,},
   {"GetUserRights", pi_lua_getuserrights,},
   {"GetUserGroup", pi_lua_getusergroup,},
+  {"GetUserSupports", pi_lua_getusersupports,},
+  {"GetUserMyINFO", pi_lua_getusermyinfo,},
 
   {"UserIsOP", pi_lua_userisop,},
   {"UserIsActive", pi_lua_userisactive,},

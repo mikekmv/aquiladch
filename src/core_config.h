@@ -49,6 +49,15 @@ typedef struct {
   /* more settings */
   unsigned char *Redirect;
   unsigned char *KickBanRedirect;
+  
+  /* buffering settings */
+  unsigned long BufferSoftLimit;
+  unsigned long BufferHardLimit;
+  unsigned long BufferTotalLimit;
+
+  unsigned long TimeoutBuffering;
+  unsigned long TimeoutOverflow;
+
 } config_t;
 
 extern config_t config;

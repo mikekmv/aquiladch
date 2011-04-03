@@ -44,6 +44,7 @@
 
 /* global redir stats */
 unsigned long buffering = 0;
+unsigned long buf_mem = 0;
 
 /* banlist */
 banlist_t hardbanlist, softbanlist;
@@ -154,6 +155,18 @@ int accept_new_user (esocket_t * s)
     return -1;
   }
 
+  if (buf_mem > config.BufferTotalLimit) {
+    int l;
+    char buffer[256];
+
+    l = snprintf (buffer, 256, "<" HUBSOFT_NAME "> This hub is too busy, please try again later.|");
+    write (r, buffer, l);
+    shutdown (r, SHUT_RDWR);
+    close (r);
+
+    return -1;
+  }
+
   /* client */
   cl = malloc (sizeof (client_t));
   memset (cl, 0, sizeof (client_t));
@@ -161,6 +174,7 @@ int accept_new_user (esocket_t * s)
   /* create new context */
   cl->proto = (proto_t *) s->context;
   cl->user = cl->proto->user_alloc (cl);
+  cl->state = HUB_STATE_NORMAL;
 
   /* user connection refused. */
   if (!cl->user) {
@@ -204,10 +218,17 @@ int accept_new_user (esocket_t * s)
   return r;
 }
 
+int server_write_credit (client_t * cl, buffer_t * b)
+{
+  cl->credit += bf_size (b);
+  return server_write (cl, b);
+}
+
 int server_write (client_t * cl, buffer_t * b)
 {
   esocket_t *s;
-  long l, w, t;
+  long l, w;
+  unsigned long t;
   buffer_t *e;
 
   if (!cl)
@@ -218,17 +239,20 @@ int server_write (client_t * cl, buffer_t * b)
 
   /* if data is queued, queue this after it */
   if (cl->outgoing.count) {
-    // this woudl reset the timer each time a write is done.
-    //if (cl->outgoing.count > DEFAULT_MAX_OUTGOINGBUFFERS)
-    //  esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
-
     /* if we are still below max buffer per user, queue buffer */
-    if ((cl->outgoing.size - cl->offset) < DEFAULT_MAX_OUTGOINGSIZE) {
+    if (((cl->outgoing.size - cl->offset) < (config.BufferHardLimit + cl->credit))
+	&& (buf_mem < config.BufferTotalLimit)) {
+      buf_mem -= cl->outgoing.size;
       string_list_add (&cl->outgoing, cl->user, b);
+      buf_mem += cl->outgoing.size;
       DPRINTF (" %p Buffering %d buffers, %lu (%s).\n", cl->user, cl->outgoing.count,
 	       cl->outgoing.size, cl->user->nick);
-      if ((cl->outgoing.size - cl->offset) >= DEFAULT_MAX_OUTGOINGSIZE)
-	esocket_settimeout (s, PROTO_TIMEOUT_OVERFLOW);
+      /* if we are over the softlimit, we go into quick timeout mode */
+      if ((cl->state == HUB_STATE_BUFFERING)
+	  && ((cl->outgoing.size - cl->offset) >= (config.BufferSoftLimit + cl->credit))) {
+	cl->state = HUB_STATE_OVERFLOW;
+	esocket_settimeout (s, config.TimeoutBuffering);
+      }
     }
 
     /* try sending some of that data */
@@ -261,6 +285,14 @@ int server_write (client_t * cl, buffer_t * b)
   if (w > 0)
     t += w - l;
 
+  if (cl->credit) {
+    if (cl->credit > t) {
+      cl->credit -= t;
+    } else {
+      cl->credit = 0;
+    };
+  }
+
   /* not everything could be written to socket. store the buffer 
    * and ask esocket to notify us as the socket becomes writable 
    */
@@ -272,13 +304,21 @@ int server_write (client_t * cl, buffer_t * b)
       buffering++;
 
     string_list_add (&cl->outgoing, cl->user, e);
+    buf_mem += cl->outgoing.size;
     cl->offset = w;
     esocket_addevents (s, ESOCKET_EVENT_OUT);
-    esocket_settimeout (s,
-			((cl->outgoing.size - cl->offset) <
-			 DEFAULT_MAX_OUTGOINGSIZE) ? PROTO_TIMEOUT_BUFFERING :
-			PROTO_TIMEOUT_OVERFLOW);
-    DPRINTF (" %p Starting to buffer... %lu\n", cl->user, cl->outgoing.size);
+
+    if (cl->state == HUB_STATE_NORMAL) {
+      if ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit)) {
+	cl->state = HUB_STATE_BUFFERING;
+	esocket_settimeout (s, config.TimeoutBuffering);
+      } else {
+	cl->state = HUB_STATE_OVERFLOW;
+	esocket_settimeout (s, config.TimeoutOverflow);
+      }
+    }
+    DPRINTF (" %p Starting to buffer... %lu (credit %lu)\n", cl->user, cl->outgoing.size,
+	     cl->credit);
   };
 
   return t;
@@ -302,8 +342,10 @@ int server_disconnect_user (client_t * cl)
     close (s);
   }
 
-  if (cl->outgoing.count)
+  if (cl->outgoing.count) {
+    buf_mem -= cl->outgoing.size;
     buffering--;
+  }
 
   /* clear buffered output buffers */
   string_list_clear (&cl->outgoing);
@@ -335,6 +377,8 @@ int server_handle_output (esocket_t * es)
   t = 0;
   b = NULL;
 
+  buf_mem -= cl->outgoing.size;
+
   /* write out as much data as possible */
   for (e = cl->outgoing.first; e; e = cl->outgoing.first) {
     for (b = e->data; b; b = n) {
@@ -346,8 +390,10 @@ int server_handle_output (esocket_t * es)
 	  case EAGAIN:
 	    break;
 	  case EPIPE:
+	    buf_mem += cl->outgoing.size;
 	    return server_disconnect_user (cl);
 	  default:
+	    buf_mem += cl->outgoing.size;
 	    return -1;
 	}
 	w = 0;
@@ -370,17 +416,29 @@ int server_handle_output (esocket_t * es)
 
     string_list_del (&cl->outgoing, e);
   }
+  if (cl->credit) {
+    if (cl->credit > t) {
+      cl->credit -= t;
+    } else {
+      cl->credit = 0;
+    };
+  }
+
   /* still not all data written */
   if (b) {
     if (w > 0)
       cl->offset += w;
-    if (t > DEFAULT_OUTGOINGTHRESHOLD)
-      esocket_settimeout (cl->es,
-			  (cl->outgoing.size > DEFAULT_MAX_OUTGOINGSIZE) ?
-			  PROTO_TIMEOUT_BUFFERING : PROTO_TIMEOUT_OVERFLOW);
 
-    DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu)\n", t, cl->outgoing.count,
-	     cl->outgoing.size, cl->offset);
+    if ((cl->state == HUB_STATE_OVERFLOW)
+	&& ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit))) {
+      esocket_settimeout (cl->es, config.TimeoutBuffering);
+      cl->state = HUB_STATE_BUFFERING;
+    }
+
+    buf_mem += cl->outgoing.size;
+
+    DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu, credit %lu)\n", t,
+	     cl->outgoing.count, cl->outgoing.size, cl->offset, cl->credit);
     return 0;
   }
 
@@ -389,8 +447,9 @@ int server_handle_output (esocket_t * es)
   if (!cl->outgoing.count) {
     esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
     esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
+    buffering--;
+    cl->state = HUB_STATE_NORMAL;
   }
-  buffering--;
   return 0;
 }
 

@@ -21,8 +21,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "proto.h"
 #include "config.h"
@@ -44,7 +48,122 @@
 
 struct timeval boottime;
 
+typedef struct {
+  /* go to daemon mode */
+  unsigned int detach;
+
+  /* seperate working dir */
+  unsigned int setwd;
+  unsigned char *wd;
+
+  /* pid/lock file */
+  unsigned int setlock;
+  unsigned char *lock;
+} args_t;
+
+args_t args = {
+detach:0,
+
+setwd:0,
+wd:NULL,
+
+setlock:0,
+lock:"aquila.pid"
+};
+
 /* utility functions */
+
+void usage (unsigned char *name)
+{
+  printf ("Usage: %s [-hd] [-p <pidfile>] [-c <config dir>]\n"
+	  "  -h : print this help\n"
+	  "  -d : detach (run as daemon)\n"
+	  "  -p : specify pidfile\n" "  -c : specify config directory\n", name);
+}
+
+void parseargs (int argc, char **argv)
+{
+  char opt;
+
+  while ((opt = getopt (argc, argv, "hdp:c:")) > 0) {
+    switch (opt) {
+      case '?':
+      case 'h':
+	usage (argv[0]);
+	exit (0);
+	break;
+      case 'd':
+	args.detach = 1;
+	break;
+      case 'p':
+	if (args.setlock)
+	  free (args.lock);
+	args.setlock = 1;
+	args.lock = strdup (optarg);
+	break;
+      case 'c':
+	if (args.setwd)
+	  free (args.wd);
+	args.setwd = 1;
+	args.wd = strdup (optarg);
+	break;
+    }
+  }
+}
+
+void daemonize ()
+{
+  int i, lockfd;
+  unsigned char pid[16];
+
+  /* detach if asked */
+  if (args.detach) {
+    if (getppid () == 1)
+      return;			/* already a daemon */
+
+    /* spawn daemon */
+    i = fork ();
+    if (i < 0)
+      exit (1);			/* fork error */
+    if (i > 0)
+      exit (0);			/* parent exits */
+
+    /* child (daemon) continues */
+    setsid ();			/* obtain a new process group */
+    for (i = getdtablesize (); i >= 0; --i)
+      close (i);		/* close all descriptors */
+
+    /* close parent fds and send output to fds 0, 1 and 2 to bitbucket */
+    i = open ("/dev/null", O_RDWR);
+    dup (i);
+    dup (i);			/* handle standart I/O */
+  }
+
+  /* change to working directory */
+  if (args.setwd)
+    chdir (args.wd);
+
+  /* create local lock */
+  lockfd = open (args.lock, O_RDWR | O_CREAT, 0640);
+  if (lockfd < 0) {
+    perror ("lock: open");
+    exit (1);
+  }
+
+  /* lock the file */
+  if (lockf (lockfd, F_TLOCK, 0) < 0) {
+    perror ("lock: lockf");
+    printf (HUBSOFT_NAME " is already running.\n");
+    exit (0);
+  }
+
+  /* write to pid to lockfile */
+  snprintf (pid, 16, "%d\n", getpid ());
+  write (lockfd, pid, strlen (pid));
+
+  /* restrict created files to 0750 */
+  umask (027);
+}
 
 /*
  * MAIN LOOP
@@ -59,24 +178,21 @@ int main (int argc, char **argv)
   /* unbuffer the output */
   setvbuf (stdout, (char *) NULL, _IOLBF, 0);
 
+  /* block SIGPIPE */
   sigemptyset (&set);
   sigaddset (&set, SIGPIPE);
   sigprocmask (SIG_BLOCK, &set, NULL);
 
 #ifdef DEBUG
   /* add stacktrace handler */
-  {
-    struct sigaction sact;
-
-    StackTraceInit (argv[0], -1);
-
-    sigemptyset (&sact.sa_mask);
-    sact.sa_flags = 0;
-    sact.sa_handler = CrashHandler;
-    sigaction (SIGSEGV, &sact, NULL);
-    sigaction (SIGBUS, &sact, NULL);
-  }
+  StackTraceInit (argv[0], -1);
 #endif
+
+  /* parse arguments */
+  parseargs (argc, argv);
+
+  /* deamonize */
+  daemonize ();
 
   /* initialize the global configuration */
   config_init ();
@@ -106,6 +222,7 @@ int main (int argc, char **argv)
   /* setup socket handler */
   h = esocket_create_handler (4);
   h->toval.tv_sec = 60;
+  h->toval.tv_usec = 0;
 
   /* setup server */
   server_setup (h);

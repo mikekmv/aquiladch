@@ -547,7 +547,7 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
 
 unsigned int esocket_close (esocket_t * s)
 {
-  esocket_update_state (s, SOCKSTATE_INIT);
+  esocket_update_state (s, SOCKSTATE_CLOSED);
   close (s->socket);
   s->socket = -1;
   s->handler->n--;
@@ -598,7 +598,8 @@ unsigned int esocket_remove_socket (esocket_t * s)
 
   h = s->handler;
 
-  esocket_update_state (s, SOCKSTATE_CLOSED);
+  if (s->state != SOCKSTATE_CLOSED)
+    esocket_update_state (s, SOCKSTATE_CLOSED);
 
   if (s->tovalid)
     esocket_deltimeout (s);
@@ -631,14 +632,6 @@ unsigned int esocket_remove_socket (esocket_t * s)
   --(h->n);
 #endif
 #endif
-
-  /* free memory 
-     if (s->addr) {
-     freeaddrinfo (s->addr);
-     s = NULL;
-     }
-     free (s);
-   */
 
   return 1;
 }
@@ -749,6 +742,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   /* handle sockets */
   /* FIXME could be optimized. s should not be reset to h->sockets after each try */
   /* best to keep resetting to h->sockets this allows any socket to be deleted from the callbacks */
+  gettimeofday (&now, NULL);
+  now.tv_sec += h->toval.tv_sec;
+  now.tv_usec += h->toval.tv_usec;
+  if (now.tv_usec > 1000000) {
+    now.tv_sec += now.tv_usec / 1000000;
+    now.tv_usec = now.tv_usec % 1000000;
+  }
   s = h->sockets;
   while (num > 0) {
     if (s->socket >= 0) {
@@ -775,16 +775,15 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	    {
 	      int err, len;
 
-	      DPRINTF ("Connecting and %s!", s->error ? "error" : "connected");
-
 	      len = sizeof (s->error);
 	      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
 	      assert (!err);
-	      esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	      if ((h->types[s->type].error)
-		  && esocket_hasevent (s, ESOCKET_EVENT_OUT))
-		h->types[s->type].error (s);
 
+	      DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
+
+	      esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
+	      if (h->types[s->type].error)
+		h->types[s->type].error (s);
 	    }
 	    break;
 	  default:
@@ -795,6 +794,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	continue;
       }
       if (e && FD_ISSET (s->socket, e)) {
+	int err;
+	unsigned int len;
+
+	len = sizeof (s->error);
+	err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
+	assert (!err);
+
 	FD_CLR (s->socket, e);
 	s->to = now;
 	if ((h->types[s->type].error)
@@ -866,7 +872,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   now.tv_sec += h->toval.tv_sec;
   now.tv_usec += h->toval.tv_usec;
   if (now.tv_usec > 1000000) {
-    now.tv_sec += now.tv_sec / 1000000;
+    now.tv_sec += now.tv_usec / 1000000;
     now.tv_usec = now.tv_usec % 1000000;
   }
   /* h->n will grow when we accept users... */
@@ -881,6 +887,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       continue;
 
     if (pfdi->revents & (POLLERR | POLLHUP | POLLNVAL)) {
+      int err;
+      unsigned int len;
+
+      len = sizeof (s->error);
+      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
+      assert (!err);
+
       s->to = now;
       if (h->types[s->type].error)
 	h->types[s->type].error (s);
@@ -975,7 +988,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   now.tv_sec += h->toval.tv_sec;
   now.tv_usec += h->toval.tv_usec;
   if (now.tv_usec > 1000000) {
-    now.tv_sec += now.tv_sec / 1000000;
+    now.tv_sec += now.tv_usec / 1000000;
     now.tv_usec = now.tv_usec % 1000000;
   }
   for (i = 0; i < num; i++) {

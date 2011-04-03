@@ -369,6 +369,7 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
 }
 
 /* FIXME read this from proc.*/
+extern unsigned long buf_mem;
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
@@ -377,9 +378,9 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
   gettimeofday (&now, NULL);
 
   bf_printf (output, "Memory Usage:\n");
-  bf_printf (output, "Resident: %lu\n", procstats[0][current[0]].ps.ru_maxrss);
-  bf_printf (output, "Shared: %lu\n", procstats[0][current[0]].ps.ru_idrss);
-
+  //bf_printf (output, "Resident: %lu\n", procstats[0][current[0]].ps.ru_maxrss);
+  //bf_printf (output, "Shared: %lu\n", procstats[0][current[0]].ps.ru_idrss);
+  bf_printf (output, " Buffering memory: %lu\n", buf_mem);
   return 0;
 }
 
@@ -472,7 +473,7 @@ int pi_statistics_init ()
   command_register ("statcpu", &pi_statistics_handler_statcpu, 0, "Show cpu usage stats.");
   command_register ("statnmdc", &pi_statistics_handler_statnmdc, 0,
 		    "Show nmdc protocol stats. Experts only.");
-  /* doesn't work. command_register ("statmem",   &pi_statistics_handler_statmem, 0, "Show memory usage stats."); */
+  command_register ("statmem", &pi_statistics_handler_statmem, 0, "Show memory usage stats.");
   command_register ("uptime", &pi_statistics_handler_uptime, 0, "Show uptime.");
 
   return 0;
