@@ -117,6 +117,7 @@ int core_config_init ()
   config_register ("user.defaultrights",CFG_ELEM_CAP,  &config.DefaultRights,      "These are the rights of an unregistered user.");
 
   config_register ("hub.reconnectperiod", CFG_ELEM_ULONG, &iplist_interval, "This is the minimum time before an IP address is allowed to reconnect to the hub.");
+  config_register ("hub.reconnectsize", CFG_ELEM_ULONG, &iplist_size, "This is the number of IP address to remember.");
 
   /* *INDENT-ON* */
 

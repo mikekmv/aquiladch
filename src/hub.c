@@ -149,6 +149,14 @@ int accept_new_user (esocket_t * s)
     return -1;
   }
 
+  /* make socket non-blocking */
+  if (fcntl (r, F_SETFL, O_NONBLOCK)) {
+    perror ("fcntl()");
+    shutdown (r, SHUT_RDWR);
+    close (r);
+    return -1;
+  }
+
   /* check last connection list */
   if (iplist_interval) {
     if (iplist_find (&lastlist, client_address.sin_addr.s_addr)) {
@@ -164,14 +172,7 @@ int accept_new_user (esocket_t * s)
     iplist_add (&lastlist, client_address.sin_addr.s_addr);
   }
 
-  /* make socket non-blocking */
-  if (fcntl (r, F_SETFL, O_NONBLOCK)) {
-    perror ("fcntl()");
-    shutdown (r, SHUT_RDWR);
-    close (r);
-    return -1;
-  }
-
+  /* check available memory */
   if (buf_mem > config.BufferTotalLimit) {
     int l;
     char buffer[256];

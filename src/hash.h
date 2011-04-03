@@ -20,6 +20,9 @@
 #ifndef _HASH_H_
 #define _HASH_H_
 
-extern __inline__ unsigned int SuperFastHash (const unsigned char *data, int len);
+#include <stdint.h>
 
+extern __inline__ unsigned int SuperFastHash (const unsigned char *data, int len);
+extern __inline__ uint32_t one_at_a_time (uint32_t key);
+                              
 #endif

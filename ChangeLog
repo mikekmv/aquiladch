@@ -1,7 +1,8 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
-	Limit DOS impact.
+	Improved port blocker protection. Dynamic hashlist. 
+	Protection against port blockers.
 	Print memory in use by lua script in !luastat.
 	Disabled warnings for no search rights. Too annoying.
 	Added pmand broadcast flags for triggerrules.

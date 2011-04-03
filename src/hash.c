@@ -43,6 +43,11 @@
                      +((const unsigned char *) (d))[0])
 #endif
 
+typedef union {
+  uint32_t ip;
+  char key[4];
+} map_t;
+
 __inline__ unsigned int SuperFastHash (const unsigned char *data, int len)
 {
   unsigned long hash;
@@ -91,5 +96,23 @@ __inline__ unsigned int SuperFastHash (const unsigned char *data, int len)
   hash += hash >> 15;
   hash ^= hash << 10;
 
+  return hash;
+}
+
+__inline__ uint32_t one_at_a_time (uint32_t key)
+{
+  uint32_t hash, i;
+  map_t m;
+
+  m.ip = key;
+  for (hash = 0, i = 0; i < 4; ++i) {
+    hash += m.key[i];
+    hash += (hash << 10);
+    hash ^= (hash >> 6);
+  }
+
+  hash += (hash << 3);
+  hash ^= (hash >> 11);
+  hash += (hash << 15);
   return hash;
 }
