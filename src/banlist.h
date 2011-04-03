@@ -32,14 +32,6 @@
 #include "buffer.h"
 #include "dllist.h"
 
-#define BANLIST_HASHBITS	11
-#define BANLIST_HASHSIZE	(1 << BANLIST_HASHBITS)
-#define BANLIST_HASHMASK	(BANLIST_HASHSIZE-1)
-
-#define BANLIST_NICK_HASHBITS   10
-#define BANLIST_NICK_HASHSIZE	(1 << BANLIST_NICK_HASHBITS)
-#define BANLIST_NICK_HASHMASK	(BANLIST_NICK_HASHSIZE-1)
-
 typedef struct banlist {
   dllist_entry_t list_ip;
   dllist_entry_t list_name;

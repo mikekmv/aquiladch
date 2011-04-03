@@ -441,7 +441,7 @@ void banlist_init (banlist_t * list)
 {
   memset (list, 0, sizeof (banlist_t));
   dlhashlist_init ((dllist_t *) & list->list_ip, BANLIST_HASHSIZE);
-  dlhashlist_init ((dllist_t *) & list->list_name, BANLIST_HASHSIZE);
+  dlhashlist_init ((dllist_t *) & list->list_name, BANLIST_NICK_HASHSIZE);
 }
 
 void banlist_clear (banlist_t * list)

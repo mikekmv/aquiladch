@@ -1,5 +1,8 @@
 
 Develstatus:
+	- command trigger to mainchat
+	- create some sort of external statistics support.
+	- don't send filtered MyINFOs to the ops.
 	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files
 	- language suppport

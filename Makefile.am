@@ -19,6 +19,17 @@ commit:
 	make -C src indent
 	svn commit
 
+log:
+	@svn diff ChangeLog 2>&1 | grep -e "^+" | grep -v -e "^++" | cut -c 2- | sed -r 's/^[\t ]*//'
+
+commitlog:
+	make -C src indent
+	@svn diff ChangeLog 2>&1 | grep -e "^+" | grep -v -e "^++" | cut -c 2- | sed -r 's/^[\t ]*//' > CommitMessage
+	echo "Commit Message:"
+	cat CommitMessage
+	svn commit -F CommitMessage
+	rm -f CommitMessage
+
 release: commit dist
 	svn copy svn://gw/aquila/trunk/aquila svn://gw/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
 	@echo Release ${VERSION}

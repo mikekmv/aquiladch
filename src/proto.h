@@ -80,6 +80,7 @@ typedef struct user {
 
   /* rate limiting counters */
   leaky_bucket_t rate_warnings;
+  leaky_bucket_t rate_violations;
   leaky_bucket_t rate_chat;
   leaky_bucket_t rate_search;
   leaky_bucket_t rate_myinfo;

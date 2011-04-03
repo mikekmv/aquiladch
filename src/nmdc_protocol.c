@@ -760,6 +760,7 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Think before you talk and don't spam.");
       nmdc_stats.chatoverflow++;
+      retval = proto_nmdc_violation (u, &now);
       break;
     }
 
@@ -849,13 +850,6 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
   gettimeofday (&now, NULL);
 
   do {
-
-    /* check quota */
-    if (!get_token (&rates.myinfo, &u->rate_myinfo, now.tv_sec)) {
-      nmdc_stats.myinfooverflow++;
-      break;
-    }
-
     /* build and generate the tag */
     new = rebuild_myinfo (u, b);
     if (!new || (u->active < 0)) {
@@ -906,8 +900,6 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 
     if (u->MyINFO)
       bf_free (u->MyINFO);
-
-    /* build and generate the tag for al users */
     u->MyINFO = new;
 
     /* ops get the full tag immediately */
@@ -919,8 +911,12 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       string_list_entry_t *entry;
 
       /* if no entry in the stringlist yet, exit */
-      if (!(entry = string_list_find (&cache.myinfoupdate.messages, u)))
+      if (!(entry = string_list_find (&cache.myinfoupdate.messages, u))) {
+	nmdc_stats.myinfooverflow++;
+	retval = proto_nmdc_violation (u, &now);
 	break;
+      }
+
       /* if there is an entry, replace it with the more recent one. */
       cache.myinfoupdate.length -= bf_used (entry->data);
       string_list_del (&cache.myinfoupdate.messages, entry);
@@ -969,6 +965,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	proto_nmdc_user_warn (u, &now, "Passive searches are limited to %u every %u seconds.",
 			      rates.psearch.refill, rates.psearch.period);
       }
+      retval = proto_nmdc_violation (u, &now);
       nmdc_stats.searchoverflow++;
       break;
     }
@@ -1099,8 +1096,6 @@ int proto_nmdc_state_online_sr (user_t * u, token_t * tkn, buffer_t * output, bu
   do {
     /* check quota */
     if (!get_token (&rates.psresults_out, &u->rate_psresults_out, now.tv_sec)) {
-      proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
-			    researchmininterval);
       nmdc_stats.sroverflow++;
       break;
     }
@@ -1405,6 +1400,7 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Don't send private messages so fast.");
       nmdc_stats.pmoverflow++;
+      retval = proto_nmdc_violation (u, &now);
       break;
     }
 
@@ -1672,6 +1668,7 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
      * prevents the need for yet another leaky bucket. */
     if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Think before you ask HubINFO and don't spam.\n");
+      retval = proto_nmdc_violation (u, &now);
       break;
     }
 
@@ -1732,6 +1729,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
       if (!get_token (&rates.getnicklist, &u->rate_getnicklist, now.tv_sec)) {
 	proto_nmdc_user_warn (u, &now, "Userlist request denied. Maximum 1 reload per %ds.",
 			      rates.getnicklist.period);
+	retval = proto_nmdc_violation (u, &now);
 	break;
       }
 

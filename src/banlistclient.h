@@ -33,10 +33,6 @@
 #include "buffer.h"
 #include "dllist.h"
 
-#define BANLIST_NICK_HASHBITS   10
-#define BANLIST_NICK_HASHSIZE	(1 << BANLIST_NICK_HASHBITS)
-#define BANLIST_NICK_HASHMASK	(BANLIST_NICK_HASHSIZE-1)
-
 typedef struct banlist_client {
   dllist_entry_t dllist;
 

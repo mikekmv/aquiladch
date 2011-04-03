@@ -407,6 +407,9 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
 					     unsigned int argc, unsigned char **argv)
 {
   cpu_printf (output);
+#ifdef DEBUG
+  bf_printf (output, "Warning: DEBUG build, cpu measurements higher as normal.\n");
+#endif
   return 0;
 }
 
@@ -448,6 +451,7 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " cacherebuild : %lu\n", nmdc_stats.cacherebuild);
   bf_printf (output, " userjoin : %lu\n", nmdc_stats.userjoin);
   bf_printf (output, " userpart : %lu\n", nmdc_stats.userpart);
+  bf_printf (output, " userviolate : %lu\n", nmdc_stats.userviolate);
   bf_printf (output, " banned : %lu\n", nmdc_stats.banned);
   bf_printf (output, " forcemove : %lu\n", nmdc_stats.forcemove);
   bf_printf (output, " disconnect : %lu\n", nmdc_stats.disconnect);

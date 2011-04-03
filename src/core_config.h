@@ -64,6 +64,9 @@ typedef struct {
 
   unsigned long ReconnectBantime;
 
+  unsigned long ProbationPeriod;
+  unsigned long ViolationBantime;
+
   unsigned long DelayedLogout;
   // NI unsigned long DelayedLogoutMax;
 } config_t;

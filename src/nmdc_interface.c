@@ -482,6 +482,7 @@ user_t *proto_nmdc_user_alloc (void *priv)
   user->parent = priv;
 
   init_bucket (&user->rate_warnings, now.tv_sec);
+  init_bucket (&user->rate_violations, now.tv_sec);
   init_bucket (&user->rate_chat, now.tv_sec);
   init_bucket (&user->rate_search, now.tv_sec);
   init_bucket (&user->rate_myinfo, now.tv_sec);
@@ -491,6 +492,7 @@ user_t *proto_nmdc_user_alloc (void *priv)
 
   /* warnings and searches start with a full token load ! */
   user->rate_warnings.tokens = rates.warnings.burst;
+  user->rate_violations.tokens = rates.violations.burst;
 
   /* protocol private data */
   user->pdata = malloc (sizeof (nmdc_user_t));
@@ -740,6 +742,43 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
   return 0;
 }
 
+int proto_nmdc_violation (user_t * u, struct timeval *now)
+{
+  buffer_t *buf;
+
+  /* if there are still tokens left, just return */
+  if (get_token (&rates.violations, &u->rate_violations, now->tv_sec))
+    return 0;
+
+  /* user is in violation */
+
+  /* if he is only a short time online, this is most likely a spammer and he will be hardbanned */
+  buf = bf_alloc (128);
+  if ((u->joinstamp - now->tv_sec) < config.ProbationPeriod) {
+    bf_printf (buf, "Rate Probation Violation.");
+    banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf, 0);
+
+  } else {
+    bf_printf (buf, "Rate Violation.");
+    banlist_add (&hardbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF, buf,
+		 now->tv_sec + config.ViolationBantime);
+  }
+
+  u->flags & NMDC_FLAG_WASKICKED;
+
+  /* send message */
+  server_write (u->parent, buf);
+  bf_free (buf);
+
+  /* disconnect the user */
+  if (u->state != PROTO_STATE_DISCONNECTED)
+    server_disconnect_user (u->parent);
+
+  nmdc_stats.userviolate++;
+
+  return -1;
+}
+
 int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *message, ...)
 {
   buffer_t *buf;
@@ -879,6 +918,7 @@ int proto_nmdc_init ()
   init_bucket_type (&rates.psresults_in, 15, 100, 25);
   init_bucket_type (&rates.psresults_out, 15, 50, 25);
   init_bucket_type (&rates.warnings, 120, 10, 1);
+  init_bucket_type (&rates.violations, 60, 10, 2);
 
   config_register ("rate.chat.period", CFG_ELEM_ULONG, &rates.chat.period,
 		   "Period of chat messages. This controls how often a user can send a chat message. Keep this low.");
@@ -935,6 +975,13 @@ int proto_nmdc_init ()
 		   "Period of user warnings. This controls how many warning a user gets within the period.");
   config_register ("rate.warnings.burst", CFG_ELEM_ULONG, &rates.warnings.burst,
 		   "Period of user warnings. This controls how many warnings a user that overstep limits can save up.");
+
+  config_register ("rate.violations.period", CFG_ELEM_ULONG, &rates.violations.period,
+		   "Period of user violations. This controls how often a warning is send to user that overstep limits.");
+  config_register ("rate.violations.refill", CFG_ELEM_ULONG, &rates.violations.refill,
+		   "Period of user violations. This controls how many warning a user gets within the period.");
+  config_register ("rate.violations.burst", CFG_ELEM_ULONG, &rates.violations.burst,
+		   "Period of user violations. This controls how many violations a user that overstep limits can save up.");
 
   /* cache stuff */
   memset ((void *) &cache, 0, sizeof (cache_t));

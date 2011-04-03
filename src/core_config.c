@@ -68,6 +68,9 @@ int core_config_init ()
 
   config.ReconnectBantime = DEFAULT_RECONNECTBANTIME;
 
+  config.ViolationBantime = DEFAULT_VIOLATIONBANTIME;
+  config.ProbationPeriod = DEFAULT_PROBATIONPERIOD;
+
   config.DelayedLogout = DEFAULT_DELAYEDLOGOUT;
   // NI config.DelayedLogoutMax = DEFAULT_DELAYEDLOGOUTMAX;
 
@@ -108,6 +111,9 @@ int core_config_init ()
 
   config_register ("hub.TimeoutBuffering",     CFG_ELEM_ULONG,  &config.TimeoutBuffering, "If the hub start buffering for a user, after this many milliseconds, the user will be disconnected.");
   config_register ("hub.TimeoutOverflow",      CFG_ELEM_ULONG,  &config.TimeoutOverflow,  "If the hub start buffering for a user and the amount exceed hub.BufferSoftLimit, he wil be disconnected after this many milliseconds.");
+
+  config_register ("hub.ViolationBantime", CFG_ELEM_ULONG,  &config.ViolationBantime, "If a user violates the rate controls too much, he will be banned for this amount of time.");
+  config_register ("hub.ViolationProbationPeriod",  CFG_ELEM_ULONG,  &config.ProbationPeriod,  "If the user violatest the rate controls too much within this period after joining, he will be hardbanned permanently.");
 
   config_register ("user.defaultrights",CFG_ELEM_CAP,  &config.DefaultRights,      "These are the rights of an unregistered user.");
 
