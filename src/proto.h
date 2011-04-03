@@ -20,7 +20,6 @@
 #ifndef _PROTO_H_
 #define _PROTO_H_
 
-#include <arpa/inet.h>
 #include "hashlist.h"
 #include "buffer.h"
 #include "config.h"

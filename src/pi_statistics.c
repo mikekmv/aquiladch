@@ -402,7 +402,7 @@ unsigned long pi_statistics_handler_statbw (plugin_user_t * user, buffer_t * out
 {
   bandwidth_printf (output);
 #ifdef DEBUG
-  bf_printf (output, _("Warning: DEBUG build, cpu measurements highly inaccurate.\n"));
+  bf_printf (output, _("Warning: DEBUG build, bandwidth measurements inaccurate.\n"));
 #endif
   return 0;
 }

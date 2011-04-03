@@ -133,8 +133,12 @@ int account_pwd_set (account_t * account, unsigned char *pwd)
 {
   unsigned char salt[3];
 
-  salt[0] = ((random () % 46) + 45);
-  salt[1] = ((random () % 46) + 45);
+  do {
+    salt[0] = ((random () % 78) + 45);
+  } while (((salt[0] > 57) && (salt[0] < 65)) || ((salt[0] > 90) && (salt[0] < 97)));
+  do {
+    salt[1] = ((random () % 78) + 45);
+  } while (((salt[1] > 57) && (salt[1] < 65)) || ((salt[1] > 90) && (salt[1] < 97)));
   salt[2] = 0;
 
   strncpy (account->passwd, crypt (pwd, salt), NICKLENGTH);

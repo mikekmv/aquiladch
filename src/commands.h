@@ -53,6 +53,7 @@ extern int command_setup ();
 extern int command_register (unsigned char *name, command_handler_t * handler, unsigned long cap,
 			     unsigned char *help);
 extern int command_unregister (unsigned char *name);
+extern int command_setrights (unsigned char *name, unsigned long cap, unsigned long ncap);
 
 extern unsigned int command_flags_print (command_flag_t * flags, buffer_t * buf,
 					 unsigned long flag);

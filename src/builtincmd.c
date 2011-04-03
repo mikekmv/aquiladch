@@ -1514,7 +1514,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
   }
 
   for (i = 0; i < (PASSWDLENGTH); i++) {
-    passwd[i] = (33 + (random () % 90));
+    passwd[i] = (40 + (random () % 82));
   }
   passwd[i] = '\0';
 
@@ -1803,7 +1803,7 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	struct in_addr ia;
 
 	if (!inet_aton (argv[2], &ia)) {
-	  bf_printf (output, _("\"%s\" is not a valid IP address.\n"));
+	  bf_printf (output, _("\"%s\" is not a valid IP address.\n"), argv[2]);
 	  break;
 	}
 	*elem->val.v_ip = ia.s_addr;

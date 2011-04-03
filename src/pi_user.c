@@ -170,7 +170,7 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
   /* check if client is accepted */
   if ((cl = banlist_client_find (&clientbanlist, user->client, user->version))
       && (!(user->rights & CAP_TAG))) {
-    plugin_user_printf (user, _("Sorry, this client is not accepted because: %*s\n"),
+    plugin_user_printf (user, _("Sorry, this client is not accepted because: %.*s\n"),
 			bf_used (cl->message), cl->message->s);
     goto drop;
   }

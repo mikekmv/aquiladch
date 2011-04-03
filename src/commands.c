@@ -162,6 +162,24 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
   return 0;
 }
 
+int command_setrights (unsigned char *name, unsigned long cap, unsigned long ncap)
+{
+  unsigned int hash = SuperFastHash (name, strlen (name));
+  command_t *cmd;
+  command_t *list = &cmd_hashtable[hash & COMMAND_HASHMASK];
+
+  for (cmd = list->next; cmd != list; cmd = cmd->next)
+    if (!strcmp (cmd->name, name))
+      break;
+
+  if (cmd == list)
+    return 0;
+
+  cmd->req_cap = ((cmd->req_cap | cap) & ~ncap);
+
+  return 1;
+}
+
 int command_unregister (unsigned char *name)
 {
   unsigned int hash = SuperFastHash (name, strlen (name));

@@ -969,6 +969,20 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     if (s->state == SOCKSTATE_FREED)
       continue;
 
+    if (activity & EPOLLHUP) {
+      int err;
+      unsigned int len;
+
+      len = sizeof (s->error);
+      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
+      assert (!err);
+
+      if (h->types[s->type].error)
+	h->types[s->type].error (s);
+
+      ASSERT (s->state == SOCKSTATE_FREED);
+      continue;
+    }
     if (activity & EPOLLERR) {
       int err;
       unsigned int len;

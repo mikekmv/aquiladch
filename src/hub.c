@@ -47,6 +47,8 @@
 unsigned long buffering = 0;
 unsigned long buf_mem = 0;
 
+unsigned int ndelay = 1;
+
 /* banlist */
 banlist_t hardbanlist, softbanlist;
 
@@ -141,10 +143,12 @@ int accept_new_user (esocket_t * s)
     }
 
     /* FIXME: test. we disable naggle: we do our own queueing! */
-    if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
-      perror ("setsockopt:");
-      close (r);
-      return -1;
+    if (ndelay) {
+      if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
+	perror ("setsockopt:");
+	close (r);
+	return -1;
+      }
     }
 
     /* before all else, test hardban */
@@ -273,6 +277,9 @@ int server_write (client_t * cl, buffer_t * b)
   if (!(s = cl->es))
     return 0;
 
+  if (!bf_used (b))
+    return 0;
+
   /* if data is queued, queue this after it */
   if (cl->outgoing.count) {
     /* if we are still below max buffer per user, queue buffer */
@@ -378,10 +385,9 @@ int server_disconnect_user (client_t * cl, char *reason)
 
   /* close the real socket */
   if (cl->es) {
-    s = cl->es->socket;
+    esocket_close (cl->es);
     esocket_remove_socket (cl->es);
     cl->es = NULL;
-    close (s);
   }
 
   if (cl->outgoing.count) {
@@ -606,7 +612,6 @@ int server_init ()
   banlist_init (&softbanlist);
 
   core_config_init ();
-
 
   return 0;
 }

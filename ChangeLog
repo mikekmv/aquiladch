@@ -1,6 +1,20 @@
 This is the Aquila Changelog.
 
 0.1.10-pre4:
+	banlist will list both IP and nick for dual bans (Req FleetCommand).
+	Send login password message in PM. Has disadvantages for some clients.
+	Added support for the pm flag on login triggers.
+	Fixed handling of EPOLLHUP
+	Added SetCommandRights() lua function. Allows you reassign the rights for every command.
+	Added ndelay setting.
+	Fix error message in pi_user.c
+	Fix 0 byte write bug (try saying that quickly :S)
+	Print error when trying to update hublist while no hublists configured.
+	Fix Salt generation in aqpasswd.c and user.c
+	Added RawToRights()
+	Removed some possibly troublesome characters from !pwgen.
+	Fixed bug in !configset IP address handling error message.
+	Fixed EventDisconnect.
 	Added ChatToRights and PmToRights lua functions.
 	Fix Ubuntu support.
 	Improved userlist layout. (General request)

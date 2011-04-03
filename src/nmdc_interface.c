@@ -445,6 +445,20 @@ __inline__ int proto_nmdc_user_say (user_t * u, buffer_t * b, buffer_t * message
   return 0;
 }
 
+__inline__ int proto_nmdc_user_say_pm (user_t * u, user_t * target, user_t * src, buffer_t * b,
+				       buffer_t * message)
+{
+
+  bf_printf (b, "$To: %s From: %s $<%s> ", target->nick, u->nick, src->nick);
+  for (; message; message = message->next)
+    bf_strncat (b, message->s, bf_used (message));
+  if (*(b->e - 1) == '\n')
+    b->e--;
+  if (b->e[-1] != '|')
+    bf_strcat (b, "|");
+  return 0;
+}
+
 __inline__ int proto_nmdc_user_say_string (user_t * u, buffer_t * b, unsigned char *message)
 {
   bf_strcat (b, "<");
@@ -524,13 +538,7 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
 
   buf = bf_alloc (32 + 3 * NICKLENGTH + bf_size (message));
 
-  bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
-  for (; message; message = message->next)
-    bf_strncat (buf, message->s, bf_used (message));
-  if (*(buf->e - 1) == '\n')
-    buf->e--;
-  if (buf->e[-1] != '|')
-    bf_strcat (buf, "|");
+  proto_nmdc_user_say_pm (u, target, source, buf, message);
 
   if (target->state == PROTO_STATE_VIRTUAL) {
     plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
@@ -559,12 +567,7 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
 
   buf = bf_alloc (32 + 3 * NICKLENGTH + bf_size (message));
 
-  bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
-  for (; message; message = message->next)
-    bf_strncat (buf, message->s, bf_used (message));
-  if (*(buf->e - 1) == '\n')
-    buf->e--;
-  bf_strcat (buf, "|");
+  proto_nmdc_user_say_pm (u, target, source, buf, message);
 
   if (target->state == PROTO_STATE_VIRTUAL) {
     plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
@@ -732,7 +735,17 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
-  plugin_send_event (u->plugin_priv, PLUGIN_EVENT_DISCONNECT, reason);
+  if (!u->plugin_priv) {
+    buffer_t *b = bf_alloc (256 + strlen (reason));
+
+    if (b) {
+      bf_printf (b, "Nick %s, State %d, Reason: %s\n", u->nick, u->state, reason);
+      plugin_send_event (NULL, PLUGIN_EVENT_DISCONNECT, b);
+      bf_free (b);
+    }
+  } else {
+    plugin_send_event (u->plugin_priv, PLUGIN_EVENT_DISCONNECT, bf_buffer (reason));
+  }
 
   /* if user was online, clear out all stale data */
   if (u->state == PROTO_STATE_ONLINE) {
@@ -747,6 +760,9 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
     hash_deluser (&hashlist, &u->hash);
+
+    /* mark user offline so the verifies don't fail. */
+    u->state = PROTO_STATE_DISCONNECTED;
 
     /* kicked users do not go on the cachehashlist */
     if (u->flags & NMDC_FLAG_WASKICKED) {
@@ -764,6 +780,7 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
   } else {
     /* if the returned user has same nick, but different user pointer, this is legal */
     ASSERT (u != hash_find_nick (&hashlist, u->nick, strlen (u->nick)));
+    u->state = PROTO_STATE_DISCONNECTED;
   }
 
   if (u->supports & NMDC_SUPPORTS_ZLine)

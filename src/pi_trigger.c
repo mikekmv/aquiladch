@@ -331,7 +331,13 @@ unsigned long pi_trigger_login (plugin_user_t * user, void *dummy, unsigned long
     r->trigger->usecnt++;
 
     trigger_verify (r->trigger);
-    plugin_user_sayto (NULL, user, r->trigger->text, 0);
+    if (bf_used (r->trigger->text)) {
+      if (r->flags & RULE_FLAG_PM) {
+	plugin_user_priv (NULL, user, NULL, r->trigger->text, 0);
+      } else {
+	plugin_user_sayto (NULL, user, r->trigger->text, 0);
+      }
+    }
   };
 
   return 0;

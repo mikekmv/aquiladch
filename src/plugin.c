@@ -427,17 +427,33 @@ int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t * messag
 int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
 {
   banlist_entry_t *ne;
+  struct in_addr ipa, netmask;
 
   ne = banlist_find_bynick (&softbanlist, nick);
   if (!ne)
     return 0;
 
+  ipa.s_addr = ne->ip;
+  netmask.s_addr = ne->netmask;
+
   if (ne->expire) {
-    return bf_printf (buf, _("Found nick ban by %s for %s for %lus because: %.*s"), ne->op,
-		      ne->nick, ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
+    if (ne->ip) {
+      return bf_printf (buf, _("Found nick ban by %s for %s (IP %s) for %lus because: %.*s"),
+			ne->op, ne->nick, print_ip (ipa, netmask), ne->expire - now.tv_sec,
+			bf_used (ne->message), ne->message->s);
+    } else {
+      return bf_printf (buf, _("Found nick ban by %s for %s for %lus because: %.*s"), ne->op,
+			ne->nick, ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
+    }
   } else {
-    return bf_printf (buf, _("Found permanent nick ban by %s for %s because: %.*s"), ne->op,
-		      ne->nick, bf_used (ne->message), ne->message->s);
+    if (ne->ip) {
+      return bf_printf (buf, _("Found permanent nick ban by %s for %s (IP %s) because: %.*s"),
+			ne->op, ne->nick, print_ip (ipa, netmask), bf_used (ne->message),
+			ne->message->s);
+    } else {
+      return bf_printf (buf, _("Found permanent nick ban by %s for %s because: %.*s"), ne->op,
+			ne->nick, bf_used (ne->message), ne->message->s);
+    }
   }
 }
 
@@ -453,12 +469,23 @@ int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   ipa.s_addr = ie->ip;
   netmask.s_addr = ie->netmask;
   if (ie->expire) {
-    return bf_printf (buf, _("Found IP ban by %s for %s for %lus because: %.*s"), ie->op,
-		      print_ip (ipa, netmask), ie->expire - now.tv_sec, bf_used (ie->message),
-		      ie->message->s);
+    if (ie->nick[0]) {
+      return bf_printf (buf, _("Found IP ban by %s for %s (%s) for %lus because: %.*s"), ie->op,
+			print_ip (ipa, netmask), ie->nick, ie->expire - now.tv_sec,
+			bf_used (ie->message), ie->message->s);
+    } else {
+      return bf_printf (buf, _("Found IP ban by %s for %s for %lus because: %.*s"), ie->op,
+			print_ip (ipa, netmask), ie->expire - now.tv_sec, bf_used (ie->message),
+			ie->message->s);
+    }
   } else {
-    return bf_printf (buf, _("Found permanent ban by %s for %s because: %.*s"), ie->op,
-		      print_ip (ipa, netmask), bf_used (ie->message), ie->message->s);
+    if (ie->nick[0]) {
+      return bf_printf (buf, _("Found permanent ban by %s for %s (%s) because: %.*s"), ie->op,
+			print_ip (ipa, netmask), ie->nick, bf_used (ie->message), ie->message->s);
+    } else {
+      return bf_printf (buf, _("Found permanent ban by %s for %s because: %.*s"), ie->op,
+			print_ip (ipa, netmask), bf_used (ie->message), ie->message->s);
+    }
   }
 }
 

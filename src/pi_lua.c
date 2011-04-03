@@ -1141,6 +1141,40 @@ int pi_lua_sendtorights (lua_State * lua)
   return 1;
 }
 
+int pi_lua_rawtorights (lua_State * lua)
+{
+  unsigned int i;
+  buffer_t *b;
+  plugin_user_t *tgt = NULL, *prev = NULL;
+  unsigned long cap = 0, ncap = 0;
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
+
+  b = bf_alloc (10240);
+
+  bf_printf (b, "%s", message);
+
+  parserights (rights, &cap, &ncap);
+
+  /* send to all users */
+  i = 0;
+  prev = NULL;
+  while (plugin_user_next (&tgt)) {
+    prev = tgt;
+    if (((tgt->rights & cap) != cap) || ((tgt->rights & ncap) != 0))
+      continue;
+    if (plugin_user_raw (tgt, b) < 0) {
+      tgt = prev;
+    } else {
+      i++;
+    }
+  }
+  lua_pushnumber (lua, i);
+
+  bf_free (b);
+
+  return 1;
+}
 
 int pi_lua_sendpmtorights (lua_State * lua)
 {
@@ -1767,6 +1801,19 @@ int pi_lua_cmddel (lua_State * lua)
   return 0;
 }
 
+int pi_lua_cmdsetrights (lua_State * lua)
+{
+  unsigned long caps = 0, ncaps = 0;
+  unsigned char *cmd = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
+
+  parserights (rights, &caps, &ncaps);
+
+  lua_pushboolean (lua, command_setrights (cmd, caps, ncaps));
+
+  return 1;
+}
+
 /* clean out all command of this script */
 int pi_lua_cmdclean (lua_State * lua)
 {
@@ -1862,6 +1909,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
 
   {"RawToNick", pi_lua_rawtonick,},
   {"RawToAll", pi_lua_rawtoall,},
+  {"RawToRights", pi_lua_rawtorights,},
 
   /* account management */
   {"GroupCreate", pi_lua_group_create,},
@@ -1884,6 +1932,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   /* lua created command functions */
   {"RegCommand", pi_lua_cmdreg,},
   {"DelCommand", pi_lua_cmddel,},
+  {"SetCommandRights", pi_lua_cmdsetrights,},
 
   /* config functions */
   {"SetConfig", pi_lua_setconfig,},

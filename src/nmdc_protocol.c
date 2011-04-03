@@ -319,9 +319,9 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	/* assign CAP_SHARE and CAP_TAG anyway */
 	u->rights =
 	  config.DefaultRights | ((a->rights | a->classp->rights) & (CAP_SHARE | CAP_TAG));
-	proto_nmdc_user_say_string (HubSec, output,
-				    __
-				    ("Your account priviliges will not be awarded until you set a password."));
+	proto_nmdc_user_say_pm (HubSec, u, HubSec, output,
+				bf_buffer (__
+					   ("Your account priviliges will not be awarded until you set a password.")));
       }
     } else {
       /* verify nick */
@@ -548,10 +548,10 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     bf_strcat (output, "|");
 
     if (!a->passwd[0])
-      proto_nmdc_user_say (HubSec, output,
-			   bf_buffer
-			   (__
-			    ("Your account priviliges will not be awarded until you set a password. Use !passwd or !pwgen.")));
+      proto_nmdc_user_say_pm (HubSec, u, HubSec, output,
+			      bf_buffer
+			      (__
+			       ("Your account priviliges will not be awarded until you set a password. Use !passwd or !pwgen.")));
 
     u->state = PROTO_STATE_HELLO;
     server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);

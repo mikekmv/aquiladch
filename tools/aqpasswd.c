@@ -56,9 +56,14 @@ int main (int argc, char **argv)
   } else
     printf ("Appending new owner %s to file %s\n", argv[2], argv[1]);
 
-  salt[0] = ((random () % 46) + 45);
-  salt[1] = ((random () % 46) + 45);
+  do {
+    salt[0] = ((random () % 78) + 45);
+  } while ( ((salt[0] > 57)&&(salt[0] < 65))||((salt[0] > 90)&&(salt[0] < 97)) );
+  do { 
+    salt[1] = ((random () % 78) + 45);
+  } while ( ((salt[1] > 57)&&(salt[1] < 65))||((salt[1] > 90)&&(salt[1] < 97)) );
   salt[2] = 0;
+
   fprintf (fp, "A %s %s %lu %lu %lu %s %lu %lu\n", argv[2], crypt (argv[3], salt), CAP_ADMIN | CAP_OWNER, 0, 0, argv[2], time(NULL), 0);
 
   fclose (fp);

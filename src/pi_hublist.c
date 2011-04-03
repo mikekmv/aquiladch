@@ -109,6 +109,11 @@ int pi_hublist_update (buffer_t * output, unsigned long flags)
   esocket_t *s;
   pi_hublist_ctx_t *ctx;
 
+  if (!pi_hublist_lists || !*pi_hublist_lists) {
+    bf_printf (output, _("No hublists configured\n"));
+    return 0;
+  }
+
   lists = strdup (pi_hublist_lists);
 
   for (l = strtok (lists, ";, "); l; l = strtok (NULL, ";, ")) {

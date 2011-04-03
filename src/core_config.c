@@ -28,6 +28,8 @@
 #include "proto.h"
 #include "iplist.h"
 
+extern int ndelay;
+
 config_t config;
 
 int core_config_init ()
@@ -116,8 +118,10 @@ int core_config_init ()
 
   config_register ("user.defaultrights",CFG_ELEM_CAP,  &config.DefaultRights,      _("These are the rights of an unregistered user."));
 
-  config_register ("hub.reconnectperiod", CFG_ELEM_ULONG, &iplist_interval, _("This is the minimum time before an IP address is allowed to reconnect to the hub."));
+  config_register ("hub.reconnectperiod", CFG_ELEM_ULONG, &iplist_interval, _("This is the minimum time before an IP address is allowed to reconnect to the hub. NEVER TURN THIS OFF."));
   config_register ("hub.reconnectsize", CFG_ELEM_ULONG, &iplist_size, _("This is the number of IP address to remember."));
+
+  config_register ("hub.ndelay", CFG_ELEM_UINT, &ndelay, _("This turns on or off the ndelay setting."));
 
   /* *INDENT-ON* */
 
