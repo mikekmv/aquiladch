@@ -429,6 +429,8 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
 
 /* FIXME read this from proc.*/
 extern unsigned long buf_mem;
+extern unsigned long cachelist_count;
+
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
@@ -452,6 +454,7 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
 
   bf_printf (output, HUBSOFT_NAME " stats:\n");
   bf_printf (output, " Buffering memory: %lu\n", buf_mem);
+  bf_printf (output, " Cachelist size: %lu\n", cachelist_count);
   return 0;
 }
 

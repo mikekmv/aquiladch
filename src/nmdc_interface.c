@@ -72,6 +72,7 @@ leaky_bucket_t rate_warnings;
 static user_t *freelist = NULL;
 hashlist_t hashlist;
 
+unsigned long cachelist_count = 0;
 user_t *cachelist = NULL;
 user_t *cachelist_last = NULL;
 hashlist_t cachehashlist;
@@ -307,6 +308,7 @@ void proto_nmdc_user_cachelist_add (user_t * user)
   }
   user->prev = NULL;
   cachelist = user;
+  cachelist_count++;
 }
 
 void proto_nmdc_user_cachelist_invalidate (user_t * u)
@@ -353,6 +355,7 @@ void proto_nmdc_user_cachelist_clear ()
     } else {
       cachelist = u->next;
     };
+    cachelist_count--;
 
     /* put user in freelist */
     proto_nmdc_user_freelist_add (u);

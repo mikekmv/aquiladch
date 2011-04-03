@@ -26,6 +26,7 @@
 #include "hash.h"
 #include "cap.h"
 #include "proto.h"
+#include "iplist.h"
 
 config_t config;
 
@@ -115,6 +116,7 @@ int core_config_init ()
 
   config_register ("user.defaultrights",CFG_ELEM_CAP,  &config.DefaultRights,      "These are the rights of an unregistered user.");
 
+  config_register ("hub.reconnectperiod", CFG_ELEM_ULONG, &iplist_interval, "This is the minimum time before an IP address is allowed to reconnect to the hub.");
 
   /* *INDENT-ON* */
 

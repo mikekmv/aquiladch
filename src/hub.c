@@ -36,7 +36,7 @@
 #endif
 
 #include "core_config.h"
-
+#include "iplist.h"
 
 #define HUB_INPUTBUFFER_SIZE	4096
 
@@ -48,6 +48,8 @@ unsigned long buf_mem = 0;
 
 /* banlist */
 banlist_t hardbanlist, softbanlist;
+
+iplist_t lastlist;
 
 unsigned int es_type_server, es_type_listen;
 
@@ -145,6 +147,21 @@ int accept_new_user (esocket_t * s)
     shutdown (r, SHUT_RDWR);
     close (r);
     return -1;
+  }
+
+  /* check last connection list */
+  if (iplist_interval) {
+    if (iplist_find (&lastlist, client_address.sin_addr.s_addr)) {
+      int l;
+      char buffer[256];
+
+      l = snprintf (buffer, 256, "<" HUBSOFT_NAME "> Don't reconnect so fast.|");
+      write (r, buffer, l);
+      shutdown (r, SHUT_RDWR);
+      close (r);
+      return -1;
+    }
+    iplist_add (&lastlist, client_address.sin_addr.s_addr);
   }
 
   /* make socket non-blocking */
@@ -550,6 +567,8 @@ int server_init ()
   banlist_init (&softbanlist);
 
   core_config_init ();
+
+  iplist_init (&lastlist);
 
   return 0;
 }

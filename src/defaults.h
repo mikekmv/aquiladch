@@ -165,6 +165,8 @@
 #define BANLIST_CLIENT_HASHSIZE	(1 << BANLIST_NICK_HASHBITS)
 #define BANLIST_CLIENT_HASHMASK	(BANLIST_NICK_HASHSIZE-1)
 
+#define IPLIST_SIZE	2048
+#define IPLIST_TIME	30
 
 /*
  * Fork storm prevention: minimum second delay between forks
