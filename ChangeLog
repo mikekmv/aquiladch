@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Fix bug with flushtimer that goes berserk.
+	Fix bugs with long output.
+	Use correct string for gettext in bf_printf/bf_vprintf
 	Fixed warnings
 	Fixed memleak in proto_nmdc_state_init();
 	Now use correct keywords for gettext string parsing.

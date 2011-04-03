@@ -1596,14 +1596,29 @@ unsigned long handler_confighelp (plugin_user_t * user, buffer_t * output, void 
   config_element_t *elem;
 
   if (argc < 2) {
-    for (elem = config_sorted.onext; elem != &config_sorted; elem = elem->onext)
+    for (elem = config_sorted.onext; elem != &config_sorted; elem = elem->onext) {
+      if (bf_unused (output) < (strlen (elem->name) + strlen (elem->help) + 4)) {
+	buffer_t *buf;
+
+	buf = bf_alloc (4000);
+	bf_append (&output, buf);
+	output = buf;
+      }
       bf_printf (output, "%s: %s\n", elem->name, elem->help);
+    }
   } else {
     for (i = 1; i < argc; i++) {
       elem = config_find (argv[i]);
       if (!elem) {
 	bf_printf (output, _("Sorry, unknown configuration value %s\n"), argv[i]);
 	continue;
+      }
+      if (bf_unused (output) < (strlen (elem->name) + strlen (elem->help) + 4)) {
+	buffer_t *buf;
+
+	buf = bf_alloc (4000);
+	bf_append (&output, buf);
+	output = buf;
       }
       bf_printf (output, "%s: %s\n", elem->name, elem->help);
     }

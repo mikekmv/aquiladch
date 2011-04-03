@@ -171,6 +171,7 @@ int proto_nmdc_user_delrobot (user_t * u)
   string_list_purge (&cache.psearch.messages, u);
 
   buf = bf_alloc (8 + NICKLENGTH);
+
   bf_strcat (buf, "$Quit ");
   bf_strcat (buf, u->nick);
   bf_strcat (buf, "|");
@@ -240,6 +241,7 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
   strncpy (u->nick, nick, NICKLENGTH);
   u->nick[NICKLENGTH - 1] = 0;
   u->MyINFO = bf_copy (tmpbuf, 0);
+
   bf_free (tmpbuf);
 
   u->rights = CAP_OP;
@@ -270,10 +272,10 @@ void proto_nmdc_user_freelist_add (user_t * user)
 
 void proto_nmdc_user_freelist_clear ()
 {
+  user_t *o;
+
   /* destroy freelist */
   while (freelist) {
-    user_t *o;
-
     o = freelist;
     freelist = freelist->next;
 
@@ -432,7 +434,7 @@ int proto_nmdc_user_chat_all (user_t * u, buffer_t * message)
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
-  buf = bf_alloc (32 + NICKLENGTH + bf_used (message));
+  buf = bf_alloc (32 + NICKLENGTH + bf_size (message));
 
   proto_nmdc_user_say (u, buf, message);
 
@@ -450,7 +452,7 @@ int proto_nmdc_user_send (user_t * u, user_t * target, buffer_t * message)
   if (target->state == PROTO_STATE_DISCONNECTED)
     return EINVAL;
 
-  buf = bf_alloc (32 + NICKLENGTH + bf_used (message));
+  buf = bf_alloc (32 + NICKLENGTH + bf_size (message));
 
   proto_nmdc_user_say (u, buf, message);
 
@@ -471,7 +473,7 @@ int proto_nmdc_user_send_direct (user_t * u, user_t * target, buffer_t * message
   if (target->state == PROTO_STATE_DISCONNECTED)
     return EINVAL;
 
-  buf = bf_alloc (32 + NICKLENGTH + bf_used (message));
+  buf = bf_alloc (32 + NICKLENGTH + bf_size (message));
 
   proto_nmdc_user_say (u, buf, message);
 
@@ -489,7 +491,7 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
   if (target->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
-  buf = bf_alloc (32 + 3 * NICKLENGTH + bf_used (message));
+  buf = bf_alloc (32 + 3 * NICKLENGTH + bf_size (message));
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
   for (; message; message = message->next)
@@ -501,16 +503,16 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
 
   if (target->state == PROTO_STATE_VIRTUAL) {
     plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
-
-    bf_free (buf);
-    return 0;
+    goto leave;
   }
+
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, u, buf);
   cache_count (privatemessages, target);
 
   target->MessageCnt++;
   target->CacheException++;
 
+leave:
   bf_free (buf);
 
   return 0;
@@ -523,7 +525,7 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
   if (target->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
-  buf = bf_alloc (32 + 3 * NICKLENGTH + bf_used (message));
+  buf = bf_alloc (32 + 3 * NICKLENGTH + bf_size (message));
 
   bf_printf (buf, "$To: %s From: %s $<%s> ", target->nick, u->nick, source->nick);
   for (; message; message = message->next)
@@ -534,13 +536,12 @@ int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, b
 
   if (target->state == PROTO_STATE_VIRTUAL) {
     plugin_send_event (target->plugin_priv, PLUGIN_EVENT_PM_IN, buf);
-
-    bf_free (buf);
-    return 0;
+    goto leave;
   }
 
   server_write (target->parent, buf);
 
+leave:
   bf_free (buf);
 
   return 0;
@@ -638,7 +639,6 @@ user_t *proto_nmdc_user_alloc (void *priv)
 
 int proto_nmdc_user_free (user_t * user)
 {
-
   /* remove from the current user list */
   if (user->next)
     user->next->prev = user->prev;
@@ -888,7 +888,7 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
 
   buf = bf_alloc (10240);
 
-  bf_printf (buf, "<%s>", HubSec->nick);
+  bf_printf (buf, "<%s> ", HubSec->nick);
   bf_printf (buf, _("WARNING: "));
 
   va_start (ap, message);

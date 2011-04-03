@@ -597,6 +597,7 @@ unsigned int plugin_user_raw_all (buffer_t * message)
 unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buffer_t * message,
 				int direct)
 {
+  buffer_t *b;
   user_t *u, *t;
 
   if (src) {
@@ -606,9 +607,12 @@ unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buf
   }
 
   /* delete trailing \n */
-  if (bf_used (message) && (message->s[bf_used (message) - 1] == '\n')) {
-    message->s[bf_used (message) - 1] = '\0';
-    message->e--;
+  b = message;
+  while (b->next)
+    b = b->next;
+  if (bf_used (b) && (b->s[bf_used (b) - 1] == '\n')) {
+    b->s[bf_used (b) - 1] = '\0';
+    b->e--;
   }
 
   t = ((plugin_private_t *) target->private)->parent;
@@ -623,6 +627,7 @@ unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buf
 unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plugin_user_t * user,
 			       buffer_t * message, int direct)
 {
+  buffer_t *b;
   user_t *u, *t, *s;
 
   if (src) {
@@ -632,9 +637,12 @@ unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plug
   }
 
   /* delete trailing \n */
-  if (bf_used (message) && (message->s[bf_used (message) - 1] == '\n')) {
-    message->s[bf_used (message) - 1] = '\0';
-    message->e--;
+  b = message;
+  while (b->next)
+    b = b->next;
+  if (bf_used (b) && (b->s[bf_used (b) - 1] == '\n')) {
+    b->s[bf_used (b) - 1] = '\0';
+    b->e--;
   }
 
   t = ((plugin_private_t *) target->private)->parent;

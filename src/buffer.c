@@ -406,7 +406,7 @@ int bf_printf (buffer_t * dst, const char *format, ...)
 
   /* print to the buffer */
   va_start (ap, format);
-  retval = vsnprintf (gettext (dst->e), available, format, ap);
+  retval = vsnprintf (dst->e, available, gettext (format), ap);
   va_end (ap);
 
   /* make sure dst->e is always valid */
@@ -425,7 +425,7 @@ int bf_vprintf (buffer_t * dst, const char *format, va_list ap)
     return 0;
 
   /* print to the buffer */
-  retval = vsnprintf (gettext (dst->e), available, format, ap);
+  retval = vsnprintf (dst->e, available, gettext (format), ap);
 
   /* make sure dst->e is always valid */
   dst->e += (retval > available) ? available : retval;

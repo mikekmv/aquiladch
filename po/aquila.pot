@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-02 19:43+0100\n"
+"POT-Creation-Date: 2006-12-04 16:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -346,7 +346,7 @@ msgstr ""
 msgid "Group %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:920 src/builtincmd.c:964 src/builtincmd.c:1649
+#: src/builtincmd.c:920 src/builtincmd.c:964 src/builtincmd.c:1664
 msgid "You are not allowed to assign rights.\n"
 msgstr ""
 
@@ -604,235 +604,235 @@ msgid ""
 "%.*s\n"
 msgstr ""
 
-#: src/builtincmd.c:1564 src/builtincmd.c:1713
+#: src/builtincmd.c:1564 src/builtincmd.c:1728
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr ""
 
-#: src/builtincmd.c:1582 src/builtincmd.c:1605 src/builtincmd.c:1628
+#: src/builtincmd.c:1582 src/builtincmd.c:1613 src/builtincmd.c:1643
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1622
+#: src/builtincmd.c:1637
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr ""
 
-#: src/builtincmd.c:1655
+#: src/builtincmd.c:1670
 msgid "You are not allowed to assign: "
 msgstr ""
 
-#: src/builtincmd.c:1662
+#: src/builtincmd.c:1677
 msgid "You are not allowed to remove: "
 msgstr ""
 
-#: src/builtincmd.c:1691
+#: src/builtincmd.c:1706
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr ""
 
-#: src/builtincmd.c:1702
+#: src/builtincmd.c:1717
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1731
+#: src/builtincmd.c:1746
 msgid "All Data saved."
 msgstr ""
 
-#: src/builtincmd.c:1744
+#: src/builtincmd.c:1759
 msgid "Data reloaded."
 msgstr ""
 
-#: src/builtincmd.c:1760
+#: src/builtincmd.c:1775
 msgid "Errors during autosave:\n"
 msgstr ""
 
-#: src/builtincmd.c:1783
+#: src/builtincmd.c:1798
 msgid "Minimum length of a password."
 msgstr ""
 
-#: src/builtincmd.c:1784
+#: src/builtincmd.c:1799
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr ""
 
-#: src/builtincmd.c:1785
+#: src/builtincmd.c:1800
 msgid "User to send report to. Can be a chatroom."
 msgstr ""
 
-#: src/builtincmd.c:1786
+#: src/builtincmd.c:1801
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
 msgstr ""
 
-#: src/builtincmd.c:1787
+#: src/builtincmd.c:1802
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
 msgstr ""
 
-#: src/builtincmd.c:1790
+#: src/builtincmd.c:1805
 msgid "Make the HubSec say something."
 msgstr ""
 
-#: src/builtincmd.c:1791
+#: src/builtincmd.c:1806
 msgid "Make the HubSec warn user."
 msgstr ""
 
-#: src/builtincmd.c:1792
+#: src/builtincmd.c:1807
 msgid "Shut the hub down."
 msgstr ""
 
-#: src/builtincmd.c:1793
+#: src/builtincmd.c:1808
 msgid "Send a report to the OPs."
 msgstr ""
 
-#: src/builtincmd.c:1794
+#: src/builtincmd.c:1809
 msgid "Displays the Aquila version."
 msgstr ""
 
-#: src/builtincmd.c:1795
+#: src/builtincmd.c:1810
 msgid "Shows you your IP address."
 msgstr ""
 
-#: src/builtincmd.c:1796
+#: src/builtincmd.c:1811
 msgid "Kick a user. Automatic short ban included."
 msgstr ""
 
-#: src/builtincmd.c:1797
+#: src/builtincmd.c:1812
 msgid "Drop a user. Automatic short ban included."
 msgstr ""
 
-#: src/builtincmd.c:1798
+#: src/builtincmd.c:1813
 msgid "IP Ban a user by IP address."
 msgstr ""
 
-#: src/builtincmd.c:1799
+#: src/builtincmd.c:1814
 msgid "Nick ban a user by nick."
 msgstr ""
 
-#: src/builtincmd.c:1800
+#: src/builtincmd.c:1815
 msgid "Ban a user by nick."
 msgstr ""
 
-#: src/builtincmd.c:1801
+#: src/builtincmd.c:1816
 msgid "Show ban by nick/IP."
 msgstr ""
 
-#: src/builtincmd.c:1802
+#: src/builtincmd.c:1817
 msgid "Display help message."
 msgstr ""
 
-#: src/builtincmd.c:1803
+#: src/builtincmd.c:1818
 msgid "Unban a nick."
 msgstr ""
 
-#: src/builtincmd.c:1804
+#: src/builtincmd.c:1819
 msgid "Unban an ip."
 msgstr ""
 
-#: src/builtincmd.c:1805
+#: src/builtincmd.c:1820
 msgid "Hardban an IP."
 msgstr ""
 
-#: src/builtincmd.c:1806
+#: src/builtincmd.c:1821
 msgid "Unhardban an IP."
 msgstr ""
 
-#: src/builtincmd.c:1807
+#: src/builtincmd.c:1822
 msgid "Zombie a user. Can't talk or pm."
 msgstr ""
 
-#: src/builtincmd.c:1808
+#: src/builtincmd.c:1823
 msgid "Show the zombie horde."
 msgstr ""
 
-#: src/builtincmd.c:1809
+#: src/builtincmd.c:1824
 msgid "Unzombie a user. Can talk or pm again."
 msgstr ""
 
-#: src/builtincmd.c:1810
+#: src/builtincmd.c:1825
 msgid "Returns the user using the IP."
 msgstr ""
 
-#: src/builtincmd.c:1812
+#: src/builtincmd.c:1827
 msgid "Send a private message to all users."
 msgstr ""
 
-#: src/builtincmd.c:1814
+#: src/builtincmd.c:1829
 msgid "Add a user group."
 msgstr ""
 
-#: src/builtincmd.c:1815
+#: src/builtincmd.c:1830
 msgid "Delete a user group."
 msgstr ""
 
-#: src/builtincmd.c:1816
+#: src/builtincmd.c:1831
 msgid "Edit the rights of a user group."
 msgstr ""
 
-#: src/builtincmd.c:1817
+#: src/builtincmd.c:1832
 msgid "List all groups with their rights."
 msgstr ""
 
-#: src/builtincmd.c:1819
+#: src/builtincmd.c:1834
 msgid "Add a user."
 msgstr ""
 
-#: src/builtincmd.c:1820
+#: src/builtincmd.c:1835
 msgid "Delete a user."
 msgstr ""
 
-#: src/builtincmd.c:1821
+#: src/builtincmd.c:1836
 msgid "Edit the extra rights of a user."
 msgstr ""
 
-#: src/builtincmd.c:1822
+#: src/builtincmd.c:1837
 msgid "List all users of a user group."
 msgstr ""
 
-#: src/builtincmd.c:1823
+#: src/builtincmd.c:1838
 msgid "Show information of user."
 msgstr ""
 
-#: src/builtincmd.c:1824
+#: src/builtincmd.c:1839
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 
-#: src/builtincmd.c:1826
+#: src/builtincmd.c:1841
 msgid "Show configuration."
 msgstr ""
 
-#: src/builtincmd.c:1827
+#: src/builtincmd.c:1842
 msgid "Show configuration value help string."
 msgstr ""
 
-#: src/builtincmd.c:1828 src/builtincmd.c:1829
+#: src/builtincmd.c:1843 src/builtincmd.c:1844
 msgid "Set configuration values."
 msgstr ""
 
-#: src/builtincmd.c:1831
+#: src/builtincmd.c:1846
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 
-#: src/builtincmd.c:1832
+#: src/builtincmd.c:1847
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
 msgstr ""
 
-#: src/builtincmd.c:1834
+#: src/builtincmd.c:1849
 msgid "Change your password."
 msgstr ""
 
-#: src/builtincmd.c:1835
+#: src/builtincmd.c:1850
 msgid "Let the hub generate a random password."
 msgstr ""
 
-#: src/builtincmd.c:1837 src/builtincmd.c:1838
+#: src/builtincmd.c:1852 src/builtincmd.c:1853
 msgid "Let the hub CRASH!."
 msgstr ""
 
@@ -1414,7 +1414,7 @@ msgstr ""
 msgid "%s %s by %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:972 src/plugin.c:976 src/plugin.c:981 src/plugin.c:985
+#: src/plugin.c:980 src/plugin.c:984 src/plugin.c:989 src/plugin.c:993
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
 msgstr ""

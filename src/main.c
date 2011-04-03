@@ -351,7 +351,8 @@ int main (int argc, char **argv)
     /* 1s periodic cache flush */
     gettimeofday (&tnow, NULL);
     if (timercmp (&tnow, &tnext, >=)) {
-      tnext.tv_sec += 1;
+      while (timercmp (&tnow, &tnext, >=))
+	tnext.tv_sec += 1;
       now = tnow;
       nmdc_proto.flush_cache ();
     }
