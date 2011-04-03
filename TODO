@@ -1,5 +1,6 @@
 
 Develstatus:
+	- fix the unregsitered/registered/op counter?
 	- detect changes in *.conf files
 	- language suppport
 	- Add some sort of command "context" support. 

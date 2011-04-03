@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre1:
+	Fixes default settings for hub.buffer*timeout
 	Make stuff compile on cygwin again.
 	Make banned users a seperate counter from forcemoves.
 	Added CFG_ELEM_CAP support to LUA Set/GetConfig

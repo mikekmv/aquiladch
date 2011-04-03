@@ -25,7 +25,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
-#include <limit.h>
+#include <limits.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
