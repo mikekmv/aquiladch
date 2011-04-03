@@ -374,8 +374,12 @@ unsigned long pi_user_handler_clientban (plugin_user_t * user, buffer_t * output
   if (buf)
     bf_free (buf);
 
-  bf_printf (output, _("Client \"%s\" (%lf, %lf) added to banned list because: %s\n"), argv[1], min,
-	     max, argv[4]);
+  if (buf) {
+    bf_printf (output, _("Client \"%s\" (%lf, %lf) added to banned list because: %s\n"), argv[1],
+	       min, max, argv[4]);
+  } else {
+    bf_printf (output, _("Client \"%s\" (%lf, %lf) added to banned list\n"), argv[1], min, max);
+  }
 
   return 0;
 }
@@ -388,8 +392,13 @@ unsigned long pi_user_handler_clientlist (plugin_user_t * user, buffer_t * outpu
 
   dlhashlist_foreach (&clientbanlist, i) {
     dllist_foreach (dllist_bucket (&clientbanlist, i), b) {
-      bf_printf (output, _("Client \"%s\" (%lf, %lf) because: %.*s\n"), b->client, b->minVersion,
-		 b->maxVersion, bf_used (b->message), b->message->s);
+      if (b->message) {
+	bf_printf (output, _("Client \"%s\" (%lf, %lf) because: %.*s\n"), b->client, b->minVersion,
+		   b->maxVersion, bf_used (b->message), b->message->s);
+      } else {
+	bf_printf (output, _("Client \"%s\" (%lf, %lf)\n"), b->client, b->minVersion,
+		   b->maxVersion);
+      }
     }
   }
 

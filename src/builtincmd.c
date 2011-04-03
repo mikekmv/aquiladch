@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <time.h>
 #include <limits.h>
+#include <locale.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
@@ -1523,6 +1524,61 @@ leave:
   return 0;
 }
 
+unsigned long handler_setlocale (plugin_user_t * user, buffer_t * output, void *priv,
+				 unsigned int argc, unsigned char **argv)
+{
+  unsigned char *locale;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <local>", argv[0]);
+    return 0;
+  }
+
+  locale = setlocale (LC_MESSAGES, argv[1]);
+  if (locale) {
+    bf_printf (output, "Locale set to %s", locale);
+  } else {
+    bf_printf (output, "Locale %s could not be set.", argv[1]);
+  }
+
+  return 0;
+}
+
+unsigned long handler_getlocale (plugin_user_t * user, buffer_t * output, void *priv,
+				 unsigned int argc, unsigned char **argv)
+{
+  struct lconv *lconv;
+  char *env, *var;
+
+  var = "LANGUAGE";
+  env = getenv (var);
+  if (!env) {
+    var = "LC_ALL";
+    env = getenv (var);
+  }
+  if (!env) {
+    var = "LC_MESSAGES";
+    env = getenv (var);
+  }
+  if (!env) {
+    var = "LANG";
+    env = getenv (var);
+  }
+
+  if (var && env)
+    bf_printf (output, _("Local is determined by variable %s and set to %s\n"), var, env);
+
+  bf_printf (output, _("Locale is set to %s\n"), setlocale (LC_MESSAGES, NULL));
+
+  lconv = localeconv ();
+  if (*lconv->decimal_point != '.')
+    bf_printf (output,
+	       _
+	       ("WARNING: decimal point is '%c', this will cause problems in parsing tags. Set LC_NUMERIC to \"C\""));
+
+  return 0;
+}
+
 #ifdef DEBUG
 #include "stacktrace.h"
 unsigned long handler_crash (plugin_user_t * user, buffer_t * output, void *priv,
@@ -1882,6 +1938,10 @@ int builtincmd_init ()
   
   command_register ("passwd",     &handler_passwd,	0,            _("Change your password."));
   command_register ("pwgen",      &handler_pwgen,	0,            _("Let the hub generate a random password."));
+
+  command_register ("setlocale",  &handler_setlocale,	CAP_ADMIN,    _("Set the locale of the hub."));
+  command_register ("getlocale",  &handler_getlocale,	CAP_ADMIN,    _("Get the locale of the hub."));
+
 #ifdef DEBUG
   command_register ("crash",      &handler_crash,	CAP_OWNER,    _("Let the hub CRASH!."));
   command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let the hub CRASH!."));

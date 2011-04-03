@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta28\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-12 22:03+0100\n"
+"POT-Creation-Date: 2006-12-14 01:49+0100\n"
 "PO-Revision-Date: 2006-12-02 10:13+0200\n"
 "Last-Translator: maksalaatikko <maksis@adrenaline-network.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -16,87 +16,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/builtincmd.c:109
+#: src/builtincmd.c:110
 #, c-format
 msgid "Usage: %s <nick> <warning>"
 msgstr "Käyttö: %s <nick> <varoitus>"
 
-#: src/builtincmd.c:116 src/builtincmd.c:314 src/builtincmd.c:380
-#: src/builtincmd.c:434 src/builtincmd.c:480 src/builtincmd.c:684
-#: src/builtincmd.c:734 src/builtincmd.c:1215 src/builtincmd.c:1312
-#: src/builtincmd.c:1368 src/builtincmd.c:1373 src/builtincmd.c:1419
-#: src/builtincmd.c:1485
+#: src/builtincmd.c:117 src/builtincmd.c:315 src/builtincmd.c:381
+#: src/builtincmd.c:435 src/builtincmd.c:481 src/builtincmd.c:685
+#: src/builtincmd.c:735 src/builtincmd.c:1216 src/builtincmd.c:1313
+#: src/builtincmd.c:1369 src/builtincmd.c:1374 src/builtincmd.c:1420
+#: src/builtincmd.c:1486
 #, c-format
 msgid "User %s not found."
 msgstr "Käyttäjää %s ei löytynyt."
 
-#: src/builtincmd.c:123
+#: src/builtincmd.c:124
 #, c-format
 msgid "%s is WARNING you: "
 msgstr "%s is WARNING you: "
 
-#: src/builtincmd.c:155
+#: src/builtincmd.c:156
 msgid "Hub shutdown in progress."
 msgstr "Hub shutdown in progress. / Hubi sammutetaan."
 
-#: src/builtincmd.c:173
+#: src/builtincmd.c:174
 #, c-format
 msgid "This is %s Version %s"
 msgstr "This is %s Version %s"
 
-#: src/builtincmd.c:185
+#: src/builtincmd.c:186
 #, c-format
 msgid "Usage: %s <message>"
 msgstr "Käyttö: %s <viesti>"
 
-#: src/builtincmd.c:206
+#: src/builtincmd.c:207
 #, c-format
 msgid "Message sent to %lu users."
 msgstr "Viesti lähetetty %lu:lle käyttäjälle."
 
-#: src/builtincmd.c:222 src/builtincmd.c:301 src/builtincmd.c:366
+#: src/builtincmd.c:223 src/builtincmd.c:302 src/builtincmd.c:367
 #, c-format
 msgid "Usage: %s <nick> <reason>"
 msgstr "Käyttö: %s <nick> <syy>"
 
-#: src/builtincmd.c:229
+#: src/builtincmd.c:230
 msgid "Report could not be sent. Reporting is disabled."
 msgstr "Report could not be sent. Reporting is disabled."
 
-#: src/builtincmd.c:248
+#: src/builtincmd.c:249
 #, c-format
 msgid "User %s (%s) reports %s (%s): "
 msgstr "Käyttäjä %s (%s) ilmiantaa käyttäjän %s (%s): "
 
-#: src/builtincmd.c:250
+#: src/builtincmd.c:251
 #, c-format
 msgid "User %s (%s) reports %s (not logged in): "
 msgstr "Käyttäjä %s (%s) ilmiantaa käyttäjän %s (ei hubissa): "
 
-#: src/builtincmd.c:262
+#: src/builtincmd.c:263
 #, c-format
 msgid "Report could not be sent, %s not found."
 msgstr "Report could not be sent, %s not found."
 
-#: src/builtincmd.c:264
+#: src/builtincmd.c:265
 msgid "Report could not be sent, target not found."
 msgstr "Report could not be sent, target not found."
 
-#: src/builtincmd.c:273
+#: src/builtincmd.c:274
 msgid "Report sent."
 msgstr "Report sent."
 
-#: src/builtincmd.c:285
+#: src/builtincmd.c:286
 #, c-format
 msgid "Your IP is %s\n"
 msgstr "Your IP is %s\n"
 
-#: src/builtincmd.c:320
+#: src/builtincmd.c:321
 #, c-format
 msgid "Kicked user %s ( ip %s ) because: %.*s"
 msgstr "Potkittiin käyttäjä %s ( ip %s ), koska : %.*s"
 
-#: src/builtincmd.c:332 src/builtincmd.c:398
+#: src/builtincmd.c:333 src/builtincmd.c:399
 #, c-format
 msgid ""
 "\n"
@@ -105,7 +105,7 @@ msgstr ""
 "\n"
 "Bannitaan käyttäjä %s ajaksi\n"
 
-#: src/builtincmd.c:334 src/builtincmd.c:400
+#: src/builtincmd.c:335 src/builtincmd.c:401
 msgid ""
 "\n"
 "Banning user forever"
@@ -113,7 +113,7 @@ msgstr ""
 "\n"
 "Käyttäjä bannattu pysyvästi"
 
-#: src/builtincmd.c:339
+#: src/builtincmd.c:340
 #, c-format
 msgid ""
 "\n"
@@ -122,7 +122,7 @@ msgstr ""
 "\n"
 "Et voi bannata käyttäjiä pidemmäksi aikaa kuin %s kick-komennolla."
 
-#: src/builtincmd.c:343 src/builtincmd.c:408
+#: src/builtincmd.c:344 src/builtincmd.c:409
 msgid ""
 "\n"
 "Sorry, you cannot ban."
@@ -130,17 +130,17 @@ msgstr ""
 "\n"
 "Sinä et voi bannia."
 
-#: src/builtincmd.c:373
+#: src/builtincmd.c:374
 #, c-format
 msgid "You were dropped by %s because: "
 msgstr "You were dropped by %s because: "
 
-#: src/builtincmd.c:386
+#: src/builtincmd.c:387
 #, c-format
 msgid "Dropped user %s (ip %s) because: %.*s"
 msgstr "Pudotettiin käyttäjä %s (ip %s) ja syynä oli: %.*s"
 
-#: src/builtincmd.c:404
+#: src/builtincmd.c:405
 #, c-format
 msgid ""
 "\n"
@@ -149,288 +149,288 @@ msgstr ""
 "\n"
 "Et voi bannata käyttäjää pidemmäksi aikaa kuin %s drop-komennolla."
 
-#: src/builtincmd.c:428 src/builtincmd.c:474 src/builtincmd.c:533
-#: src/builtincmd.c:1272 src/builtincmd.c:1306 src/pi_user.c:331
+#: src/builtincmd.c:429 src/builtincmd.c:475 src/builtincmd.c:534
+#: src/builtincmd.c:1273 src/builtincmd.c:1307 src/pi_user.c:331
 #, c-format
 msgid "Usage: %s <nick>"
 msgstr "Käyttö: %s <nick>"
 
-#: src/builtincmd.c:440
+#: src/builtincmd.c:441
 #, c-format
 msgid "User %s's putrid flesh stinks up the place..."
 msgstr "User %s's putrid flesh stinks up the place..."
 
-#: src/builtincmd.c:452
+#: src/builtincmd.c:453
 msgid "The hub is infested by the following zombie horde:\n"
 msgstr "Zombiet tällä hetkellä:\n"
 
-#: src/builtincmd.c:463
+#: src/builtincmd.c:464
 msgid "No zombies found!\n"
 msgstr "Zombieita ei löytynyt!\n"
 
-#: src/builtincmd.c:486
+#: src/builtincmd.c:487
 #, c-format
 msgid "User %s's putrid flesh is miraculously restored..."
 msgstr "User %s's putrid flesh is miraculously restored..."
 
-#: src/builtincmd.c:498 src/builtincmd.c:552 src/builtincmd.c:575
+#: src/builtincmd.c:499 src/builtincmd.c:553 src/builtincmd.c:576
 #, c-format
 msgid "Usage: %s <ip>"
 msgstr "Käyttö: %s <ip>"
 
-#: src/builtincmd.c:507 src/builtincmd.c:516
+#: src/builtincmd.c:508 src/builtincmd.c:517
 #, c-format
 msgid "User %s is using IP %s\n"
 msgstr "Käyttäjä %s käyttää IP:tä %s\n"
 
-#: src/builtincmd.c:511 src/builtincmd.c:520
+#: src/builtincmd.c:512 src/builtincmd.c:521
 #, c-format
 msgid "No one using IP %s found."
 msgstr "Ketään IP:tä %s käyttävää ei löytynyt."
 
-#: src/builtincmd.c:523 src/builtincmd.c:563 src/builtincmd.c:586
+#: src/builtincmd.c:524 src/builtincmd.c:564 src/builtincmd.c:587
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address."
 msgstr "\"%s\" ei tunnistettu IP-osoitteeksi."
 
-#: src/builtincmd.c:538
+#: src/builtincmd.c:539
 #, c-format
 msgid "Nick %s unbanned."
 msgstr "Nickin %s banni poistettu."
 
-#: src/builtincmd.c:540
+#: src/builtincmd.c:541
 #, c-format
 msgid "No ban for nick %s found."
 msgstr "Nickille %s ei löytynyt banneja."
 
-#: src/builtincmd.c:558 src/builtincmd.c:581
+#: src/builtincmd.c:559 src/builtincmd.c:582
 #, c-format
 msgid "IP %s unbanned."
 msgstr "IP:n %s banni poistettu."
 
-#: src/builtincmd.c:560 src/builtincmd.c:583
+#: src/builtincmd.c:561 src/builtincmd.c:584
 #, c-format
 msgid "No ban for IP %s found."
 msgstr "IP:lle %s ei löytynyt banneja."
 
-#: src/builtincmd.c:602 src/builtincmd.c:770
+#: src/builtincmd.c:603 src/builtincmd.c:771
 #, c-format
 msgid "Usage: %s <ip/nick> [<period>] <reason>"
 msgstr "Käyttö: %s <ip/nick> [<aika>] <syy>"
 
-#: src/builtincmd.c:620
+#: src/builtincmd.c:621
 #, c-format
 msgid "IP Banning user %s (ip %s) forever: %.*s"
 msgstr "Bannitaan käyttäjän %s IP (ip %s) pysyvästi: %.*s"
 
-#: src/builtincmd.c:623
+#: src/builtincmd.c:624
 #, c-format
 msgid "IP Banning user %s (ip %s) for %s: %.*s"
 msgstr "Bannitaan käyttäjän %s IP (ip %s) %s %.*s ajaksi"
 
-#: src/builtincmd.c:629
+#: src/builtincmd.c:630
 #, c-format
 msgid "User %s offline, found in iplog\n"
 msgstr "Käyttäjä %s ei ole hubissa, mutta löytyi ip-logista\n"
 
-#: src/builtincmd.c:632
+#: src/builtincmd.c:633
 #, c-format
 msgid "IP Banning %s (ip %s) forever: %.*s."
 msgstr "Bannitaan IP %s (ip %s) pysyvästi: %.*s."
 
-#: src/builtincmd.c:635
+#: src/builtincmd.c:636
 #, c-format
 msgid "IP Banning %s (ip %s) for %s: %.*s"
 msgstr "Bannitaan IP %s (ip %s) %s: %.*s ajaksi"
 
-#: src/builtincmd.c:642
+#: src/builtincmd.c:643
 #, c-format
 msgid "IP Banning %s forever: %.*s."
 msgstr "Bannitaan IP %s pysyvästi: %.*s."
 
-#: src/builtincmd.c:645
+#: src/builtincmd.c:646
 #, c-format
 msgid "IP Banning %s for %s: %.*s"
 msgstr "Bannitaan IP %s %s: %.*s ajaksi"
 
-#: src/builtincmd.c:649
+#: src/builtincmd.c:650
 #, c-format
 msgid "User not found or IP address not valid: %s\n"
 msgstr "Käyttäjää ei löytynyt tai IP-osoite ei ole kunnollinen: %s\n"
 
-#: src/builtincmd.c:667 src/builtincmd.c:718
+#: src/builtincmd.c:668 src/builtincmd.c:719
 #, c-format
 msgid "Usage: %s <nick> [<period>] <reason>"
 msgstr "Käyttö: %s <nick> [<aika>] <syy>"
 
-#: src/builtincmd.c:689
+#: src/builtincmd.c:690
 #, c-format
 msgid "Banned nick %s forever: %.*s"
 msgstr "Nick %s bannittu pysyvästi: %.*s"
 
-#: src/builtincmd.c:691
+#: src/builtincmd.c:692
 #, c-format
 msgid "Banned nick %s for %s: %.*s"
 msgstr "Nick %s bannittu %s %.*s ajaksi"
 
-#: src/builtincmd.c:738
+#: src/builtincmd.c:739
 #, c-format
 msgid "User %s not online, found in iplog.\n"
 msgstr "Käyttäjä %s ei ole hubissa, mutta löydettiin ip-logista.\n"
 
-#: src/builtincmd.c:747
+#: src/builtincmd.c:748
 #, c-format
 msgid "Banning user %s (ip %s) forever: %.*s"
 msgstr "Bannitaan käyttäjä %s (ip %s) pysyvästi: %.*s"
 
-#: src/builtincmd.c:750
+#: src/builtincmd.c:751
 #, c-format
 msgid "Banning user %s (ip %s) for %s: %.*s"
 msgstr "Bannitaan käyttäjä %s (ip %s) %s: %.*s ajaksi"
 
-#: src/builtincmd.c:786
+#: src/builtincmd.c:787
 #, c-format
 msgid "HARD Banning user %s (ip %s) forever: %.*s"
 msgstr "HARD-bannitaan käyttäjä %s (ip %s) pysyvästi: %.*s"
 
-#: src/builtincmd.c:789
+#: src/builtincmd.c:790
 #, c-format
 msgid "HARD Banning user %s (ip %s) for %s: %.*s"
 msgstr "HARD-bannitaan käyttäjä %s (ip %s) %s: %.*s ajaksi"
 
-#: src/builtincmd.c:796
+#: src/builtincmd.c:797
 #, c-format
 msgid "HARD Banning ip %s forever: %.*s"
 msgstr "HARD-bannitaan ip %s pysyvästi: %.*s"
 
-#: src/builtincmd.c:799
+#: src/builtincmd.c:800
 #, c-format
 msgid "HARD Banning ip %s for %s: %.*s"
 msgstr "HARD-bannitaan ip %s %s: %.*s ajaksi"
 
-#: src/builtincmd.c:804
+#: src/builtincmd.c:805
 #, c-format
 msgid "User not found or ip address not valid: %s\n"
 msgstr "Käyttäjää ei löytynyt tai IP-osoite ei ole kelvollinen: %s\n"
 
-#: src/builtincmd.c:819 src/builtincmd.c:850
+#: src/builtincmd.c:820 src/builtincmd.c:851
 #, c-format
 msgid "Usage: %s [<ip|nick>]"
 msgstr "Käyttö: %s [<ip|nick>]"
 
-#: src/builtincmd.c:825 src/builtincmd.c:856
+#: src/builtincmd.c:826 src/builtincmd.c:857
 msgid "No bans found."
 msgstr "Banneja ei löydetty."
 
-#: src/builtincmd.c:830 src/builtincmd.c:861
+#: src/builtincmd.c:831 src/builtincmd.c:862
 #, c-format
 msgid "No IP bans found for %s"
 msgstr "IP:lle %s ei löydetty banneja"
 
-#: src/builtincmd.c:835 src/builtincmd.c:866
+#: src/builtincmd.c:836 src/builtincmd.c:867
 #, c-format
 msgid "No Nick bans found for %s"
 msgstr "Nickille %s ei löydetty banneja"
 
-#: src/builtincmd.c:887
+#: src/builtincmd.c:888
 msgid "Available commands:\n"
 msgstr "Available commands / Käytettävissä olevat komennot:\n"
 
-#: src/builtincmd.c:893
+#: src/builtincmd.c:894
 msgid "Commands are preceded with ! or +\n"
 msgstr "Commands are preceded with ! or + / Komentoja edeltää ! tai +\n"
 
-#: src/builtincmd.c:912
+#: src/builtincmd.c:913
 #, c-format
 msgid "Command %s not found.\n"
 msgstr "Command %s not found.\n"
 
-#: src/builtincmd.c:931
+#: src/builtincmd.c:932
 #, c-format
 msgid "Usage: %s <group> <rights>...\n"
 msgstr "Käyttö: %s <ryhmä> <oikeudet>...\n"
 
-#: src/builtincmd.c:937
+#: src/builtincmd.c:938
 #, c-format
 msgid "Group %s already exists.\n"
 msgstr "Ryhmä %s on jo olemassa.\n"
 
-#: src/builtincmd.c:952 src/builtincmd.c:996 src/builtincmd.c:1697
+#: src/builtincmd.c:953 src/builtincmd.c:997 src/builtincmd.c:1753
 msgid "You are not allowed to assign rights.\n"
 msgstr "Et pysty määrittämään oikeuksia.\n"
 
-#: src/builtincmd.c:956 src/builtincmd.c:1000
+#: src/builtincmd.c:957 src/builtincmd.c:1001
 msgid "You are not allowed to assign the following rights to this group: "
 msgstr "Et pysty määrittämään seuraavia oikeuksia tälle ryhmälle: "
 
-#: src/builtincmd.c:965
+#: src/builtincmd.c:966
 #, c-format
 msgid "Group %s created with: "
 msgstr "Ryhmä %s luotu: "
 
-#: src/builtincmd.c:980
+#: src/builtincmd.c:981
 #, c-format
 msgid "Usage: %s <group> <[+]right/-right>...\n"
 msgstr "Käyttö: %s <ryhmä> <[+]oikeus/-oikeus>...\n"
 
-#: src/builtincmd.c:986 src/builtincmd.c:1040 src/builtincmd.c:1092
-#: src/builtincmd.c:1132
+#: src/builtincmd.c:987 src/builtincmd.c:1041 src/builtincmd.c:1093
+#: src/builtincmd.c:1133
 #, c-format
 msgid "Group %s does not exist.\n"
 msgstr "Ryhmää %s ei ole olemassa.\n"
 
-#: src/builtincmd.c:1008
+#: src/builtincmd.c:1009
 msgid "You are not allowed to remove the following rights from this group: "
 msgstr "Et pysty poistamaan seuraavia oikeuksia tältä ryhmältä: "
 
-#: src/builtincmd.c:1019
+#: src/builtincmd.c:1020
 #, c-format
 msgid "Group %s modified. Current rights:"
 msgstr "Ryhmää %s muokattu. Nykyiset oikeudet:"
 
-#: src/builtincmd.c:1033
+#: src/builtincmd.c:1034
 #, c-format
 msgid "Usage: %s <group>"
 msgstr "Käyttö: %s <ryhmä>"
 
-#: src/builtincmd.c:1045
+#: src/builtincmd.c:1046
 #, c-format
 msgid "Group %s still has %ld users.\n"
 msgstr "Ryhmässä %s on yhä %ld käyttäjää.\n"
 
-#: src/builtincmd.c:1050
+#: src/builtincmd.c:1051
 #, c-format
 msgid "Group %s deleted.\n"
 msgstr "Ryhmä %s poistettu.\n"
 
-#: src/builtincmd.c:1095
+#: src/builtincmd.c:1096
 #, c-format
 msgid "Group %s: "
 msgstr "Ryhmä %s: "
 
-#: src/builtincmd.c:1123
+#: src/builtincmd.c:1124
 #, c-format
 msgid "Usage: %s <nick> <group> [<rights...>]"
 msgstr "Käyttö: %s <nick> <ryhmä> [<oikeudet...>]"
 
-#: src/builtincmd.c:1128
+#: src/builtincmd.c:1129
 #, c-format
 msgid "User %s already exists.\n"
 msgstr "Käyttäjätili %s on jo olemassa.\n"
 
-#: src/builtincmd.c:1142 src/builtincmd.c:1383
+#: src/builtincmd.c:1143 src/builtincmd.c:1384
 msgid "You are not allowed to assign a user to this group.\n"
 msgstr "Et pysty siirtämään käyttäjää tähän ryhmään.\n"
 
-#: src/builtincmd.c:1148 src/builtincmd.c:1210
+#: src/builtincmd.c:1149 src/builtincmd.c:1211
 msgid "You are not allowed to assign a user extra rights.\n"
 msgstr "Et pysty määrittämään käyttäjän ylimääräisiä oikeuksia.\n"
 
-#: src/builtincmd.c:1152
+#: src/builtincmd.c:1153
 msgid "You are not allowed to assign this user: "
 msgstr "Et pysty määrittämään tätä käyttäjää: "
 
-#: src/builtincmd.c:1163 src/builtincmd.c:1252
+#: src/builtincmd.c:1164 src/builtincmd.c:1253
 #, c-format
 msgid ""
 "User %s created with group %s.\n"
@@ -439,7 +439,7 @@ msgstr ""
 "Käyttäjä %s luotu ryhmään %s.\n"
 "Nykyiset oikeudet:"
 
-#: src/builtincmd.c:1177
+#: src/builtincmd.c:1178
 #, c-format
 msgid ""
 "You have been registered by %s. Please use !passwd <password> to set a "
@@ -448,7 +448,7 @@ msgstr ""
 "You have been registered by %s. Please use !passwd <password> to set a "
 "password and relogin to gain your new rights. You have been assigned:\n"
 
-#: src/builtincmd.c:1186
+#: src/builtincmd.c:1187
 msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
@@ -456,7 +456,7 @@ msgstr ""
 "Käyttäjä on jo kirjautunut sisään. Häntä on kehoitettu asettamaan salasana "
 "ja yhdistämään hubiin uudestaan.\n"
 
-#: src/builtincmd.c:1190
+#: src/builtincmd.c:1191
 #, c-format
 msgid ""
 "No user with nickname %s is currently logged in. Please notify the user "
@@ -465,49 +465,49 @@ msgstr ""
 "Hubissa ei ole tällä hetkellä nickillä %s olevaa käyttäjää. Ilmoita "
 "käyttäjälle itse hänen tunnuksistaan.\n"
 
-#: src/builtincmd.c:1204
+#: src/builtincmd.c:1205
 #, c-format
 msgid "Usage: %s <nick> <[+]right/-right>...\n"
 msgstr "Käyttö: %s <nick> <[+]oikeus/-oikeus>...\n"
 
-#: src/builtincmd.c:1225
+#: src/builtincmd.c:1226
 msgid "You are not allowed to assign the following rights to this user: "
 msgstr "Et pysty määrittämään seuraavia oikeuksia tälle käyttäjälle: "
 
-#: src/builtincmd.c:1232
+#: src/builtincmd.c:1233
 msgid "You are not allowed to touch: "
 msgstr "Et pysty koskemaan tähän käyttäjään: "
 
-#: src/builtincmd.c:1245
+#: src/builtincmd.c:1246
 #, c-format
 msgid "Warning! User %s is still awarded the following rights by his group:"
 msgstr ""
 "Varoitus! Käyttäjällä %s on yhä seuraavat oikeudet hänen ryhmänsä "
 "perusteella:"
 
-#: src/builtincmd.c:1259
+#: src/builtincmd.c:1260
 msgid ""
 "User is already logged in. Tell him to rejoin to gain all his new rights.\n"
 msgstr ""
 "Käyttäjä on jo hubissa. Kerro häntä yhdistämään hubiin uudestaan saadakseen "
 "uudet oikeutensa.\n"
 
-#: src/builtincmd.c:1277
+#: src/builtincmd.c:1278
 #, c-format
 msgid "User account %s does not exist.\n"
 msgstr "Käyttäjätiliä %s ei ole olemassa.\n"
 
-#: src/builtincmd.c:1283
+#: src/builtincmd.c:1284
 #, c-format
 msgid "You are not allowed to delete user %s.\n"
 msgstr "Et pysty poistamaan käyttäjätiliä %s.\n"
 
-#: src/builtincmd.c:1288
+#: src/builtincmd.c:1289
 #, c-format
 msgid "User account %s deleted.\n"
 msgstr "Käyttäjätili %s poistettu.\n"
 
-#: src/builtincmd.c:1292
+#: src/builtincmd.c:1293
 msgid ""
 "User is still logged in with all rights of the deleted account. Kick the "
 "user to take them away.\n"
@@ -515,59 +515,59 @@ msgstr ""
 "Käyttäjä on yhä hubissa ja hänellä on poistetun tilin oikeudet käytössä. "
 "Poista oikeudet potkaisemalla käyttäjä.\n"
 
-#: src/builtincmd.c:1314
+#: src/builtincmd.c:1315
 #, c-format
 msgid "User information for user %s\n"
 msgstr "Tiedot käyttäjästä %s\n"
 
-#: src/builtincmd.c:1318
+#: src/builtincmd.c:1319
 #, c-format
 msgid "Group %s, Rights: "
 msgstr "Ryhmä %s, Oikeudet: "
 
-#: src/builtincmd.c:1323
+#: src/builtincmd.c:1324
 msgid "Users password is NOT set.\n"
 msgstr "Käyttäjän salasanaa EI ole asetettu.\n"
 
-#: src/builtincmd.c:1324
+#: src/builtincmd.c:1325
 #, c-format
 msgid "User was registered by %s on %s"
 msgstr "Käyttäjän on rekisteröinyt %s päivänä %s"
 
-#: src/builtincmd.c:1331
+#: src/builtincmd.c:1332
 #, c-format
 msgid ", last login %s\n"
 msgstr ", kirjautunut edellisen kerran %s\n"
 
-#: src/builtincmd.c:1335
+#: src/builtincmd.c:1336
 msgid ", never logged in.\n"
 msgstr ", ei ole ikinä kirjautunut hubiin.\n"
 
-#: src/builtincmd.c:1341
+#: src/builtincmd.c:1342
 #, c-format
 msgid "Using Client %s version %s\n"
 msgstr "Käyttää clientin %s versiota %s\n"
 
-#: src/builtincmd.c:1349
+#: src/builtincmd.c:1350
 #, c-format
 msgid "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 msgstr "IP: %s Hubit: (%u, %u, %u), Slotit %u\n"
 
-#: src/builtincmd.c:1363
+#: src/builtincmd.c:1364
 #, c-format
 msgid "Usage: %s <nick> <group>"
 msgstr "Käyttö: %s <nick> <ryhmä>"
 
-#: src/builtincmd.c:1379
+#: src/builtincmd.c:1380
 msgid "You are not allowed to remove a user from this group.\n"
 msgstr "Et pysty poistamaan tässä ryhmässä olevien käyttäjätilejä.\n"
 
-#: src/builtincmd.c:1395
+#: src/builtincmd.c:1396
 #, c-format
 msgid "Moved user %s from group %s to %s\n"
 msgstr "Siirrettiin käyttäjä %s ryhmästä %s ryhmään %s\n"
 
-#: src/builtincmd.c:1411
+#: src/builtincmd.c:1412
 #, c-format
 msgid ""
 "Usage: %s [<nick>] <password>\n"
@@ -576,12 +576,12 @@ msgstr ""
 "Käyttö: %s [<nick>] <salasana>\n"
 " Jos nickiä ei laiteta, vaihtaa oman salasanasi."
 
-#: src/builtincmd.c:1425 src/builtincmd.c:1490
+#: src/builtincmd.c:1426 src/builtincmd.c:1491
 #, c-format
 msgid "You are not allowed to change %s's password\n"
 msgstr "Et pysty vaihtamaan käyttäjän %s salasanaa\n"
 
-#: src/builtincmd.c:1434
+#: src/builtincmd.c:1435
 msgid ""
 "The password is unacceptable, please choose another. You specified a known "
 "account name as your password.\n"
@@ -590,7 +590,7 @@ msgstr ""
 "olemassa olevan käyttäjätilin. The password is unacceptable, please choose "
 "another. You specified a known account name as your password.\n"
 
-#: src/builtincmd.c:1441
+#: src/builtincmd.c:1442
 msgid ""
 "The password is unacceptable, please choose another. You specified a logged "
 "in username as your password.\n"
@@ -599,23 +599,23 @@ msgstr ""
 "hubiin kirjautuneen käyttäjän nickin. The password is unacceptable, please "
 "choose another. You specified a logged in username as your password.\n"
 
-#: src/builtincmd.c:1446 src/builtincmd.c:1498
+#: src/builtincmd.c:1447 src/builtincmd.c:1499
 #, c-format
 msgid "No account for user %s.\n"
 msgstr "Käyttäjää %s ei ole rekisteröity.\n"
 
-#: src/builtincmd.c:1454
+#: src/builtincmd.c:1455
 #, c-format
 msgid ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
 msgstr ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
 
-#: src/builtincmd.c:1461 src/builtincmd.c:1521
+#: src/builtincmd.c:1462 src/builtincmd.c:1522
 msgid "Password set.\n"
 msgstr "Salasana asetettu / Password set.\n"
 
-#: src/builtincmd.c:1477
+#: src/builtincmd.c:1478
 #, c-format
 msgid ""
 "Usage: %s [<nick>]\n"
@@ -624,7 +624,7 @@ msgstr ""
 "Käyttö: %s [<nick>]\n"
 " Jos nickiä ei laiteta, vaihtaa oman salasanasi."
 
-#: src/builtincmd.c:1511
+#: src/builtincmd.c:1512
 #, c-format
 msgid ""
 "Your password was reset. It is now\n"
@@ -633,7 +633,7 @@ msgstr ""
 "Salasanasi nollattiin. Se on nyt \n"
 "%.*s\n"
 
-#: src/builtincmd.c:1515
+#: src/builtincmd.c:1516
 #, c-format
 msgid ""
 "The password of %s was reset. It is now\n"
@@ -642,66 +642,83 @@ msgstr ""
 "Käyttäjän %s salasana nollattiin. Se on nyt \n"
 "%.*s\n"
 
-#: src/builtincmd.c:1597 src/builtincmd.c:1761
+#: src/builtincmd.c:1569
+#, c-format
+msgid "Local is determined by variable %s and set to %s\n"
+msgstr ""
+
+#: src/builtincmd.c:1571
+#, c-format
+msgid "Locale is set to %s\n"
+msgstr ""
+
+#: src/builtincmd.c:1577
+#, c-format
+msgid ""
+"WARNING: decimal point is '%c', this will cause problems in parsing tags. "
+"Set LC_NUMERIC to \"C\""
+msgstr ""
+
+#: src/builtincmd.c:1653 src/builtincmd.c:1817
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr "%s !Tuntematon tyyppi!\n"
 
-#: src/builtincmd.c:1615 src/builtincmd.c:1646 src/builtincmd.c:1676
+#: src/builtincmd.c:1671 src/builtincmd.c:1702 src/builtincmd.c:1732
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr "Tuntematon arvo asetukselle %s\n"
 
-#: src/builtincmd.c:1670
+#: src/builtincmd.c:1726
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr "Käyttö: %s <asetus> <arvo>"
 
-#: src/builtincmd.c:1703
+#: src/builtincmd.c:1759
 msgid "You are not allowed to assign: "
 msgstr "Et pysty määrittämään: "
 
-#: src/builtincmd.c:1710
+#: src/builtincmd.c:1766
 msgid "You are not allowed to remove: "
 msgstr "Et pysty poistamaan: "
 
-#: src/builtincmd.c:1739
+#: src/builtincmd.c:1795
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr "\"%s\" ei ole kelvollinen IP-osoite.\n"
 
-#: src/builtincmd.c:1750
+#: src/builtincmd.c:1806
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr "Maksimiarvo tälle asetukselle on %s\n"
 
-#: src/builtincmd.c:1779
+#: src/builtincmd.c:1835
 msgid "All Data saved."
 msgstr "Kaikki tiedot tallennettu."
 
-#: src/builtincmd.c:1792
+#: src/builtincmd.c:1848
 msgid "Data reloaded."
 msgstr "Tiedot ladattu uudestaan."
 
-#: src/builtincmd.c:1808
+#: src/builtincmd.c:1864
 msgid "Errors during autosave:\n"
 msgstr "Errors during autosave:\n"
 
-#: src/builtincmd.c:1831
+#: src/builtincmd.c:1887
 msgid "Minimum length of a password."
 msgstr "Salasanan vähimmäispituus"
 
-#: src/builtincmd.c:1832
+#: src/builtincmd.c:1888
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr ""
 "Asetusten automaattisen tallennuksen ajanjakso. Aseta 0 poistaaksesi "
 "käytöstä."
 
-#: src/builtincmd.c:1833
+#: src/builtincmd.c:1889
 msgid "User to send report to. Can be a chatroom."
 msgstr "Käytäjä jolle ilmiannot lähetetään. Voi olla keskusteluhuone."
 
-#: src/builtincmd.c:1834
+#: src/builtincmd.c:1890
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
@@ -709,7 +726,7 @@ msgstr ""
 "Max banniaika, jonka voi antaa kick-komennolla (ja käyttämälä _ban_:a). Tämä "
 "ei vaikuta käyttäjään, joilla on ban-oikeus."
 
-#: src/builtincmd.c:1835
+#: src/builtincmd.c:1891
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
@@ -717,161 +734,161 @@ msgstr ""
 "Jos tämä on asetettu, käyttäjä, jolla ei ole ban-oikeutta voi bannata "
 "käyttämällä _ban_:a. Max aika voidaan asettaa asetuksella kickmaxbantime."
 
-#: src/builtincmd.c:1838
+#: src/builtincmd.c:1894
 msgid "Make the HubSec say something."
 msgstr "Laita HubSec sanomaan jotakin."
 
-#: src/builtincmd.c:1839
+#: src/builtincmd.c:1895
 msgid "Make the HubSec warn user."
 msgstr "Laita HubSec varoittamaan käyttäjää."
 
-#: src/builtincmd.c:1840
+#: src/builtincmd.c:1896
 msgid "Shut the hub down."
 msgstr "Sammuttaa hubin."
 
-#: src/builtincmd.c:1841
+#: src/builtincmd.c:1897
 msgid "Send a report to the OPs."
 msgstr "Send a report to the OPs. / Ilmianna käyttäjä operaattoreille"
 
-#: src/builtincmd.c:1842
+#: src/builtincmd.c:1898
 msgid "Displays the Aquila version."
 msgstr "Displays the Aquila version. / Näyttää Aquilan version"
 
-#: src/builtincmd.c:1843
+#: src/builtincmd.c:1899
 msgid "Shows you your IP address."
 msgstr "Shows you your IP address. / Näyttää IP-osoitteesi"
 
-#: src/builtincmd.c:1844
+#: src/builtincmd.c:1900
 msgid "Kick a user. Automatic short ban included."
 msgstr "Potkaise käyttäjä. Lyhyt banni lisätään automaattisesti."
 
-#: src/builtincmd.c:1845
+#: src/builtincmd.c:1901
 msgid "Drop a user. Automatic short ban included."
 msgstr "Pudottaa käyttäjän. Lyhyt banni lisätään automaattisesti."
 
-#: src/builtincmd.c:1846
+#: src/builtincmd.c:1902
 msgid "IP Ban a user by IP address."
 msgstr "Bannaa IP:n (arvoksi IP)."
 
-#: src/builtincmd.c:1847
+#: src/builtincmd.c:1903
 msgid "Nick ban a user by nick."
 msgstr "Bannaa käyttäjän nickin (laita arvoksi nick)."
 
-#: src/builtincmd.c:1848
+#: src/builtincmd.c:1904
 msgid "Ban a user by nick."
 msgstr "Bannaa käyttäjän (arvoksi nick)."
 
-#: src/builtincmd.c:1849
+#: src/builtincmd.c:1905
 msgid "Show ban by nick/IP."
 msgstr "Näyttää bannit tai voit myös laittaa arvoksi nick/IP)."
 
-#: src/builtincmd.c:1850
+#: src/builtincmd.c:1906
 msgid "Display help message."
 msgstr "Display help message. / Näyttää tämän help-viestin"
 
-#: src/builtincmd.c:1851
+#: src/builtincmd.c:1907
 msgid "Unban a nick."
 msgstr "Poista nickban."
 
-#: src/builtincmd.c:1852
+#: src/builtincmd.c:1908
 msgid "Unban an ip."
 msgstr "Poista IP-banni."
 
-#: src/builtincmd.c:1853
+#: src/builtincmd.c:1909
 msgid "Hardban an IP."
 msgstr "Laita IP:lle hardban."
 
-#: src/builtincmd.c:1854
+#: src/builtincmd.c:1910
 msgid "Unhardban an IP."
 msgstr "Poista IP:n hardban."
 
-#: src/builtincmd.c:1855
+#: src/builtincmd.c:1911
 #, fuzzy
 msgid "Show hard bans by nick/IP."
 msgstr "Näyttää bannit tai voit myös laittaa arvoksi nick/IP)."
 
-#: src/builtincmd.c:1856
+#: src/builtincmd.c:1912
 msgid "Zombie a user. Can't talk or pm."
 msgstr "Tee käyttäjästä Zombie. Ei voi lähettää viestejä."
 
-#: src/builtincmd.c:1857
+#: src/builtincmd.c:1913
 msgid "Show the zombie horde."
 msgstr "Listaa Zombiet."
 
-#: src/builtincmd.c:1858
+#: src/builtincmd.c:1914
 msgid "Unzombie a user. Can talk or pm again."
 msgstr "Palauttaa käyttäjän normaaliksi. Pystyy jälleen lähettämään viestejä."
 
-#: src/builtincmd.c:1859
+#: src/builtincmd.c:1915
 msgid "Returns the user using the IP."
 msgstr "Näytää annettulla IP:lla olevan käyttäjän ."
 
-#: src/builtincmd.c:1861
+#: src/builtincmd.c:1917
 msgid "Send a private message to all users."
 msgstr "Lähettää yksityisviestin kaikille käyttäjille."
 
-#: src/builtincmd.c:1863
+#: src/builtincmd.c:1919
 msgid "Add a user group."
 msgstr "Lisää käyttäjäryhmä."
 
-#: src/builtincmd.c:1864
+#: src/builtincmd.c:1920
 msgid "Delete a user group."
 msgstr "Poista käyttäjäryhmä."
 
-#: src/builtincmd.c:1865
+#: src/builtincmd.c:1921
 msgid "Edit the rights of a user group."
 msgstr "Muokkaa käyttäjäryhmän oikeuksia."
 
-#: src/builtincmd.c:1866
+#: src/builtincmd.c:1922
 msgid "List all groups with their rights."
 msgstr "Listaa kaikki ryhmät oikeuksineen."
 
-#: src/builtincmd.c:1868
+#: src/builtincmd.c:1924
 msgid "Add a user."
 msgstr "Lisää käyttäjätili."
 
-#: src/builtincmd.c:1869
+#: src/builtincmd.c:1925
 msgid "Delete a user."
 msgstr "Poista käyttäjätili."
 
-#: src/builtincmd.c:1870
+#: src/builtincmd.c:1926
 msgid "Edit the extra rights of a user."
 msgstr "Muokkaa käyttäjän ylimääräisiä oikeuksia."
 
-#: src/builtincmd.c:1871
+#: src/builtincmd.c:1927
 msgid "List all users of a user group."
 msgstr "Listaa annetun ryhmän kaikki käyttäjät."
 
-#: src/builtincmd.c:1872
+#: src/builtincmd.c:1928
 msgid "Show information of user."
 msgstr "Näyttää tietoa käyttäjästä / käyttäjätilistä."
 
-#: src/builtincmd.c:1873
+#: src/builtincmd.c:1929
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 "Siirtää käyttäjän uuteen ryhmään. Tulee voimaan uudelleen yhdistämisen "
 "jälkeen"
 
-#: src/builtincmd.c:1875
+#: src/builtincmd.c:1931
 msgid "Show configuration."
 msgstr "Näyttää nykyiset asetukset."
 
-#: src/builtincmd.c:1876
+#: src/builtincmd.c:1932
 msgid "Show configuration value help string."
 msgstr "Näyttää ohjeet asetusten laittamiseen."
 
-#: src/builtincmd.c:1877 src/builtincmd.c:1878
+#: src/builtincmd.c:1933 src/builtincmd.c:1934
 msgid "Set configuration values."
 msgstr "Aseta asetuksen arvo."
 
-#: src/builtincmd.c:1880
+#: src/builtincmd.c:1936
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 "Lataa tiedot asetustiedostoista. VAROITUS: Tallentamattomat muutokset "
 "häviävät."
 
-#: src/builtincmd.c:1881
+#: src/builtincmd.c:1937
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
@@ -879,15 +896,25 @@ msgstr ""
 "Tallentaa kaikki muutokset asetustiedostoihin. VAROITUS: Aikaisemmin "
 "tallennetut tiedot korvataan!"
 
-#: src/builtincmd.c:1883
+#: src/builtincmd.c:1939
 msgid "Change your password."
 msgstr "Vaihtaa oman salasanan."
 
-#: src/builtincmd.c:1884
+#: src/builtincmd.c:1940
 msgid "Let the hub generate a random password."
 msgstr "Anna hubin luoda satunnainen salasana"
 
-#: src/builtincmd.c:1886 src/builtincmd.c:1887
+#: src/builtincmd.c:1942
+#, fuzzy
+msgid "Set the locale of the hub."
+msgstr "Hubin nimi (laita \" väliin jos useita sanoja)."
+
+#: src/builtincmd.c:1943
+#, fuzzy
+msgid "Get the locale of the hub."
+msgstr "Hubin nimi (laita \" väliin jos useita sanoja)."
+
+#: src/builtincmd.c:1946 src/builtincmd.c:1947
 msgid "Let the hub CRASH!."
 msgstr ""
 
@@ -2450,36 +2477,46 @@ msgstr ""
 "Käyttö: !%s <clientin tagi> <minversio> <maxversio> <syy>\n"
 "Laita versioksi 0, mikäli ei tarpeellinen."
 
-#: src/pi_user.c:377
+#: src/pi_user.c:378
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) added to banned list because: %s\n"
 msgstr "Client \"%s\" (%lf, %lf) lisätty bannilistaan syyllä: %s\n"
 
-#: src/pi_user.c:391
+#: src/pi_user.c:381
+#, fuzzy, c-format
+msgid "Client \"%s\" (%lf, %lf) added to banned list\n"
+msgstr "Client \"%s\" (%lf, %lf) lisätty bannilistaan syyllä: %s\n"
+
+#: src/pi_user.c:396
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) because: %.*s\n"
 msgstr "Client \"%s\" (%lf, %lf) koska: %.*s\n"
 
-#: src/pi_user.c:397
+#: src/pi_user.c:399
+#, fuzzy, c-format
+msgid "Client \"%s\" (%lf, %lf)\n"
+msgstr "Client \"%s\" (%lf, %lf) koska: %.*s\n"
+
+#: src/pi_user.c:406
 msgid "No clients banned."
 msgstr "Yhtään clienttiä ei ole bannittu."
 
-#: src/pi_user.c:410
+#: src/pi_user.c:419
 #, c-format
 msgid "Usage: !%s <clientname> <min> <max>\n"
 msgstr "Käyttö: !%s <clientin nimi> <min> <max>\n"
 
-#: src/pi_user.c:418
+#: src/pi_user.c:427
 #, c-format
 msgid "Client \"%s\" removed from banlist\n"
 msgstr "Clientin \"%s\" poistettu bannilistasta\n"
 
-#: src/pi_user.c:420
+#: src/pi_user.c:429
 #, c-format
 msgid "Client \"%s\" not found in banlist\n"
 msgstr "Clientiä \"%s\" ei löydy bannilistasta\n"
 
-#: src/pi_user.c:462
+#: src/pi_user.c:471
 #, c-format
 msgid ""
 "WARNING: resourcelimit for this process allows a absolute maximum of %lu "
@@ -2489,7 +2526,7 @@ msgstr ""
 "lu käyttäjään, tällä hetkellä %lu asetettuma (järjestelmän ulimit "
 "mahdollisesti liian matala).\n"
 
-#: src/pi_user.c:472
+#: src/pi_user.c:481
 #, c-format
 msgid ""
 "WARNING: You are using an Aquila version based on select(). This limits the "
@@ -2500,7 +2537,7 @@ msgstr ""
 "hubin järkeväksi maksimikooksi %u. Tämän määrän ylittäminen voi kaataa "
 "hubin.\n"
 
-#: src/pi_user.c:479
+#: src/pi_user.c:488
 msgid ""
 "WARNING: You are using an Aquila version based on poll(). This limits the "
 "performance of your hub with larger sizes. Please consider moving to kernel "
@@ -2510,7 +2547,7 @@ msgstr ""
 "resurssien käyttöä suuremmilla käyttäjämäärillä. Harkitse 2.6 kernelin "
 "asentamista ja uutta glibc:ta.\n"
 
-#: src/pi_user.c:487
+#: src/pi_user.c:496
 msgid ""
 "WARNING: userlimit.registered equals userlimit.op. userlimit.registered "
 "includes the ops (since they are registered too): setting them equal means "
@@ -2521,117 +2558,117 @@ msgstr ""
 "yhtä  suuriksi tarkoittaa, että OP:t pääsevät hubiin, mutta muut "
 "rekisteröidyt käyttäjät eivät.\n"
 
-#: src/pi_user.c:521
+#: src/pi_user.c:530
 msgid "Maximum unregistered users."
 msgstr "Rekisteröitymättömien käyttäjien enimmäismäärä."
 
-#: src/pi_user.c:522
+#: src/pi_user.c:531
 msgid "Maximum registered users."
 msgstr "Rekisteröityneiden käyttäjien enimmäismäärä."
 
-#: src/pi_user.c:523
+#: src/pi_user.c:532
 msgid "Reserve place for this many ops in the registered users."
 msgstr ""
 "OP:iden enimmäismäärä (sisältyy rekisteröityneiden käyttäjien "
 "enimmäismäärään, eli laita pienempi arvo)."
 
-#: src/pi_user.c:527
+#: src/pi_user.c:536
 msgid "Minimum share requirement for unregistered users."
 msgstr "Vaadittava vähimmäisjako rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:528
+#: src/pi_user.c:537
 msgid "Minimum share requirement for registered users."
 msgstr "Vaadittava vähimmäisjako rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:529
+#: src/pi_user.c:538
 msgid "Minimum share requirement for OPS"
 msgstr "Vaadittava vähimmäisjako OP:ille"
 
-#: src/pi_user.c:531
+#: src/pi_user.c:540
 msgid "Minimum hubs for unregistered users."
 msgstr "Min hubit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:532
+#: src/pi_user.c:541
 msgid "Maximum hubs for unregistered users."
 msgstr "Max hubit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:533
+#: src/pi_user.c:542
 msgid "Minimum slots for unregistered users."
 msgstr "Min slotit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:534
+#: src/pi_user.c:543
 msgid "Maximum slots for unregistered users."
 msgstr "Max slotit rekisteröitymättömille käyttäjille."
 
-#: src/pi_user.c:535
+#: src/pi_user.c:544
 msgid "Minimum hubs/slot ratio for unregistered users."
 msgstr "Min hub/slot ratio rekisteröitymättömille."
 
-#: src/pi_user.c:537
+#: src/pi_user.c:546
 msgid "Minimum hubs for registered users."
 msgstr "Min hubit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:538
+#: src/pi_user.c:547
 msgid "Maximum hubs for registered users."
 msgstr "Max hubit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:539
+#: src/pi_user.c:548
 msgid "Minimum slots for registered users."
 msgstr "Min slotit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:540
+#: src/pi_user.c:549
 msgid "Maximum slots for registered users."
 msgstr "Max slotit rekisteröityneille käyttäjille."
 
-#: src/pi_user.c:541
+#: src/pi_user.c:550
 msgid "Minimum hubs/slot ratio for registered users."
 msgstr "Min hub/slot ratio rekisteröityneille."
 
-#: src/pi_user.c:543
+#: src/pi_user.c:552
 msgid "Minimum hubs for Operators."
 msgstr "Min hubit operaattoreille."
 
-#: src/pi_user.c:544
+#: src/pi_user.c:553
 msgid "Maximum hubs for Operators."
 msgstr "Max hubit operaattoreille."
 
-#: src/pi_user.c:545
+#: src/pi_user.c:554
 msgid "Minimum slots for Operators."
 msgstr "Min slotit operaattoreille."
 
-#: src/pi_user.c:546
+#: src/pi_user.c:555
 msgid "Maximum slots for Operators."
 msgstr "Max slotit operaattoreille."
 
-#: src/pi_user.c:547
+#: src/pi_user.c:556
 msgid "Minimum hubs/slot ratio for Operators."
 msgstr "Min hub/slot -suhde operaattoreille."
 
-#: src/pi_user.c:558
+#: src/pi_user.c:567
 msgid "Show logged in user counts."
 msgstr "Show logged in user counts."
 
-#: src/pi_user.c:560
+#: src/pi_user.c:569
 msgid "Ban a client."
 msgstr "Bannaa client."
 
-#: src/pi_user.c:561
+#: src/pi_user.c:570
 msgid "List client bans."
 msgstr "Listaa clientien bannit."
 
-#: src/pi_user.c:562
+#: src/pi_user.c:571
 msgid "Unban a client."
 msgstr "Poista clientin banni."
 
-#: src/pi_user.c:564
+#: src/pi_user.c:573
 msgid "Add a source IP restriction for a user."
 msgstr "Aseta IP-rajoitus käyttäjälle."
 
-#: src/pi_user.c:565
+#: src/pi_user.c:574
 msgid "Remove a source IP restriction for a user."
 msgstr "Poista IP-rajoitus käyttäjältä."
 
-#: src/pi_user.c:566
+#: src/pi_user.c:575
 msgid "Show source IP restrictions for a user."
 msgstr "Näytä käyttäjän IP-rajoitus."
 
