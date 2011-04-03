@@ -90,6 +90,10 @@ typedef struct {
   unsigned long searchoverflow;
   unsigned long searchevent;
   unsigned long searchtoolong;
+  unsigned long researchdrop;
+  unsigned long researchmatch;
+  unsigned long searchtth;
+  unsigned long searchnormal;
   unsigned long sroverflow;
   unsigned long srevent;
   unsigned long srrobot;

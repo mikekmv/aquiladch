@@ -429,6 +429,10 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " searchoverflow : %lu\n", nmdc_stats.searchoverflow);
   bf_printf (output, " searchtoolong : %lu\n", nmdc_stats.searchtoolong);
   bf_printf (output, " searchevent : %lu\n", nmdc_stats.searchevent);
+  bf_printf (output, " researchdrop : %lu\n", nmdc_stats.researchdrop);
+  bf_printf (output, " researchmatch : %lu\n", nmdc_stats.researchmatch);
+  bf_printf (output, " searchtth : %lu\n", nmdc_stats.searchtth);
+  bf_printf (output, " searchnormal : %lu\n", nmdc_stats.searchnormal);
   bf_printf (output, " srtoolong : %lu\n", nmdc_stats.srtoolong);
   bf_printf (output, " sroverflow : %lu\n", nmdc_stats.sroverflow);
   bf_printf (output, " srevent : %lu\n", nmdc_stats.srevent);

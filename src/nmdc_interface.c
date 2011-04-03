@@ -470,7 +470,11 @@ user_t *proto_nmdc_user_alloc (void *priv)
 
   /* yes, create and init user */
   user = malloc (sizeof (user_t));
+  if (!user)
+    return NULL;
   memset (user, 0, sizeof (user_t));
+
+  user->tthlist = tth_list_alloc (researchmaxcount);
 
   user->state = PROTO_STATE_INIT;
   user->parent = priv;
@@ -486,7 +490,6 @@ user_t *proto_nmdc_user_alloc (void *priv)
   /* warnings and searches start with a full token load ! */
   user->rate_warnings.tokens = rates.warnings.burst;
 
-
   /* protocol private data */
   user->pdata = malloc (sizeof (nmdc_user_t));
   memset (user->pdata, 0, sizeof (nmdc_user_t));
@@ -498,8 +501,6 @@ user_t *proto_nmdc_user_alloc (void *priv)
   user->prev = NULL;
 
   userlist = user;
-
-  searchlist_init (&user->searchlist);
 
   nmdc_stats.userjoin++;
 
@@ -575,8 +576,6 @@ int proto_nmdc_user_disconnect (user_t * u)
     u->MyINFO = NULL;
   }
 
-  searchlist_clear (&u->searchlist);
-
   if (u->supports & NMDC_SUPPORTS_ZLine)
     cache.ZlineSupporters--;
   if (u->supports & NMDC_SUPPORTS_ZPipe)
@@ -651,6 +650,8 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
 
 int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
 {
+  buffer_t *b;
+
   if (u->state == PROTO_STATE_DISCONNECTED)
     return 0;
 
@@ -659,10 +660,29 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
     return 0;
   }
 
-  nmdc_stats.redirect++;
-  nmdc_stats.forcemove--;
+  if (u->MessageCnt)
+    proto_nmdc_user_flush (u);
 
-  return proto_nmdc_user_forcemove (u, config.Redirect, message);
+  b = bf_alloc (265 + NICKLENGTH + strlen (config.Redirect) + bf_used (message));
+
+  if (message)
+    proto_nmdc_user_say (HubSec, b, message);
+
+  if (config.Redirect && *config.Redirect) {
+    bf_strcat (b, "$ForceMove ");
+    bf_strcat (b, config.Redirect);
+    bf_strcat (b, "|");
+  }
+
+  server_write (u->parent, b);
+  bf_free (b);
+
+  if (u->state != PROTO_STATE_DISCONNECTED)
+    server_disconnect_user (u->parent);
+
+  nmdc_stats.redirect++;
+
+  return 0;
 }
 
 int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *message, ...)
@@ -732,6 +752,10 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 
     o = freelist;
     freelist = freelist->next;
+
+    if (o->tthlist)
+      free (o->tthlist);
+
     if (o->plugin_priv)
       plugin_del_user ((plugin_private_t **) & o->plugin_priv);
     /* free protocol private data */

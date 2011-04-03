@@ -198,6 +198,8 @@ unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_
   bf_printf (b, "You have been kicked by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
 
+  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_KICK, b);
+
   retval =
     ((plugin_private_t *) u->plugin_priv)->proto->user_forcemove (u, config.KickBanRedirect, b);
 
@@ -230,6 +232,9 @@ unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer
 
   bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
+
+  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
+
   retval =
     ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
 
@@ -379,6 +384,9 @@ unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, b
 
   bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
+
+  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
+
   retval =
     ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
 
@@ -411,6 +419,9 @@ unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buff
 
   bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
 	     bf_used (message), message->s);
+
+  plugin_send_event (((plugin_private_t *) user->private), PLUGIN_EVENT_BAN, b);
+
   retval =
     ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
 

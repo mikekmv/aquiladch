@@ -914,7 +914,8 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output, buffer_t * b)
 {
   int retval = 0;
-  searchlist_entry_t *e = NULL;
+  tth_t tth;
+  tth_list_entry_t *e;
   buffer_t *ss = NULL;
   char *c = NULL;
   unsigned long deadline;
@@ -948,57 +949,32 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
       break;
     }
 
-    /* Do research handling */
-    for (c = tkn->argument; *c != ' '; c++);
-    c++;
-
     /* CAP_NOSRCHLIMIT avoids research option */
     if (!(u->rights & CAP_NOSRCHLIMIT)) {
-      for (e = u->searchlist.last; e; e = e->prev) {
-	/* see if search is cached */
-	if (!strcmp (e->data->s, c)) {
-	  /* was the search outside the minimum interval ? */
-	  if ((now.tv_sec - e->timestamp) < researchmininterval) {
+      if (u->tthlist && tth_harvest (&tth, tkn->argument)) {
+	nmdc_stats.searchtth++;
+	if ((e = tth_list_check (u->tthlist, &tth, researchperiod))) {
+	  if ((now.tv_sec - e->stamp) < researchmininterval) {
+	    /* search dropped because researched too quickly */
 	    proto_nmdc_user_warn (u, &now, "Do not repeat searches within %d seconds.",
 				  researchmininterval);
-	    /* no. restore search token and drop search */
 	    u->rate_search.tokens++;
-	    drop = 1;
-	    //DPRINTF ("Dropped research\n");
+	    nmdc_stats.researchdrop++;
 	    break;
 	  }
-	  /* was it done within the re-search period ? */
-	  if (deadline < e->timestamp) {
-	    //proto_nmdc_user_warn (u, &now, "Searches repeated within %u seconds are only send to users joined within that period.", researchperiod);
-	    /* if so, only search recent users */
-	    /* queue in re-searchqueue */
+	  if (deadline < e->stamp) {
 	    cache_queue (cache.aresearch, u, b);
 	    if (u->active) {
 	      cache_queue (cache.presearch, u, b);
 	    }
-	    drop = 1;
-	    //DPRINTF ("Doing RESEARCH\n");
+	    nmdc_stats.researchmatch++;
+	    break;
 	  }
-	  searchlist_update (&u->searchlist, e);
-	  break;
+	} else {
+	  tth_list_add (u->tthlist, &tth, now.tv_sec);
 	}
-      }
-      if (drop)
-	break;
-    }
-    /* if search wasn't cached, cache it */
-    if (!e) {
-      //DPRINTF ("New Search\n");
-      ss = bf_alloc (strlen (c) + 1);
-      bf_printf (ss, "%s", c);
-
-      /* if necessary, prune searchlist */
-      while (u->searchlist.count >= researchmaxcount)
-	searchlist_del (&u->searchlist, u->searchlist.first);
-
-      searchlist_add (&u->searchlist, u, ss);
-
-      bf_free (ss);
+      } else
+	nmdc_stats.searchnormal++;
     }
 
     /* TODO verify nick, mode and IP */
@@ -1207,8 +1183,7 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
     }
 
     if ((t->rights & CAP_SHAREBLOCK) && t->active) {
-      proto_nmdc_user_say (HubSec, output, bf_buffer ("You cannot download from this user."));
-      retval = server_write (u->parent, output);
+      proto_nmdc_user_warn (u, &now, "You cannot download from %s.", t->nick);
       break;
     }
 
@@ -1298,8 +1273,7 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
     }
 
     if (t->rights & CAP_SHAREBLOCK) {
-      proto_nmdc_user_say (HubSec, output, bf_buffer ("You cannot download from this user."));
-      retval = server_write (u->parent, output);
+      proto_nmdc_user_warn (u, &now, "You cannot download from %s.", t->nick);
       break;
     }
 
@@ -1329,7 +1303,6 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
   int l;
   unsigned char *c, *n;
   user_t *t;
-
   struct timeval now;
 
   gettimeofday (&now, NULL);
@@ -1442,6 +1415,8 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
   unsigned char *c, *who, *where, *why;
   user_t *target;
   unsigned int port;
+  struct timeval now;
+
 
   do {
     if (!(u->rights & CAP_REDIRECT))
@@ -1526,6 +1501,16 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
        }
      */
 
+    c = output->s;
+    bf_printf (output, "%s", why);
+    if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, output) != PLUGIN_RETVAL_CONTINUE) {
+      gettimeofday (&now, NULL);
+      proto_nmdc_user_warn (u, &now, "Redirect refused.\n");
+      output->s = c;
+      break;
+    }
+    output->s = c;
+
     /* move user.
      * this check will allow us to forcemove users that are not yet online.
      * while not forcemoving robots.
@@ -1572,11 +1557,20 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
     if (~u->rights & target->rights)
       break;
 
+    c = output->s;
     bf_printf (output, "You were kicked.");
     banlist_add (&softbanlist, u->nick, target->nick, target->ipaddress, 0xFFFFFFFF, output,
 		 now.tv_sec + config.defaultKickPeriod);
 
+    if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, NULL) != PLUGIN_RETVAL_CONTINUE) {
+      gettimeofday (&now, NULL);
+      proto_nmdc_user_warn (u, &now, "Redirect refused.\n");
+      output->s = c;
+      break;
+    }
+
     retval = proto_nmdc_user_forcemove (target, config.KickBanRedirect, output);
+    output->s = c;
   } while (0);
 
   return retval;

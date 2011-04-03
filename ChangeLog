@@ -1,5 +1,12 @@
 This is the Aquila Changelog.
 
+0.1.10-pre2:
+	Added support for EVENT_REDIRECT for $Forcemove
+	Added support for EVENT_KICK and EVENT_BAN.
+	Mention nick in warning if user cannot be downloaded from. 
+		(Req maksalaatikko)
+	Replaced string based research to TTH based research.
+
 0.1.10-pre1:
 	users with the "group" right can no longer downgrade higher users.
 		(Thanks Upgrade)

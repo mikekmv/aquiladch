@@ -105,6 +105,7 @@ int core_config_init ()
 
   config_register ("user.defaultrights",CFG_ELEM_CAP,  &config.DefaultRights,      "These are the rights of an unregistered user.");
 
+
   /* *INDENT-ON* */
 
   return 0;

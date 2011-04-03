@@ -25,7 +25,7 @@
 #include "buffer.h"
 #include "config.h"
 #include "leakybucket.h"
-#include "searchlist.h"
+#include "tth.h"
 
 #define PROTO_STATE_INIT         0	/* initial creation state */
 #define PROTO_STATE_SENDLOCK     1	/* waiting for user $Key */
@@ -94,7 +94,7 @@ typedef struct user {
   unsigned int CacheException;
 
   /* search caching */
-  searchlist_t searchlist;
+  tth_list_t *tthlist;
 
   /* cache data */
   buffer_t *MyINFO;
