@@ -2016,7 +2016,7 @@ unsigned long handler_luastat (plugin_user_t * user, buffer_t * output, void *pr
   bf_printf (output, "\nRunning LUA scripts:\n");
 
   for (ctx = lua_list.next; ctx != &lua_list; ctx = ctx->next) {
-    bf_printf (output, " %s\n", ctx->name);
+    bf_printf (output, " %s (%s)\n", ctx->name, format_size (lua_getgccount (ctx->l) * 1024));
   }
 
   return 1;

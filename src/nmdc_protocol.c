@@ -939,7 +939,9 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
   do {
 
     if (!(u->rights & CAP_SEARCH)) {
-      proto_nmdc_user_warn (u, &now, "You are not allowed to search.");
+      /* this is really annoying 
+         proto_nmdc_user_warn (u, &now, "You are not allowed to search."); 
+       */
       break;
     }
 

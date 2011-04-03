@@ -646,6 +646,7 @@ int proto_nmdc_user_free (user_t * user)
   };
 
   user->parent = NULL;
+
   /* if the user was online, put him in the cachelist. if he was kicked, don't. */
   if (!(user->flags & NMDC_FLAG_WASONLINE) || (user->flags & NMDC_FLAG_WASKICKED)) {
     proto_nmdc_user_freelist_add (user);
