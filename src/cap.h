@@ -20,26 +20,27 @@
 #ifndef _CAP_H_
 #define _CAP_H_
 
-#define CAP_SHARE  	 0x0001
-#define CAP_KICK   	 0x0002
-#define CAP_BAN    	 0x0004
-#define CAP_KEY    	 0x0008
-#define CAP_CONFIG 	 0x0010
-#define CAP_SAY    	 0x0020
-#define CAP_USER   	 0x0040
-#define CAP_GROUP  	 0x0080
-#define CAP_INHERIT	 0x0100
-#define CAP_CHAT   	 0x0200
-#define CAP_PM     	 0x0400
-#define CAP_DL	   	 0x0800
-#define CAP_BANHARD	 0x1000
-#define CAP_SEARCH	 0x2000
-#define CAP_PMOP	 0x4000
-#define CAP_TAG		 0x8000
-#define CAP_SHAREHIDE	0x10000
-#define CAP_SHAREBLOCK	0x20000
-#define CAP_SPAM	0x40000
-#define CAP_NOSRCHLIMIT 0x80000
+#define CAP_SHARE  	   0x0001
+#define CAP_KICK   	   0x0002
+#define CAP_BAN    	   0x0004
+#define CAP_KEY    	   0x0008
+#define CAP_CONFIG 	   0x0010
+#define CAP_SAY    	   0x0020
+#define CAP_USER   	   0x0040
+#define CAP_GROUP  	   0x0080
+#define CAP_INHERIT	   0x0100
+#define CAP_CHAT   	   0x0200
+#define CAP_PM     	   0x0400
+#define CAP_DL	   	   0x0800
+#define CAP_BANHARD	   0x1000
+#define CAP_SEARCH	   0x2000
+#define CAP_PMOP	   0x4000
+#define CAP_TAG		   0x8000
+#define CAP_SHAREHIDE	  0x10000
+#define CAP_SHAREBLOCK	  0x20000
+#define CAP_SPAM	  0x40000
+#define CAP_NOSRCHLIMIT   0x80000
+#define CAP_SOURCEVERIFY 0x100000
 #define CAP_OWNER	0x80000000
 
 /* shortcuts... */

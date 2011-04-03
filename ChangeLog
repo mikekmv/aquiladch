@@ -1,6 +1,32 @@
 This is the Aquila Changelog.
 
 0.1.9:
+	Fix: don't use timer.reset if time is equal.
+	Fixed: Chat* lua commands from hubsec in script init crashed hub on boot.
+	Added GetUserGroup, GroupFind and AccountFind functions.
+	Fixed crash with zombie bug.
+	Added client source IP requirement. Added CAP_SOURCEVERIFY to active check.
+	Clear banlists before load!
+	Fixed pi_hublist.c : buf when corrupt input.
+	Fixed poll build.
+	Fix crash with lua kick and ban functions.
+	Fix error message when unloading an unexisting script.
+	Added some pretty status code to the configure message.
+	Fix error message printing in pi_hublist.c
+	Fix that crash with the MyINFO update code too.
+	Point config name to correct config value :s.
+	Fix crash when tag was toolong, KickOnTagTooLong is set and the user has CAP_TAG assigned.
+	Added tag.KickOnTagTooLong. If this is set to 0, the tags are just hidden.
+	Print time remaining on time bans.
+	Added OP name to kick and ban messages.
+	Cleaned up kick and ban messages
+	Fixed ZPipe user counter. (reported FleetCommand)
+	whoip now returns all users with specified IP, not just the first hit (request FleetCommand).
+	Preliminary support for registering banning OP.
+	Merged banlistnick and banlist. Easier ban management by user (request FleetCommand).
+	Fixed bug with EventConfig : now correctly passes on new config element name.
+	Never load a lua script twice, replace the old version.
+	Fixed clientban (reported FleetCommand)
 	KickBanRedirect support was incomplete. (Reported maksalaatikko)
 	statbot fixed. was broken by cpu stats changes. (reported Blade)
 	Redid cpu stats again.

@@ -37,6 +37,7 @@
 #include "commands.h"
 #include "user.h"
 #include "cap.h"
+#include "config.h"
 
 const unsigned char *pi_lua_eventnames[] = {
   "EventLogin",
@@ -81,7 +82,7 @@ typedef struct lua_context {
 
 lua_context_t lua_list;
 
-unsigned int plugin_lua_close (unsigned char *name);
+unsigned int pi_lua_close (unsigned char *name);
 
 unsigned long long pi_lua_eventmap;
 
@@ -91,6 +92,9 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 
 
 #define PLUGIN_USER_FIND(arg) 	( (pi_lua_eventuser && !strcmp(arg, pi_lua_eventuser->nick)) ? pi_lua_eventuser : plugin_user_find (arg) )
+
+#define PUSH_TABLE_ENTRY(ctx, name, entry)  { lua_pushstring (ctx, name); lua_pushstring (ctx, entry); lua_settable(ctx, -3); }
+
 
 /******************************* LUA INTERFACE *******************************************/
 
@@ -470,6 +474,33 @@ int pi_lua_getuserrights (lua_State * lua)
   return 1;
 }
 
+int pi_lua_getusergroup (lua_State * lua)
+{
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  plugin_user_t *user;
+  account_t *acc;
+
+  user = PLUGIN_USER_FIND (nick);
+  if (!user)
+    goto leave;
+
+  if (!(user->flags & PLUGIN_FLAG_REGISTERED))
+    goto leave;
+
+  acc = account_find (user->nick);
+  if (!acc)
+    goto leave;
+
+  lua_pushstring (lua, acc->classp->name);
+
+  return 1;
+
+leave:
+  lua_pushnil (lua);
+
+  return 1;
+}
+
 
 /******************************************************************************************
  *  LUA Functions Bot handling
@@ -525,7 +556,7 @@ int pi_lua_user_kick (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_user_kick (u, b);
+  plugin_user_kick (NULL, u, b);
 
   bf_free (b);
 
@@ -581,7 +612,7 @@ int pi_lua_user_ban (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_user_ban (u, b, period);
+  plugin_user_ban (NULL, u, b, period);
 
   bf_free (b);
 
@@ -611,7 +642,7 @@ int pi_lua_user_bannick (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_user_bannick (u, b, period);
+  plugin_user_bannick (NULL, u, b, period);
 
   bf_free (b);
 
@@ -641,7 +672,7 @@ int pi_lua_user_banip (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_user_banip (u, b, period);
+  plugin_user_banip (NULL, u, b, period);
 
   bf_free (b);
 
@@ -671,7 +702,7 @@ int pi_lua_user_banip_hard (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_user_banip_hard (u, b, period);
+  plugin_user_banip_hard (NULL, u, b, period);
 
   bf_free (b);
 
@@ -701,7 +732,7 @@ int pi_lua_banip (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_ban_ip (ia.s_addr, netmask.s_addr, b, period);
+  plugin_ban_ip (NULL, ia.s_addr, netmask.s_addr, b, period);
 
   bf_free (b);
 
@@ -730,7 +761,7 @@ int pi_lua_banip_hard (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  plugin_ban_ip_hard (ia.s_addr, netmask.s_addr, b, period);
+  plugin_ban_ip_hard (NULL, ia.s_addr, netmask.s_addr, b, period);
 
   bf_free (b);
 
@@ -1114,6 +1145,33 @@ leave:
   return 1;
 }
 
+int pi_lua_account_find (lua_State * lua)
+{
+  account_t *acc;
+  buffer_t *b;
+
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+
+  acc = account_find (nick);
+  if (!acc)
+    goto leave;
+
+  lua_newtable (lua);
+
+  PUSH_TABLE_ENTRY (lua, "nick", acc->nick);
+
+  b = bf_alloc (10240);
+  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
+  PUSH_TABLE_ENTRY (lua, "rights", b->s);
+  bf_free (b);
+  PUSH_TABLE_ENTRY (lua, "group", acc->classp->name);
+
+  return 1;
+leave:
+  lua_pushnil (lua);
+  return 1;
+}
+
 int pi_lua_group_create (lua_State * lua)
 {
   unsigned int retval = 0;
@@ -1173,6 +1231,31 @@ leave:
   return 1;
 }
 
+int pi_lua_group_find (lua_State * lua)
+{
+  account_type_t *acc;
+  buffer_t *b;
+
+  unsigned char *name = (unsigned char *) luaL_checkstring (lua, 1);
+
+  acc = account_type_find (name);
+  if (!acc)
+    goto leave;
+
+  lua_newtable (lua);
+
+  PUSH_TABLE_ENTRY (lua, "name", acc->name);
+
+  b = bf_alloc (10240);
+  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
+  PUSH_TABLE_ENTRY (lua, "rights", b->s);
+  bf_free (b);
+
+  return 1;
+leave:
+  lua_pushnil (lua);
+  return 1;
+}
 
 /******************************************************************************************
  *  LUA Functions Custom Command Handling
@@ -1369,6 +1452,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"GetUserSlots", pi_lua_getuserslots,},
   {"GetUserHubs", pi_lua_getuserhubs,},
   {"GetUserRights", pi_lua_getuserrights,},
+  {"GetUserGroup", pi_lua_getusergroup,},
 
   {"UserIsOP", pi_lua_userisop,},
   {"UserIsActive", pi_lua_userisactive,},
@@ -1409,10 +1493,12 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"GroupCreate", pi_lua_group_create,},
   {"GroupInUse", pi_lua_group_inuse,},
   {"GroupDelete", pi_lua_group_inuse,},
+  {"GroupFind", pi_lua_group_find,},
   {"AccountCreate", pi_lua_account_create,},
   {"AccountDelete", pi_lua_account_delete,},
   {"AccountPasswd", pi_lua_account_passwd,},
   {"AccountPwGen", pi_lua_account_pwgen,},
+  {"AccountFind", pi_lua_account_find,},
 
   /* hubinfo stat related info */
   {"GetActualUsersTotal", pi_lua_getuserstotal,},
@@ -1485,11 +1571,16 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
   lua_State *l;
   lua_context_t *ctx;
 
-  /*
-   * All Lua contexts are held in this structure, we work with it almost
-   * all the time.
-   */
+  /* first we check if a script like this has already been loaded.. */
+  for (ctx = lua_list.next; ctx != &lua_list; ctx = ctx->next) {
+    if (!strcmp (name, ctx->name))
+      break;
+  };
 
+  if (ctx != &lua_list)
+    pi_lua_close (name);
+
+  /* load script */
   l = lua_open ();
   openlualibs (l);		/* Load Lua libraries */
   pi_lua_register_functions (l);	/* register lua commands */
@@ -1659,9 +1750,11 @@ unsigned long handler_luaclose (plugin_user_t * user, buffer_t * output, void *p
     return 0;
   }
 
-  pi_lua_close (argv[1]);
-
-  bf_printf (output, "Lua script '%s' unloaded.\n", argv[1]);
+  if (pi_lua_close (argv[1])) {
+    bf_printf (output, "Lua script '%s' unloaded.\n", argv[1]);
+  } else {
+    bf_printf (output, "Lua script '%s' not found.\n", argv[1]);
+  }
 
   return 0;
 }
@@ -1697,7 +1790,13 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 
     /* push arguments */
     lua_pushstring (ctx->l, (user ? user->nick : (unsigned char *) ""));
-    lua_pushstring (ctx->l, (token ? token->s : (unsigned char *) ""));
+    if (event == PLUGIN_EVENT_CONFIG) {
+      config_element_t *elem = (config_element_t *) token;
+
+      lua_pushstring (ctx->l, (elem ? elem->name : (unsigned char *) ""));
+    } else {
+      lua_pushstring (ctx->l, (token ? token->s : (unsigned char *) ""));
+    }
 
     /* call funtion. */
     result = lua_pcall (ctx->l, 2, 1, 0);
@@ -1821,6 +1920,8 @@ int pi_lua_init ()
   command_register ("luastat", &handler_luastat, CAP_CONFIG, "Show lua stats.");
   command_register ("luaload", &handler_luaload, CAP_CONFIG, "Load a lua script.");
   command_register ("luaremove", &handler_luaclose, CAP_CONFIG, "Remove a lua script.");
+
+  pi_lua_event_load (NULL, NULL, NULL, 0, NULL);
 
   return 0;
 }

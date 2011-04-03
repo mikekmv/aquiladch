@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.9-pre9]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.9-pre10]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -52,6 +52,18 @@ AC_ARG_ENABLE(profiler,
 	  no|false) 
 	  	 ;;
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-profiler);;
+	esac],
+	[])
+
+AC_ARG_ENABLE(testcoverage,
+	AC_HELP_STRING([--enable-testcoverage],[Turn on test coverage logging (default OFF)]),
+	[case "$enableval" in
+	  yes|true) 
+	  	sCFLAGS="${sCFLAGS} -fprofile-arcs -ftest-coverage"
+	  	 ;;
+	  no|false) 
+	  	 ;;
+	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-testcoverage);;
 	esac],
 	[])
 
@@ -199,7 +211,7 @@ AC_CHECK_LIB([lua$with_lua_suffix],
 AC_MSG_CHECKING([for liblua version 5.0.x ])
 save_CPPFLAGS="$CPPFLAGS"
 save_LIBS="$LIBS"
-CPPFLAGS="$PPCFLAGS $LUA_INCLUDES"
+CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
 LIBS="$LIBS $LUA_LIBS"
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
@@ -279,3 +291,48 @@ AC_CONFIG_FILES([Makefile
                  tools/Makefile])
 
 AC_OUTPUT
+
+echo "-------------------------------------------------------------------------------"
+echo "                            Aquila configuration"
+
+echo -n "   DEBUG Support                                     "
+if test x$debug = xtrue
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   EPOLL Support                                     "
+if test "${ALLOW_EPOLL}" != ""
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   POLL Support                                      "
+if test "${ALLOW_POLL}" != ""
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   ZLine/ZPipe Support                               "
+if test "${ZLINE}" != ""
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   LUA Support                                       "
+if test "${ALLOW_LUA}" != ""
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+echo "-------------------------------------------------------------------------------"
+

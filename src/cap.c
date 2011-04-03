@@ -53,6 +53,7 @@ cap_array_t Capabilities[] = {
 	{"shareblock",	CAP_SHAREBLOCK,	"This blocks everyone from downloading from this user. Only works for active users."},
 	{"spam",	CAP_SPAM,	"Users with this right can post messages as large as they want."},
 	{"nosrchlimit", CAP_NOSRCHLIMIT,"Users with this right are not subject to search limitations."},
+	{"sourceverify",CAP_SOURCEVERIFY,"User with this right are only allowed into the hub if their source IP is listed for their nick in the userrestict list."},
 	{0, 0, 0}
 };
 /* *INDENT-ON* */

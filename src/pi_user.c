@@ -27,12 +27,14 @@
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
+#include "banlist.h"
 #include "banlistclient.h"
 #include "utils.h"
 
 #include "esocket.h"
 
 #define PI_USER_CLIENTBANFILE "clientbanlist.conf"
+#define PI_USER_RESTRICTFILE "restrict.conf"
 
 typedef struct slotratio {
   unsigned int minslot;
@@ -43,6 +45,7 @@ typedef struct slotratio {
 } slotratio_t;
 
 
+banlist_t sourcelist;
 banlist_client_t clientbanlist;
 
 unsigned char *ClientBanFileName;
@@ -171,6 +174,18 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
     goto drop;
   }
 
+  /* check if the user requires source ip verification */
+  if ((user->rights & CAP_SOURCEVERIFY)
+      && (!banlist_find (&sourcelist, user->nick, user->ipaddress))) {
+    struct in_addr ip;
+
+    ip.s_addr = user->ipaddress;
+    plugin_user_printf (user, "Sorry, your login is not accepted from this IP (%s)",
+			inet_ntoa (ip));
+    goto drop;
+  }
+
+  /* check hub/slot/ratio values */
   if (!pi_user_check_user (user))
     goto drop;
 
@@ -248,6 +263,88 @@ unsigned long pi_user_event_logout (plugin_user_t * user, void *dummy, unsigned 
 
 /*************************************************************************************************************************/
 
+unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * output, void *priv,
+					    unsigned int argc, unsigned char **argv)
+{
+  struct in_addr ip, netmask;
+  plugin_user_t *tgt;
+
+  if (argc < 3) {
+    bf_printf (output, "Usage: %s <nick> <ip/network>", argv[0]);
+    return 0;
+  }
+
+  if (parse_ip (argv[2], &ip, &netmask)) {
+    banlist_add (&sourcelist, user->nick, argv[1], ip.s_addr, netmask.s_addr, bf_buffer (""), 0);
+    if ((tgt = plugin_user_find (argv[1]))) {
+      if (!(tgt->rights & CAP_SOURCEVERIFY)) {
+	bf_printf (output, "Please do not forget to assign the \"sourceverify\" right to user %s\n",
+		   argv[1]);
+      }
+    }
+    bf_printf (output, "User %s is now allowed to log in from %s\n", argv[1],
+	       print_ip (ip, netmask));
+  } else {
+    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address or network.", argv[2]);
+  }
+
+  return 0;
+}
+
+unsigned long pi_user_handler_userunrestrict (plugin_user_t * user, buffer_t * output, void *priv,
+					      unsigned int argc, unsigned char **argv)
+{
+  struct in_addr ip, netmask;
+  banlist_entry_t *e;
+
+  if (argc < 3) {
+    bf_printf (output, "Usage: %s <nick> <ip/network>", argv[0]);
+    return 0;
+  }
+
+  if (parse_ip (argv[2], &ip, &netmask)) {
+    e = banlist_find_exact (&sourcelist, argv[1], ip.s_addr, netmask.s_addr);
+    if (e) {
+      banlist_del (&sourcelist, e);
+      bf_printf (output, "User %s is no longer allowed to log in from %s\n", argv[1],
+		 print_ip (ip, netmask));
+    } else {
+      bf_printf (output, "Could not find source restriction \"%s\" for nick %s\n", argv[2],
+		 argv[1]);
+    }
+  } else {
+    bf_printf (output, "Sorry, \"%s\" is not a recognisable IP address or network.", argv[2]);
+  }
+
+  return 0;
+}
+
+unsigned long pi_user_handler_userrestrictlist (plugin_user_t * user, buffer_t * output, void *priv,
+						unsigned int argc, unsigned char **argv)
+{
+  int i;
+  struct in_addr ip, netmask;
+  banlist_entry_t *e = NULL;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <nick>", argv[0]);
+    return 0;
+  }
+
+  i = 0;
+  bf_printf (output, "Allow user %s from:\n", argv[1]);
+  while ((e = banlist_find_bynick_next (&sourcelist, e, argv[1]))) {
+    ip.s_addr = e->ip;
+    netmask.s_addr = e->netmask;
+    bf_printf (output, " Source %s\n", print_ip (ip, netmask));
+    i++;
+  }
+  if (!i)
+    bf_printf (output, " None.");
+
+  return 0;
+}
+
 unsigned long pi_user_handler_clientban (plugin_user_t * user, buffer_t * output, void *dummy,
 					 unsigned int argc, unsigned char **argv)
 {
@@ -264,13 +361,16 @@ unsigned long pi_user_handler_clientban (plugin_user_t * user, buffer_t * output
   sscanf (argv[2], "%lf", &min);
   sscanf (argv[3], "%lf", &max);
 
-  buf = bf_alloc (strlen (argv[4]));
-  if (argv[4])
+  if (argv[4]) {
+    buf = bf_alloc (strlen (argv[4]));
     bf_strcat (buf, argv[4]);
+  } else
+    buf = NULL;
 
   banlist_client_add (&clientbanlist, argv[1], min, max, buf);
 
-  bf_free (buf);
+  if (buf)
+    bf_free (buf);
 
   bf_printf (output, "Client \"%s\" (%lf, %lf) added to banned list because: %s\n", argv[1], min,
 	     max, argv[4]);
@@ -321,6 +421,7 @@ unsigned long pi_user_event_save (plugin_user_t * user, void *dummy, unsigned lo
 				  buffer_t * token)
 {
   banlist_client_save (&clientbanlist, ClientBanFileName);
+  banlist_save (&sourcelist, PI_USER_RESTRICTFILE);
   return PLUGIN_RETVAL_CONTINUE;
 }
 
@@ -329,6 +430,8 @@ unsigned long pi_user_event_load (plugin_user_t * user, void *dummy, unsigned lo
 {
   banlist_client_clear (&clientbanlist);
   banlist_client_load (&clientbanlist, ClientBanFileName);
+  banlist_clear (&sourcelist);
+  banlist_load (&sourcelist, PI_USER_RESTRICTFILE);
   return PLUGIN_RETVAL_CONTINUE;
 }
 
@@ -363,10 +466,15 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 #else
   if ((user_unregistered_max + user_registered_max + user_op_max) >= 5000) {
     bf_printf (buf,
-	       "WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n")
+	       "WARNING: You are using an Aquila version based on poll(). This limits the performance of your hub with larger sizes. Please consider moving to kernel version 2.6 and a recent glibc.\n");
   }
 #endif
 #endif
+
+  if (user_registered_max == user_op_max) {
+    bf_printf (buf,
+	       "WARNING: userlimit.registered equals userlimit.op. userlimit.registered includes the ops (since they are registered too): setting them equal means that you only allow OPs, but not normal registered users.\n");
+  }
 
   plugin_user_sayto (NULL, user, buf);
 
@@ -383,6 +491,7 @@ int pi_user_init ()
   int i;
 
   banlist_client_init (&clientbanlist);
+  banlist_init (&sourcelist);
 
   plugin_user = plugin_register ("user");
 
@@ -440,6 +549,10 @@ int pi_user_init ()
   command_register ("clientban",     &pi_user_handler_clientban,   CAP_CONFIG, "Ban a client.");
   command_register ("clientbanlist", &pi_user_handler_clientlist,  CAP_KEY,    "List client bans.");
   command_register ("clientunban",   &pi_user_handler_clientunban, CAP_CONFIG, "Unban a client.");
+
+  command_register ("userrestrict",     &pi_user_handler_userrestrict,     CAP_USER, "Add a source IP restriction for a user.");
+  command_register ("userunrestrict",   &pi_user_handler_userunrestrict,   CAP_USER, "Remove a source IP restriction for a user.");
+  command_register ("userrestrictlist", &pi_user_handler_userrestrictlist, CAP_USER, "Show source IP restrictions for a user.");
   
   /* *INDENT-ON* */  
 

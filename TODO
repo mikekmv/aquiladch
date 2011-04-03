@@ -1,23 +1,17 @@
 
 Develstatus:
-	- some right to avoid rates
-	- HubTopic
 	- add some directory locks. no two aquila instances from the same configs...
 	- check on doubly loaded scripts
-	- Possibility to ban prefixes and ip-ranges. (suggestion maksalaatikko)
 	- Fix the crash if the clock is set back...
 	- add nick checking for insane chars as spaces  ( $|<>:?*"/\)
 	- split up proto_nmdc_state_online
 	- event handler.
 		- add events for user creation and deletion. (Why??)
-	- add anti-flooder module (not for 0.1)
 	- SSL (not for 0.1)
 	- ADC (future)
 	- redo tag parsing, make it more flexible. (allow missing fields).
 	- md5 password hashing. preferably verlihub compatible.
-	- !topic
 	- add a hideuser right?
-	- redirection plugin
 
 Large changes:
 	- rebuild proto_nmdc_flush_cache()
@@ -26,10 +20,6 @@ Large changes:
 	- consider adding the chunked approach FarCry suggested for the nicklistcache
 	- command line parameters.
 		- config dir
-
-Plugins:
-	- nick rules: unwanted/required nick prefixes
-	- passive user module.
 
 Ideas:
 	- if i ever implement something of a congestion measure, i could add

@@ -107,8 +107,13 @@ buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
   if (*s == '<') {
     l = e - s;
     /* FIXME perhaps generate a custom tag? */
-    if ((l <= config.MaxTagLength) || (u->op))
+    if ((l <= config.MaxTagLength) || (u->op)) {
       bf_strncat (d, s, l);
+    } else {
+      if (config.DropOnTagTooLong) {
+	goto nuke;
+      }
+    }
   }
   bf_strcat (d, "$ $");
 

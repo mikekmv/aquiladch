@@ -42,8 +42,11 @@ banlist_client_entry_t *banlist_client_add (banlist_client_t * list, unsigned ch
   b->client[NICKLENGTH - 1] = 0;
   b->minVersion = minVersion;
   b->maxVersion = maxVersion;
-  b->message = reason;
-  bf_claim (reason);
+  if (reason) {
+    b->message = reason;
+    bf_claim (reason);
+  } else
+    b->message = bf_alloc (0);
 
   /* put in hashlist */
   dlhashlist_prepend (list, SuperFastHash (client, strlen (client)) & BANLIST_NICK_HASHMASK, b);
@@ -98,9 +101,9 @@ banlist_client_entry_t *banlist_client_find (banlist_client_t * list, unsigned c
     return e;
 
   if ((version >= e->minVersion) && (version <= e->maxVersion))
-    return 0;
+    return e;
 
-  return e;
+  return 0;
 }
 
 unsigned int banlist_client_cleanup (banlist_client_t * list)

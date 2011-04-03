@@ -95,11 +95,6 @@ int main (int argc, char **argv)
   pi_chatlog_init ();
   pi_statbot_init ();
   pi_hublist_init ();
-#ifdef ALLOW_LUA
-#ifdef HAVE_LUA_H
-  pi_lua_init ();
-#endif
-#endif
   plugin_config_load ();
 
   /* add lowest member of the statistices */
@@ -117,6 +112,13 @@ int main (int argc, char **argv)
   nmdc_setup (h);
   command_setup ();
   pi_hublist_setup (h);
+
+#ifdef ALLOW_LUA
+#ifdef HAVE_LUA_H
+  /* lua must only be loaded last. */
+  pi_lua_init ();
+#endif
+#endif
 
   /* main loop */
   gettimeofday (&tnext, NULL);

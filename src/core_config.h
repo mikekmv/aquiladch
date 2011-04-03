@@ -40,6 +40,7 @@ typedef struct {
   unsigned int MaxSpeedLength;
   unsigned int MaxEMailLength;
   unsigned int MaxShareLength;
+  unsigned int DropOnTagTooLong;
 
   /* user specific settings */
   unsigned long DefaultRights;

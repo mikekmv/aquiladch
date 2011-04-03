@@ -126,3 +126,28 @@ user_t *hash_find_ip (hashlist_t * list, unsigned long ip)
 
   return NULL;
 }
+
+user_t *hash_find_ip_next (hashlist_t * list, user_t * last, unsigned long ip)
+{
+  dllist_t *p;
+  user_t *u, *lst;
+  uint32_t h;
+
+  h = SuperFastHash ((const unsigned char *) &ip, 4);
+  h &= SERVER_HASH_MASK;
+
+  lst = dllist_bucket (&list->ip, h);
+  dllist_foreach (lst, p) {
+    u = (user_t *) ((char *) p - sizeof (dllist_t));
+    if (last) {
+      if (u != last)
+	continue;
+      last = NULL;
+      continue;
+    }
+    if (u->ipaddress == ip)
+      return u;
+  }
+
+  return NULL;
+}

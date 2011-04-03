@@ -47,7 +47,6 @@ unsigned long buffering = 0;
 
 /* banlist */
 banlist_t hardbanlist, softbanlist;
-banlist_nick_t nickbanlist;
 
 unsigned int es_type_server, es_type_listen;
 
@@ -141,7 +140,7 @@ int accept_new_user (esocket_t * s)
   }
 
   /* before all else, test hardban */
-  if (banlist_find (&hardbanlist, client_address.sin_addr.s_addr)) {
+  if (banlist_find_byip (&hardbanlist, client_address.sin_addr.s_addr)) {
     shutdown (r, SHUT_RDWR);
     close (r);
     return -1;
@@ -481,7 +480,7 @@ int server_init ()
 
   banlist_init (&hardbanlist);
   banlist_init (&softbanlist);
-  banlist_nick_init (&nickbanlist);
+  //banlist_nick_init (&nickbanlist);
 
   core_config_init ();
 

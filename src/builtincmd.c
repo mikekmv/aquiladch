@@ -267,7 +267,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
   /* rebuild reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "You were kicked by %s because: ", user->nick);
+  //bf_printf (buf, "You were kicked by %s because: ", user->nick);
   for (i = 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -298,7 +298,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
 	} else {
 	  bf_printf (output, "\nBanning user forever");
 	}
-	plugin_user_ban (target, buf, total);
+	plugin_user_ban (user, target, buf, total);
 	goto leave;
       } else {
 	bf_printf (output, "\nSorry. You cannot ban users for longer than ");
@@ -311,7 +311,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
   }
 
   /* actually kick the user. */
-  plugin_user_kick (target, buf);
+  plugin_user_kick (user, target, buf);
 
 leave:
   bf_free (buf);
@@ -367,8 +367,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
 	} else {
 	  bf_printf (output, "\nBanning user forever");
 	}
-	plugin_ban_nick (target->nick, buf, total);
-	plugin_ban_ip (target->ipaddress, 0xFFFFFFFF, buf, total);
+	plugin_user_ban (user, target, buf, total);
       } else {
 	bf_printf (output, "\nSorry. You cannot ban users for longer than ");
 	time_print (output, KickMaxBanTime);
@@ -447,8 +446,11 @@ unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv
   };
 
   if (inet_aton (argv[1], &ip)) {
-    if ((tgt = plugin_user_find_ip (ip.s_addr))) {
-      bf_printf (output, "User %s is using IP %s", tgt->nick, inet_ntoa (ip));
+    if ((tgt = plugin_user_find_ip (NULL, ip.s_addr))) {
+      do {
+	bf_printf (output, "User %s is using IP %s\n", tgt->nick, inet_ntoa (ip));
+	tgt = plugin_user_find_ip (tgt, ip.s_addr);
+      } while (tgt);
     } else {
       bf_printf (output, "No one using IP %s found.", inet_ntoa (ip));
     }
@@ -543,7 +545,6 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
     period = time_parse (argv[2]);
   }
 
-  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -558,10 +559,10 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
       time_print (output, period);
       bf_printf (output, ": %.*s", bf_used (buf), buf->s);
     }
-    plugin_user_banip (target, buf, period);
+    plugin_user_banip (user, target, buf, period);
   } else {
     if (parse_ip (argv[1], &ip, &netmask)) {
-      plugin_ban_ip (ip.s_addr, netmask.s_addr, buf, period);
+      plugin_ban_ip (user, ip.s_addr, netmask.s_addr, buf, period);
       if (!period) {
 	bf_printf (output, "IP Banning %s forever: %.*s.", print_ip (ip, netmask), bf_used (buf),
 		   buf->s);
@@ -601,7 +602,6 @@ unsigned long handler_bannick (plugin_user_t * user, buffer_t * output, void *pr
   /* build reason */
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -621,9 +621,9 @@ unsigned long handler_bannick (plugin_user_t * user, buffer_t * output, void *pr
   }
 
   if (target) {
-    plugin_user_bannick (target, buf, period);
+    plugin_user_bannick (user, target, buf, period);
   } else {
-    plugin_ban_nick (argv[1], buf, period);
+    plugin_ban_nick (user, argv[1], buf, period);
   }
 
   bf_free (buf);
@@ -651,7 +651,6 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
 
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -673,7 +672,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
     bf_printf (output, ": %.*s", bf_used (buf), buf->s);
   }
 
-  plugin_user_ban (target, buf, period);
+  plugin_user_ban (user, target, buf, period);
 
 leave:
   bf_free (buf);
@@ -700,7 +699,6 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
 
   buf = bf_alloc (1024);
   *buf->e = '\0';
-  bf_printf (buf, "[%s] ", user->nick);
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
@@ -715,7 +713,7 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
       time_print (output, period);
       bf_printf (output, ": %.*s", bf_used (buf), buf->s);
     }
-    plugin_user_banip_hard (target, buf, period);
+    plugin_user_banip_hard (user, target, buf, period);
   } else {
     if (parse_ip (argv[1], &ip, &netmask)) {
       if (!period) {
@@ -726,7 +724,7 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
 	time_print (output, period);
 	bf_printf (output, "%lus: %.*s", bf_used (buf), buf->s);
       }
-      plugin_ban_ip_hard (ip.s_addr, netmask.s_addr, buf, period);
+      plugin_ban_ip_hard (user, ip.s_addr, netmask.s_addr, buf, period);
     } else {
       bf_printf (output, "User not found or ip address not valid: %s\n", argv[1]);
     }
@@ -1377,6 +1375,13 @@ unsigned long handler_crash (plugin_user_t * user, buffer_t * output, void *priv
   ASSERT (0);
   return 0;
 }
+
+unsigned long handler_bug (plugin_user_t * user, buffer_t * output, void *priv,
+			   unsigned int argc, unsigned char **argv)
+{
+  strcpy ((void *) 1L, "");
+  return 0;
+}
 #endif
 
 /************************** config ******************************/
@@ -1648,7 +1653,7 @@ int builtincmd_init ()
 
   command_register ("say",        &handler_say,  	 CAP_SAY,     "Make the HubSec say something.");
   command_register ("warn",       &handler_warn,  	 CAP_KEY,     "Make the HubSec warn user.");
-  command_register ("shutdown",	  &handler_shutdown,     CAP_ADMIN,   "Shut the hub down.");
+  command_register ("shutdown",	  &handler_shutdown,     CAP_OWNER,   "Shut the hub down.");
   command_register ("report",     &handler_report,       0,           "Send a report to the OPs.");
   command_register ("version",    &handler_version,      0,           "Displays the Aquila version.");
   command_register ("myip",       &handler_myip,         0,           "Shows you your IP address.");
@@ -1667,7 +1672,7 @@ int builtincmd_init ()
   command_register ("unzombie",   &handler_unzombie,     CAP_KICK,    "Unzombie a user. Can talk or pm again.");
   command_register ("whoip",      &handler_whoip,        CAP_KICK,    "Returns the user using the IP.");
 
-  command_register ("massall",	  &handler_massall,    CAP_ADMIN,     "Send a private message to all users.");
+  command_register ("massall",	  &handler_massall,    CAP_CONFIG,     "Send a private message to all users.");
 
   command_register ("groupadd",   &handler_groupadd,   CAP_GROUP,     "Add a user group.");
   command_register ("groupdel",   &handler_groupdel,   CAP_GROUP,     "Delete a user group.");
@@ -1693,6 +1698,7 @@ int builtincmd_init ()
   command_register ("pwgen",      &handler_pwgen,	0,            "Let " HUBSOFT_NAME " generate a random password.");
 #ifdef DEBUG
   command_register ("crash",      &handler_crash,	CAP_OWNER,    "Let " HUBSOFT_NAME " CRASH!.");
+  command_register ("bug",	  &handler_bug,		CAP_OWNER,    "Let " HUBSOFT_NAME " CRASH!.");
 #endif
   gettimeofday (&savetime, NULL);
   

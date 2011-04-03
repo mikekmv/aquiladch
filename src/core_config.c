@@ -46,6 +46,7 @@ int core_config_init ()
   config.MaxSpeedLength       = DEFAULT_MAXSPEEDLENGTH;
   config.MaxEMailLength       = DEFAULT_MAXEMAILLENGTH;
   config.MaxShareLength       = DEFAULT_MAXSHARELENGTH;
+  config.DropOnTagTooLong     = DEFAULT_DROPONTAGTOOLONG;
   
   config.Redirect            = strdup (DEFAULT_REDIRECT);
   config.KickBanRedirect     = strdup (DEFAULT_REDIRECT);
@@ -63,11 +64,12 @@ int core_config_init ()
   config_register ("HubSecurity.Nick",   CFG_ELEM_STRING, &config.HubSecurityNick, "Name of the Hub Security bot.");
   config_register ("HubSecurity.Desc",   CFG_ELEM_STRING, &config.HubSecurityDesc, "Description of the Hub Security bot.");
 
-  config_register ("tag.MaxDescLength",  CFG_ELEM_UINT,   &config.MaxDescriptionLength, "Maximum Length of the users description field.");
-  config_register ("tag.MaxTagLength",   CFG_ELEM_UINT,   &config.MaxTagLength,    "Maximum length of the users tag field.");
-  config_register ("tag.MaxSpeedLength", CFG_ELEM_UINT,   &config.MaxSpeedLength,  "Maximum length of the users speed field.");
-  config_register ("tag.MaxEMailLength", CFG_ELEM_UINT,   &config.MaxEMailLength,  "Maximum length of the users email address field.");
-  config_register ("tag.MaxShareLength", CFG_ELEM_UINT,   &config.MaxShareLength,  "Maximum length of the users sharesize field.");
+  config_register ("tag.MaxDescLength",    CFG_ELEM_UINT,   &config.MaxDescriptionLength, "Maximum Length of the users description field.");
+  config_register ("tag.MaxTagLength",     CFG_ELEM_UINT,   &config.MaxTagLength,    "Maximum length of the users tag field.");
+  config_register ("tag.MaxSpeedLength",   CFG_ELEM_UINT,   &config.MaxSpeedLength,  "Maximum length of the users speed field.");
+  config_register ("tag.MaxEMailLength",   CFG_ELEM_UINT,   &config.MaxEMailLength,  "Maximum length of the users email address field.");
+  config_register ("tag.MaxShareLength",   CFG_ELEM_UINT,   &config.MaxShareLength,  "Maximum length of the users sharesize field.");
+  config_register ("tag.DropOnTagTooLong", CFG_ELEM_UINT,   &config.DropOnTagTooLong, "Kick the user if the tag is too long. If this is not set, the tag will be hidden.");
   
   config_register ("Redirect",           CFG_ELEM_STRING, &config.Redirect,        "Redirection target.");
   config_register ("KickBanRedirect",    CFG_ELEM_STRING, &config.KickBanRedirect, "Redirection target in case of kick or ban.");

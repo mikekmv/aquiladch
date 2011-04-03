@@ -36,6 +36,7 @@
 #include "config.h"
 #include "core_config.h"
 #include "plugin_int.h"
+#include "utils.h"
 
 #include "hashlist_func.h"
 
@@ -54,6 +55,8 @@
 **                                  DEFINES                                   **
 **                                                                            **
 \******************************************************************************/
+
+#define SKIPTOCHAR(var, end, ch)	for (; *var && (*var != ch) && (var < end); *var++)
 
 /******************************************************************************\
 **                                                                            **
@@ -829,9 +832,10 @@ int proto_nmdc_user_disconnect (user_t * u)
 
   searchlist_clear (&u->searchlist);
 
-  if (u->supports & NMDC_SUPPORTS_ZLine) {
+  if (u->supports & NMDC_SUPPORTS_ZLine)
     cache.ZlineSupporters--;
-  }
+  if (u->supports & NMDC_SUPPORTS_ZPipe)
+    cache.ZpipeSupporters--;
 
   u->state = PROTO_STATE_DISCONNECTED;
 
@@ -852,7 +856,7 @@ int proto_nmdc_user_forcemove (user_t * u, unsigned char *destination, buffer_t 
   if (u->MessageCnt)
     proto_nmdc_user_flush (u);
 
-  b = bf_alloc (265 + NICKLENGTH + bf_used (message) + strlen (destination));
+  b = bf_alloc (265 + NICKLENGTH + strlen (destination) + bf_used (message));
 
   if (message)
     proto_nmdc_user_say (HubSec, b, message);
@@ -1117,9 +1121,9 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
   int retval = 0;
   buffer_t *output;
   banlist_entry_t *ban;
-  banlist_nick_entry_t *nban;
   user_t *existing_user;
   account_t *a;
+  struct timeval now;
 
   if (tkn->type != TOKEN_VALIDATENICK)
     return 0;
@@ -1203,15 +1207,23 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     bf_strcat (output, "|");
 
     /* soft ban ? */
-    ban = banlist_find (&softbanlist, u->ipaddress);
+    ban = banlist_find_byip (&softbanlist, u->ipaddress);
     if (ban) {
       DPRINTF ("** Refused user %s. IP Banned because %.*s\n", u->nick,
 	       (unsigned int) bf_used (ban->message), ban->message->s);
       bf_strcat (output, "<");
       bf_strcat (output, HubSec->nick);
-      bf_strcat (output, "> You have been banned because: ");
+      bf_strcat (output, "> You have been banned by ");
+      bf_strcat (output, ban->op);
+      bf_strcat (output, " because: ");
       bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
+      if (ban->expire) {
+	gettimeofday (&now, NULL);
+	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
+	time_print (output, ban->expire - now.tv_sec);
+	bf_strcat (output, "|");
+      }
       if (defaultbanmessage && strlen (defaultbanmessage)) {
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
@@ -1223,15 +1235,23 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     }
 
     /* nickban ? */
-    nban = banlist_nick_find (&nickbanlist, u->nick);
-    if (nban) {
+    ban = banlist_find_bynick (&softbanlist, u->nick);
+    if (ban) {
       DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
-	       (unsigned int) bf_used (nban->message), nban->message->s);
+	       (unsigned int) bf_used (ban->message), ban->message->s);
       bf_strcat (output, "<");
       bf_strcat (output, HubSec->nick);
-      bf_strcat (output, "> You have been banned because: ");
-      bf_strncat (output, nban->message->s, bf_used (nban->message));
+      bf_strcat (output, "> You have been banned by ");
+      bf_strcat (output, ban->op);
+      bf_strcat (output, " because: ");
+      bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
+      if (ban->expire) {
+	gettimeofday (&now, NULL);
+	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
+	time_print (output, ban->expire - now.tv_sec);
+	bf_strcat (output, "|");
+      }
       if (defaultbanmessage && strlen (defaultbanmessage)) {
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
@@ -1273,7 +1293,8 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
   account_type_t *t;
   buffer_t *output;
   user_t *existing_user;
-  banlist_nick_entry_t *nban;
+  banlist_entry_t *ban;
+  struct timeval now;
 
   if (tkn->type != TOKEN_MYPASS)
     return 0;
@@ -1311,15 +1332,23 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
     };
 
     /* nickban ? not for owner offcourse */
-    nban = banlist_nick_find (&nickbanlist, u->nick);
-    if (nban && (!(u->rights & CAP_OWNER))) {
+    ban = banlist_find_bynick (&softbanlist, u->nick);
+    if (ban && (!(u->rights & CAP_OWNER))) {
       DPRINTF ("** Refused user %s. Nick Banned because %.*s\n", u->nick,
-	       (unsigned int) bf_used (nban->message), nban->message->s);
+	       (unsigned int) bf_used (ban->message), ban->message->s);
       bf_strcat (output, "<");
       bf_strcat (output, HubSec->nick);
-      bf_strcat (output, "> You have been banned because: ");
-      bf_strncat (output, nban->message->s, bf_used (nban->message));
+      bf_strcat (output, "> You have been banned by ");
+      bf_strcat (output, ban->op);
+      bf_strcat (output, " because: ");
+      bf_strncat (output, ban->message->s, bf_used (ban->message));
       bf_strcat (output, "|");
+      if (ban->expire) {
+	gettimeofday (&now, NULL);
+	bf_printf (output, "<%s> Time remaining ", HubSec->nick);
+	time_print (output, ban->expire - now.tv_sec);
+	bf_strcat (output, "|");
+      }
       if (defaultbanmessage && strlen (defaultbanmessage)) {
 	bf_printf (output, "<%s> %s|", HubSec->nick, defaultbanmessage);
       }
@@ -1403,7 +1432,8 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     /* create backup */
     u->MyINFO = rebuild_myinfo (u, b);
     if (!u->MyINFO || (u->active < 0)) {
-      if (u->active < 0) {
+      /* we cannot pass a user without a valid u->MyINFO field. */
+      if (u->MyINFO && (u->active < 0)) {
 	if (u->rights & CAP_TAG) {
 	  DPRINTF ("  Warning: CAP_TAG overrides bad myinfo");
 	  proto_nmdc_user_say (HubSec, output,
@@ -1426,6 +1456,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	break;
       }
     }
+    ASSERT (u->MyINFO);
 
     /* allocate plugin private stuff */
     plugin_new_user ((plugin_private_t **) & u->plugin_priv, u, &nmdc_proto);
@@ -1565,8 +1596,10 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  if (le->user == u)
 	    i--;
 
-	/* rest of add cached data */
+	/* rest of add cached data, skip markers */
 	for (; le; le = le->next) {
+	  if (!bf_used (le->data))
+	    continue;
 	  bf_strncat (buf, le->data->s, bf_used (le->data));
 	  bf_strcat (buf, "|");
 	}
@@ -1583,6 +1616,12 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	if (!(u->flags & PROTO_FLAG_ZOMBIE)) {
 	  cache_queue (cache.chat, u, b);
+	} else {
+	  /* add empty chat buffer as marker */
+	  buffer_t *mark = bf_alloc (1);
+
+	  cache_queue (cache.chat, u, mark);
+	  bf_free (mark);
 	}
 
 	break;
@@ -1600,7 +1639,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	/* build and generate the tag */
 	new = rebuild_myinfo (u, b);
 	if (!new || (u->active < 0)) {
-	  if (u->active < 0) {
+	  if (new && (u->active < 0)) {
 	    if (u->rights & CAP_TAG) {
 	      DPRINTF ("  Warning: CAP_TAG overrides bad myinfo");
 	      proto_nmdc_user_say (HubSec, output,
@@ -1803,7 +1842,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	n = tkn->argument;
 
 	/* find end of nick */
-	for (; *c && (*c != ' ') && (c < b->e); ++c);
+	//for (; *c && (*c != ' ') && (c < b->e); ++c);
+	SKIPTOCHAR (c, b->e, ' ');
 	l = c - n;
 
 	if ((!*c) || strncmp (n, u->nick, l)) {
@@ -1889,7 +1929,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	n = tkn->argument;
 
 	/* find end of nick */
-	for (; *c && (*c != ' '); c++);
+	//for (; *c && (*c != ' '); c++);
+	SKIPTOCHAR (c, b->e, ' ');
 	l = c - n;
 
 	/* find target */
@@ -1924,7 +1965,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	n = tkn->argument;
 
 	/* find end of nick */
-	for (; *c && (*c != ' '); c++);
+	//for (; *c && (*c != ' '); c++);
+	SKIPTOCHAR (c, b->e, ' ');
 	l = c - n;
 
 	/* find target */
@@ -1943,7 +1985,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	}
 
 	n = ++c;
-	for (; *c && (*c != ':'); c++);
+	//for (; *c && (*c != ':'); c++);
+	SKIPTOCHAR (c, b->e, ':');
 	if (*c != ':')
 	  break;
 	l = c - n;
@@ -1989,7 +2032,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 
 	/* check target */
 	n = c = tkn->argument;
-	for (; *c && (*c != ' '); c++);
+	//for (; *c && (*c != ' '); c++);
+	SKIPTOCHAR (c, b->e, ' ');
 	l = c - n;
 
 	if (strncasecmp (u->nick, tkn->argument, l)) {
@@ -2068,7 +2112,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	n = tkn->argument;
 
 	/* find end of nick */
-	for (; *c && (*c != ' '); c++);
+	//for (; *c && (*c != ' '); c++);
+	SKIPTOCHAR (c, b->e, ' ');
 	l = c - n;
 
 	/* find target */
@@ -2153,7 +2198,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	c = tkn->argument;
 
 	/* find first "$Who:" token */
-	for (; *c && (*c != '$'); ++c);
+	//for (; *c && (*c != '$'); ++c);
+	SKIPTOCHAR (c, b->e, ' ');
 	if (!*c++)
 	  break;
 
@@ -2162,13 +2208,15 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	if (!*c++)
 	  break;
 
-	for (; *c && (*c != ':'); c++);
+	//for (; *c && (*c != ':'); c++);
+	SKIPTOCHAR (c, b->e, ':');
 	if (!*c)
 	  break;
 	who = ++c;
 
 	/* terminate string */
-	for (; *c && (*c != '$'); c++);
+	//for (; *c && (*c != '$'); c++);
+	SKIPTOCHAR (c, b->e, '$');
 	if (!*c)
 	  break;
 	*c = '\0';
@@ -2185,13 +2233,15 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	/* find "Where:" token */
 	if (strncmp (++c, "Where", 5))
 	  break;
-	for (; *c && (*c != ':'); c++);
+	//for (; *c && (*c != ':'); c++);
+	SKIPTOCHAR (c, b->e, ':');
 	if (!*c)
 	  break;
 	where = ++c;
 
 	/* terminate */
-	for (; *c && (*c != '$'); c++);
+	//for (; *c && (*c != '$'); c++);
+	SKIPTOCHAR (c, b->e, '$');
 	if (!*c)
 	  break;
 	*c++ = '\0';
@@ -2199,7 +2249,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	/* find "Msg:" token */
 	if (strncmp (c, "Msg", 3))
 	  break;
-	for (; *c && (*c != ':'); c++);
+	//for (; *c && (*c != ':'); c++);
+	SKIPTOCHAR (c, b->e, ':');
 	if (!*c)
 	  break;
 	why = ++c;
@@ -2244,10 +2295,8 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
 	  break;
 
 	bf_printf (output, "You were kicked.");
-	banlist_add (&softbanlist, target->ipaddress, 0xFFFFFFFF, output,
+	banlist_add (&softbanlist, u->nick, target->nick, target->ipaddress, 0xFFFFFFFF, output,
 		     now.tv_sec + config.defaultKickPeriod);
-	banlist_nick_add (&nickbanlist, target->nick, output,
-			  now.tv_sec + config.defaultKickPeriod);
 
 	retval = proto_nmdc_user_forcemove (target, config.KickBanRedirect, output);
 	break;
@@ -2369,13 +2418,16 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
       /* data and length */
       b = le->data;
       l = bf_used (b);
+      if (!l)
+	continue;
 
       memcpy (t, b->s, l);
       t += l;
       *t++ = '|';
     };
-    ASSERT (!u->ChatCnt);
+    //ASSERT (!u->ChatCnt);
     u->CacheException -= u->ChatCnt;
+    u->ChatCnt = 0;
   };
 
   if (u->active) {

@@ -46,7 +46,7 @@
 
 #ifndef USE_EPOLL
 #  ifdef ALLOW_POLL
-#    define POLL
+#    define USE_POLL
 #  endif
 #endif
 
@@ -55,7 +55,7 @@
  */
 
 #ifndef USE_EPOLL
-#  ifndef POLL
+#  ifndef USE_POLL
 #    ifndef HAVE_SELECT
 #      warning "You are missing epoll, poll and select. This code will not work."
 #    endif
@@ -168,7 +168,7 @@ typedef struct esockethandler {
   unsigned long timercnt;
 
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
   fd_set input;
   fd_set output;
   fd_set error;

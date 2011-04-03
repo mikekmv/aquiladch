@@ -36,30 +36,47 @@
 #define BANLIST_HASHSIZE	(1 << BANLIST_HASHBITS)
 #define BANLIST_HASHMASK	(BANLIST_HASHSIZE-1)
 
+#define BANLIST_NICK_HASHBITS   10
+#define BANLIST_NICK_HASHSIZE	(1 << BANLIST_NICK_HASHBITS)
+#define BANLIST_NICK_HASHMASK	(BANLIST_NICK_HASHSIZE-1)
+
 typedef struct banlist {
-  dllist_entry_t dllist;
+  dllist_entry_t list_ip;
+  dllist_entry_t list_name;
 
   uint32_t ip;
   uint32_t netmask;
+  unsigned char nick[NICKLENGTH];
+  unsigned char op[NICKLENGTH];
   buffer_t *message;
   time_t expire;
 } banlist_entry_t;
 
 typedef struct {
-  dllist_t list;
+  dllist_t list_ip;
+  dllist_t list_name;
   unsigned long netmask_inuse[33];
 } banlist_t;
 
-extern banlist_entry_t *banlist_add (banlist_t * list, uint32_t ip, uint32_t netmask, buffer_t * reason,
+extern banlist_entry_t *banlist_add (banlist_t * list, unsigned char *op, unsigned char *nick,
+				     uint32_t ip, uint32_t netmask, buffer_t * reason,
 				     unsigned long expire);
 
 extern unsigned int banlist_del (banlist_t * list, banlist_entry_t *);
 extern unsigned int banlist_del_byip (banlist_t * list, uint32_t ip, uint32_t netmask);
+extern unsigned int banlist_del_bynick (banlist_t * list, unsigned char *nick);
 
-extern banlist_entry_t *banlist_find (banlist_t * list, uint32_t ip);
-extern banlist_entry_t *banlist_find_net (banlist_t * list, uint32_t ip, uint32_t netmask);
+extern banlist_entry_t *banlist_find_byip (banlist_t * list, uint32_t ip);
+extern banlist_entry_t *banlist_find_bynick_next (banlist_t * list, banlist_entry_t * old,
+						  unsigned char *nick);
+extern banlist_entry_t *banlist_find_bynet (banlist_t * list, uint32_t ip, uint32_t netmask);
+extern banlist_entry_t *banlist_find_bynick (banlist_t * list, unsigned char *);
+extern banlist_entry_t *banlist_find_exact (banlist_t * list, unsigned char *, uint32_t ip,
+					    uint32_t netmask);
+extern banlist_entry_t *banlist_find (banlist_t * list, unsigned char *, uint32_t ip);
 
 extern unsigned int banlist_cleanup (banlist_t * list);
+extern void banlist_clear (banlist_t * list);
 
 extern unsigned int banlist_save (banlist_t * list, unsigned char *file);
 extern unsigned int banlist_load (banlist_t * list, unsigned char *file);

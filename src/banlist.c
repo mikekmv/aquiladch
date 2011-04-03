@@ -20,12 +20,15 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <arpa/inet.h>
 
 #include "defaults.h"
 #include "banlist.h"
 #include "buffer.h"
+#include "hash.h"
+
 
 typedef union {
   uint32_t ip;
@@ -66,36 +69,60 @@ __inline__ uint32_t netmask_to_numbits (uint32_t netmask)
   return i;
 }
 
-banlist_entry_t *banlist_add (banlist_t * list, uint32_t ip, uint32_t netmask, buffer_t * reason,
-			      unsigned long expire)
+__inline__ unsigned int nicktolower (unsigned char *dest, unsigned char *source)
+{
+  unsigned int l;
+
+  *dest = '\0';
+  for (l = 0; *source && (l < NICKLENGTH); l++)
+    *dest++ = isalpha (*source) ? tolower (*source++) : *source++;
+
+  *dest++ = '\0';
+  return l;
+};
+
+banlist_entry_t *banlist_add (banlist_t * list, unsigned char *op, unsigned char *nick, uint32_t ip,
+			      uint32_t netmask, buffer_t * reason, unsigned long expire)
 {
   banlist_entry_t *b;
   uint32_t i;
+  unsigned char n[NICKLENGTH];
+  unsigned int l;
 
   /* bad netmask */
   i = netmask_to_numbits (netmask);
   if (i > 32)
     return NULL;
 
+  l = nicktolower (n, nick);
+
   /* delete any earlier bans of this ip. */
-  banlist_del_byip (list, ip, netmask);
+  if ((b = banlist_find_exact (list, nick, ip, netmask)))
+    banlist_del (list, b);
 
   /* alloc and clear new element */
   b = malloc (sizeof (banlist_entry_t));
 
   /* init */
-  dllist_init (&b->dllist);
+  dllist_init (&b->list_ip);
+  dllist_init (&b->list_name);
+  strncpy (b->nick, nick, NICKLENGTH);
+  b->nick[NICKLENGTH - 1] = 0;
+  strncpy (b->op, op, NICKLENGTH);
+  b->op[NICKLENGTH - 1] = 0;
   b->ip = ip & netmask;
   b->netmask = netmask;
-  b->message = reason;
-  bf_claim (reason);
+  b->message = bf_copy (reason, 0);
   b->expire = expire;
 
   /* mask netmask as used */
   list->netmask_inuse[i]++;
 
   /* put in hashlist */
-  dlhashlist_prepend (&list->list, one_at_a_time (ip & netmask) & BANLIST_HASHMASK, b);
+  dlhashlist_prepend (&list->list_ip, one_at_a_time (ip & netmask) & BANLIST_HASHMASK,
+		      (&b->list_ip));
+  dlhashlist_prepend (&list->list_name, SuperFastHash (n, l) & BANLIST_NICK_HASHMASK,
+		      (&b->list_name));
 
   return b;
 }
@@ -108,7 +135,8 @@ unsigned int banlist_del (banlist_t * list, banlist_entry_t * e)
   ASSERT (list->netmask_inuse[netmask_to_numbits (e->netmask)]);
   list->netmask_inuse[netmask_to_numbits (e->netmask)]--;
 
-  dllist_del ((dllist_entry_t *) e);
+  dllist_del ((dllist_entry_t *) (&e->list_ip));
+  dllist_del ((dllist_entry_t *) (&e->list_name));
   if (e->message)
     bf_free (e->message);
   free (e);
@@ -118,27 +146,37 @@ unsigned int banlist_del (banlist_t * list, banlist_entry_t * e)
 
 unsigned int banlist_del_byip (banlist_t * list, uint32_t ip, uint32_t netmask)
 {
-  banlist_entry_t *e, *l;
+  banlist_entry_t *e;
 
-  l = dllist_bucket (&list->list, one_at_a_time (ip & netmask) & BANLIST_HASHMASK);
-  dllist_foreach (l, e)
-    if (e->ip == ip)
-    break;
-
-  if (e == dllist_end (l))
-    return 0;
-
-  banlist_del (list, e);
+  if (netmask) {
+    e = banlist_find_bynet (list, ip, netmask);
+  } else {
+    e = banlist_find_byip (list, ip);
+  }
+  if (e)
+    banlist_del (list, e);
 
   return 1;
 }
 
-banlist_entry_t *banlist_find_net (banlist_t * list, uint32_t ip, uint32_t netmask)
+unsigned int banlist_del_bynick (banlist_t * list, unsigned char *nick)
+{
+  banlist_entry_t *e;
+
+  e = banlist_find_bynick (list, nick);
+  if (e)
+    banlist_del (list, e);
+
+  return 1;
+}
+
+
+banlist_entry_t *banlist_find_bynet (banlist_t * list, uint32_t ip, uint32_t netmask)
 {
   struct timeval now;
   banlist_entry_t *e, *l;
 
-  l = dllist_bucket (&list->list, one_at_a_time (ip & netmask) & BANLIST_HASHMASK);
+  l = dllist_bucket (&list->list_ip, one_at_a_time (ip & netmask) & BANLIST_HASHMASK);
   dllist_foreach (l, e)
     if ((e->ip == (ip & netmask)) && (e->netmask == netmask))
     break;
@@ -155,7 +193,34 @@ banlist_entry_t *banlist_find_net (banlist_t * list, uint32_t ip, uint32_t netma
   return e;
 }
 
-banlist_entry_t *banlist_find (banlist_t * list, uint32_t ip)
+banlist_entry_t *banlist_find_exact (banlist_t * list, unsigned char *nick, uint32_t ip,
+				     uint32_t netmask)
+{
+  struct timeval now;
+  banlist_entry_t *e, *l;
+  unsigned char n[NICKLENGTH];
+  unsigned int i;
+
+  i = nicktolower (n, nick);
+
+  l = dllist_bucket (&list->list_ip, one_at_a_time (ip & netmask) & BANLIST_HASHMASK);
+  dllist_foreach (l, e)
+    if ((e->ip == (ip & netmask)) && (e->netmask == netmask) && (!strncmp (e->nick, n, i)))
+    break;
+
+  if (e == dllist_end (l))
+    return 0;
+
+  gettimeofday (&now, NULL);
+  if (e->expire && (now.tv_sec > e->expire)) {
+    banlist_del (list, e);
+    e = NULL;
+  }
+
+  return e;
+}
+
+banlist_entry_t *banlist_find_byip (banlist_t * list, uint32_t ip)
 {
   struct timeval now;
   banlist_entry_t *e = NULL, *l = NULL;
@@ -166,13 +231,12 @@ banlist_entry_t *banlist_find (banlist_t * list, uint32_t ip)
   for (i = 32; i >= 0; --i, netmask = (netmask << 1) & 0xFFFFFFFE) {
     if (!list->netmask_inuse[i])
       continue;
-    l = dllist_bucket (&list->list, one_at_a_time (ip & ntohl (netmask)) & BANLIST_HASHMASK);
+    l = dllist_bucket (&list->list_ip, one_at_a_time (ip & ntohl (netmask)) & BANLIST_HASHMASK);
     dllist_foreach (l, e)
-      if (e->ip == (ip & e->netmask))
+      if (e->ip && (e->ip == (ip & e->netmask)))
       break;
     if (e != dllist_end (l))
       break;
-
   }
 
   if (e == dllist_end (l))
@@ -187,22 +251,112 @@ banlist_entry_t *banlist_find (banlist_t * list, uint32_t ip)
   return e;
 }
 
+banlist_entry_t *banlist_find_bynick (banlist_t * list, unsigned char *nick)
+{
+  dllist_entry_t *p, *l;
+  struct timeval now;
+  banlist_entry_t *e;
+  unsigned char n[NICKLENGTH];
+  unsigned int i;
+
+  i = nicktolower (n, nick);
+  l = dllist_bucket (&list->list_name, SuperFastHash (n, i) & BANLIST_NICK_HASHMASK);
+  dllist_foreach (l, p) {
+    e = (banlist_entry_t *) ((char *) p - sizeof (dllist_t));
+    if (!strncasecmp (e->nick, nick, NICKLENGTH))
+      break;
+  }
+  if (p == dllist_end (l))
+    return 0;
+
+  gettimeofday (&now, NULL);
+  if (e->expire && (now.tv_sec > e->expire)) {
+    banlist_del (list, e);
+    e = NULL;
+  }
+
+  return e;
+}
+
+banlist_entry_t *banlist_find_bynick_next (banlist_t * list, banlist_entry_t * old,
+					   unsigned char *nick)
+{
+  dllist_entry_t *p, *l;
+  struct timeval now;
+  banlist_entry_t *e;
+  unsigned char n[NICKLENGTH];
+  unsigned int i;
+
+  i = nicktolower (n, nick);
+  l = dllist_bucket (&list->list_name, SuperFastHash (n, i) & BANLIST_NICK_HASHMASK);
+  dllist_foreach (l, p) {
+    e = (banlist_entry_t *) ((char *) p - sizeof (dllist_t));
+    if (old) {
+      if (e != old)
+	continue;
+      old = NULL;
+      continue;
+    }
+    if (!strncasecmp (e->nick, nick, NICKLENGTH))
+      break;
+  }
+  if (p == dllist_end (l))
+    return 0;
+
+  gettimeofday (&now, NULL);
+  if (e->expire && (now.tv_sec > e->expire)) {
+    banlist_del (list, e);
+    e = NULL;
+  }
+
+  return e;
+}
+
+banlist_entry_t *banlist_find (banlist_t * list, unsigned char *nick, uint32_t ip)
+{
+  dllist_entry_t *p, *l;
+  struct timeval now;
+  banlist_entry_t *e;
+  unsigned char n[NICKLENGTH];
+  unsigned int i;
+
+  i = nicktolower (n, nick);
+  l = dllist_bucket (&list->list_name, SuperFastHash (n, i) & BANLIST_NICK_HASHMASK);
+  dllist_foreach (l, p) {
+    e = (banlist_entry_t *) ((char *) p - sizeof (dllist_t));
+    if ((e->ip == (ip & e->netmask)) && !strncmp (e->nick, n, i))
+      break;
+  }
+  if (p == dllist_end (l))
+    return 0;
+
+  gettimeofday (&now, NULL);
+  if (e->expire && (now.tv_sec > e->expire)) {
+    banlist_del (list, e);
+    e = NULL;
+  }
+
+  return e;
+}
+
 unsigned int banlist_cleanup (banlist_t * list)
 {
   uint32_t i;
-  banlist_entry_t *e, *n, *l;
+  banlist_entry_t *e;
+  dllist_entry_t *l, *p, *n;
   struct timeval now;
 
-  dlhashlist_foreach (&list->list, i) {
-    l = dllist_bucket (&list->list, i);
-    for (e = (banlist_entry_t *) l->dllist.next; e != dllist_end (l); e = n) {
-      n = (banlist_entry_t *) e->dllist.next;;
+  dlhashlist_foreach (&list->list_name, i) {
+    l = dllist_bucket (&list->list_name, i);
+    for (p = l->next; p != dllist_end (l); p = n) {
+      n = p->next;
+      e = (banlist_entry_t *) ((char *) p - sizeof (dllist_t));
       if (e->expire && (e->expire > now.tv_sec))
 	continue;
 
       ASSERT (list->netmask_inuse[netmask_to_numbits (e->netmask)]);
       list->netmask_inuse[netmask_to_numbits (e->netmask)]--;
-      dllist_del ((dllist_entry_t *) e);
+      dllist_del ((dllist_entry_t *) & e->list_name);
       bf_free (e->message);
       free (e);
     }
@@ -214,31 +368,36 @@ unsigned int banlist_save (banlist_t * list, unsigned char *file)
 {
   FILE *fp;
   uint32_t i;
-  unsigned long l;
-  banlist_entry_t *e, *lst;
+  unsigned long j;
+  banlist_entry_t *e;
+  dllist_entry_t *l, *p, *n;
   struct timeval now;
 
-  banlist_cleanup (list);
+  //banlist_cleanup (list);
 
   fp = fopen (file, "w+");
   if (!fp)
     return errno;
 
   gettimeofday (&now, NULL);
-  fwrite (list->netmask_inuse, sizeof (list->netmask_inuse), 1, fp);
-  dlhashlist_foreach (&list->list, i) {
-    lst = dllist_bucket (&list->list, i);
-    for (e = (banlist_entry_t *) lst->dllist.next; e != dllist_end (lst);
-	 e = (banlist_entry_t *) e->dllist.next) {
-      if (e->expire && (now.tv_sec > e->expire))
+  fwrite (list->netmask_inuse, sizeof (unsigned long), 33, fp);
+  dlhashlist_foreach (&list->list_ip, i) {
+    l = dllist_bucket (&list->list_ip, i);
+    for (p = l->next; p != dllist_end (l); p = n) {
+      n = p->next;
+      e = (banlist_entry_t *) p;
+      if (e->expire && (e->expire < now.tv_sec)) {
+	banlist_del (list, e);
 	continue;
-
-      l = bf_used (e->message);
+      }
+      j = bf_used (e->message);
       fwrite (&e->ip, sizeof (e->ip), 1, fp);
       fwrite (&e->netmask, sizeof (e->netmask), 1, fp);
+      fwrite (e->nick, sizeof (e->nick), 1, fp);
+      fwrite (e->op, sizeof (e->op), 1, fp);
       fwrite (&e->expire, sizeof (e->expire), 1, fp);
-      fwrite (&l, sizeof (l), 1, fp);
-      fwrite (e->message->s, 1, l, fp);
+      fwrite (&j, sizeof (j), 1, fp);
+      fwrite (e->message->s, 1, j, fp);
     }
   }
   fclose (fp);
@@ -250,22 +409,27 @@ unsigned int banlist_load (banlist_t * list, unsigned char *file)
   FILE *fp;
   unsigned long l;
   banlist_entry_t e;
+  struct timeval now;
 
   fp = fopen (file, "r+");
   if (!fp)
     return errno;
-  fread (list->netmask_inuse, sizeof (list->netmask_inuse), 1, fp);
+  gettimeofday (&now, NULL);
+  fread (list->netmask_inuse, sizeof (unsigned long), 33, fp);
   while (!feof (fp)) {
     if (!fread (&e.ip, sizeof (e.ip), 1, fp))
       break;
     fread (&e.netmask, sizeof (e.netmask), 1, fp);
+    fread (e.nick, sizeof (e.nick), 1, fp);
+    fread (e.op, sizeof (e.op), 1, fp);
     fread (&e.expire, sizeof (e.expire), 1, fp);
     fread (&l, sizeof (l), 1, fp);
     e.message = bf_alloc (l);
     fread (e.message->s, l, 1, fp);
     e.message->e += l;
 
-    banlist_add (list, e.ip, e.netmask, e.message, e.expire);
+    if (!e.expire || (e.expire > now.tv_sec))
+      banlist_add (list, e.op, e.nick, e.ip, e.netmask, e.message, e.expire);
 
     bf_free (e.message);
   }
@@ -276,7 +440,8 @@ unsigned int banlist_load (banlist_t * list, unsigned char *file)
 void banlist_init (banlist_t * list)
 {
   memset (list, 0, sizeof (banlist_t));
-  dlhashlist_init ((dllist_t *) & list->list, BANLIST_HASHSIZE);
+  dlhashlist_init ((dllist_t *) & list->list_ip, BANLIST_HASHSIZE);
+  dlhashlist_init ((dllist_t *) & list->list_name, BANLIST_HASHSIZE);
 }
 
 void banlist_clear (banlist_t * list)
@@ -284,10 +449,10 @@ void banlist_clear (banlist_t * list)
   uint32_t i;
   banlist_entry_t *e, *n, *lst;
 
-  dlhashlist_foreach (&list->list, i) {
-    lst = dllist_bucket (&list->list, i);
-    for (e = (banlist_entry_t *) lst->dllist.next; e != dllist_end (lst); e = n) {
-      n = (banlist_entry_t *) e->dllist.next;
+  dlhashlist_foreach (&list->list_ip, i) {
+    lst = dllist_bucket (&list->list_ip, i);
+    for (e = (banlist_entry_t *) lst->list_ip.next; e != dllist_end (lst); e = n) {
+      n = (banlist_entry_t *) e->list_ip.next;
 
       ASSERT (list->netmask_inuse[netmask_to_numbits (e->netmask)]);
       list->netmask_inuse[netmask_to_numbits (e->netmask)]--;

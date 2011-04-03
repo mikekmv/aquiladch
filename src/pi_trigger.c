@@ -301,6 +301,9 @@ unsigned long pi_trigger_login (plugin_user_t * user, void *dummy, unsigned long
   for (r = ruleListLogin.next; r != &ruleListLogin; r = r->next) {
     if ((r->cap & user->rights) != r->cap)
       continue;
+
+    r->trigger->usecnt++;
+
     trigger_verify (r->trigger);
     plugin_user_sayto (NULL, user, r->trigger->text);
   };

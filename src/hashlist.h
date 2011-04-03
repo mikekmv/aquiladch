@@ -43,5 +43,7 @@ extern void hash_deluser (hashlist_t * list, hashlist_entry_t * entry);
 extern unsigned int hash_adduser (hashlist_t * list, user_t * u);
 extern user_t *hash_find_nick (hashlist_t * list, unsigned char *n, unsigned int len);
 extern user_t *hash_find_ip (hashlist_t * list, unsigned long ip);
+extern user_t *hash_find_ip_next (hashlist_t * list, user_t *last, unsigned long ip);
+
 */
 #endif /* _HASHLIST_H_ */

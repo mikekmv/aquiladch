@@ -28,8 +28,8 @@
 #  include <netinet/in.h>
 #endif
 
+#include "utils.h"
 #include "banlist.h"
-#include "banlistnick.h"
 #include "user.h"
 #include "core_config.h"
 #include "hashlist_func.h"
@@ -92,11 +92,12 @@ plugin_user_t *plugin_user_find (unsigned char *name)
   return &((plugin_private_t *) u->plugin_priv)->user;
 }
 
-plugin_user_t *plugin_user_find_ip (unsigned long ip)
+plugin_user_t *plugin_user_find_ip (plugin_user_t * last, unsigned long ip)
 {
-  user_t *u;
+  user_t *u = last ? ((plugin_private_t *) (last)->private)->parent : NULL;
 
-  u = hash_find_ip (&hashlist, ip);
+  //u = hash_find_ip (&hashlist, ip);
+  u = hash_find_ip_next (&hashlist, u, ip);
   if (!u)
     return NULL;
 
@@ -120,10 +121,12 @@ unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message)
   return ((plugin_private_t *) user->private)->proto->user_drop (u, message);
 }
 
-unsigned int plugin_user_kick (plugin_user_t * user, buffer_t * message)
+unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message)
 {
   struct timeval now;
   user_t *u;
+  buffer_t *b;
+  unsigned int retval;
 
   if (!user)
     return 0;
@@ -134,18 +137,29 @@ unsigned int plugin_user_kick (plugin_user_t * user, buffer_t * message)
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_add (&softbanlist, u->ipaddress, 0xffffffff, message,
-	       now.tv_sec + config.defaultKickPeriod);
-  banlist_nick_add (&nickbanlist, u->nick, message, now.tv_sec + config.defaultKickPeriod);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
+	       message, now.tv_sec + config.defaultKickPeriod);
 
-  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
-								      message);
+  b = bf_alloc (265 + bf_used (message));
+
+  bf_printf (b, "You have been kicked by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+	     bf_used (message), message->s);
+
+  retval =
+    ((plugin_private_t *) u->plugin_priv)->proto->user_forcemove (u, config.KickBanRedirect, b);
+
+  bf_free (b);
+
+  return retval;
 }
 
-unsigned int plugin_user_banip (plugin_user_t * user, buffer_t * message, unsigned long period)
+unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+				unsigned long period)
 {
   struct timeval now;
   user_t *u;
+  buffer_t *b;
+  unsigned int retval;
 
   if (!user)
     return 0;
@@ -156,9 +170,19 @@ unsigned int plugin_user_banip (plugin_user_t * user, buffer_t * message, unsign
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_add (&softbanlist, u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
-								      message);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
+	       message, period ? now.tv_sec + period : 0);
+
+  b = bf_alloc (265 + bf_used (message));
+
+  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+	     bf_used (message), message->s);
+  retval =
+    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+
+  bf_free (b);
+
+  return retval;
 }
 
 unsigned int plugin_user_unban (plugin_user_t * user)
@@ -175,7 +199,7 @@ unsigned int plugin_user_unban (plugin_user_t * user)
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_nick_del_bynick (&nickbanlist, u->nick);
+  banlist_del_bynick (&softbanlist, u->nick);
   return 0;
 }
 
@@ -214,16 +238,17 @@ unsigned int plugin_unban (unsigned char *nick)
   if (!nick)
     return 0;
 
-  return banlist_nick_del_bynick (&nickbanlist, nick);
+  return banlist_del_bynick (&softbanlist, nick);
 }
 
-unsigned int plugin_ban_ip (unsigned long ip, unsigned long netmask, buffer_t * message,
-			    unsigned long period)
+unsigned int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask,
+			    buffer_t * message, unsigned long period)
 {
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  banlist_add (&softbanlist, ip, netmask, message, period ? now.tv_sec + period : 0);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
+	       period ? now.tv_sec + period : 0);
   return 0;
 }
 
@@ -232,18 +257,20 @@ unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask)
   return banlist_del_byip (&softbanlist, ip, netmask);
 }
 
-unsigned int plugin_ban_nick (unsigned char *nick, buffer_t * message, unsigned long period)
+unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message,
+			      unsigned long period)
 {
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  banlist_nick_add (&nickbanlist, nick, message, period ? now.tv_sec + period : 0);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, 0L, 0L, message,
+	       period ? now.tv_sec + period : 0);
   return 0;
 }
 
 unsigned int plugin_unban_nick (unsigned char *nick)
 {
-  banlist_nick_del_bynick (&nickbanlist, nick);
+  banlist_del_bynick (&softbanlist, nick);
   return 0;
 }
 
@@ -253,20 +280,24 @@ unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask)
   return 0;
 }
 
-unsigned int plugin_ban_ip_hard (unsigned long ip, unsigned long netmask, buffer_t * message,
-				 unsigned long period)
+unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask,
+				 buffer_t * message, unsigned long period)
 {
   struct timeval now;
 
   gettimeofday (&now, NULL);
-  banlist_add (&hardbanlist, ip, netmask, message, period ? now.tv_sec + period : 0);
+  banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
+	       period ? now.tv_sec + period : 0);
   return 0;
 }
 
-unsigned int plugin_user_banip_hard (plugin_user_t * user, buffer_t * message, unsigned long period)
+unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+				     unsigned long period)
 {
   struct timeval now;
   user_t *u;
+  buffer_t *b;
+  unsigned int retval;
 
   if (!user)
     return 0;
@@ -277,15 +308,28 @@ unsigned int plugin_user_banip_hard (plugin_user_t * user, buffer_t * message, u
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_add (&hardbanlist, u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
-								      message);
+  banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
+	       message, period ? now.tv_sec + period : 0);
+
+  b = bf_alloc (265 + bf_used (message));
+
+  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+	     bf_used (message), message->s);
+  retval =
+    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+
+  bf_free (b);
+
+  return retval;
 }
 
-unsigned int plugin_user_bannick (plugin_user_t * user, buffer_t * message, unsigned long period)
+unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+				  unsigned long period)
 {
   struct timeval now;
   user_t *u;
+  buffer_t *b;
+  unsigned int retval;
 
   if (!user)
     return 0;
@@ -296,15 +340,28 @@ unsigned int plugin_user_bannick (plugin_user_t * user, buffer_t * message, unsi
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_nick_add (&nickbanlist, u->nick, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
-								      message);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, 0L, 0L, message,
+	       period ? now.tv_sec + period : 0);
+
+  b = bf_alloc (265 + bf_used (message));
+
+  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+	     bf_used (message), message->s);
+  retval =
+    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+
+  bf_free (b);
+
+  return retval;
 }
 
-unsigned int plugin_user_ban (plugin_user_t * user, buffer_t * message, unsigned long period)
+unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+			      unsigned long period)
 {
   struct timeval now;
   user_t *u;
+  buffer_t *b;
+  unsigned int retval;
 
   if (!user)
     return 0;
@@ -315,27 +372,36 @@ unsigned int plugin_user_ban (plugin_user_t * user, buffer_t * message, unsigned
     return 0;
 
   gettimeofday (&now, NULL);
-  banlist_nick_add (&nickbanlist, u->nick, message, period ? now.tv_sec + period : 0);
-  banlist_add (&softbanlist, u->ipaddress, 0xffffffff, message, period ? now.tv_sec + period : 0);
-  return ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect,
-								      message);
+  banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
+	       message, period ? now.tv_sec + period : 0);
+
+  b = bf_alloc (265 + bf_used (message));
+
+  bf_printf (b, "You have been banned by %s because: %.*s\n", (op ? op->nick : HubSec->nick),
+	     bf_used (message), message->s);
+  retval =
+    ((plugin_private_t *) user->private)->proto->user_forcemove (u, config.KickBanRedirect, b);
+
+  bf_free (b);
+
+  return retval;
 }
 
 unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
 {
   struct timeval now;
-  banlist_nick_entry_t *ne;
+  banlist_entry_t *ne;
 
-  ne = banlist_nick_find (&nickbanlist, nick);
+  ne = banlist_find_bynick (&softbanlist, nick);
   if (!ne)
     return 0;
 
   gettimeofday (&now, NULL);
   if (ne->expire) {
-    return bf_printf (buf, "Found nick ban for %s for %lus because: %.*s", ne->nick,
+    return bf_printf (buf, "Found nick ban by %s for %s for %lus because: %.*s", ne->op, ne->nick,
 		      ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
   } else {
-    return bf_printf (buf, "Found permanent nick ban for %s because: %.*s", ne->nick,
+    return bf_printf (buf, "Found permanent nick ban by for %s because: %.*s", ne->op, ne->nick,
 		      bf_used (ne->message), ne->message->s);
   }
 }
@@ -346,7 +412,7 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   struct in_addr ipa, netmask;
   banlist_entry_t *ie;
 
-  ie = banlist_find (&softbanlist, ip);
+  ie = banlist_find_byip (&softbanlist, ip);
   if (!ie)
     return 0;
 
@@ -354,11 +420,12 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   ipa.s_addr = ie->ip;
   netmask.s_addr = ie->netmask;
   if (ie->expire) {
-    return bf_printf (buf, "Found IP ban for %s for %lus because: %.*s", print_ip (ipa, netmask),
-		      ie->expire - now.tv_sec, bf_used (ie->message), ie->message->s);
+    return bf_printf (buf, "Found IP ban by %s for %s for %lus because: %.*s", ie->op,
+		      print_ip (ipa, netmask), ie->expire - now.tv_sec, bf_used (ie->message),
+		      ie->message->s);
   } else {
-    return bf_printf (buf, "Found permanent ban for %s because: %.*s", print_ip (ipa, netmask),
-		      bf_used (ie->message), ie->message->s);
+    return bf_printf (buf, "Found permanent ban by %s for %s because: %.*s", ie->op,
+		      print_ip (ipa, netmask), bf_used (ie->message), ie->message->s);
   }
 }
 
@@ -838,11 +905,6 @@ unsigned int plugin_config_save (buffer_t * output)
   if (retval)
     bf_printf (output, "Error saving configuration to %s: %s\n", SoftBanFile, strerror (retval));
 
-  retval = banlist_nick_save (&nickbanlist, NickBanFile);
-  if (retval)
-    bf_printf (output, "Error saving configuration to %s: %s\n", NickBanFile, strerror (retval));
-
-
   plugin_send_event (NULL, PLUGIN_EVENT_SAVE, output);
 
   return 0;
@@ -852,9 +914,10 @@ unsigned int plugin_config_load ()
 {
   config_load (ConfigFile);
   accounts_load (AccountsFile);
+  banlist_clear (&hardbanlist);
   banlist_load (&hardbanlist, HardBanFile);
+  banlist_clear (&softbanlist);
   banlist_load (&softbanlist, SoftBanFile);
-  banlist_nick_load (&nickbanlist, NickBanFile);
 
   plugin_send_event (NULL, PLUGIN_EVENT_LOAD, NULL);
 

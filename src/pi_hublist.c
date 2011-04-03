@@ -43,19 +43,19 @@ esocket_handler_t *pi_hublist_handler;
 
 extern long users_total;
 
-static int escape_string (char *output, int j)
+static int escape_string (buffer_t * output)
 {
-  int i;
-  char *l, *k;
-  char tmpbuf[2048];
+  int i, j;
+  char *l, *k, *e;
+  buffer_t *tmpbuf;
 
-  if (j > 2048)
-    return -1;
+  tmpbuf = bf_copy (output, 0);
 
-  memcpy (tmpbuf, output, j);
-
-  l = tmpbuf;
-  k = output;
+  l = tmpbuf->s;
+  k = output->s;
+  e = output->buffer + output->size - 10;
+  j = bf_used (tmpbuf);
+  bf_clear (output);
 
   /* do not escape first $ character */
   if (*k == '$') {
@@ -64,7 +64,7 @@ static int escape_string (char *output, int j)
     j--;
   };
 
-  for (i = 0; (i < j) && ((k - output) < 2038); i++)
+  for (i = 0; (i < j) && (k < e); i++)
     switch (l[i]) {
       case 0:
       case 5:
@@ -72,14 +72,17 @@ static int escape_string (char *output, int j)
       case 96:
       case 124:
       case 126:
-	k += sprintf (k, "/%%DCN%03d%%/", l[i]);
+	bf_printf (output, "/%%DCN%03d%%/", l[i]);
 	break;
       default:
-	*k++ = l[i];
+	if (bf_unused (output) > 0)
+	  *output->e++ = l[i];
     }
-  *k = '\0';
 
-  return k - output;
+  if (bf_unused (output) > 0)
+    *output->e++ = '\0';
+
+  return bf_used (output);
 }
 
 
@@ -118,7 +121,7 @@ int pi_hublist_update (buffer_t * output)
 	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, gai_strerror (result));
 	DPRINTF ("%s", output->s);
       } else {
-	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, strerror (result));
+	bf_printf (output, "Hublist update ERROR: %s: connect: %s\n", l, strerror (-result));
 	DPRINTF ("%s", output->s);
       }
       esocket_close (s);
@@ -148,16 +151,19 @@ int pi_hublist_handle_input (esocket_t * s)
   // read data
   n = read (s->socket, buf->s, PI_HUBLIST_BUFFER_SIZE);
   if (n < 0) {
-    bf_printf (buf, "Hublost update ERROR: %s: read: %s\n", (char *) s->context, strerror (errno));
+    bf_clear (buf);
+    bf_printf (buf, "Hublist update ERROR: %s: read: %s\n", (char *) s->context, strerror (errno));
     DPRINTF ("%s", buf->s);
     plugin_report (buf);
     goto leave;
   }
   buf->e = buf->s + n;
+  buf->s[n - 1] = '\0';
 
   n = sizeof (local);
   if (getsockname (s->socket, (struct sockaddr *) &local, &n)) {
-    bf_printf (buf, "Hublost update ERROR: %s: gethostname: %s\n", (char *) s->context,
+    bf_clear (buf);
+    bf_printf (buf, "Hublist update ERROR: %s: gethostname: %s\n", (char *) s->context,
 	       strerror (errno));
     DPRINTF ("%s", buf->s);
     plugin_report (buf);
@@ -171,6 +177,15 @@ int pi_hublist_handle_input (esocket_t * s)
   t = buf->s + 6;		/* skip '$Lock ' */
   l = strsep (&t, " ");
   j = t - l - 1;
+
+  /* verify pointers */
+  if (!t || (j >= PI_HUBLIST_BUFFER_SIZE)) {
+    bf_clear (output);
+    bf_printf (output, "Hublist update ERROR: %s: illegal input %*s\n", bf_used (buf), buf->s);
+    plugin_report (output);
+    bf_free (output);
+    goto leave;
+  }
 
   /* prepare output buffer */
   bf_strcat (output, "$Key ");
@@ -188,8 +203,10 @@ int pi_hublist_handle_input (esocket_t * s)
 
   k[j] = '\0';
 
+  output->e += j;
+
   /* escape key */
-  output->e += escape_string (k, j);	/* length of key plus length of "$Key " */
+  escape_string (output);
 
   bf_strcat (output, "|");
 

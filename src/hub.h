@@ -29,7 +29,6 @@
 #include "proto.h"
 #include "stringlist.h"
 #include "banlist.h"
-#include "banlistnick.h"
 
 /* local timeouts */
 
@@ -59,7 +58,7 @@ extern unsigned long users;
 /*  banlists */
 extern unsigned long buffering;
 extern banlist_t hardbanlist, softbanlist;
-extern banlist_nick_t nickbanlist;
+//extern banlist_nick_t nickbanlist;
 
 extern int server_init ();
 extern int server_setup (esocket_handler_t *);

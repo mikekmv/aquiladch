@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifdef POLL
+#ifdef USE_POLL
 #include <sys/poll.h>
 #endif
 
@@ -121,7 +121,7 @@ unsigned int esocket_setevents (esocket_t * s, unsigned int events)
     s->events = events;
   }
 #else
-#ifdef POLL
+#ifdef USE_POLL
   s->events = events;
 #else
   esocket_handler_t *h = s->handler;
@@ -178,7 +178,7 @@ unsigned int esocket_addevents (esocket_t * s, unsigned int events)
     s->events = ee.events;
   }
 #else
-#ifdef POLL
+#ifdef USE_POLL
   s->events |= events;
 #else
   esocket_handler_t *h = s->handler;
@@ -220,7 +220,7 @@ unsigned int esocket_clearevents (esocket_t * s, unsigned int events)
     s->events = ee.events;
   }
 #else
-#ifdef POLL
+#ifdef USE_POLL
   s->events = s->events & ~events;
 #else
   esocket_handler_t *h = s->handler;
@@ -269,7 +269,7 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
     }
 
     /* new time is later than the old */
-    if (timercmp (&s->reset, &s->to, >=)) {
+    if (timercmp (&s->reset, &s->to, >)) {
       s->resetvalid = 1;
 
       return 0;
@@ -335,7 +335,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTING:
       /* remove the wait for connect" */
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
       FD_CLR (s->socket, &h->output);
       h->no--;
 #else
@@ -348,7 +348,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTED:
       /* remove according to requested callbacks */
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
       if (esocket_hasevent (s, ESOCKET_EVENT_IN)) {
 	FD_CLR (s->socket, &h->input);
 	h->ni--;
@@ -384,7 +384,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTING:
       /* add to wait for connect */
 #ifndef USE_EPOLL
-#ifdef POLL
+#ifdef USE_POLL
       s->events |= POLLOUT;
 #else
       FD_SET (s->socket, &h->output);
@@ -397,7 +397,7 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
     case SOCKSTATE_CONNECTED:
       /* add according to requested callbacks */
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
       s->events = h->types[s->type].default_events;
       if (esocket_hasevent (s, ESOCKET_EVENT_IN)) {
 	FD_SET (s->socket, &h->input);
@@ -481,7 +481,7 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
   esocket_update_state (socket, state);
 
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
   if (h->n <= s)
     h->n = s + 1;
 #else
@@ -534,7 +534,7 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
     return s;
 
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
   if (h->n <= fd)
     h->n = fd + 1;
 #else
@@ -585,7 +585,7 @@ int esocket_connect (esocket_t * s, char *address, unsigned int port)
 unsigned int esocket_remove_socket (esocket_t * s)
 {
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
   int max;
 #endif
 #endif
@@ -619,7 +619,7 @@ unsigned int esocket_remove_socket (esocket_t * s)
   s->state = SOCKSTATE_FREED;
 
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
   /* recalculate fd upperlimit for select */
   max = 0;
   for (s = h->sockets; s; s = s->next)
@@ -709,7 +709,7 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
 }
 
 #ifndef USE_EPOLL
-#ifndef POLL
+#ifndef USE_POLL
 /************************************************************************
 **
 **                             SELECT
@@ -876,6 +876,10 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       continue;
 
     s = *li;
+
+    if (s->state == SOCKSTATE_FREED)
+      continue;
+
     if (pfdi->revents & (POLLERR | POLLHUP | POLLNVAL)) {
       s->to = now;
       if (h->types[s->type].error)
@@ -916,6 +920,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	  break;
 	case SOCKSTATE_FREED:
 	default:
+	  DPRINTF ("POLLOUT while socket in state %d\n", s->state);
 	  assert (0);
       }
       if (s->state == SOCKSTATE_FREED)
@@ -980,6 +985,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
       continue;
 
     if (activity & EPOLLERR) {
+      int err;
+      unsigned int len;
+
+      len = sizeof (s->error);
+      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
+      assert (!err);
+
       s->to = now;
       if (h->types[s->type].error)
 	h->types[s->type].error (s);
