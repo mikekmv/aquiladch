@@ -146,6 +146,12 @@
 
 #define DEFAULT_RECONNECTBANTIME	120
 
+/*
+ * Fork storm prevention: minimum second delay between forks
+ */
+ 
+#define MIN_FORK_RETRY_PERIOD		3
+
 #ifdef DEBUG
 #include "stacktrace.h"
 #define DPRINTF	printf

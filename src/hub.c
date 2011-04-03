@@ -499,6 +499,12 @@ int server_timeout (esocket_t * s)
 {
   client_t *cl = (client_t *) ((unsigned long long) s->context);
 
+  /* if the client is online and has no data buffered, ignore the timeout -- this avoids disconnection in an empty hub */
+  if ((cl->user->state == PROTO_STATE_ONLINE) && !cl->outgoing.size) {
+    esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
+    return 0;
+  }
+
   DPRINTF ("Timeout user %s : %d\n", cl->user->nick, cl->user->state);
   return server_disconnect_user (cl);
 }

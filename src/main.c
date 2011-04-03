@@ -51,6 +51,7 @@ struct timeval boottime;
 typedef struct {
   /* go to daemon mode */
   unsigned int detach;
+  unsigned int restart;
 
   /* seperate working dir */
   unsigned int setwd;
@@ -63,6 +64,7 @@ typedef struct {
 
 args_t args = {
 detach:0,
+restart:0,
 
 setwd:0,
 wd:NULL,
@@ -79,6 +81,7 @@ void usage (unsigned char *name)
 	  "  -h : print this help\n"
 	  "  -v : print version\n"
 	  "  -d : detach (run as daemon)\n"
+	  "  -r : automatically restart hub if it shuts down\n"
 	  "  -p : specify pidfile\n" "  -c : specify config directory\n", name);
 }
 
@@ -91,7 +94,7 @@ void parseargs (int argc, char **argv)
 {
   int opt;
 
-  while ((opt = getopt (argc, argv, "hvdp:c:")) > 0) {
+  while ((opt = getopt (argc, argv, "hvdrp:c:")) > 0) {
     switch (opt) {
       case '?':
       case 'h':
@@ -103,6 +106,9 @@ void parseargs (int argc, char **argv)
 	break;
       case 'd':
 	args.detach = 1;
+	break;
+      case 'r':
+	args.restart = 1;
 	break;
       case 'p':
 	if (args.setlock)
@@ -141,7 +147,7 @@ void daemonize ()
     setsid ();			/* obtain a new process group */
 
     /* fork again so we become process group leader 
-       and cannot regain a controlling tty 
+     *  and cannot regain a controlling tty 
      */
     i = fork ();
     if (i < 0)
@@ -201,6 +207,48 @@ void daemonize ()
 
   /* restrict created files to 0750 */
   umask (027);
+
+  /* Auto restart code.
+   * fork to start the hub and fork again if the child exits
+   */
+  if (args.restart) {
+    time_t stamp, now;
+    sigset_t set, oldset;
+
+    /* block all signals except SIG_CHILD */
+    sigemptyset (&set);
+    sigaddset (&set, SIGCHLD);
+    sigprocmask (SIG_SETMASK, &set, &oldset);
+
+    time (&now);
+    do {
+      /* record fork time */
+      stamp = now;
+
+      /* fork the child */
+      i = fork ();
+
+      if (i < 0)
+	exit (1);		/* fork error */
+
+      /* the child exists the loop to start the actual hub */
+      if (i == 0)
+	break;
+
+      /* we wait until the child exits */
+      wait (NULL);
+
+      /* guard against fork storms */
+      time (&now);
+      if ((now - stamp) < MIN_FORK_RETRY_PERIOD)
+	sleep (MIN_FORK_RETRY_PERIOD - (now - stamp));
+
+      /* loop to restart child */
+    } while (1);
+
+    /* restore childs signal mask */
+    sigprocmask (SIG_SETMASK, &oldset, NULL);
+  }
 }
 
 /*
@@ -241,6 +289,7 @@ int main (int argc, char **argv)
   server_init ();
   nmdc_init ();
 
+  /* initialize the plugins */
   pi_iplog_init ();
   pi_user_init ();
   pi_chatroom_init ();
@@ -251,7 +300,7 @@ int main (int argc, char **argv)
   pi_hublist_init ();
   plugin_config_load ();
 
-  /* add lowest member of the statistices */
+  /* add lowest member of the statistics */
   gettimeofday (&boottime, NULL);
 
   /* initialize the random generator */
