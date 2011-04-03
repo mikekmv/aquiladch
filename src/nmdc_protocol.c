@@ -1274,7 +1274,6 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
       if (!inet_aton (n, &addr)) {
 	break;
       }
-      *c = ':';
 
       /* must be identical */
       if (u->ipaddress != addr.s_addr) {
@@ -1282,9 +1281,12 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
 	proto_nmdc_user_warn (u, &now,
 			      "Your client uses IP %s for downloading, while you have IP %s\n", n,
 			      inet_ntoa (addr));
+	*c = ':';
 	break;
       }
+      *c = ':';
     }
+
     if (t->state == PROTO_STATE_ONLINE) {
       /* queue search result with the correct user
        * \0 termination should not be necessary

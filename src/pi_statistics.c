@@ -446,7 +446,7 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
 
     bf_printf (output, " %s (online: ", u->nick);
     time_print (output, now.tv_sec - u->joinstamp);
-    bf_printf (output, "%s), %lu buffers, total %lu, offset %lu, credit %lu\n", cl->outgoing.count,
+    bf_printf (output, "), %lu buffers, total %lu, offset %lu, credit %lu\n", cl->outgoing.count,
 	       cl->outgoing.size, cl->offset, cl->credit);
     bufs += cl->outgoing.count;
     total += cl->outgoing.size;

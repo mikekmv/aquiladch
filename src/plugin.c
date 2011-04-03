@@ -481,12 +481,12 @@ unsigned int plugin_banlist (buffer_t * output)
       ip.s_addr = e->ip;
       nm.s_addr = e->netmask;
       if (e->expire) {
-	bf_printf (output, "%s %s Expires: ", e->nick, print_ip (ip, nm));
+	bf_printf (output, "%s %s by %s Expires: ", e->nick, print_ip (ip, nm), e->op);
 	time_print (output, e->expire - now.tv_sec);
 	bf_printf (output, " Message: %.*s\n", bf_used (e->message), e->message->s);
       } else {
-	bf_printf (output, "%s %s Message: %.*s\n", e->nick, print_ip (ip, nm),
-		   bf_used (e->message), e->message->s);
+	bf_printf (output, "%s %s by %s Message: %.*s\n", e->nick, print_ip (ip, nm),
+		   e->op, bf_used (e->message), e->message->s);
       }
       n++;
     }
