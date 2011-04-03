@@ -61,6 +61,7 @@ typedef struct ratelimiting {
   leaky_bucket_type_t psearch;
   leaky_bucket_type_t research;
   leaky_bucket_type_t myinfo;
+  leaky_bucket_type_t myinfoop;
   leaky_bucket_type_t getnicklist;
   leaky_bucket_type_t getinfo;
   leaky_bucket_type_t downloads;

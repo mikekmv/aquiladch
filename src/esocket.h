@@ -92,7 +92,7 @@
 #ifdef USE_EPOLL
 #include <sys/epoll.h>
 #define ESOCKET_MAX_FDS 	16384
-#define ESOCKET_ASK_FDS 	1024
+#define ESOCKET_ASK_FDS 	2048
 #endif
 
 #define SOCKSTATE_INIT		0

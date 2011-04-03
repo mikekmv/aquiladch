@@ -84,6 +84,7 @@ typedef struct user {
   leaky_bucket_t rate_chat;
   leaky_bucket_t rate_search;
   leaky_bucket_t rate_myinfo;
+  leaky_bucket_t rate_myinfoop;
   leaky_bucket_t rate_getnicklist;
   leaky_bucket_t rate_getinfo;
   leaky_bucket_t rate_downloads;

@@ -660,6 +660,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       u->rate_chat = existing_user->rate_chat;
       u->rate_search = existing_user->rate_search;
       u->rate_myinfo = existing_user->rate_myinfo;
+      u->rate_myinfoop = existing_user->rate_myinfoop;
       u->rate_getnicklist = existing_user->rate_getnicklist;
       u->rate_getinfo = existing_user->rate_getinfo;
       u->rate_downloads = existing_user->rate_downloads;
@@ -698,7 +699,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       cache_queue (cache.myinfo, u, u->MyINFO);
     };
 
-    /* ops get the full tag immediately -- it means the ops get all MYINFOs double though */
+    /* ops get the full tag immediately */
     cache_queue (cache.myinfoupdateop, u, b);
 
     /* if this new user is an OP send an updated OpList */
@@ -885,16 +886,26 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       break;
     }
 
-    /* update the tag */
-    nicklistcache_updateuser (u, new);
 
     if (u->MyINFO)
       bf_free (u->MyINFO);
     u->MyINFO = new;
 
     /* ops get the full tag immediately */
-    cache_purge (cache.myinfoupdateop, u);
-    cache_queue (cache.myinfoupdateop, u, b);
+    if (get_token (&rates.myinfoop, &u->rate_myinfoop, now.tv_sec)) {
+      cache_purge (cache.myinfoupdateop, u);
+      cache_queue (cache.myinfoupdateop, u, b);
+    } else {
+      string_list_entry_t *entry;
+
+      /* if entry in the stringlist, replace it */
+      if (entry = string_list_find (&cache.myinfoupdateop.messages, u)) {
+	cache.myinfoupdateop.length -= bf_used (entry->data);
+	string_list_del (&cache.myinfoupdateop.messages, entry);
+
+	cache_queue (cache.myinfoupdateop, u, u->MyINFO);
+      }
+    }
 
     /* check quota */
     if (!get_token (&rates.myinfo, &u->rate_myinfo, now.tv_sec)) {
@@ -907,7 +918,9 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 	break;
       }
 
-      /* if there is an entry, replace it with the more recent one. */
+      /* if there is an entry, replace it with the more recent one. 
+       * don't use cache_purge, we already have the pointer and there is max 1.
+       */
       cache.myinfoupdate.length -= bf_used (entry->data);
       string_list_del (&cache.myinfoupdate.messages, entry);
 
@@ -920,6 +933,8 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
     cache_purge (cache.myinfoupdate, u);
     cache_queue (cache.myinfoupdate, u, u->MyINFO);
 
+    /* update the tag */
+    nicklistcache_updateuser (u, new);
   } while (0);
 
   return retval;
@@ -1896,10 +1911,11 @@ unsigned int proto_nmdc_build_buffer (buffer_t * buffer, user_t * u, unsigned in
   return bf_used (buffer);
 }
 
-inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, unsigned long now)
+inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, buffer_t * buf2,
+				   unsigned long now)
 {
   register buffer_t *b;
-  register unsigned char *t;
+  register unsigned char *t = NULL;
   register string_list_entry_t *le;
   register unsigned int l;
 
@@ -1915,6 +1931,12 @@ inline int proto_nmdc_add_element (cache_element_t * elem, buffer_t * buf, unsig
       t += l;
       *t++ = '|';
     }
+    if (buf2) {
+      memcpy (buf2->e, buf->e, t - buf->e);
+      buf2->e += t - buf->e;
+      BF_VERIFY (buf2);
+    }
+
     buf->e = t;
     BF_VERIFY (buf);
     return 1;
@@ -1927,14 +1949,24 @@ void proto_nmdc_flush_cache ()
 {
   buffer_t *b;
   user_t *u, *n;
-  buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op, *buf_aresearch, *buf_presearch;
-  unsigned int psl, asl, l, t;
   unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0, ars = 0, prs = 0;
   unsigned long deadline;
+
+  unsigned long t, r;
+
+  unsigned long l, asl, psl;
+  buffer_t *buf_passive, *buf_active, *buf_exception;
+
+  unsigned long lop, aslop, pslop;
+  buffer_t *buf_passive_op, *buf_active_op, *buf_exception_op;
+
+  buffer_t *buf_aresearch, *buf_presearch;
 
 #ifdef ZLINES
   buffer_t *buf_zlinepassive = NULL, *buf_zlineactive = NULL;
   buffer_t *buf_zpipepassive = NULL, *buf_zpipeactive = NULL;
+  buffer_t *buf_zlinepassive_op = NULL, *buf_zlineactive_op = NULL;
+  buffer_t *buf_zpipepassive_op = NULL, *buf_zpipeactive_op = NULL;
 #endif
 
   /*
@@ -1944,18 +1976,29 @@ void proto_nmdc_flush_cache ()
   /* calculate lengths: always worst case. */
   l = cache.chat.length + cache.chat.messages.count;
   l += cache.myinfo.length + cache.myinfo.messages.count;
+  lop = l;
   l += cache.myinfoupdate.length + cache.myinfoupdate.messages.count;
-  psl = l + cache.psearch.length + cache.psearch.messages.count;
-  asl = l + cache.asearch.length + cache.asearch.messages.count;
+  lop += cache.myinfoupdateop.length + cache.myinfoupdateop.messages.count;
+
+  t = cache.psearch.length + cache.psearch.messages.count;
+  psl = l + t;
+  pslop = lop + t;
+
+  t = cache.asearch.length + cache.asearch.messages.count;
+  asl = l + t;
+  aslop = lop + t;
 
   /* allocate buffers */
   buf_passive = bf_alloc (psl);
   buf_active = bf_alloc (asl);
-  buf_exception =
-    bf_alloc (((asl >
-		psl) ? asl : psl) + cache.results.length + cache.results.messages.count +
-	      cache.privatemessages.length + cache.privatemessages.messages.count);
-  buf_op = bf_alloc (cache.myinfoupdateop.length + cache.myinfoupdateop.messages.count);
+  buf_passive_op = bf_alloc (pslop);
+  buf_active_op = bf_alloc (aslop);
+
+  t =
+    cache.results.length + cache.results.messages.count + cache.privatemessages.length +
+    cache.privatemessages.messages.count;
+  buf_exception = bf_alloc (((asl > psl) ? asl : psl) + t);
+  buf_exception_op = bf_alloc (((aslop > pslop) ? aslop : pslop) + t);
 
   buf_aresearch = bf_alloc (cache.aresearch.length + cache.aresearch.messages.count);
   buf_presearch = bf_alloc (cache.presearch.length + cache.presearch.messages.count);
@@ -1963,25 +2006,20 @@ void proto_nmdc_flush_cache ()
   deadline = now.tv_sec - researchperiod;
 
   /* operator buffer */
-  miuo = proto_nmdc_add_element (&cache.myinfoupdateop, buf_op, now.tv_sec);
+  // miuo = proto_nmdc_add_element (&cache.myinfoupdateop, buf_op, now.tv_sec);
 
   /* Exception buffer */
-  mi = proto_nmdc_add_element (&cache.myinfo, buf_exception, now.tv_sec);
-  miu = proto_nmdc_add_element (&cache.myinfoupdate, buf_exception, now.tv_sec);
+  mi = proto_nmdc_add_element (&cache.myinfo, buf_exception, buf_passive, now.tv_sec);
+  miu = proto_nmdc_add_element (&cache.myinfoupdate, buf_exception, buf_passive, now.tv_sec);
+  miuo =
+    proto_nmdc_add_element (&cache.myinfoupdateop, buf_exception_op, buf_passive_op, now.tv_sec);
 
   ASSERT (bf_used (buf_exception) <= (l - cache.chat.length + cache.chat.messages.count));
 
-  /* copy identical part to passive buffer */
-  t = bf_used (buf_exception);
-  if (t) {
-    memcpy (buf_passive->s, buf_exception->s, t);
-    buf_passive->e += t;
-  }
-
   /* add chat messages */
-  ch = proto_nmdc_add_element (&cache.chat, buf_passive, now.tv_sec);
-
+  ch = proto_nmdc_add_element (&cache.chat, buf_passive, buf_passive_op, now.tv_sec);
   ASSERT (bf_used (buf_passive) <= l);
+  ASSERT (bf_used (buf_passive_op) <= lop);
 
   /* copy identical part to active buffer too */
   t = bf_used (buf_passive);
@@ -1989,10 +2027,15 @@ void proto_nmdc_flush_cache ()
     memcpy (buf_active->s, buf_passive->s, t);
     buf_active->e += t;
   }
+  t = bf_used (buf_passive_op);
+  if (t) {
+    memcpy (buf_active_op->s, buf_passive_op->s, t);
+    buf_active_op->e += t;
+  }
 
   /* at the end, add the passive and active search messages */
-  ps = proto_nmdc_add_element (&cache.psearch, buf_passive, now.tv_sec);
-  as = proto_nmdc_add_element (&cache.asearch, buf_active, now.tv_sec);
+  ps = proto_nmdc_add_element (&cache.psearch, buf_passive, buf_passive_op, now.tv_sec);
+  as = proto_nmdc_add_element (&cache.asearch, buf_active, buf_active_op, now.tv_sec);
 
   ASSERT (bf_used (buf_passive) <= psl);
   ASSERT (bf_used (buf_active) <= asl);
@@ -2007,11 +2050,15 @@ void proto_nmdc_flush_cache ()
       && get_token (&cache.results.timertype, &cache.results.timer, now.tv_sec))
     res = 1;
 
-  ars = proto_nmdc_add_element (&cache.aresearch, buf_aresearch, now.tv_sec);
-  prs = proto_nmdc_add_element (&cache.presearch, buf_presearch, now.tv_sec);
+  ars = proto_nmdc_add_element (&cache.aresearch, buf_aresearch, NULL, now.tv_sec);
+  prs = proto_nmdc_add_element (&cache.presearch, buf_presearch, NULL, now.tv_sec);
 
   BF_VERIFY (buf_active);
   BF_VERIFY (buf_passive);
+  BF_VERIFY (buf_exception);
+  BF_VERIFY (buf_active_op);
+  BF_VERIFY (buf_passive_op);
+  BF_VERIFY (buf_exception_op);
   BF_VERIFY (buf_aresearch);
   BF_VERIFY (buf_presearch);
 
@@ -2021,12 +2068,20 @@ void proto_nmdc_flush_cache ()
 	   cache.ZlineSupporters ? &buf_zlinepassive : NULL);
     zline (buf_active, cache.ZpipeSupporters ? &buf_zpipeactive : NULL,
 	   cache.ZlineSupporters ? &buf_zlineactive : NULL);
+    zline (buf_passive_op, cache.ZpipeSupporters ? &buf_zpipepassive_op : NULL,
+	   cache.ZlineSupporters ? &buf_zlinepassive_op : NULL);
+    zline (buf_active_op, cache.ZpipeSupporters ? &buf_zpipeactive_op : NULL,
+	   cache.ZlineSupporters ? &buf_zlineactive_op : NULL);
   }
 
   BF_VERIFY (buf_zpipeactive);
   BF_VERIFY (buf_zlineactive);
   BF_VERIFY (buf_zpipepassive);
   BF_VERIFY (buf_zlinepassive);
+  BF_VERIFY (buf_zpipeactive_op);
+  BF_VERIFY (buf_zlineactive_op);
+  BF_VERIFY (buf_zpipepassive_op);
+  BF_VERIFY (buf_zlinepassive_op);
 #endif
 
   if (mi)
@@ -2059,8 +2114,6 @@ void proto_nmdc_flush_cache ()
    * write out buffers 
    */
 
-  /* if there are *any* users, search a filled bucket in the nick hashlist 
-   * and use that as a starting point for the cache flush.  */
   if (userlist) {
     for (u = userlist; u; u = n) {
       n = u->next;
@@ -2076,7 +2129,11 @@ void proto_nmdc_flush_cache ()
 	      || (u->MessageCnt && pm))) {
 	/* we need to copy this buffer cuz it could be buffered during write
 	   and it is changed at every call to proto_nmdc_build_buffer */
-	b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
+	if (u->op) {
+	  b = bf_copy (buf_exception_op, buf_exception_op->size - bf_used (buf_exception_op));
+	} else {
+	  b = bf_copy (buf_exception, buf_exception->size - bf_used (buf_exception));
+	}
 	proto_nmdc_build_buffer (b, u, as, ps, ch, pm, res);
 	BF_VERIFY (b);
 
@@ -2096,23 +2153,34 @@ void proto_nmdc_flush_cache ()
 	bf_free (b);
       } else {
 #ifdef ZLINES
-	if (u->supports & NMDC_SUPPORTS_ZPipe) {
-	  b = (u->active ? buf_zpipeactive : buf_zpipepassive);
-	} else if (u->supports & NMDC_SUPPORTS_ZLine) {
-	  b = (u->active ? buf_zlineactive : buf_zlinepassive);
+	if (u->op) {
+	  if (u->supports & NMDC_SUPPORTS_ZPipe) {
+	    b = (u->active ? buf_zpipeactive_op : buf_zpipepassive_op);
+	  } else if (u->supports & NMDC_SUPPORTS_ZLine) {
+	    b = (u->active ? buf_zlineactive_op : buf_zlinepassive_op);
+	  } else {
+	    b = (u->active ? buf_active_op : buf_passive_op);
+	  }
+	} else {
+	  if (u->supports & NMDC_SUPPORTS_ZPipe) {
+	    b = (u->active ? buf_zpipeactive : buf_zpipepassive);
+	  } else if (u->supports & NMDC_SUPPORTS_ZLine) {
+	    b = (u->active ? buf_zlineactive : buf_zlinepassive);
+	  } else {
+	    b = (u->active ? buf_active : buf_passive);
+	  }
+	}
+#else
+	if (u->op) {
+	  b = (u->active ? buf_active_op : buf_passive_op);
 	} else {
 	  b = (u->active ? buf_active : buf_passive);
 	}
-#else
-	b = (u->active ? buf_active : buf_passive);
 #endif
 	if (bf_used (b))
 	  if (server_write (u->parent, b) > 0)
 	    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
       }
-      /* send extra OP buffer */
-      if (miuo && u->op)
-	server_write (u->parent, buf_op);
       /* write out researches to recent clients */
       if (ars || (u->active && prs)) {
 	if (u->joinstamp > deadline) {
@@ -2130,12 +2198,22 @@ void proto_nmdc_flush_cache ()
     bf_free (buf_zlinepassive);
   if (buf_zlineactive && (buf_zlineactive != buf_active))
     bf_free (buf_zlineactive);
+  if (buf_zpipepassive_op && (buf_zpipepassive_op != buf_passive_op))
+    bf_free (buf_zpipepassive_op);
+  if (buf_zpipeactive_op && (buf_zpipeactive_op != buf_active_op))
+    bf_free (buf_zpipeactive_op);
+  if (buf_zlinepassive_op && (buf_zlinepassive_op != buf_passive_op))
+    bf_free (buf_zlinepassive_op);
+  if (buf_zlineactive_op && (buf_zlineactive_op != buf_active_op))
+    bf_free (buf_zlineactive_op);
 #endif
 
   bf_free (buf_passive);
   bf_free (buf_active);
   bf_free (buf_exception);
-  bf_free (buf_op);
+  bf_free (buf_passive_op);
+  bf_free (buf_active_op);
+  bf_free (buf_exception_op);
   bf_free (buf_aresearch);
   bf_free (buf_presearch);
 

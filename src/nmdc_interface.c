@@ -1,4 +1,3 @@
-
 /*                                                                                                                                    
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
@@ -178,6 +177,7 @@ int proto_nmdc_user_delrobot (user_t * u)
   bf_strcat (buf, "|");
 
   cache_queue (cache.myinfo, u, buf);
+  cache_queue (cache.myinfoupdateop, u, buf);
 
   bf_free (buf);
 
@@ -248,6 +248,7 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
 
   /* send it to the users */
   cache_queue (cache.myinfo, u, u->MyINFO);
+  cache_queue (cache.myinfoupdateop, u, u->MyINFO);
 
   return u;
 }
@@ -284,9 +285,6 @@ void proto_nmdc_user_freelist_clear ()
 
     if (o->plugin_priv)
       plugin_del_user ((plugin_private_t **) & o->plugin_priv);
-    /* free protocol private data */
-    if (o->pdata)
-      free (o->pdata);
 
     free (o);
   }
@@ -337,6 +335,7 @@ void proto_nmdc_user_cachelist_clear ()
       bf_strcat (buf, "$Quit ");
       bf_strcat (buf, u->nick);
       cache_queue (cache.myinfo, u, buf);
+      cache_queue (cache.myinfoupdateop, u, buf);
       bf_free (buf);
       nicklistcache_deluser (u);
 
@@ -595,10 +594,13 @@ user_t *proto_nmdc_user_alloc (void *priv)
   }
 
   /* yes, create and init user */
-  user = malloc (sizeof (user_t));
+  user = malloc (sizeof (user_t) + sizeof (nmdc_user_t));
   if (!user)
     return NULL;
-  memset (user, 0, sizeof (user_t));
+  memset (user, 0, sizeof (user_t) + sizeof (nmdc_user_t));
+
+  /* protocol private data */
+  user->pdata = ((void *) user) + sizeof (user_t);
 
   user->tthlist = tth_list_alloc (researchmaxcount);
 
@@ -610,6 +612,7 @@ user_t *proto_nmdc_user_alloc (void *priv)
   init_bucket (&user->rate_chat, now.tv_sec);
   init_bucket (&user->rate_search, now.tv_sec);
   init_bucket (&user->rate_myinfo, now.tv_sec);
+  init_bucket (&user->rate_myinfoop, now.tv_sec);
   init_bucket (&user->rate_getnicklist, now.tv_sec);
   init_bucket (&user->rate_getinfo, now.tv_sec);
   init_bucket (&user->rate_downloads, now.tv_sec);
@@ -617,10 +620,6 @@ user_t *proto_nmdc_user_alloc (void *priv)
   /* warnings and violationss start with a full token load ! */
   user->rate_warnings.tokens = rates.warnings.burst;
   user->rate_violations.tokens = rates.violations.burst;
-
-  /* protocol private data */
-  user->pdata = malloc (sizeof (nmdc_user_t));
-  memset (user->pdata, 0, sizeof (nmdc_user_t));
 
   /* add user to the list... */
   user->next = userlist;
@@ -698,6 +697,7 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
       bf_strcat (buf, "$Quit ");
       bf_strcat (buf, u->nick);
       cache_queue (cache.myinfo, u, buf);
+      cache_queue (cache.myinfoupdateop, u, buf);
       bf_free (buf);
     } else {
       hash_adduser (&cachehashlist, u);
@@ -1017,6 +1017,7 @@ int proto_nmdc_init ()
   init_bucket_type (&rates.asearch, 15, 5, 1);
   init_bucket_type (&rates.psearch, 15, 5, 1);
   init_bucket_type (&rates.myinfo, 1800, 1, 1);
+  init_bucket_type (&rates.myinfoop, 120, 1, 1);
   init_bucket_type (&rates.getnicklist, 1200, 1, 1);
   init_bucket_type (&rates.getinfo, 1, 10, 10);
   init_bucket_type (&rates.downloads, 5, 6, 1);
@@ -1039,9 +1040,13 @@ int proto_nmdc_init ()
   config_register ("rate.passivesearch.burst", CFG_ELEM_ULONG, &rates.psearch.burst,
 		   "Burst of searches. This controls how many searches a passive user can 'save up'. Keep this low.");
   config_register ("rate.myinfo.period", CFG_ELEM_ULONG, &rates.myinfo.period,
-		   "Period of MyINFO messages. This controls how often a user can send a MyINFO message. Keep this very high.");
+		   "Period of MyINFO messages. This controls how often a user can send a MyINFO message that is send to everyone. Keep this very high.");
   config_register ("rate.myinfo.burst", CFG_ELEM_ULONG, &rates.myinfo.burst,
-		   "Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up'. Keep this at 1.");
+		   "Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up' (everyone). Keep this at 1.");
+  config_register ("rate.myinfoop.period", CFG_ELEM_ULONG, &rates.myinfoop.period,
+		   "Period of MyINFO messages. This controls how often a user can send a MyINFO message that is send on to the ops only. Keep this very high.");
+  config_register ("rate.myinfoop.burst", CFG_ELEM_ULONG, &rates.myinfoop.burst,
+		   "Burst of MyINFO messages. This controls how many MyINFO messages a user can 'save up' (OPs messages only). Keep this at 1.");
   config_register ("rate.getnicklist.period", CFG_ELEM_ULONG, &rates.getnicklist.period,
 		   "Period of nicklist requests. This controls how often a user can refresh his userlist. Keep this high.");
   config_register ("rate.getnicklist.burst", CFG_ELEM_ULONG, &rates.getnicklist.burst,

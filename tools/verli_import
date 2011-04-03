@@ -51,7 +51,7 @@
 				printf ("Unsupported encryption: %d\n", $array["pwd_crypt"]);
 				$pwd = "\1";
 		}
-		printf ("A %s %s 0 %lu %lu\n", $array["nick"], $pwd, $group, $groupid[$group]++);
+		printf ("A %s %s 0 %lu %lu %s %lu %lu\n", $array["nick"], $pwd, $group, $groupid[$group]++, "verli_import", time(), 0);
 	}
 
 	mysql_close ($sql);

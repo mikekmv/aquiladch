@@ -1,6 +1,11 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Only update nicklistcache when myinfo send to users.
+	Added rate.myinfoop
+	updated aqpasswd and verli_import to the new password file layouts.
+	No longer send all MyINFOs to ops twice.
+	Loop accept to reduce polling overhead. accept 2048 events in 1 go.
 	Changed default to 8096 ips for anti-portblocker.
 	Added !statconn with portblocker stats.
 	Improved port blocker protection. Dynamic hashlist. 

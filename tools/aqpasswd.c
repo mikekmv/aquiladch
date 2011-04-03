@@ -59,7 +59,7 @@ int main (int argc, char **argv)
   salt[0] = ((random () % 46) + 45);
   salt[1] = ((random () % 46) + 45);
   salt[2] = 0;
-  fprintf (fp, "A %s %s %u %u %u\n", argv[2], crypt (argv[3], salt), CAP_ADMIN | CAP_OWNER, 0, 0);
+  fprintf (fp, "A %s %s %lu %lu %lu %s %lu %lu\n", argv[2], crypt (argv[3], salt), CAP_ADMIN | CAP_OWNER, 0, 0, argv[2], time(NULL), 0);
 
   fclose (fp);
 
