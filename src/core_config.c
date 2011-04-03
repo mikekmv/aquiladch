@@ -52,7 +52,6 @@ int core_config_init ()
   config.Redirect            = strdup (DEFAULT_REDIRECT);
   config.KickBanRedirect     = strdup (DEFAULT_REDIRECT);
   config.defaultKickPeriod   = DEFAULT_KICKPERIOD;
-  config.SysReportTarget     = strdup (DEFAULT_SYSREPORTTARGET);
 
   config.BufferSoftLimit = DEFAULT_BUFFER_SOFTLIMIT;
   config.BufferHardLimit = DEFAULT_BUFFER_HARDLIMIT;
@@ -62,10 +61,7 @@ int core_config_init ()
   config.TimeoutOverflow = DEFAULT_TIMEOUT_OVERFLOW;
   
   config.DefaultRights = CAP_DEFAULT;
-
-  config.PasswdRetry = DEFAULT_PASSWDRETRY;
-  config.PasswdBantime = DEFAULT_PASSWDBANTIME;
-
+  
   config_register ("NMDC.ListenPort",    CFG_ELEM_UINT,   &config.ListenPort,      "Port on which the hub will listen.");
   config_register ("NMDC.ListenAddress", CFG_ELEM_IP,     &config.ListenAddress,   "IP on which the hub will listen, set to 0.0.0.0 for all.");
   config_register ("NMDC.ExtraPorts",    CFG_ELEM_STRING, &config.NMDCExtraPorts,  "Extra NMDC ports to listen on.");
@@ -86,8 +82,6 @@ int core_config_init ()
   config_register ("Redirect",           CFG_ELEM_STRING, &config.Redirect,        "Redirection target.");
   config_register ("KickBanRedirect",    CFG_ELEM_STRING, &config.KickBanRedirect, "Redirection target in case of kick or ban.");
   config_register ("KickAutoBanLength",  CFG_ELEM_ULONG,  &config.defaultKickPeriod, "Length of automatic temporary ban after a kick.");
-
-  config_register ("hub.SysReportTarget", CFG_ELEM_STRING, &config.SysReportTarget, "The hub sends all error messages here.");
 
   config_register ("hub.BufferSoftLimit",     CFG_ELEM_MEMSIZE,  &config.BufferSoftLimit, "If a user has more data buffered than this setting, he has limited time to read it all.");
   config_register ("hub.BufferHardLimit",     CFG_ELEM_MEMSIZE,  &config.BufferHardLimit, "If a user has more data buffered than this setting, no more will be allowed.");

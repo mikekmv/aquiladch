@@ -109,8 +109,7 @@ typedef struct {
 typedef struct ratelimiting {
   leaky_bucket_type_t warnings;
   leaky_bucket_type_t chat;
-  leaky_bucket_type_t asearch;
-  leaky_bucket_type_t psearch;
+  leaky_bucket_type_t search;
   leaky_bucket_type_t research;
   leaky_bucket_type_t myinfo;
   leaky_bucket_type_t getnicklist;
@@ -132,7 +131,6 @@ typedef struct {
   unsigned long cacherebuild;	/* rebuild of nick list cache */
   unsigned long userjoin;	/* all user joins */
   unsigned long userpart;	/* all user parts */
-  unsigned long banned;		/* all forcemoves  for banned users */
   unsigned long forcemove;	/* all forcemoves */
   unsigned long disconnect;	/* all drops/disconnects */
   unsigned long redirect;	/* all redirects */
