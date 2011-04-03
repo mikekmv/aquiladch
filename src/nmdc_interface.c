@@ -296,6 +296,8 @@ void proto_nmdc_user_freelist_clear ()
     o = freelist;
     freelist = freelist->next;
 
+    NICKLISTCACHE_VERIFY;
+
     if (o->tthlist)
       free (o->tthlist);
 
@@ -328,6 +330,7 @@ void proto_nmdc_user_cachelist_add (user_t * user)
   user->prev = NULL;
   cachelist = user;
   cachelist_count++;
+  user->joinstamp = now.tv_sec;
 }
 
 void proto_nmdc_user_cachelist_invalidate (user_t * u)
@@ -340,14 +343,14 @@ void proto_nmdc_user_cachelist_clear ()
 {
   buffer_t *buf;
   user_t *u, *p;
-  time_t now;
+  time_t tnow;
   unsigned int op;
 
-  time (&now);
-  now -= config.DelayedLogout;
+  tnow = now.tv_sec;
+  tnow -= config.DelayedLogout;
   for (u = cachelist_last; u; u = p) {
     p = u->prev;
-    if (u->joinstamp >= (unsigned) now)
+    if (u->joinstamp >= (unsigned) tnow)
       continue;
 
     /* a joinstamp of 0 means the user rejoined */
@@ -359,6 +362,9 @@ void proto_nmdc_user_cachelist_clear ()
       cache_queue (cache.myinfo, NULL, buf);
       cache_queue (cache.myinfoupdateop, NULL, buf);
       bf_free (buf);
+
+      u->joinstamp = 0;
+
       nicklistcache_deluser (u);
 
       /* remove from hashlist */
@@ -383,6 +389,9 @@ void proto_nmdc_user_cachelist_clear ()
 
     /* put user in freelist */
     proto_nmdc_user_freelist_add (u);
+
+    NICKLISTCACHE_VERIFY;
+
     u = NULL;
   }
 }
@@ -696,13 +705,16 @@ int proto_nmdc_user_free (user_t * user)
   user->parent = NULL;
 
   /* if the user was online, put him in the cachelist. if he was kicked, don't. */
-  if (!(user->flags & NMDC_FLAG_WASONLINE) || (user->flags & NMDC_FLAG_WASKICKED)) {
+  if ((!(user->flags & NMDC_FLAG_WASONLINE)) || (user->flags & NMDC_FLAG_WASKICKED)) {
+    nicklistcache_deluser (user);
     proto_nmdc_user_freelist_add (user);
   } else {
     proto_nmdc_user_cachelist_add (user);
   }
 
   nmdc_stats.userpart++;
+
+  NICKLISTCACHE_VERIFY;
 
   return 0;
 }
@@ -1330,6 +1342,8 @@ int proto_nmdc_setup ()
 
   plugin_nmdc = plugin_register ("nmdc");
   plugin_request (plugin_nmdc, PLUGIN_EVENT_CONFIG, (void *) &nmdc_event_config);
+
+  nmdc_nickchar_rebuild ();
 
   return 0;
 }

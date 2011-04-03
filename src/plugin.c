@@ -271,8 +271,8 @@ int plugin_user_unzombie (plugin_user_t * user)
 
   u = ((plugin_private_t *) user->private)->parent;
 
-  user->flags &= !PLUGIN_FLAG_ZOMBIE;
-  u->flags &= !PROTO_FLAG_ZOMBIE;
+  user->flags &= ~PLUGIN_FLAG_ZOMBIE;
+  u->flags &= ~PROTO_FLAG_ZOMBIE;
 
   return 0;
 }

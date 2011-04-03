@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Fix bug in delayed logout feature.
+	Correct nicklistcache size estimate bug.
+	Initialize nickchar map on boot up. (Report maksalaatikko)
 	Rights parsing in lua now supports + and -. (Report FleetCommand)
 	Fix bug with too many args for commands (Report FleetCommand)
 	Correctly handle return value from plugin function.

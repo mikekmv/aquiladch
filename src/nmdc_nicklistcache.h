@@ -86,10 +86,19 @@ typedef struct {
 } cache_t;
 
 extern int nicklistcache_adduser (user_t * u);
-extern int nicklistcache_updateuser (user_t * u, buffer_t * new);
+extern int nicklistcache_updateuser (buffer_t *old, buffer_t * new);
 extern int nicklistcache_deluser (user_t * u);
 //extern int nicklistcache_rebuild (struct timeval now);
 extern int nicklistcache_sendnicklist (user_t * target);
 extern int nicklistcache_sendoplist (user_t * target);
+
+#ifdef DEBUG
+
+#  define NICKLISTCACHE_VERIFY	nicklistcache_verify()
+  extern void nicklistcache_verify ();
+
+#else
+#  define NICKLISTCACHE_VERIFY
+#endif
 
 #endif

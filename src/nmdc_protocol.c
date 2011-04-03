@@ -725,8 +725,13 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
     time (&u->joinstamp);
 
-    /* add user to nicklist cache */
-    nicklistcache_adduser (u);
+    /* add user to nicklist cache, if the user existed, just update him. */
+    if (existing_user) {
+      nicklistcache_updateuser (existing_user->MyINFO, u->MyINFO);
+      u->flags |= (existing_user->flags & NMDC_FLAG_CACHED);
+    } else {
+      nicklistcache_adduser (u);
+    }
 
     /* from now on, user is reachable */
     hash_adduser (&hashlist, u);
@@ -879,7 +884,7 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
 int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output, buffer_t * b)
 {
   int retval = 0;
-  buffer_t *new;
+  buffer_t *new, *old;
 
   do {
     /* build and generate the tag */
@@ -928,10 +933,13 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
       break;
     }
 
-
-    if (u->MyINFO)
-      bf_free (u->MyINFO);
+    /* update user */
+    old = u->MyINFO;
     u->MyINFO = new;
+
+    /* update the tag */
+    nicklistcache_updateuser (old, new);
+    bf_free (old);
 
     /* ops get the full tag immediately */
     if (get_token (&rates.myinfoop, &u->rate_myinfoop, now.tv_sec)) {
@@ -975,8 +983,6 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
     cache_purge (cache.myinfoupdate, u);
     cache_queue (cache.myinfoupdate, u, u->MyINFO);
 
-    /* update the tag */
-    nicklistcache_updateuser (u, new);
   } while (0);
 
   return retval;

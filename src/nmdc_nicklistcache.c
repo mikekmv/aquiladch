@@ -32,12 +32,43 @@
 **                                                                            **
 \******************************************************************************/
 
+#ifdef DEBUG
+void nicklistcache_verify ()
+{
+  user_t *u;
+  unsigned long le = 0, lei = 0, leo = 0;
+
+  for (u = userlist; u; u = u->next) {
+    if ((u->state != PROTO_STATE_ONLINE) && (u->state != PROTO_STATE_VIRTUAL))
+      continue;
+    le += strlen (u->nick) + 2;
+    lei += bf_used (u->MyINFO) + 1;
+    if (u->op)
+      leo += strlen (u->nick) + 2;
+  }
+
+  for (u = cachelist; u; u = u->next) {
+    if (!u->joinstamp)
+      continue;
+    le += strlen (u->nick) + 2;
+    lei += bf_used (u->MyINFO) + 1;
+    if (u->op)
+      leo += strlen (u->nick) + 2;
+  }
+  ASSERT (le == cache.length_estimate);
+  ASSERT (lei == cache.length_estimate_info);
+  ASSERT (leo == cache.length_estimate_op);
+}
+#endif
+
 int nicklistcache_adduser (user_t * u)
 {
   unsigned long l;
 
-  cache.length_estimate += strlen (u->nick) + 2;
+  l = strlen (u->nick) + 2;
+  cache.length_estimate += l;
   cache.length_estimate_info += bf_used (u->MyINFO) + 1;	/* add one for the | */
+
   u->flags |= NMDC_FLAG_CACHED;
 
   cache.usercount++;
@@ -46,9 +77,11 @@ int nicklistcache_adduser (user_t * u)
     u->rate_getinfo.tokens += cache.usercount;
 
   if (u->op) {
-    cache.length_estimate_op += strlen (u->nick) + 2;
+    cache.length_estimate_op += l;
     cache.needrebuild = 1;
   }
+
+  NICKLISTCACHE_VERIFY;
 
   if (cache.needrebuild)
     return 0;
@@ -70,12 +103,16 @@ int nicklistcache_adduser (user_t * u)
   return 0;
 }
 
-int nicklistcache_updateuser (user_t * u, buffer_t * new)
+int nicklistcache_updateuser (buffer_t * old, buffer_t * new)
 {
   unsigned long l;
 
-  cache.length_estimate_info -= bf_used (u->MyINFO);
+  l = bf_used (old);
+  if (l < cache.length_estimate_info)
+    cache.length_estimate_info -= bf_used (old);
   cache.length_estimate_info += bf_used (new);
+
+  NICKLISTCACHE_VERIFY;
 
   if (cache.needrebuild)
     return 0;
@@ -96,18 +133,28 @@ int nicklistcache_updateuser (user_t * u, buffer_t * new)
 
 int nicklistcache_deluser (user_t * u)
 {
+  unsigned long l;
+
   if (!(u->flags & NMDC_FLAG_CACHED))
     return 0;
 
-  cache.length_estimate -= (strlen (u->nick) + 2);
-  cache.length_estimate_info -= (bf_used (u->MyINFO) + 1);
+  l = (bf_used (u->MyINFO) + 1);
+  if (l < cache.length_estimate_info)
+    cache.length_estimate_info -= l;
+  l = (strlen (u->nick) + 2);
+  if (l < cache.length_estimate)
+    cache.length_estimate -= l;
 
   cache.usercount--;
 
   if (u->op) {
     cache.needrebuild = 1;
-    cache.length_estimate_op -= (strlen (u->nick) + 2);
+    cache.length_estimate_op -= l;
   }
+
+  u->flags &= ~NMDC_FLAG_CACHED;
+
+  NICKLISTCACHE_VERIFY;
 
   if (cache.needrebuild)
     return 0;
@@ -130,6 +177,8 @@ int nicklistcache_rebuild (struct timeval now)
 {
   unsigned char *s, *o;
   user_t *t;
+
+  NICKLISTCACHE_VERIFY;
 
   nmdc_stats.cacherebuild++;
 
