@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Added some DEBUG code.
+	Fix bug in locale settings.
 	Added commands getlocale/setlocale.
 	Fix clientbanlist and clientban when no message is provided.
 	Hardcode LC_NUMERIC to "C" to prevent problems with tag parsing.

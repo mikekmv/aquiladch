@@ -35,6 +35,9 @@ typedef struct string_list_entry {
   struct string_list_entry *hnext, *hprev;
   struct user *user;
   buffer_t *data;
+#ifdef DEBUG
+  unsigned long size;
+#endif
 } string_list_entry_t;
 
 typedef struct string_list {

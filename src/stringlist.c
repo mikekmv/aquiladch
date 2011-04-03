@@ -54,6 +54,9 @@ inline string_list_entry_t *string_list_add (string_list_t * list, struct user *
   list->size += bf_size (data);
 
   bf_claim (data);
+#ifdef DEBUG
+  entry->size = bf_size (data);
+#endif
 
   STRINGLIST_VERIFY (list);
 
@@ -76,6 +79,7 @@ inline void string_list_del (string_list_t * list, string_list_entry_t * entry)
     list->first = entry->next;
   }
   if (entry->data) {
+    ASSERT (bf_size (entry->data) == entry->size);
     list->size -= bf_size (entry->data);
     bf_free (entry->data);
   }
@@ -85,6 +89,8 @@ inline void string_list_del (string_list_t * list, string_list_entry_t * entry)
 
   free (entry);
   list->count--;
+
+  STRINGLIST_VERIFY (list);
 }
 
 inline void string_list_purge (string_list_t * list, struct user *user)
@@ -168,6 +174,7 @@ inline void string_list_verify (string_list_t * list)
   while (entry) {
     count++;
     size += bf_size (entry->data);
+    ASSERT (entry->size == bf_size (entry->data));
     prev = entry;
     entry = entry->next;
   };

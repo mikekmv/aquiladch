@@ -300,7 +300,6 @@ int server_write (client_t * cl, buffer_t * b)
   w = l = t = 0;
   for (e = b; e; e = e->next) {
     l = bf_used (e);
-    t += l;
     w = send (s->socket, e->s, l, 0);
     if (w < 0) {
       DPRINTF ("server_write: write: %s\n", strerror (errno));
@@ -314,14 +313,16 @@ int server_write (client_t * cl, buffer_t * b)
 	default:
 	  return -1;
       }
+      w = 0;
       break;
     }
     hubstats.TotalBytesSend += w;
     if (w != l)
       break;
+    t += l;
   }
   if (w > 0)
-    t += w - l;
+    t += w;
 
   if (cl->credit) {
     if (cl->credit > t) {
@@ -335,13 +336,10 @@ int server_write (client_t * cl, buffer_t * b)
    * and ask esocket to notify us as the socket becomes writable 
    */
   if (e) {
-    if (w < 0)
-      w = 0;
-
-    if (!cl->outgoing.count)
-      buffering++;
+    ASSERT (!cl->outgoing.count);
 
     string_list_add (&cl->outgoing, cl->user, e);
+    buffering++;
     buf_mem += cl->outgoing.size;
     cl->offset = w;
     esocket_addevents (s, ESOCKET_EVENT_OUT);

@@ -289,10 +289,10 @@ int main (int argc, char **argv)
   /* we adjust the language to the enviroment, but
      the decimal point is hardcoded to .
    */
-  setlocale (LC_ALL, "");
-  setlocale (LC_NUMERIC, "C");
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
+  setlocale (LC_ALL, "");
+  setlocale (LC_NUMERIC, "C");
 #endif
 
 #ifdef DEBUG

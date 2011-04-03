@@ -184,7 +184,7 @@
 #include "stacktrace.h"
 #define DPRINTF	printf
 //#define ASSERT assert
-#define ASSERT(expr) ( (void)( (expr) ? 0 : CrashHandler(-1)) )
+#define ASSERT(expr) ( (void)( (expr) ? 0 : (DPRINTF ("ASSERT FAILED (%s:%d): " #expr, __FILE__, __LINE__), fflush (stdout), CrashHandler(-1)) ) )
 #else
 #define DPRINTF(x...) /* x */
 #define ASSERT(x...) /* x */

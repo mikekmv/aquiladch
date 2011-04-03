@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-14 01:49+0100\n"
+"POT-Creation-Date: 2006-12-15 00:25+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -2529,19 +2529,19 @@ msgstr ""
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:313 src/hub.c:453
+#: src/hub.c:312 src/hub.c:451
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:544
+#: src/hub.c:542
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:566
+#: src/hub.c:564
 msgid "Timeout"
 msgstr ""
 
-#: src/hub.c:574
+#: src/hub.c:572
 msgid "Socket error."
 msgstr ""
 
