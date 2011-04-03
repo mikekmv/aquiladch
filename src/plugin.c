@@ -28,6 +28,7 @@
 #  include <netinet/in.h>
 #endif
 
+#include "aqtime.h"
 #include "utils.h"
 #include "banlist.h"
 #include "user.h"
@@ -175,7 +176,6 @@ unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message)
 
 unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message)
 {
-  struct timeval now;
   user_t *u;
   buffer_t *b;
   unsigned int retval;
@@ -188,7 +188,6 @@ unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_
   if (u->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
 	       message, now.tv_sec + config.defaultKickPeriod);
 
@@ -210,7 +209,6 @@ unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_
 unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 				unsigned long period)
 {
-  struct timeval now;
   user_t *u;
   buffer_t *b;
   unsigned int retval;
@@ -223,7 +221,6 @@ unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer
   if (u->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
 	       message, period ? now.tv_sec + period : 0);
 
@@ -244,7 +241,6 @@ unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer
 
 unsigned int plugin_user_unban (plugin_user_t * user)
 {
-  struct timeval now;
   user_t *u;
 
   if (!user)
@@ -255,7 +251,6 @@ unsigned int plugin_user_unban (plugin_user_t * user)
   if (u->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  gettimeofday (&now, NULL);
   banlist_del_bynick (&softbanlist, u->nick);
   return 0;
 }
@@ -301,9 +296,6 @@ unsigned int plugin_unban (unsigned char *nick)
 unsigned int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask,
 			    buffer_t * message, unsigned long period)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
 	       period ? now.tv_sec + period : 0);
   return 0;
@@ -317,9 +309,6 @@ unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask)
 unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message,
 			      unsigned long period)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, 0L, 0L, message,
 	       period ? now.tv_sec + period : 0);
   return 0;
@@ -328,9 +317,6 @@ unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t 
 unsigned int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip,
 			 unsigned long netmask, buffer_t * message, unsigned long period)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), nick, ip, netmask, message,
 	       period ? now.tv_sec + period : 0);
   return 0;
@@ -351,9 +337,6 @@ unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask)
 unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask,
 				 buffer_t * message, unsigned long period)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
   banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), "", ip, netmask, message,
 	       period ? now.tv_sec + period : 0);
   return 0;
@@ -362,7 +345,6 @@ unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned 
 unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 				     unsigned long period)
 {
-  struct timeval now;
   user_t *u;
   buffer_t *b;
   unsigned int retval;
@@ -375,7 +357,6 @@ unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, b
   if (u->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  gettimeofday (&now, NULL);
   banlist_add (&hardbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
 	       message, period ? now.tv_sec + period : 0);
 
@@ -397,7 +378,6 @@ unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, b
 unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 				  unsigned long period)
 {
-  struct timeval now;
   user_t *u;
   buffer_t *b;
   unsigned int retval;
@@ -410,7 +390,6 @@ unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buff
   if (u->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, 0L, 0L, message,
 	       period ? now.tv_sec + period : 0);
 
@@ -432,7 +411,6 @@ unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buff
 unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 			      unsigned long period)
 {
-  struct timeval now;
   user_t *u;
   buffer_t *b;
   unsigned int retval;
@@ -445,7 +423,6 @@ unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t
   if (u->state == PROTO_STATE_VIRTUAL)
     return 0;
 
-  gettimeofday (&now, NULL);
   banlist_add (&softbanlist, (op ? op->nick : HubSec->nick), u->nick, u->ipaddress, 0xffffffff,
 	       message, period ? now.tv_sec + period : 0);
 
@@ -463,14 +440,12 @@ unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t
 
 unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
 {
-  struct timeval now;
   banlist_entry_t *ne;
 
   ne = banlist_find_bynick (&softbanlist, nick);
   if (!ne)
     return 0;
 
-  gettimeofday (&now, NULL);
   if (ne->expire) {
     return bf_printf (buf, "Found nick ban by %s for %s for %lus because: %.*s", ne->op, ne->nick,
 		      ne->expire - now.tv_sec, bf_used (ne->message), ne->message->s);
@@ -482,7 +457,6 @@ unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick)
 
 unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
 {
-  struct timeval now;
   struct in_addr ipa, netmask;
   banlist_entry_t *ie;
 
@@ -490,7 +464,6 @@ unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip)
   if (!ie)
     return 0;
 
-  gettimeofday (&now, NULL);
   ipa.s_addr = ie->ip;
   netmask.s_addr = ie->netmask;
   if (ie->expire) {
@@ -508,10 +481,8 @@ unsigned int plugin_banlist (buffer_t * output)
   unsigned long bucket, n;
   banlist_entry_t *lst, *e;
   struct in_addr ip, nm;
-  time_t now;
 
   n = 0;
-  time (&now);
   dlhashlist_foreach (&softbanlist.list_ip, bucket) {
     lst = dllist_bucket (&softbanlist.list_ip, bucket);
     dllist_foreach (lst, e) {
@@ -519,7 +490,7 @@ unsigned int plugin_banlist (buffer_t * output)
       nm.s_addr = e->netmask;
       if (e->expire) {
 	bf_printf (output, "%s %s Expires: ", e->nick, print_ip (ip, nm));
-	time_print (output, e->expire - now);
+	time_print (output, e->expire - now.tv_sec);
 	bf_printf (output, " Message: %.*s\n", bf_used (e->message), e->message->s);
       } else {
 	bf_printf (output, "%s %s Message: %.*s\n", e->nick, print_ip (ip, nm),

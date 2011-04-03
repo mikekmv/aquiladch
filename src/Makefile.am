@@ -28,7 +28,7 @@ STACKTRACEFILES = stacktrace.c
 NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
 
 bin_PROGRAMS = aquila
-aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) tth.c
+aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) tth.c aqtime.c
 aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@
 
 indent: .indent

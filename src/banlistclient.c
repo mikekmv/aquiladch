@@ -18,9 +18,9 @@
  */
 
 #include <stdio.h>
-#include <sys/time.h>
 #include <string.h>
 
+#include "aqtime.h"
 #include "banlistclient.h"
 #include "buffer.h"
 #include "hash.h"
@@ -107,9 +107,7 @@ unsigned int banlist_client_cleanup (banlist_client_t * list)
 {
   uint32_t i;
   banlist_client_entry_t *e, *n, *l;
-  struct timeval now;
 
-  gettimeofday (&now, NULL);
   dlhashlist_foreach (list, i) {
     l = dllist_bucket (list, i);
     for (e = (banlist_client_entry_t *) l->dllist.next; e != l; e = n) {
@@ -128,14 +126,12 @@ unsigned int banlist_client_save (banlist_client_t * list, unsigned char *file)
   uint32_t i;
   unsigned long l;
   banlist_client_entry_t *e, *lst;
-  struct timeval now;
 
   fp = fopen (file, "w+");
   if (!fp) {
     return errno;
   }
 
-  gettimeofday (&now, NULL);
   dlhashlist_foreach (list, i) {
     lst = dllist_bucket (list, i);
     dllist_foreach (lst, e) {

@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <sys/time.h>
 
+#include "aqtime.h"
 #include "plugin.h"
 #include "config.h"
 #include "commands.h"
@@ -127,7 +128,6 @@ unsigned int trigger_cache (trigger_t * trigger)
 
 void trigger_verify (trigger_t * trigger)
 {
-  struct timeval stamp;
   struct stat curstat;
 
   if (trigger->type == TRIGGER_TYPE_TEXT)
@@ -135,11 +135,10 @@ void trigger_verify (trigger_t * trigger)
 
   switch (trigger->type) {
     case TRIGGER_TYPE_FILE:
-      gettimeofday (&stamp, NULL);
-      if ((stamp.tv_sec - trigger->timestamp.tv_sec) < TRIGGER_RELOAD_PERIOD)
+      if ((now.tv_sec - trigger->timestamp.tv_sec) < TRIGGER_RELOAD_PERIOD)
 	break;
 
-      trigger->timestamp = stamp;
+      trigger->timestamp = now;
 
       if (!(trigger->flags & TRIGGER_FLAG_READALWAYS)) {
 	if (stat (trigger->file, &curstat))
@@ -155,8 +154,7 @@ void trigger_verify (trigger_t * trigger)
 
       break;
     case TRIGGER_TYPE_COMMAND:
-      gettimeofday (&stamp, NULL);
-      if ((stamp.tv_sec - trigger->timestamp.tv_sec) < TRIGGER_RELOAD_PERIOD)
+      if ((now.tv_sec - trigger->timestamp.tv_sec) < TRIGGER_RELOAD_PERIOD)
 	break;
 
       break;
@@ -213,7 +211,7 @@ trigger_t *trigger_create (unsigned char *name, unsigned long type, unsigned cha
       break;
   }
 
-  gettimeofday (&trigger->timestamp, NULL);
+  trigger->timestamp = now;
 
   /* link in list, at the end. */
   trigger->next = &triggerList;

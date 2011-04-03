@@ -23,6 +23,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "aqtime.h"
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
@@ -42,7 +43,6 @@ extern float cpu_calculate (int time);
 unsigned long pi_statbot_handler_statbot (plugin_user_t * user, buffer_t * output, void *dummy,
 					  unsigned int argc, unsigned char **argv)
 {
-  struct timeval now;
   config_element_t *userlimit, *minshare, *minslots, *maxslots, *maxhubs, *hubname, *listenport,
     *hostname, *hubdesc;
 
@@ -56,7 +56,6 @@ unsigned long pi_statbot_handler_statbot (plugin_user_t * user, buffer_t * outpu
   maxslots = config_find ("slot.unregistered.max");
   maxhubs = config_find ("hub.unregistered.max");
 
-  gettimeofday (&now, NULL);
   bf_printf (output,
 	     "HubInfo %s$%s$%s$%s$%u$%lu$%llu$%llu$%u$%u$%lu$%lu$%lu$%lu$%lu$%lu$%lu$%.2f$%.2f$%.2f$%lu$%lu$%lu$",
 	     hubname ? *(hubname->val.v_string) : (unsigned char *) "", "" /* config.HubTopic */ ,

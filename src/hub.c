@@ -489,6 +489,7 @@ int server_handle_input (esocket_t * s)
     return -1;
   }
 
+  gettime ();
   if (cl->buffers)
     cl->proto->handle_input (cl->user, &cl->buffers);
 

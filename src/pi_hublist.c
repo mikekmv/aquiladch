@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "aqtime.h"
 #include "buffer.h"
 #include "config.h"
 #include "commands.h"
@@ -339,14 +340,12 @@ int pi_hublist_handle_timeout (esocket_t * s)
 unsigned long pi_hublist_handle_update (plugin_user_t * user, void *ctxt, unsigned long event,
 					void *token)
 {
-  struct timeval now;
   buffer_t *output;
   unsigned int l;
 
   if (!pi_hublist_interval)
     return 0;
 
-  gettimeofday (&now, NULL);
   if (now.tv_sec > (pi_hublist_savetime.tv_sec + (time_t) pi_hublist_interval)) {
     pi_hublist_savetime = now;
     output = bf_alloc (1024);

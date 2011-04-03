@@ -26,6 +26,7 @@
 
 #include "hashlist_func.h"
 
+#include "aqtime.h"
 #include "nmdc_token.h"
 #include "nmdc_nicklistcache.h"
 #include "nmdc_local.h"
@@ -66,6 +67,8 @@ unsigned int researchmininterval, researchperiod, researchmaxcount;
 
 unsigned char *defaultbanmessage = NULL;
 
+leaky_bucket_t rate_warnings;
+
 static user_t *freelist = NULL;
 hashlist_t hashlist;
 
@@ -104,6 +107,8 @@ int proto_nmdc_user_priv (user_t * u, user_t * target, user_t * source, buffer_t
 int proto_nmdc_user_priv_direct (user_t * u, user_t * target, user_t * source, buffer_t * message);
 int proto_nmdc_user_raw (user_t * target, buffer_t * message);
 int proto_nmdc_user_raw_all (buffer_t * message);
+
+int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...);
 
 /******************************************************************************\
 **                                                                            **
@@ -578,13 +583,13 @@ int proto_nmdc_user_raw_all (buffer_t * message)
 
 user_t *proto_nmdc_user_alloc (void *priv)
 {
-  struct timeval now;
   user_t *user;
 
   /* do we have a connect token? */
-  gettimeofday (&now, NULL);
-  if (!get_token (&rates.connects, &connects, now.tv_sec))
+  if (!get_token (&rates.connects, &connects, now.tv_sec)) {
+    proto_nmdc_warn (&now, "Users refused because of login rate.");
     return NULL;
+  }
 
   /* yes, create and init user */
   user = malloc (sizeof (user_t));
@@ -871,7 +876,7 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
     return 0;
   }
 
-  buf = bf_alloc (1024);
+  buf = bf_alloc (10240);
 
   bf_strcat (buf, "<");
   bf_strcat (buf, HubSec->nick);
@@ -884,6 +889,35 @@ int proto_nmdc_user_warn (user_t * u, struct timeval *now, unsigned char *messag
   bf_strcat (buf, "|");
 
   server_write (u->parent, buf);
+
+  bf_free (buf);
+
+  return 1;
+}
+
+int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...)
+{
+  user_t *u;
+  buffer_t *buf;
+  va_list ap;
+
+  u = hash_find_nick (&hashlist, config.SysReportTarget, strlen (config.SysReportTarget));
+  if (!u)
+    return 0;
+
+  if (!get_token (&rates.warnings, &rate_warnings, now->tv_sec)) {
+    return 0;
+  }
+
+  buf = bf_alloc (10240);
+  bf_printf (buf, "WARNING: ");
+
+  va_start (ap, message);
+  bf_vprintf (buf, message, ap);
+  va_end (ap);
+
+  proto_nmdc_user_priv_direct (HubSec, u, HubSec, buf);
+
   bf_free (buf);
 
   return 1;
@@ -921,6 +955,8 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
     /* if parent is freed "buffers" is not longer valid */
     if (user->state == PROTO_STATE_DISCONNECTED)
       break;
+
+    gettime ();
   }
 
   proto_nmdc_user_freelist_clear ();

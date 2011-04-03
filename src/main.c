@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "aqtime.h"
 #include "proto.h"
 #include "config.h"
 #include "user.h"
@@ -212,7 +213,7 @@ void daemonize ()
    * fork to start the hub and fork again if the child exits
    */
   if (args.restart) {
-    time_t stamp, now;
+    time_t stamp, tnow;
     sigset_t set, oldset;
 
     /* block all signals except SIG_CHILD */
@@ -223,7 +224,7 @@ void daemonize ()
     time (&now);
     do {
       /* record fork time */
-      stamp = now;
+      stamp = tnow;
 
       /* fork the child */
       i = fork ();
@@ -239,9 +240,9 @@ void daemonize ()
       wait (NULL);
 
       /* guard against fork storms */
-      time (&now);
-      if ((now - stamp) < MIN_FORK_RETRY_PERIOD)
-	sleep (MIN_FORK_RETRY_PERIOD - (now - stamp));
+      time (&tnow);
+      if ((tnow - stamp) < MIN_FORK_RETRY_PERIOD)
+	sleep (MIN_FORK_RETRY_PERIOD - (tnow - stamp));
 
       /* loop to restart child */
     } while (1);
@@ -341,6 +342,7 @@ int main (int argc, char **argv)
     if (timercmp (&tnow, &tnext, >=)) {
       tnext = tnow;
       tnext.tv_sec += 1;
+      now = tnow;
       nmdc_proto.flush_cache ();
     }
   }

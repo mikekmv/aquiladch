@@ -1,7 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
-	Rport the last rate violation when a user gets banned.
+	Added warning if join rate is overstepped.
+	Added global "now" time variable to reduce gettimeofday/time calls
+	Report the last rate violation when a user gets banned.
 	On reconnect, only restore tthlist if the old user had one.
 	fix userlist layout
 	add lua SetUserRights()

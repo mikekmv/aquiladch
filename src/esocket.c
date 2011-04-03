@@ -276,9 +276,9 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
     } else {
       esocket_deltimeout (s);
     }
-  }
-
-  gettimeofday (&s->to, NULL);
+    s->to = s->reset;
+  } else
+    gettimeofday (&s->to, NULL);
 
   /* determine key */
   key = (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + timeout;
@@ -665,8 +665,8 @@ unsigned int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
 unsigned int esocket_checktimers (esocket_handler_t * h)
 {
   esocket_t *s;
-  struct timeval now;
   rbt_t *rbt;
+  struct timeval now;
 
   gettimeofday (&now, NULL);
 

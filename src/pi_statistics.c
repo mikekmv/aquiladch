@@ -24,6 +24,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include "aqtime.h"
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
@@ -194,11 +195,9 @@ float cpu_calculate (int seconds)
 int cpu_printf (buffer_t * buf)
 {
 
-  time_t now;
+  time_t tnow = now.tv_sec;
 
-  time (&now);
-
-  bf_printf (buf, "\nCpu Statistics at %s", ctime (&now));
+  bf_printf (buf, "\nCpu Statistics at %s", ctime (&tnow));
 
   if (procstats[2][(current[2] - 1) % PROCSTAT_MEASUREMENTS].tv.tv_sec > 0)
     bf_printf (buf, " last hour %2.2f%%\n",
@@ -362,9 +361,7 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
 {
   unsigned long totalmem = 0;
   unsigned long totallines = 0;
-  struct timeval now;
 
-  gettimeofday (&now, NULL);
   add_elem (output, cache.chat, now.tv_sec);
   add_elem (output, cache.myinfo, now.tv_sec);
   add_elem (output, cache.myinfoupdate, now.tv_sec);
@@ -431,10 +428,6 @@ extern unsigned long buf_mem;
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
   bf_printf (output, "Memory Usage:\n");
   //bf_printf (output, "Resident: %lu\n", procstats[0][current[0]].ps.ru_maxrss);
   //bf_printf (output, "Shared: %lu\n", procstats[0][current[0]].ps.ru_idrss);
@@ -445,13 +438,12 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
 unsigned long pi_statistics_handler_uptime (plugin_user_t * user, buffer_t * output, void *dummy,
 					    unsigned int argc, unsigned char **argv)
 {
-  struct timeval now;
+  struct timeval diff;
 
-  gettimeofday (&now, NULL);
-  timersub (&now, &boottime, &now);
+  timersub (&now, &boottime, &diff);
 
-  bf_printf (output, "Booted at %.*s, up %lu seconds (", 24, ctime (&boottime.tv_sec), now.tv_sec);
-  time_print (output, now.tv_sec);
+  bf_printf (output, "Booted at %.*s, up %lu seconds (", 24, ctime (&boottime.tv_sec), diff.tv_sec);
+  time_print (output, diff.tv_sec);
   bf_strcat (output, ")\n");
 
   return 0;

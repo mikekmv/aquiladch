@@ -20,7 +20,6 @@
 #define _GNU_SOURCE
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -33,6 +32,7 @@
 #endif
 #include <arpa/inet.h>
 
+#include "aqtime.h"
 #include "defaults.h"
 #include "builtincmd.h"
 #include "plugin.h"
@@ -1700,7 +1700,7 @@ unsigned long handler_save (plugin_user_t * user, buffer_t * output, void *priv,
 
   /* reset autosave counter */
   if (AutoSaveInterval)
-    gettimeofday (&savetime, NULL);
+    savetime = now;
 
   return retval;
 }
@@ -1716,14 +1716,12 @@ unsigned long handler_load (plugin_user_t * user, buffer_t * output, void *priv,
 
 unsigned long handler_autosave (plugin_user_t * user, void *ctxt, unsigned long event, void *token)
 {
-  struct timeval now;
   buffer_t *output;
   unsigned int l;
 
   if (!AutoSaveInterval)
     return 0;
 
-  gettimeofday (&now, NULL);
   if (now.tv_sec > (savetime.tv_sec + (time_t) AutoSaveInterval)) {
     savetime = now;
     output = bf_alloc (1024);

@@ -18,12 +18,12 @@
  */
 
 #include <stdio.h>
-#include <sys/time.h>
 #include <string.h>
 #include <ctype.h>
 
 #include <arpa/inet.h>
 
+#include "aqtime.h"
 #include "defaults.h"
 #include "banlist.h"
 #include "buffer.h"
@@ -177,7 +177,6 @@ unsigned int banlist_del_bynick (banlist_t * list, unsigned char *nick)
 
 banlist_entry_t *banlist_find_bynet (banlist_t * list, uint32_t ip, uint32_t netmask)
 {
-  struct timeval now;
   banlist_entry_t *e, *l;
 
 repeat:
@@ -189,7 +188,6 @@ repeat:
   if (e == dllist_end (l))
     return NULL;
 
-  gettimeofday (&now, NULL);
   if (e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
@@ -202,7 +200,6 @@ repeat:
 banlist_entry_t *banlist_find_exact (banlist_t * list, unsigned char *nick, uint32_t ip,
 				     uint32_t netmask)
 {
-  struct timeval now;
   banlist_entry_t *e, *l;
   unsigned char n[NICKLENGTH];
   unsigned int i;
@@ -220,7 +217,6 @@ repeat:
   if (e == dllist_end (l))
     return NULL;
 
-  gettimeofday (&now, NULL);
   if (e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
@@ -232,7 +228,6 @@ repeat:
 
 banlist_entry_t *banlist_find_byip (banlist_t * list, uint32_t ip)
 {
-  struct timeval now;
   banlist_entry_t *e, *l;
   uint32_t netmask;
   long i;
@@ -256,7 +251,6 @@ repeat:
   if (e == dllist_end (l))
     return NULL;
 
-  gettimeofday (&now, NULL);
   if (e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
@@ -269,7 +263,6 @@ repeat:
 banlist_entry_t *banlist_find_bynick (banlist_t * list, unsigned char *nick)
 {
   dllist_entry_t *p, *l;
-  struct timeval now;
   banlist_entry_t *e;
   unsigned char n[NICKLENGTH];
   unsigned int i;
@@ -287,7 +280,6 @@ repeat:
   if (p == dllist_end (l))
     return NULL;
 
-  gettimeofday (&now, NULL);
   if (e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
@@ -301,7 +293,6 @@ banlist_entry_t *banlist_find_bynick_next (banlist_t * list, banlist_entry_t * o
 					   unsigned char *nick)
 {
   dllist_entry_t *p, *l;
-  struct timeval now;
   banlist_entry_t *e;
   unsigned char n[NICKLENGTH];
   unsigned int i;
@@ -325,7 +316,6 @@ repeat:
   if (p == dllist_end (l))
     return NULL;
 
-  gettimeofday (&now, NULL);
   if (e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
@@ -338,7 +328,6 @@ repeat:
 banlist_entry_t *banlist_find (banlist_t * list, unsigned char *nick, uint32_t ip)
 {
   dllist_entry_t *p, *l;
-  struct timeval now;
   banlist_entry_t *e;
   unsigned char n[NICKLENGTH];
   unsigned int i;
@@ -356,7 +345,6 @@ repeat:
   if (p == dllist_end (l))
     return NULL;
 
-  gettimeofday (&now, NULL);
   if (e->expire && (now.tv_sec > e->expire)) {
     banlist_del (list, e);
     e = NULL;
@@ -371,7 +359,6 @@ unsigned int banlist_cleanup (banlist_t * list)
   uint32_t i;
   banlist_entry_t *e;
   dllist_entry_t *l, *p, *n;
-  struct timeval now;
 
   dlhashlist_foreach (&list->list_name, i) {
     l = dllist_bucket (&list->list_name, i);
@@ -398,7 +385,6 @@ unsigned int banlist_save (banlist_t * list, unsigned char *file)
   unsigned long j;
   banlist_entry_t *e;
   dllist_entry_t *l, *p, *n;
-  struct timeval now;
 
   //banlist_cleanup (list);
 
@@ -406,7 +392,6 @@ unsigned int banlist_save (banlist_t * list, unsigned char *file)
   if (!fp)
     return errno;
 
-  gettimeofday (&now, NULL);
   fwrite (list->netmask_inuse, sizeof (unsigned long), 33, fp);
   dlhashlist_foreach (&list->list_ip, i) {
     l = dllist_bucket (&list->list_ip, i);
@@ -436,14 +421,12 @@ unsigned int banlist_load (banlist_t * list, unsigned char *file)
   FILE *fp;
   unsigned long l;
   banlist_entry_t e;
-  struct timeval now;
 
   banlist_clear (list);
 
   fp = fopen (file, "r+");
   if (!fp)
     return errno;
-  gettimeofday (&now, NULL);
   fread (list->netmask_inuse, sizeof (unsigned long), 33, fp);
   memset (list->netmask_inuse, 0, sizeof (unsigned long) * 33);
   while (!feof (fp)) {

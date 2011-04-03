@@ -41,6 +41,8 @@ unsigned long chatlogmax = 0;
 unsigned long pi_chatlog_handler_chatlog (plugin_user_t * user, buffer_t * output, void *dummy,
 					  unsigned int argc, unsigned char **argv)
 {
+  unsigned long l;
+  buffer_t *b;
   string_list_entry_t *e;
 
   if (!chatlogmax) {
@@ -49,8 +51,15 @@ unsigned long pi_chatlog_handler_chatlog (plugin_user_t * user, buffer_t * outpu
   }
 
   bf_printf (output, "Chat History:\n");
+
+  if (bf_unused (output) < (chatlog.size + chatlog.count)) {
+    b = bf_alloc (chatlog.size + chatlog.count);
+    bf_append (&output, b);
+  } else {
+    b = output;
+  }
   for (e = chatlog.first; e; e = e->next)
-    bf_printf (output, "%.*s\n", bf_used (e->data), e->data->s);
+    bf_printf (b, "%.*s\n", bf_used (e->data), e->data->s);
 
   return 0;
 }

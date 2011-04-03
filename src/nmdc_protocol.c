@@ -24,13 +24,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include <time.h>
 
 #include "../config.h"
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
 
+#include "aqtime.h"
 #include "user.h"
 #include "core_config.h"
 #include "plugin_int.h"
@@ -77,11 +77,10 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
   unsigned int i;
   int retval = 0;
   buffer_t *output;
-  struct timeval now;
+  struct timeval tnow;
   banlist_entry_t *ban;
 
-  gettimeofday (&now, NULL);
-  timersub (&now, &boottime, &now);
+  timersub (&now, &boottime, &tnow);
 
   output = bf_alloc (2048);
   output->s[0] = '\0';
@@ -97,13 +96,12 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
   bf_strcat (output, "<");
   bf_strcat (output, HubSec->nick);
   bf_strcat (output, "> This hub is running Aquila Version " AQUILA_VERSION " (Uptime ");
-  time_print (output, now.tv_sec);
-  bf_printf (output, ".%.3lu).|", now.tv_usec / 1000);
+  time_print (output, tnow.tv_sec);
+  bf_printf (output, ".%.3lu).|", tnow.tv_usec / 1000);
 
   /* check for a reconnect ban */
   if (!cloning && (ban = banlist_find_bynet (&reconnectbanlist, u->ipaddress, 0xFFFFFFFF))) {
     bf_printf (output, "<%s> Do not reconnect too fast, time remaining: ", HubSec->nick);
-    gettimeofday (&now, NULL);
     time_print (output, ban->expire - now.tv_sec);
     bf_strcat (output, "|");
     retval = server_write (u->parent, output);
@@ -264,7 +262,6 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
   banlist_entry_t *ban;
   user_t *existing_user;
   account_t *a;
-  struct timeval now;
 
   if (tkn->type != TOKEN_VALIDATENICK)
     return 0;
@@ -316,7 +313,6 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     }
 
     /* check for a reconnect ban */
-    gettimeofday (&now, NULL);
     if ((ban = banlist_find_bynick (&reconnectbanlist, u->nick))) {
       bf_printf (output, "<%s> Do not reconnect too fast, time remaining: ", HubSec->nick);
       time_print (output, ban->expire - now.tv_sec);
@@ -455,7 +451,6 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
   buffer_t *output;
   user_t *existing_user;
   banlist_entry_t *ban;
-  struct timeval now;
 
   if (tkn->type != TOKEN_MYPASS)
     return 0;
@@ -478,7 +473,6 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
       nmdc_stats.badpasswd++;
       /* check password guessing attempts */
       if (++a->badpw >= config.PasswdRetry) {
-	gettimeofday (&now, NULL);
 	banlist_add (&softbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
 		     bf_buffer ("Password retry overflow."), now.tv_sec + config.PasswdBantime);
 	a->badpw = 0;
@@ -549,7 +543,6 @@ banned:
   bf_strncat (output, ban->message->s, bf_used (ban->message));
   bf_strcat (output, "|");
   if (ban->expire) {
-    gettimeofday (&now, NULL);
     bf_printf (output, "<%s> Time remaining ", HubSec->nick);
     time_print (output, ban->expire - now.tv_sec);
     bf_strcat (output, "|");
@@ -750,10 +743,6 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
   int i;
   string_list_entry_t *le;
 
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
   do {
     if (!(u->rights & CAP_CHAT))
       break;
@@ -846,10 +835,6 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 {
   int retval = 0;
   buffer_t *new;
-
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
 
   do {
     /* build and generate the tag */
@@ -945,10 +930,8 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
   tth_list_entry_t *e;
   unsigned char *c = NULL, *n;
   unsigned long deadline;
-  struct timeval now;
   struct in_addr addr;
 
-  gettimeofday (&now, NULL);
   deadline = now.tv_sec - researchperiod;
   do {
 
@@ -1092,10 +1075,6 @@ int proto_nmdc_state_online_sr (user_t * u, token_t * tkn, buffer_t * output, bu
   unsigned char *c, *n;
   user_t *t;
 
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
   do {
     /* check quota */
     if (!get_token (&rates.psresults_out, &u->rate_psresults_out, now.tv_sec)) {
@@ -1189,10 +1168,6 @@ int proto_nmdc_state_online_getinfo (user_t * u, token_t * tkn, buffer_t * outpu
   int l;
   unsigned char *c, *n;
   user_t *t;
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
 
   do {
     /* check quota */
@@ -1229,10 +1204,6 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
   unsigned char *c, *n;
   user_t *t;
   struct in_addr addr;
-
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
 
   do {
 
@@ -1311,10 +1282,6 @@ int proto_nmdc_state_online_rctm (user_t * u, token_t * tkn, buffer_t * output, 
   unsigned char *c, *n;
   user_t *t;
 
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
   do {
     if (!(u->rights & CAP_DL))
       break;
@@ -1383,9 +1350,6 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
   int l;
   unsigned char *c, *n;
   user_t *t;
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
 
   do {
 
@@ -1496,9 +1460,6 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
   user_t *target;
 
   /* unsigned int port; */
-  struct timeval now;
-
-
   do {
     if (!(u->rights & CAP_REDIRECT))
       break;
@@ -1585,7 +1546,6 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
     c = output->s;
     bf_printf (output, "%s", why);
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, output) != PLUGIN_RETVAL_CONTINUE) {
-      gettimeofday (&now, NULL);
       proto_nmdc_user_warn (u, &now, "Redirect refused.\n");
       output->s = c;
       break;
@@ -1611,9 +1571,6 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
   int retval = 0;
   unsigned char *n, *c;
   user_t *target;
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
 
   do {
     if (!(u->rights & CAP_KICK))
@@ -1644,7 +1601,6 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
 		 now.tv_sec + config.defaultKickPeriod);
 
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, NULL) != PLUGIN_RETVAL_CONTINUE) {
-      gettimeofday (&now, NULL);
       proto_nmdc_user_warn (u, &now, "Redirect refused.\n");
       output->s = c;
       break;
@@ -1661,9 +1617,7 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
 {
   int retval = 0;
   config_element_t *share, *slot, *hub, *users, *owner;
-  struct timeval now;
 
-  gettimeofday (&now, NULL);
   do {
     /* we reuse the warning rate here. Should not affect pingers (since they don't do much) and
      * prevents the need for yet another leaky bucket. */
@@ -1706,9 +1660,6 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
   buffer_t *output;
 
   //unsigned char *k, *l;
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
 
   output = bf_alloc (2048);
   output->s[0] = '\0';
@@ -1977,7 +1928,6 @@ void proto_nmdc_flush_cache ()
   buffer_t *buf_passive, *buf_active, *buf_exception, *buf_op, *buf_aresearch, *buf_presearch;
   unsigned int psl, asl, l, t;
   unsigned int as = 0, ps = 0, ch = 0, pm = 0, mi = 0, miu = 0, res = 0, miuo = 0, ars = 0, prs = 0;
-  struct timeval now;
   unsigned long deadline;
 
 #ifdef ZLINES
@@ -2008,7 +1958,6 @@ void proto_nmdc_flush_cache ()
   buf_aresearch = bf_alloc (cache.aresearch.length + cache.aresearch.messages.count);
   buf_presearch = bf_alloc (cache.presearch.length + cache.presearch.messages.count);
 
-  gettimeofday (&now, NULL);
   deadline = now.tv_sec - researchperiod;
 
   /* operator buffer */

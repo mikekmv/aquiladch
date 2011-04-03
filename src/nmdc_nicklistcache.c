@@ -21,6 +21,7 @@
 
 #include "utils.h"
 
+#include "aqtime.h"
 #include "nmdc_protocol.h"
 #include "nmdc_local.h"
 #include "nmdc_utils.h"
@@ -200,9 +201,7 @@ int nicklistcache_rebuild (struct timeval now)
 
 int nicklistcache_sendnicklist (user_t * target)
 {
-  struct timeval now;
 
-  gettimeofday (&now, NULL);
   if ((now.tv_sec - cache.lastrebuild) > PROTOCOL_REBUILD_PERIOD)
     cache.needrebuild = 1;
 
@@ -255,9 +254,6 @@ int nicklistcache_sendnicklist (user_t * target)
 
 int nicklistcache_sendoplist (user_t * target)
 {
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
   nicklistcache_rebuild (now);
 
   /* write out to all users except target. */

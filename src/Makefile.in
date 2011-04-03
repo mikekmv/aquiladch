@@ -58,7 +58,7 @@ am__aquila_SOURCES_DIST = buffer.c esocket.c stringlist.c rbt.c \
 	commands.c builtincmd.c cap.c pi_user.c pi_statistics.c \
 	pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c \
 	pi_iplog.c pi_hublist.c pi_lua.c main.c searchlist.c \
-	stacktrace.c getaddrinfo.c tth.c
+	stacktrace.c getaddrinfo.c tth.c aqtime.c
 am__objects_1 = nmdc_token.$(OBJEXT) nmdc_protocol.$(OBJEXT) \
 	nmdc_nicklistcache.$(OBJEXT) nmdc_utils.$(OBJEXT) \
 	nmdc.$(OBJEXT) nmdc_interface.$(OBJEXT)
@@ -77,7 +77,7 @@ am_aquila_OBJECTS = buffer.$(OBJEXT) esocket.$(OBJEXT) \
 	pi_chatlog.$(OBJEXT) pi_statbot.$(OBJEXT) pi_iplog.$(OBJEXT) \
 	pi_hublist.$(OBJEXT) $(am__objects_2) main.$(OBJEXT) \
 	searchlist.$(OBJEXT) $(am__objects_3) $(am__objects_4) \
-	tth.$(OBJEXT)
+	tth.$(OBJEXT) aqtime.$(OBJEXT)
 aquila_OBJECTS = $(am_aquila_OBJECTS)
 aquila_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -124,6 +124,7 @@ GDB = @GDB@
 GETADDRINFO_FALSE = @GETADDRINFO_FALSE@
 GETADDRINFO_TRUE = @GETADDRINFO_TRUE@
 GPROF = @GPROF@
+GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -152,9 +153,6 @@ VERSION = @VERSION@
 ZLIB = @ZLIB@
 ZLINE = @ZLINE@
 ac_ct_CC = @ac_ct_CC@
-ac_ct_GDB = @ac_ct_GDB@
-ac_ct_GPROF = @ac_ct_GPROF@
-ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__include = @am__include@
@@ -169,23 +167,30 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -203,7 +208,7 @@ EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h co
 DISTCLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
 NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
-aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) tth.c
+aquila_SOURCES = buffer.c esocket.c stringlist.c rbt.c utils.c hash.c dllist.c leakybucket.c config.c hub.c core_config.c $(NMDC_SOURCES) hashlist.c user.c banlist.c banlistclient.c plugin.c commands.c builtincmd.c cap.c pi_user.c pi_statistics.c pi_chatroom.c pi_trigger.c pi_chatlog.c pi_statbot.c pi_iplog.c pi_hublist.c $(LUA_SOURCES) main.c searchlist.c $(DEBUG_FILES) $(GETADDRINFO_SOURCES) tth.c aqtime.c
 aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@
 all: all-am
 
@@ -271,6 +276,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aqtime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/banlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/banlistclient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@
