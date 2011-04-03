@@ -1,5 +1,8 @@
 This is the Aquila Changelog.
 
+0.1.10:
+	Fix chatroom del and OP rejoin bugs.
+
 0.1.10-pre4:
 	banlist will list both IP and nick for dual bans (Req FleetCommand).
 	Send login password message in PM. Has disadvantages for some clients.

@@ -106,7 +106,7 @@ int nicklistcache_adduser (user_t * u)
 int nicklistcache_updateuser (user_t * old, user_t * new)
 {
   if (old->op != new->op) {
-    unsigned long l = strlen (new->nick);
+    unsigned long l = strlen (new->nick) + 2;
 
     if (old->op && (cache.length_estimate_op > l))
       cache.length_estimate_op -= l;

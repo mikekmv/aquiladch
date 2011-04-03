@@ -200,6 +200,8 @@ int proto_nmdc_user_delrobot (user_t * u)
 
   plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGOUT, NULL);
 
+  u->state = PROTO_STATE_DISCONNECTED;
+
   nicklistcache_deluser (u);
   hash_deluser (&hashlist, &u->hash);
 
