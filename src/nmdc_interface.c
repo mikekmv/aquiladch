@@ -30,6 +30,8 @@
 #include "nmdc_nicklistcache.h"
 #include "nmdc_local.h"
 
+#include "defaults.h"
+
 /******************************************************************************\
 **                                                                            **
 **                            GLOBAL VARIABLES                                **
@@ -1001,6 +1003,8 @@ int proto_nmdc_init ()
   lock[l++] = ']';
   lock[l++] = ']';
   lock[l] = '\0';
+
+  ASSERT (l <= sizeof (lock));
 
   memset (key, 0, sizeof (key));
   s = lock;

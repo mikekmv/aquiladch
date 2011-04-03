@@ -165,9 +165,9 @@ int accept_new_user (esocket_t * s)
     if (iplist_interval) {
       if (iplist_find (&lastlist, client_address.sin_addr.s_addr)) {
 	int l;
-	char buffer[256];
+	char buffer[1024];
 
-	l = snprintf (buffer, 256, __ ("<%s> Don't reconnect so fast.|"), HUBSOFT_NAME);
+	l = snprintf (buffer, sizeof (buffer), __ ("<%s> Don't reconnect so fast.|"), HUBSOFT_NAME);
 	write (r, buffer, l);
 	shutdown (r, SHUT_RDWR);
 	close (r);
@@ -179,11 +179,11 @@ int accept_new_user (esocket_t * s)
     /* check available memory */
     if (buf_mem > config.BufferTotalLimit) {
       int l;
-      char buffer[256];
+      char buffer[1024];
 
       l =
-	snprintf (buffer, 256, __ ("<%s> This hub is too busy, please try again later.|"),
-		  HUBSOFT_NAME);
+	snprintf (buffer, sizeof (buffer),
+		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
       write (r, buffer, l);
       shutdown (r, SHUT_RDWR);
       close (r);
@@ -203,11 +203,11 @@ int accept_new_user (esocket_t * s)
     /* user connection refused. */
     if (!cl->user) {
       int l;
-      char buffer[256];
+      char buffer[1024];
 
       l =
-	snprintf (buffer, 256, __ ("<%s> This hub is too busy, please try again later.|"),
-		  HUBSOFT_NAME);
+	snprintf (buffer, sizeof (buffer),
+		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
 
       write (r, buffer, l);
       shutdown (r, SHUT_RDWR);
@@ -225,11 +225,11 @@ int accept_new_user (esocket_t * s)
 
     if (!cl->es) {
       int l;
-      char buffer[256];
+      char buffer[1024];
 
       l =
-	snprintf (buffer, 256, __ ("<%s> This hub is too busy, please try again later.|"),
-		  HUBSOFT_NAME);
+	snprintf (buffer, sizeof (buffer),
+		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
 
       write (r, buffer, l);
       shutdown (r, SHUT_RDWR);

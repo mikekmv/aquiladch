@@ -1676,7 +1676,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
   int retval = 0;
   buffer_t *output;
 
-  output = bf_alloc (2048);
+  output = bf_alloc (4000);
   output->s[0] = '\0';
 
   switch (tkn->type) {

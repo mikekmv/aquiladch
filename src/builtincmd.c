@@ -1280,6 +1280,7 @@ unsigned long handler_userdel (plugin_user_t * user, buffer_t * output, void *pr
     cap = account->rights | account->classp->rights;
     if (cap & ~user->rights) {
       bf_printf (output, _("You are not allowed to delete user %s.\n"), argv[1]);
+      goto leave;
     }
   }
   account_del (account);

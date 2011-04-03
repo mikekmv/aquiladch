@@ -130,7 +130,7 @@ void parseargs (int argc, char **argv)
   }
 }
 
-void daemonize ()
+void daemonize (char **argv)
 {
   int i, lockfd;
   unsigned char pid[16];
@@ -218,6 +218,9 @@ void daemonize ()
   if (args.restart) {
     time_t stamp, tnow;
     sigset_t set, oldset;
+    struct stat bstat, nstat;
+
+    stat (*argv[0] ? argv[0] : "/proc/self/exe", &bstat);
 
     /* block all signals except SIG_CHILD */
     sigemptyset (&set);
@@ -246,6 +249,13 @@ void daemonize ()
       time (&tnow);
       if ((tnow - stamp) < MIN_FORK_RETRY_PERIOD)
 	sleep (MIN_FORK_RETRY_PERIOD - (tnow - stamp));
+
+      /* first we check if the executable has changed, if so, we
+       *  start the new executable instead of forking
+       */
+      stat (*argv[0] ? argv[0] : "/proc/self/exe", &nstat);
+      if (nstat.st_mtime != bstat.st_mtime)
+	execvp (*argv[0] ? argv[0] : "/proc/self/exe", argv);
 
       /* loop to restart child */
     } while (1);
@@ -289,7 +299,7 @@ int main (int argc, char **argv)
   parseargs (argc, argv);
 
   /* deamonize */
-  daemonize ();
+  daemonize (argv);
 
   /* initialize the global configuration */
   config_init ();

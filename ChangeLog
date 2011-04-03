@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Increase buffersize a bit when using translatable strings.
+	If executable is replaced, !shutdown will start the new 
+		executable when running with option -r
+	Fixed bug in !userdel.
 	Fixes in server_handle_output().
 	Added aqdtinstall Ubuntu support.
 	rights list with space between "" now works too.

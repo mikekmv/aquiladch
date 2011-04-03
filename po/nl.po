@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-12-09 02:18+0100\n"
+"POT-Creation-Date: 2006-12-10 19:00+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -23,9 +23,9 @@ msgstr ""
 
 #: src/builtincmd.c:115 src/builtincmd.c:313 src/builtincmd.c:379
 #: src/builtincmd.c:433 src/builtincmd.c:479 src/builtincmd.c:683
-#: src/builtincmd.c:733 src/builtincmd.c:1214 src/builtincmd.c:1310
-#: src/builtincmd.c:1366 src/builtincmd.c:1371 src/builtincmd.c:1417
-#: src/builtincmd.c:1483
+#: src/builtincmd.c:733 src/builtincmd.c:1214 src/builtincmd.c:1311
+#: src/builtincmd.c:1367 src/builtincmd.c:1372 src/builtincmd.c:1418
+#: src/builtincmd.c:1484
 #, c-format
 msgid "User %s not found."
 msgstr "Grebruiker %s niet gevonden."
@@ -150,7 +150,7 @@ msgstr ""
 "Sorry, u kan gebruikers niet langer dan %s verbannen met een drop"
 
 #: src/builtincmd.c:427 src/builtincmd.c:473 src/builtincmd.c:532
-#: src/builtincmd.c:1271 src/builtincmd.c:1304 src/pi_user.c:332
+#: src/builtincmd.c:1271 src/builtincmd.c:1305 src/pi_user.c:332
 #, c-format
 msgid "Usage: %s <nick>"
 msgstr "Gebruik: %s <naam>"
@@ -355,7 +355,7 @@ msgstr "Gebruik: %s <group> <rechten>...\n"
 msgid "Group %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:951 src/builtincmd.c:995 src/builtincmd.c:1695
+#: src/builtincmd.c:951 src/builtincmd.c:995 src/builtincmd.c:1696
 msgid "You are not allowed to assign rights.\n"
 msgstr "U hebt het recht niet om rechten toe te wijzen.\n"
 
@@ -420,7 +420,7 @@ msgstr "Gebruik: %s <naam> <groep> [<rechten...>]"
 msgid "User %s already exists.\n"
 msgstr "Gebruiker %s bestaat al.\n"
 
-#: src/builtincmd.c:1141 src/builtincmd.c:1381
+#: src/builtincmd.c:1141 src/builtincmd.c:1382
 msgid "You are not allowed to assign a user to this group.\n"
 msgstr "U hebt niet het recht om een gebruiker aan deze groep toe te voegen.\n"
 
@@ -509,12 +509,12 @@ msgstr "Gebruiker account %s bestaat niet.\n"
 msgid "You are not allowed to delete user %s.\n"
 msgstr "U hebt niet de toestemming om gebruiker %s de verwijderen\n"
 
-#: src/builtincmd.c:1286
+#: src/builtincmd.c:1287
 #, c-format
 msgid "User account %s deleted.\n"
 msgstr "Gebruiker account %s verwijderd.\n"
 
-#: src/builtincmd.c:1290
+#: src/builtincmd.c:1291
 msgid ""
 "User is still logged in with all rights of the deleted account. Kick the "
 "user to take them away.\n"
@@ -522,59 +522,59 @@ msgstr ""
 "Gebruiker is nog altijd ingelogd met alle rechten van de verwijderde "
 "account. Kick de gebruiker om de rechten te verwijderen.\n"
 
-#: src/builtincmd.c:1312
+#: src/builtincmd.c:1313
 #, c-format
 msgid "User information for user %s\n"
 msgstr "Gebruiker informatie voor %s\n"
 
-#: src/builtincmd.c:1316
+#: src/builtincmd.c:1317
 #, c-format
 msgid "Group %s, Rights: "
 msgstr "Groep %s, Rechten: "
 
-#: src/builtincmd.c:1321
+#: src/builtincmd.c:1322
 msgid "Users password is NOT set.\n"
 msgstr "Gebruikers wachtwoord is NIET gezet.\n"
 
-#: src/builtincmd.c:1322
+#: src/builtincmd.c:1323
 #, c-format
 msgid "User was registered by %s on %s"
 msgstr "Gebruiker was geregistreerd door %s op %s"
 
-#: src/builtincmd.c:1329
+#: src/builtincmd.c:1330
 #, c-format
 msgid ", last login %s\n"
 msgstr ", laatste login %s\n"
 
-#: src/builtincmd.c:1333
+#: src/builtincmd.c:1334
 msgid ", never logged in.\n"
 msgstr ", nog nooit ingelogd.\n"
 
-#: src/builtincmd.c:1339
+#: src/builtincmd.c:1340
 #, c-format
 msgid "Using Client %s version %s\n"
 msgstr "Gebruikt Client %s versie %s\n"
 
-#: src/builtincmd.c:1347
+#: src/builtincmd.c:1348
 #, c-format
 msgid "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 msgstr "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 
-#: src/builtincmd.c:1361
+#: src/builtincmd.c:1362
 #, c-format
 msgid "Usage: %s <nick> <group>"
 msgstr "Gebruik: %s <nick> <groep>"
 
-#: src/builtincmd.c:1377
+#: src/builtincmd.c:1378
 msgid "You are not allowed to remove a user from this group.\n"
 msgstr "U hebt niet het recht om een gebruiker uit deze groep te verwijderen\n"
 
-#: src/builtincmd.c:1393
+#: src/builtincmd.c:1394
 #, c-format
 msgid "Moved user %s from group %s to %s\n"
 msgstr "Gebruiker %s is verplaatst van groep %s naar groep %s.\n"
 
-#: src/builtincmd.c:1409
+#: src/builtincmd.c:1410
 #, c-format
 msgid ""
 "Usage: %s [<nick>] <password>\n"
@@ -583,12 +583,12 @@ msgstr ""
 "Gebruik: %s [<naam>] <wachtwoord>\n"
 " Als er geen naam gespecifieerd is wordt je eigen wachtwoord aangepast."
 
-#: src/builtincmd.c:1423 src/builtincmd.c:1488
+#: src/builtincmd.c:1424 src/builtincmd.c:1489
 #, c-format
 msgid "You are not allowed to change %s's password\n"
 msgstr "U hebt niet het recht om het wachtwoord van %s te veranderen\n"
 
-#: src/builtincmd.c:1432
+#: src/builtincmd.c:1433
 msgid ""
 "The password is unacceptable, please choose another. You specified a known "
 "account name as your password.\n"
@@ -596,7 +596,7 @@ msgstr ""
 "Het wachtwoord is onaanvaardbaar, kies alstublief een ander. U specifieerde "
 "gekende account naam als uw wachtwoord.\n"
 
-#: src/builtincmd.c:1439
+#: src/builtincmd.c:1440
 msgid ""
 "The password is unacceptable, please choose another. You specified a logged "
 "in username as your password.\n"
@@ -604,12 +604,12 @@ msgstr ""
 "Het wachtwoord is onaanvaardbaar, kies alstublief een ander. U specifieerde "
 "een bestaande gebruikersnaam als wachtwoord.\n"
 
-#: src/builtincmd.c:1444 src/builtincmd.c:1496
+#: src/builtincmd.c:1445 src/builtincmd.c:1497
 #, c-format
 msgid "No account for user %s.\n"
 msgstr "Geen account voor gebruiker %s.\n"
 
-#: src/builtincmd.c:1452
+#: src/builtincmd.c:1453
 #, c-format
 msgid ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
@@ -617,11 +617,11 @@ msgstr ""
 "Het wachtwoord is onaanvaardbaar, kies alstublief een ander. Minimum lengte "
 "is %d\n"
 
-#: src/builtincmd.c:1459 src/builtincmd.c:1519
+#: src/builtincmd.c:1460 src/builtincmd.c:1520
 msgid "Password set.\n"
 msgstr "Wachtwoord aangepast.\n"
 
-#: src/builtincmd.c:1475
+#: src/builtincmd.c:1476
 #, c-format
 msgid ""
 "Usage: %s [<nick>]\n"
@@ -630,7 +630,7 @@ msgstr ""
 "Gebruik: %s [<naam>]\n"
 " Als er geen naam gespecifieerd is dan wordt je eigen wachtwoord aangepast."
 
-#: src/builtincmd.c:1509
+#: src/builtincmd.c:1510
 #, c-format
 msgid ""
 "Your password was reset. It is now\n"
@@ -639,7 +639,7 @@ msgstr ""
 "Uw wachtwoord is veranderd. Het is nu\n"
 "%.*s\n"
 
-#: src/builtincmd.c:1513
+#: src/builtincmd.c:1514
 #, c-format
 msgid ""
 "The password of %s was reset. It is now\n"
@@ -648,64 +648,64 @@ msgstr ""
 "Het wachtwoord van %s was veranderd. Het is nu\n"
 "%.*s\n"
 
-#: src/builtincmd.c:1595 src/builtincmd.c:1759
+#: src/builtincmd.c:1596 src/builtincmd.c:1760
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr "%s !Ongekend Type!\n"
 
-#: src/builtincmd.c:1613 src/builtincmd.c:1644 src/builtincmd.c:1674
+#: src/builtincmd.c:1614 src/builtincmd.c:1645 src/builtincmd.c:1675
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr "Sorry, ongekende configuratie waarde %s\n"
 
-#: src/builtincmd.c:1668
+#: src/builtincmd.c:1669
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr "Gebruik: %s <setting> <waarde>"
 
-#: src/builtincmd.c:1701
+#: src/builtincmd.c:1702
 msgid "You are not allowed to assign: "
 msgstr "U hebt niet het recht om de volgende rechten toe te wijzen: "
 
-#: src/builtincmd.c:1708
+#: src/builtincmd.c:1709
 msgid "You are not allowed to remove: "
 msgstr "U hebt niet het recht om de volgende rechten te verwijderen: "
 
-#: src/builtincmd.c:1737
+#: src/builtincmd.c:1738
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr "\"%s\" is geen geldig IP adres.\n"
 
-#: src/builtincmd.c:1748
+#: src/builtincmd.c:1749
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr "De maximale waarde voor dit element is %s\n"
 
-#: src/builtincmd.c:1777
+#: src/builtincmd.c:1778
 msgid "All Data saved."
 msgstr "Alle data opgeslagen."
 
-#: src/builtincmd.c:1790
+#: src/builtincmd.c:1791
 msgid "Data reloaded."
 msgstr "Alle data geladen."
 
-#: src/builtincmd.c:1806
+#: src/builtincmd.c:1807
 msgid "Errors during autosave:\n"
 msgstr "Errors tijdens de autosave:\n"
 
-#: src/builtincmd.c:1829
+#: src/builtincmd.c:1830
 msgid "Minimum length of a password."
 msgstr "Minimum lengte van een wachtwoord."
 
-#: src/builtincmd.c:1830
+#: src/builtincmd.c:1831
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr "Tijd tussen autosaves, zet dit op 0 om autosave af te zetten."
 
-#: src/builtincmd.c:1831
+#: src/builtincmd.c:1832
 msgid "User to send report to. Can be a chatroom."
 msgstr "Gebruiker om rapport naar te zenden. Kan een chatroom zijn."
 
-#: src/builtincmd.c:1832
+#: src/builtincmd.c:1833
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
@@ -713,7 +713,7 @@ msgstr ""
 "Dit is de langste ban tijd die je kan opgeven met een kick (als je _BAN_ "
 "gebruikt). Dit heeft geen invloed op mensen met het ban recht."
 
-#: src/builtincmd.c:1833
+#: src/builtincmd.c:1834
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
@@ -722,164 +722,164 @@ msgstr ""
 "toch nog _BAN_ gebruiken. De maximum tijd kan worden gezet met "
 "kickmaybantime."
 
-#: src/builtincmd.c:1836
+#: src/builtincmd.c:1837
 msgid "Make the HubSec say something."
 msgstr "Laat de HubSec iets zeggen."
 
-#: src/builtincmd.c:1837
+#: src/builtincmd.c:1838
 msgid "Make the HubSec warn user."
 msgstr "Laat de HubSec een waarschuwing sturen naar een gebruiker."
 
-#: src/builtincmd.c:1838
+#: src/builtincmd.c:1839
 msgid "Shut the hub down."
 msgstr "Sluit de hub af."
 
-#: src/builtincmd.c:1839
+#: src/builtincmd.c:1840
 msgid "Send a report to the OPs."
 msgstr "Stuur een rapport naar de Operators."
 
-#: src/builtincmd.c:1840
+#: src/builtincmd.c:1841
 msgid "Displays the Aquila version."
 msgstr "Toon de Aquila versie."
 
-#: src/builtincmd.c:1841
+#: src/builtincmd.c:1842
 msgid "Shows you your IP address."
 msgstr "Toont u uw IP adres."
 
-#: src/builtincmd.c:1842
+#: src/builtincmd.c:1843
 msgid "Kick a user. Automatic short ban included."
 msgstr ""
 "Verwijder een gebruiker met een kick. Er wordt automatisch een korte ban "
 "toegevoegt."
 
-#: src/builtincmd.c:1843
+#: src/builtincmd.c:1844
 msgid "Drop a user. Automatic short ban included."
 msgstr ""
 "De verbinding met de gebruiker wordt verbroken. Er wordt automatisch een "
 "korten ban toegevoegt."
 
-#: src/builtincmd.c:1844
+#: src/builtincmd.c:1845
 msgid "IP Ban a user by IP address."
 msgstr "IP ban een IP address."
 
-#: src/builtincmd.c:1845
+#: src/builtincmd.c:1846
 msgid "Nick ban a user by nick."
 msgstr "Naam ban een gebruiker."
 
-#: src/builtincmd.c:1846
+#: src/builtincmd.c:1847
 msgid "Ban a user by nick."
 msgstr "Ban een gebruiker op naam."
 
-#: src/builtincmd.c:1847
+#: src/builtincmd.c:1848
 msgid "Show ban by nick/IP."
 msgstr "Toon bans voor een nick of IP."
 
-#: src/builtincmd.c:1848
+#: src/builtincmd.c:1849
 msgid "Display help message."
 msgstr "Toon de help boodschap."
 
-#: src/builtincmd.c:1849
+#: src/builtincmd.c:1850
 msgid "Unban a nick."
 msgstr "Ontban een naam."
 
-#: src/builtincmd.c:1850
+#: src/builtincmd.c:1851
 msgid "Unban an ip."
 msgstr "Ontban een IP adres."
 
-#: src/builtincmd.c:1851
+#: src/builtincmd.c:1852
 msgid "Hardban an IP."
 msgstr "Hard ban een IP."
 
-#: src/builtincmd.c:1852
+#: src/builtincmd.c:1853
 msgid "Unhardban an IP."
 msgstr "Verwijder een harde IP ban."
 
-#: src/builtincmd.c:1853
+#: src/builtincmd.c:1854
 msgid "Show hard bans by nick/IP."
 msgstr "Toon harde bans voor een nick of IP."
 
-#: src/builtincmd.c:1854
+#: src/builtincmd.c:1855
 msgid "Zombie a user. Can't talk or pm."
 msgstr "Zombie een gebruiker. Hij kan niet spreken of pm'en."
 
-#: src/builtincmd.c:1855
+#: src/builtincmd.c:1856
 msgid "Show the zombie horde."
 msgstr "Toon de zombie horde."
 
-#: src/builtincmd.c:1856
+#: src/builtincmd.c:1857
 msgid "Unzombie a user. Can talk or pm again."
 msgstr "Unzombie een gebruiker. Hij kan dan weer praten en pm'en."
 
-#: src/builtincmd.c:1857
+#: src/builtincmd.c:1858
 msgid "Returns the user using the IP."
 msgstr "Vind gebruikers aan de hand van een IP adres."
 
-#: src/builtincmd.c:1859
+#: src/builtincmd.c:1860
 msgid "Send a private message to all users."
 msgstr "Stuur een privee bericht naar alle gebruikers."
 
-#: src/builtincmd.c:1861
+#: src/builtincmd.c:1862
 msgid "Add a user group."
 msgstr "Creer een gebruikers groep."
 
-#: src/builtincmd.c:1862
+#: src/builtincmd.c:1863
 msgid "Delete a user group."
 msgstr "Verwijder een gebruikers groep."
 
-#: src/builtincmd.c:1863
+#: src/builtincmd.c:1864
 msgid "Edit the rights of a user group."
 msgstr "Pas de rechten van een gebruikers groep aan."
 
-#: src/builtincmd.c:1864
+#: src/builtincmd.c:1865
 msgid "List all groups with their rights."
 msgstr "Toon alle groepen en hun rechten."
 
-#: src/builtincmd.c:1866
+#: src/builtincmd.c:1867
 msgid "Add a user."
 msgstr "Voeg een gebruikers registratie toe."
 
-#: src/builtincmd.c:1867
+#: src/builtincmd.c:1868
 msgid "Delete a user."
 msgstr "Verwijder een gebruikers registratie."
 
-#: src/builtincmd.c:1868
+#: src/builtincmd.c:1869
 msgid "Edit the extra rights of a user."
 msgstr "Pas de extra rechten van een gebruiker aan."
 
-#: src/builtincmd.c:1869
+#: src/builtincmd.c:1870
 msgid "List all users of a user group."
 msgstr "Toon all gebruikers in een groep."
 
-#: src/builtincmd.c:1870
+#: src/builtincmd.c:1871
 msgid "Show information of user."
 msgstr "Toon gebruikers informatie."
 
-#: src/builtincmd.c:1871
+#: src/builtincmd.c:1872
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 "Verander gebruiker van groep. Opnieuw laten verbinden om de verandering te "
 "activeren."
 
-#: src/builtincmd.c:1873
+#: src/builtincmd.c:1874
 msgid "Show configuration."
 msgstr "Toon configuratie waarden."
 
-#: src/builtincmd.c:1874
+#: src/builtincmd.c:1875
 msgid "Show configuration value help string."
 msgstr "Toon configuration hulp."
 
-#: src/builtincmd.c:1875 src/builtincmd.c:1876
+#: src/builtincmd.c:1876 src/builtincmd.c:1877
 msgid "Set configuration values."
 msgstr "Zet configuratie waarden."
 
-#: src/builtincmd.c:1878
+#: src/builtincmd.c:1879
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 "Herlaad alle data uit files. WAARSCHUWING: Alle niet opgelagen veranderingen "
 "zullen verloren gaan."
 
-#: src/builtincmd.c:1879
+#: src/builtincmd.c:1880
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
@@ -887,15 +887,15 @@ msgstr ""
 "Save all veranderingen naar file. WAARSCHUWING: Alle vorige opgeslagen "
 "waarden gaan verloren."
 
-#: src/builtincmd.c:1881
+#: src/builtincmd.c:1882
 msgid "Change your password."
 msgstr "Verander je wachtwoord."
 
-#: src/builtincmd.c:1882
+#: src/builtincmd.c:1883
 msgid "Let the hub generate a random password."
 msgstr "Laat de hub een willekeurig wachtwoord voor je aanmaken."
 
-#: src/builtincmd.c:1884 src/builtincmd.c:1885
+#: src/builtincmd.c:1885 src/builtincmd.c:1886
 msgid "Let the hub CRASH!."
 msgstr "Doet de hub CRASHEN!"
 
@@ -1138,302 +1138,302 @@ msgstr "Denk voor u een HubINFO vraagt en spam niet.\n"
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Gebruikerslijst gewijgerd. Maximum 1 reload per %ds."
 
-#: src/nmdc_interface.c:850
+#: src/nmdc_interface.c:852
 #, c-format
 msgid "Rate Probation Violation (Last: %s)."
 msgstr ""
 
-#: src/nmdc_interface.c:854
+#: src/nmdc_interface.c:856
 #, c-format
 msgid "Rate Violation (Last: %s)."
 msgstr ""
 
-#: src/nmdc_interface.c:873
+#: src/nmdc_interface.c:875
 #, c-format
 msgid "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"
 msgstr ""
 
-#: src/nmdc_interface.c:896 src/nmdc_interface.c:926
+#: src/nmdc_interface.c:898 src/nmdc_interface.c:928
 msgid "WARNING: "
 msgstr ""
 
-#: src/nmdc_interface.c:1037
+#: src/nmdc_interface.c:1041
 msgid ""
 "Period of chat messages. This controls how often a user can send a chat "
 "message. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1040
+#: src/nmdc_interface.c:1044
 msgid ""
 "Burst of chat messages. This controls how many chat messages a user can "
 "'save up'. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1043
+#: src/nmdc_interface.c:1047
 msgid ""
 "Period of searches. This controls how often an active user can search. Keep "
 "this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1046
+#: src/nmdc_interface.c:1050
 msgid ""
 "Burst of searches. This controls how many searches an active user can 'save "
 "up'. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1049
+#: src/nmdc_interface.c:1053
 msgid ""
 "Period of searches. This controls how often a passive user can search. Keep "
 "this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1052
+#: src/nmdc_interface.c:1056
 msgid ""
 "Burst of searches. This controls how many searches a passive user can 'save "
 "up'. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1055
+#: src/nmdc_interface.c:1059
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send to everyone. Keep this very high."
 msgstr ""
 
-#: src/nmdc_interface.c:1058
+#: src/nmdc_interface.c:1062
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (everyone). Keep this at 1."
 msgstr ""
 
-#: src/nmdc_interface.c:1061
+#: src/nmdc_interface.c:1065
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send on to the ops only. Keep this very high."
 msgstr ""
 
-#: src/nmdc_interface.c:1064
+#: src/nmdc_interface.c:1068
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (OPs messages only). Keep this at 1."
 msgstr ""
 
-#: src/nmdc_interface.c:1067
+#: src/nmdc_interface.c:1071
 msgid ""
 "Period of nicklist requests. This controls how often a user can refresh his "
 "userlist. Keep this high."
 msgstr ""
 
-#: src/nmdc_interface.c:1070
+#: src/nmdc_interface.c:1074
 msgid ""
 "Burst of nicklist requests. This controls how many userlist refreshes a user "
 "can 'save up'. Keep this at 1."
 msgstr ""
 
-#: src/nmdc_interface.c:1073
+#: src/nmdc_interface.c:1077
 msgid ""
 "Period of getinfo requests. This controls how often a user can request info "
 "on a user. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1076
+#: src/nmdc_interface.c:1080
 msgid ""
 "Burst of getinfo requests. This controls how many getinfo requests a user "
 "can 'save up'."
 msgstr ""
 
-#: src/nmdc_interface.c:1079
+#: src/nmdc_interface.c:1083
 msgid ""
 "Period of downloads. This controls how often a user can initiate a download. "
 "Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1082
+#: src/nmdc_interface.c:1086
 msgid ""
 "Burst of downloads. This controls how many downloads a user can 'save up'. "
 "Keep this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1085
+#: src/nmdc_interface.c:1089
 msgid ""
 "Period of connects. This controls how often the connect counter is "
 "refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1088
+#: src/nmdc_interface.c:1092
 msgid ""
 "Burst of connects. This controls how many new user connects can be saved up "
 "in idle time. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1091
+#: src/nmdc_interface.c:1095
 msgid ""
 "Refill of connects. This controls how many new user connects are added each "
 "time the counter resets. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1095
+#: src/nmdc_interface.c:1099
 msgid ""
 "Period of passive search results. This controls how often the incoming "
 "passive search results counter is refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1098
+#: src/nmdc_interface.c:1102
 msgid ""
 "Burst of passive search results. This controls how many incoming passive "
 "search results can be saved up in idle time. Keep this equal to the search "
 "period."
 msgstr ""
 
-#: src/nmdc_interface.c:1101
+#: src/nmdc_interface.c:1105
 msgid ""
 "Refill of passive search results. This controls how many incoming passive "
 "search results are added each time the counter resets. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1105
+#: src/nmdc_interface.c:1109
 msgid ""
 "Period of passive search results. This controls how often the outgoing "
 "passive search results counter is refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1108
+#: src/nmdc_interface.c:1112
 msgid ""
 "Burst of passive search results. This controls how many outgoing passive "
 "search results can be saved up in idle time. Keep this reasonably high."
 msgstr ""
 
-#: src/nmdc_interface.c:1111
+#: src/nmdc_interface.c:1115
 msgid ""
 "Refill of passive search results. This controls how many outgoing passive "
 "search results are added each time the counter resets. Keep this reasonably "
 "high."
 msgstr ""
 
-#: src/nmdc_interface.c:1115
+#: src/nmdc_interface.c:1119
 msgid ""
 "Period of user warnings. This controls how often a warning is send to user "
 "that overstep limits."
 msgstr ""
 
-#: src/nmdc_interface.c:1118
+#: src/nmdc_interface.c:1122
 msgid ""
 "Refill of user warnings. This controls how many warning a user gets within "
 "the period."
 msgstr ""
 
-#: src/nmdc_interface.c:1121
+#: src/nmdc_interface.c:1125
 msgid ""
 "Burst of user warnings. This controls how many warnings a user that overstep "
 "limits can save up."
 msgstr ""
 
-#: src/nmdc_interface.c:1125
+#: src/nmdc_interface.c:1129
 msgid ""
 "Period of user violations. This controls how often a warning is send to user "
 "that overstep limits."
 msgstr ""
 
-#: src/nmdc_interface.c:1128
+#: src/nmdc_interface.c:1132
 msgid ""
 "Refill of user violations. This controls how many warning a user gets within "
 "the period."
 msgstr ""
 
-#: src/nmdc_interface.c:1131
+#: src/nmdc_interface.c:1135
 msgid ""
 "Burst of user violations. This controls how many violations a user that "
 "overstep limits can save up."
 msgstr ""
 
-#: src/nmdc_interface.c:1163
+#: src/nmdc_interface.c:1167
 msgid ""
 "Period of chat cache flush. This controls how often chat messages are sent "
 "to users. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1166
+#: src/nmdc_interface.c:1170
 msgid ""
 "Period of join cache flush. This controls how often users are notified of "
 "new joins."
 msgstr ""
 
-#: src/nmdc_interface.c:1169
+#: src/nmdc_interface.c:1173
 msgid ""
 "Period of update cache flush. This controls how often users are sent MyINFO "
 "updates. Keep this high."
 msgstr ""
 
-#: src/nmdc_interface.c:1172
+#: src/nmdc_interface.c:1176
 msgid ""
 "Period of operator update cache flush. This controls how often operators are "
 "sent MyINFO updates. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1175
+#: src/nmdc_interface.c:1179
 msgid ""
 "Period of active search cache flush. This controls how often search messages "
 "are sent to active users."
 msgstr ""
 
-#: src/nmdc_interface.c:1178
+#: src/nmdc_interface.c:1182
 msgid ""
 "Period of passive search cache flush. This controls how often search "
 "messages are sent to passive users."
 msgstr ""
 
-#: src/nmdc_interface.c:1181
+#: src/nmdc_interface.c:1185
 msgid ""
 "Period of search results cache flush. This controls how often search results "
 "are sent to passive users."
 msgstr ""
 
-#: src/nmdc_interface.c:1184
+#: src/nmdc_interface.c:1188
 msgid ""
 "Period of private messages cache flush. This controls how often private "
 "messages are sent to users. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1188
+#: src/nmdc_interface.c:1192
 msgid ""
 "Period of active repeated search cache flush. This controls how often search "
 "messages are sent to active users."
 msgstr ""
 
-#: src/nmdc_interface.c:1192
+#: src/nmdc_interface.c:1196
 msgid ""
 "Period of passive repeated search cache flush. This controls how often "
 "search messages are sent to passive users."
 msgstr ""
 
-#: src/nmdc_interface.c:1204
+#: src/nmdc_interface.c:1208
 msgid "Allow multiple users from the same IP address."
 msgstr ""
 
-#: src/nmdc_interface.c:1206
+#: src/nmdc_interface.c:1210
 msgid "Maximum length of a chat message."
 msgstr ""
 
-#: src/nmdc_interface.c:1208
+#: src/nmdc_interface.c:1212
 msgid "Maximum length of a search message."
 msgstr ""
 
-#: src/nmdc_interface.c:1210
+#: src/nmdc_interface.c:1214
 msgid "Maximum length of a search result"
 msgstr ""
 
-#: src/nmdc_interface.c:1213
+#: src/nmdc_interface.c:1217
 msgid "Minimum time before a re-search is considered valid."
 msgstr ""
 
-#: src/nmdc_interface.c:1215
+#: src/nmdc_interface.c:1219
 msgid "Period during which a search is considered a re-search."
 msgstr ""
 
-#: src/nmdc_interface.c:1217
+#: src/nmdc_interface.c:1221
 msgid "Maximum number of searches cached."
 msgstr ""
 
-#: src/nmdc_interface.c:1220
+#: src/nmdc_interface.c:1224
 msgid "This message is send to all banned users when they try to join."
 msgstr ""
 
@@ -2479,7 +2479,7 @@ msgstr ""
 msgid "<%s> Don't reconnect so fast.|"
 msgstr ""
 
-#: src/hub.c:185 src/hub.c:209 src/hub.c:231
+#: src/hub.c:186 src/hub.c:210 src/hub.c:232
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
