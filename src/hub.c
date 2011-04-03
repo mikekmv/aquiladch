@@ -230,6 +230,7 @@ int accept_new_user (esocket_t * s)
       shutdown (r, SHUT_RDWR);
       close (r);
 
+      cl->proto->user_free (cl->user);
       free (cl);
       return -1;
     }
@@ -371,6 +372,7 @@ int server_disconnect_user (client_t * cl, char *reason)
   }
 
   if (cl->outgoing.count) {
+    ASSERT (cl->outgoing.first);
     buf_mem -= cl->outgoing.size;
     buffering--;
   }
@@ -418,9 +420,12 @@ int server_handle_output (esocket_t * es)
 	  case EAGAIN:
 	    break;
 	  case EPIPE:
+	    e->data = b;
 	    buf_mem += cl->outgoing.size;
-	    return server_disconnect_user (cl, "Connection closed by peer.");
+	    server_disconnect_user (cl, "Connection closed by peer.");
+	    return -1;
 	  default:
+	    e->data = b;
 	    buf_mem += cl->outgoing.size;
 	    return -1;
 	}
@@ -435,6 +440,7 @@ int server_handle_output (esocket_t * es)
 
       /* store "next" pointer and free buffer memory */
       n = b->next;
+      ASSERT (cl->outgoing.size >= bf_used (b));
       cl->outgoing.size -= bf_used (b);
       bf_free_single (b);
     }
@@ -451,6 +457,7 @@ int server_handle_output (esocket_t * es)
       cl->credit = 0;
     };
   }
+  STRINGLIST_VERIFY (&cl->outgoing);
 
   /* still not all data written */
   if (b) {
@@ -471,6 +478,7 @@ int server_handle_output (esocket_t * es)
   }
 
   DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
+
   /* all data was written, we don't need the output event anymore */
   if (!cl->outgoing.count) {
     esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);

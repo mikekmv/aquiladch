@@ -22,6 +22,8 @@
 #ifdef DEBUG
 #include <string.h>
 #endif
+#include "defaults.h"
+
 #include "stringlist.h"
 
 inline void string_list_init (string_list_t * list)
@@ -53,11 +55,16 @@ inline string_list_entry_t *string_list_add (string_list_t * list, struct user *
 
   bf_claim (data);
 
+  STRINGLIST_VERIFY (list);
+
   return entry;
 }
 
 inline void string_list_del (string_list_t * list, string_list_entry_t * entry)
 {
+
+  STRINGLIST_VERIFY (list);
+
   if (entry->next) {
     entry->next->prev = entry->prev;
   } else {
@@ -84,6 +91,8 @@ inline void string_list_purge (string_list_t * list, struct user *user)
 {
   string_list_entry_t *entry, *next;
 
+  STRINGLIST_VERIFY (list);
+
   entry = list->first;
   while (entry) {
     next = entry->next;
@@ -91,11 +100,15 @@ inline void string_list_purge (string_list_t * list, struct user *user)
       string_list_del (list, entry);
     entry = next;
   };
+
+  STRINGLIST_VERIFY (list);
 }
 
 inline string_list_entry_t *string_list_find (string_list_t * list, struct user *user)
 {
   string_list_entry_t *entry, *next;
+
+  STRINGLIST_VERIFY (list);
 
   entry = list->first;
   while (entry) {
@@ -105,12 +118,17 @@ inline string_list_entry_t *string_list_find (string_list_t * list, struct user 
     entry = next;
   };
 
+
+  STRINGLIST_VERIFY (list);
+
   return NULL;
 }
 
 inline void string_list_clear (string_list_t * list)
 {
   string_list_entry_t *entry, *next;
+
+  STRINGLIST_VERIFY (list);
 
   entry = list->first;
   while (entry) {
@@ -124,4 +142,37 @@ inline void string_list_clear (string_list_t * list)
   list->last = NULL;
   list->count = 0;
   list->size = 0;
+
+  STRINGLIST_VERIFY (list);
+
 }
+
+#ifdef DEBUG
+inline void string_list_verify (string_list_t * list)
+{
+  unsigned long size, count;
+  string_list_entry_t *entry, *prev;
+
+  if (!list->first) {
+    ASSERT (!list->last);
+    ASSERT (!list->count);
+    ASSERT (!list->size);
+    return;
+  }
+  ASSERT (list->last);
+  ASSERT (list->count);
+
+  size = 0;
+  count = 0;
+  prev = entry = list->first;
+  while (entry) {
+    count++;
+    size += bf_size (entry->data);
+    prev = entry;
+    entry = entry->next;
+  };
+  ASSERT (list->last == prev);
+  ASSERT (list->size == size);
+  ASSERT (list->count == count);
+}
+#endif

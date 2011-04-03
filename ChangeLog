@@ -1,6 +1,13 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Fixed bug with banreconnecttime. 0 disables instead of making it infinite.
+	Fixed possible stringlist corruption when error during server_output
+	Added a lot string_list ASSERT code for debug builds.
+	No longer required to add a "help string" for login triggers
+	Store $Quits with NULL as source to prevent accidental deletion when
+		reusing memory.
+	Fixed !statbw counterwrap bug.
 	Only update nicklistcache when myinfo send to users.
 	Added rate.myinfoop
 	updated aqpasswd and verli_import to the new password file layouts.

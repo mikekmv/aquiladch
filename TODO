@@ -1,5 +1,6 @@
 
 Develstatus:
+	- !zombielist preferably with zombying op. (request curse)
 	- stay in prelogin until the userlist is downloaded
 	- create some sort of external statistics support.
 	- don't send filtered MyINFOs to the ops.

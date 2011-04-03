@@ -30,7 +30,6 @@
 #include "nmdc_nicklistcache.h"
 #include "nmdc_local.h"
 
-
 /******************************************************************************\
 **                                                                            **
 **                            GLOBAL VARIABLES                                **
@@ -176,8 +175,8 @@ int proto_nmdc_user_delrobot (user_t * u)
   bf_strcat (buf, u->nick);
   bf_strcat (buf, "|");
 
-  cache_queue (cache.myinfo, u, buf);
-  cache_queue (cache.myinfoupdateop, u, buf);
+  cache_queue (cache.myinfo, NULL, buf);
+  cache_queue (cache.myinfoupdateop, NULL, buf);
 
   bf_free (buf);
 
@@ -205,6 +204,7 @@ int proto_nmdc_user_delrobot (user_t * u)
   };
 
   free (u);
+
   return 0;
 }
 
@@ -215,6 +215,8 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
 
   /* create new context */
   u = malloc (sizeof (user_t));
+  if (!u)
+    return NULL;
   memset (u, 0, sizeof (user_t));
 
   u->state = PROTO_STATE_VIRTUAL;
@@ -228,7 +230,7 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
   userlist = u;
 
   /* build MyINFO */
-  tmpbuf = bf_alloc (1024);
+  tmpbuf = bf_alloc (32 + strlen (nick) + strlen (description));
   bf_strcat (tmpbuf, "$MyINFO $ALL ");
   bf_strcat (tmpbuf, nick);
   bf_strcat (tmpbuf, " ");
@@ -334,8 +336,8 @@ void proto_nmdc_user_cachelist_clear ()
       buf = bf_alloc (8 + NICKLENGTH);
       bf_strcat (buf, "$Quit ");
       bf_strcat (buf, u->nick);
-      cache_queue (cache.myinfo, u, buf);
-      cache_queue (cache.myinfoupdateop, u, buf);
+      cache_queue (cache.myinfo, NULL, buf);
+      cache_queue (cache.myinfoupdateop, NULL, buf);
       bf_free (buf);
       nicklistcache_deluser (u);
 
@@ -696,8 +698,8 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
       buf = bf_alloc (8 + NICKLENGTH);
       bf_strcat (buf, "$Quit ");
       bf_strcat (buf, u->nick);
-      cache_queue (cache.myinfo, u, buf);
-      cache_queue (cache.myinfoupdateop, u, buf);
+      cache_queue (cache.myinfo, NULL, buf);
+      cache_queue (cache.myinfoupdateop, NULL, buf);
       bf_free (buf);
     } else {
       hash_adduser (&cachehashlist, u);
@@ -953,7 +955,7 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
     if (proto_nmdc_handle_token (user, b) < 0) {
       /* This should never happen! On an EPIPE, server_write should do this.
          if (errno == EPIPE)
-         server_disconnect_user (user->parent);
+         server_disconnect_user (user->parent, "EPIPE");
        */
       ASSERT (!((errno == EPIPE) && user->parent));
       bf_free (b);

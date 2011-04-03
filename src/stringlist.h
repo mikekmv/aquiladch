@@ -22,6 +22,12 @@
 
 #include "buffer.h"
 
+#ifdef DEBUG
+#define STRINGLIST_VERIFY(x) string_list_verify(x)
+#else
+#define STRINGLIST_VERIFY(x)
+#endif
+
 struct user;
 
 typedef struct string_list_entry {
@@ -43,5 +49,6 @@ inline void string_list_del (string_list_t * list, string_list_entry_t * entry);
 inline void string_list_purge (string_list_t * list, struct user *user);
 inline string_list_entry_t *string_list_find (string_list_t * list, struct user *user);
 inline void string_list_clear (string_list_t * list);
+inline void string_list_verify (string_list_t * list);
 
 #endif

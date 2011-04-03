@@ -351,8 +351,11 @@ trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned
   rule->type = type;
   rule->cap = cap;
   rule->flags |= flags;
-  if (help)
+  if (help) {
     rule->help = strdup (help);
+  } else {
+    rule->help = NULL;
+  }
 
   switch (type) {
     case TRIGGER_RULE_LOGIN:
@@ -367,7 +370,8 @@ trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned
       break;
     default:
       t->refcnt--;
-      free (rule->help);
+      if (rule->help)
+	free (rule->help);
       free (rule);
       return NULL;
   }
@@ -635,11 +639,11 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   }
 
   if (!strcasecmp (argv[2], "login")) {
-    if (argc < 4)
+    if (argc < 3)
       goto printhelp;
     type = TRIGGER_RULE_LOGIN;
-    help = argv[3];
-    capstart = 4;
+    help = NULL;
+    capstart = 3;
     arg = NULL;
   } else if (!strcasecmp (argv[2], "command")) {
     if (argc < 5)
@@ -683,17 +687,17 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   return 0;
 
 printhelp:
-  bf_printf (output, "Usage: %s <name> <type> [<arg>] <help> [<pm>] [<broadcast>] ][rights <cap>]\n"
+  bf_printf (output, "Usage: %s <name> <type> [<arg> <help>] [<pm>] [<broadcast>] [rights <cap>]\n"
 	     "   name: name of the trigger\n"
 	     "   type: one of:\n"
-	     "      - login   : the trigger will be triggered on user login, provide capabilties after type\n"
+	     "      - login   : the trigger will be triggered on user login, provide rights after type\n"
 	     "      - command : the trigger will be triggered by a command, provide the command in <arg>,\n"
-	     "                    then a help msg for the command, followed by any required capabilities\n"
+	     "                    then a help msg for the command, followed by any required rights\n"
 	     "   arg: depends on type\n"
-	     "   help: help message for command\n"
+	     "   help: help message for command (only for command triggers)\n"
 	     "   pm: always send trigger as a private message\n"
 	     "   broadcast: send this to all users\n"
-	     "   rights: capabilities required to activate rule\n", argv[0]);
+	     "   rights: rights required to activate rule\n", argv[0]);
   return 0;
 }
 

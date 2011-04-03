@@ -258,12 +258,12 @@ unsigned int bandwidth_measure ()
   if (hubstats.TotalBytesSend >= stats.oldcounters.TotalBytesSend) {
     out = hubstats.TotalBytesSend - stats.oldcounters.TotalBytesSend;
   } else {
-    out = (~0L - hubstats.TotalBytesSend + stats.oldcounters.TotalBytesSend);
+    out = ((ULONG_MAX - stats.oldcounters.TotalBytesSend) + 1 + hubstats.TotalBytesSend);
   }
   if (hubstats.TotalBytesReceived >= stats.oldcounters.TotalBytesReceived) {
     in = hubstats.TotalBytesReceived - stats.oldcounters.TotalBytesReceived;
   } else {
-    in = (~0L - hubstats.TotalBytesReceived + stats.oldcounters.TotalBytesReceived);
+    in = ((ULONG_MAX - stats.oldcounters.TotalBytesReceived) + 1 + hubstats.TotalBytesReceived);
   }
 
   /* creating new probe */
@@ -282,9 +282,9 @@ unsigned int bandwidth_measure ()
   stats.oldstamp = now;
 
   /* handle all the other levels. */
-  if (++lvl->current == STATS_NUM_MEASUREMENTS) {
+  if (++(lvl->current) == STATS_NUM_MEASUREMENTS) {
     lvl->current = 0;
-    for (i = 0; i < STATS_NUM_LEVELS - 1; i++) {
+    for (i = 0; i < (STATS_NUM_LEVELS - 1); ++i) {
       src = &stats.bandwidth[i];
       lvl = &stats.bandwidth[i + 1];
       /* creating new probe */
@@ -300,7 +300,7 @@ unsigned int bandwidth_measure ()
       src->TotalBytesReceived = 0;
       timerclear (&src->TotalTime);
 
-      if (++lvl->current != STATS_NUM_MEASUREMENTS)
+      if (++(lvl->current) != STATS_NUM_MEASUREMENTS)
 	break;
 
       lvl->current = 0;
@@ -321,7 +321,7 @@ unsigned int bandwidth_printf (buffer_t * buf)
 	     hubstats.TotalBytesSend);
 
   lvl = &stats.bandwidth[0];
-  elem = &lvl->probes[lvl->current ? lvl->current - 1 : STATS_NUM_MEASUREMENTS];
+  elem = &lvl->probes[lvl->current ? lvl->current - 1 : (STATS_NUM_MEASUREMENTS - 1)];
 
   out = (8 * (double) elem->BytesSend) / ((double) TV_TO_MSEC (elem->stamp));
   in = (8 * (double) elem->BytesReceived) / ((double) TV_TO_MSEC (elem->stamp));
@@ -331,7 +331,6 @@ unsigned int bandwidth_printf (buffer_t * buf)
 
   for (i = 0; i < STATS_NUM_LEVELS; i++) {
     lvl = &stats.bandwidth[i];
-    elem = &lvl->probes[lvl->current ? lvl->current - 1 : STATS_NUM_MEASUREMENTS];
 
     if (timerisset (&lvl->TotalTime)) {
       out = (8000 * (double) lvl->TotalBytesSend) / ((double) TV_TO_MSEC (lvl->TotalTime));

@@ -353,8 +353,10 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     }
 
     /* add a reconnect ban for the user to prevent quick relogin. */
-    banlist_add (&reconnectbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
-		 bf_buffer ("Do not reconnect too fast."), now.tv_sec + config.ReconnectBantime);
+    if (config.ReconnectBantime) {
+      banlist_add (&reconnectbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
+		   bf_buffer ("Do not reconnect too fast."), now.tv_sec + config.ReconnectBantime);
+    }
 
     /* prepare buffer */
     bf_strcat (output, "$Hello ");
@@ -2234,9 +2236,9 @@ void proto_nmdc_flush_cache ()
   if (ars)
     cache_clear (cache.aresearch);
   if (res)
-    cache_clear (cache.results);
+    cache_clearcount (cache.results);
   if (pm)
-    cache_clear (cache.privatemessages);
+    cache_clearcount (cache.privatemessages);
 
   DPRINTF
     ("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ end cache flush /////////////////////////////\n");

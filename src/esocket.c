@@ -836,8 +836,10 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   struct pollfd *pfd, *pfdi;
   esocket_t *s, **l, **li;
 
-  pfd = malloc (sizeof (struct pollfd) * h->n);
-  l = malloc (sizeof (esocket_t *) * h->n);
+  pfd = malloc ((sizeof (struct pollfd) * h->n) + (sizeof (esocket_t *) * h->n));
+  if (!pfd)
+    return -1;
+  l = (esocket_t **) (((char *) pfd) + (sizeof (struct pollfd) * h->n));
 
   s = h->sockets;
   for (i = 0, pfdi = pfd, li = l; i < h->n; ++i, ++pfdi, ++li) {
@@ -923,7 +925,6 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 
 leave:
   free (pfd);
-  free (l);
 
   /* timer stuff */
   if (h->timercnt)
