@@ -837,6 +837,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 			       bf_buffer ("WARNING: You should use a client that uses tags!"));
 	  retval = server_write (u->parent, output);
 	  u->active = 0;
+	  ASSERT (new);
 	  goto accept_anyway;
 	} else {
 	  proto_nmdc_user_redirect (u,
@@ -867,6 +868,7 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
 				bf_buffer
 				("Sorry, you no longer satisfy the necessary requirements for this hub."));
       retval = -1;
+      bf_free (new);
       break;
     }
 

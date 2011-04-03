@@ -74,19 +74,19 @@ unsigned long pi_chatlog_handler_chat (plugin_user_t * user, void *priv, unsigne
     return PLUGIN_RETVAL_CONTINUE;
 
   /* allocate buffer */
-  b = bf_alloc (bf_used (token) + 11);
-  b->e = '\0';
+  b = bf_alloc (bf_used (token) + 12);
+  *b->e = '\0';
 
   /* add timestamp */
   time (&t);
   tmp = localtime (&t);
-  b->e += strftime (b->s, b->size, "[%H:%M:%S]", tmp);
+  b->e += strftime (b->s, b->size, "[%H:%M:%S] ", tmp);
 
   /* add chat message */
   bf_printf (b, "%.*s", bf_used (token), token->s);
 
   /* queue message */
-  string_list_add (&chatlog, NULL, token);
+  string_list_add (&chatlog, NULL, b);
 
   /* release scratch buffer */
   bf_free (b);
