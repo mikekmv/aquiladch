@@ -26,8 +26,6 @@ extern unsigned int researchmininterval, researchperiod, researchmaxcount;
 
 extern unsigned char *defaultbanmessage;
 
-extern user_t *freelist;
-
 /* function prototypes */
 extern int proto_nmdc_setup ();
 extern int proto_nmdc_init ();

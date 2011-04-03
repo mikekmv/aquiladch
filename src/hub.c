@@ -479,13 +479,11 @@ int server_handle_input (esocket_t * s)
     if (n < HUB_INPUTBUFFER_SIZE)
       break;
   };
-  /* error at last read */
   if (n <= 0) {
     bf_free (b);
     b = NULL;
   }
 
-  /* error at first read, user is disconnected */
   if ((n <= 0) && first) {
     server_disconnect_user (cl);
     return -1;

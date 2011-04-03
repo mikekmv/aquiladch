@@ -230,7 +230,7 @@ int config_load (unsigned char *filename)
 
   fp = fopen (filename, "r");
   if (!fp)
-    return -1;
+    return errno;
 
   buffer = malloc (4096);
   while (!feof (fp)) {

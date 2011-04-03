@@ -126,7 +126,7 @@ unsigned long handler_warn (plugin_user_t * user, buffer_t * output, void *priv,
     buf->s++;
 
   /* make hubsec say it */
-  plugin_user_sayto (NULL, tgt, buf);
+  plugin_user_sayto (NULL, tgt, buf, 0);
 
   bf_free (buf);
 
@@ -137,7 +137,31 @@ unsigned long handler_warn (plugin_user_t * user, buffer_t * output, void *priv,
 unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *priv,
 				unsigned int argc, unsigned char **argv)
 {
+  unsigned int i;
+  buffer_t *buf;
+  plugin_user_t *tgt = NULL;
+
+  buf = bf_alloc (10240);
+  *buf->e = '\0';
+
+  if (argc > 1) {
+    /* build message */
+    for (i = 1; i < argc; i++)
+      bf_printf (buf, " %s", argv[i]);
+    if (*buf->s == ' ')
+      buf->s++;
+  } else {
+    bf_printf (buf, "Hub shutdown in progress.");
+  }
+
+  /* send to all users */
+  while (plugin_user_next (&tgt))
+    plugin_user_sayto (user, tgt, buf, 1);
+
+  bf_free (buf);
+
   exit (0);
+
   return 0;
 }
 
@@ -1087,7 +1111,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
 	       "and relogin to gain your new rights. You have been assigned:\n", user->nick);
     command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), message,
 			 account->rights | type->rights);
-    plugin_user_sayto (NULL, target, message);
+    plugin_user_sayto (NULL, target, message, 0);
     bf_free (message);
 
     bf_printf (output,

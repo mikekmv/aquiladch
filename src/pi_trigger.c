@@ -110,8 +110,10 @@ unsigned int trigger_cache (trigger_t * trigger)
     return 0;
 
   fp = fopen (trigger->file, "r");
-  if (!fp)
-    return 0;
+  if (!fp) {
+    plugin_perror ("ERROR loading trigger file %s", trigger->file);
+    return errno;
+  }
 
   n = fread (trigger->text->s, 1, l, fp);
   fclose (fp);
@@ -306,7 +308,7 @@ unsigned long pi_trigger_login (plugin_user_t * user, void *dummy, unsigned long
     r->trigger->usecnt++;
 
     trigger_verify (r->trigger);
-    plugin_user_sayto (NULL, user, r->trigger->text);
+    plugin_user_sayto (NULL, user, r->trigger->text, 0);
   };
 
   return 0;
@@ -401,8 +403,10 @@ int trigger_save (unsigned char *file)
   trigger_rule_t *rule;
 
   fp = fopen (file, "w+");
-  if (!fp)
+  if (!fp) {
+    plugin_perror ("ERROR: saving %s", file);
     return errno;
+  }
 
   for (trigger = triggerList.next; trigger != &triggerList; trigger = trigger->next) {
     fprintf (fp, "trigger %s %lu %lu ", trigger->name, trigger->type, trigger->flags);
@@ -451,8 +455,10 @@ int trigger_load (unsigned char *file)
   trigger_rule_t *rule;
 
   fp = fopen (file, "r+");
-  if (!fp)
-    return -1;
+  if (!fp) {
+    plugin_perror ("ERROR: loading file %s", file);
+    return errno;
+  }
 
   fgets (buffer, sizeof (buffer), fp);
   while (!feof (fp)) {

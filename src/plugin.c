@@ -61,6 +61,27 @@ cap_array_t plugin_supports[] = {
 
 /******************************* UTILITIES: REPORING **************************************/
 
+unsigned int plugin_perror (unsigned char *format, ...)
+{
+  va_list ap;
+  int retval;
+  buffer_t *b;
+
+  b = bf_alloc (1024);
+
+  va_start (ap, format);
+  bf_vprintf (b, format, ap);
+  va_end (ap);
+
+  bf_printf (b, ": %s", strerror (errno));
+
+  retval = plugin_report (b);
+
+  bf_free (b);
+
+  return retval;
+}
+
 unsigned int plugin_report (buffer_t * message)
 {
   user_t *u;
@@ -548,7 +569,8 @@ unsigned int plugin_user_raw_all (buffer_t * message)
   return ((plugin_private_t *) HubSec->plugin_priv)->proto->raw_send_all (message);
 }
 
-unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buffer_t * message)
+unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buffer_t * message,
+				int direct)
 {
   user_t *u, *t;
 
@@ -571,7 +593,8 @@ unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target, buf
 
   /* too much trouble otherwise FIXME huh ??? */
   //ASSERT (u->state == PROTO_STATE_VIRTUAL);
-  return ((plugin_private_t *) u->plugin_priv)->proto->chat_send (u, t, message);
+  return direct ? ((plugin_private_t *) u->plugin_priv)->proto->chat_send_direct (u, t, message) :
+    ((plugin_private_t *) u->plugin_priv)->proto->chat_send (u, t, message);
 }
 
 unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target, plugin_user_t * user,
@@ -616,7 +639,7 @@ unsigned int plugin_user_printf (plugin_user_t * user, const char *format, ...)
   bf_vprintf (buf, format, ap);
   va_end (ap);
 
-  plugin_user_sayto (NULL, user, buf);
+  plugin_user_sayto (NULL, user, buf, 0);
 
   bf_free (buf);
 

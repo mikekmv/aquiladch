@@ -481,7 +481,7 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 	       "WARNING: userlimit.registered equals userlimit.op. userlimit.registered includes the ops (since they are registered too): setting them equal means that you only allow OPs, but not normal registered users.\n");
   }
 
-  plugin_user_sayto (NULL, user, buf);
+  plugin_user_sayto (NULL, user, buf, 0);
 
   bf_free (buf);
 

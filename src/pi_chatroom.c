@@ -176,8 +176,10 @@ unsigned int chatroom_save (unsigned char *filename)
   chatroom_t *room;
 
   fp = fopen (filename, "w+");
-  if (!fp)
+  if (!fp) {
+    plugin_perror ("ERROR saving %s", filename);
     return errno;
+  }
 
   for (room = chatrooms.next; (room != &chatrooms); room = room->next) {
     fprintf (fp, "%s %lu %lu %s\n", room->name, room->flags, room->rights, room->description);
@@ -197,8 +199,10 @@ unsigned int chatroom_load (unsigned char *filename)
   chatroom_t *room;
 
   fp = fopen (filename, "r+");
-  if (!fp)
-    return 0;
+  if (!fp) {
+    plugin_perror ("ERROR loading %s", filename);
+    return errno;
+  }
 
   fgets (buffer, 1024, fp);
   while (!feof (fp)) {

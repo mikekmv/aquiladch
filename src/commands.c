@@ -274,7 +274,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
       if (target) {
 	plugin_user_priv (target, user, NULL, output, 1);
       } else {
-	plugin_user_sayto (NULL, user, output);
+	plugin_user_sayto (NULL, user, output, 0);
       }
     }
     bf_free (output);
@@ -285,7 +285,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
     if (target) {
       plugin_user_priv (target, user, NULL, buf, 1);
     } else {
-      plugin_user_sayto (NULL, user, buf);
+      plugin_user_sayto (NULL, user, buf, 0);
     }
     bf_free (buf);
   }

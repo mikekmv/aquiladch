@@ -130,7 +130,7 @@ extern unsigned int plugin_user_raw_all (buffer_t * message);
 
 extern unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message);
 extern unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target,
-				       buffer_t * message);
+				       buffer_t * message,int direct);
 extern unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target,
 				      plugin_user_t * source, buffer_t * message, int direct);
 extern unsigned int plugin_user_printf (plugin_user_t * user, const char *format, ...);
@@ -152,6 +152,7 @@ extern unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick
 extern unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip);
 
 extern unsigned int plugin_report (buffer_t * message);
+extern unsigned int plugin_perror (unsigned char *format, ...);
 extern unsigned int plugin_config_load ();
 extern unsigned int plugin_config_save (buffer_t * output);
 

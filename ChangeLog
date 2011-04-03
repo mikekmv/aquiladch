@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
 0.1.10-pre1:
+	!shutdown now sends warning to all users.
+	Fixed random timeout problems.
+	Added function plugin_perror ();
+	Expanded save error handling.
 	Added CAP_REDIRECT. (Req popular :P)
 	Long, long postponed cleaning up of nmdc module file structure.
 	Added hub.ReconnectBantime. Users reconnecting faster than this are refused.

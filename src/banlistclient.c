@@ -131,8 +131,9 @@ unsigned int banlist_client_save (banlist_client_t * list, unsigned char *file)
   struct timeval now;
 
   fp = fopen (file, "w+");
-  if (!fp)
+  if (!fp) {
     return errno;
+  }
 
   gettimeofday (&now, NULL);
   dlhashlist_foreach (list, i) {
@@ -159,8 +160,10 @@ unsigned int banlist_client_load (banlist_client_t * list, unsigned char *file)
 
   t = 0;
   fp = fopen (file, "r+");
-  if (!fp)
-    return 0;
+  if (!fp) {
+    return errno;
+  }
+
   while (!feof (fp)) {
     if (!fread (e.client, sizeof (e.client), 1, fp))
       break;

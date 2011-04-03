@@ -1013,7 +1013,7 @@ int pi_lua_sendtonick (lua_State * lua)
   b = bf_alloc (10240);
   bf_printf (b, "%s", message);
 
-  lua_pushboolean (lua, plugin_user_sayto (s, d, b));
+  lua_pushboolean (lua, plugin_user_sayto (s, d, b, 0));
 
   bf_free (b);
 
@@ -2098,8 +2098,10 @@ unsigned long pi_lua_event_save (plugin_user_t * user, buffer_t * output, void *
   lua_context_t *ctx;
 
   fp = fopen (pi_lua_savefile, "w+");
-  if (!fp)
+  if (!fp) {
+    plugin_perror ("LUA: ERROR saving %s", pi_lua_savefile);
     return PLUGIN_RETVAL_CONTINUE;
+  }
 
   for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
     fprintf (fp, "%s\n", ctx->name);
@@ -2127,8 +2129,10 @@ unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *
 
   /* load scripts */
   fp = fopen (pi_lua_savefile, "r+");
-  if (!fp)
+  if (!fp) {
+    plugin_perror ("LUA: ERROR loading %s", pi_lua_savefile);
     return PLUGIN_RETVAL_CONTINUE;
+  }
 
   buf = bf_alloc (10240);
   fgets (buffer, sizeof (buffer), fp);
