@@ -1,5 +1,6 @@
 
 Develstatus:
+	- add trigger to pm or to main
 	- command trigger to mainchat
 	- create some sort of external statistics support.
 	- don't send filtered MyINFOs to the ops.

@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Added warning for download IP mismatches too.
+	Added right locallan that allows exception on the ip check 
+		in searches and ctms for unroutable addresses.
+	Never add a violations hardban for owners!!
 	$BotINFO is now warnings rate iso chatrate.
 	Add warning if user banned for flooding.
 	Fix cpu detection for other platforms.

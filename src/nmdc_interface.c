@@ -750,6 +750,10 @@ int proto_nmdc_violation (user_t * u, struct timeval *now)
   if (get_token (&rates.violations, &u->rate_violations, now->tv_sec))
     return 0;
 
+  /* never do this for owners! */
+  if (u->rights & CAP_OWNER)
+    return 0;
+
   /* user is in violation */
 
   /* if he is only a short time online, this is most likely a spammer and he will be hardbanned */

@@ -55,6 +55,7 @@ cap_array_t Capabilities[] = {
 	{"nosrchlimit", CAP_NOSRCHLIMIT,"Users with this right are not subject to search limitations."},
 	{"sourceverify",CAP_SOURCEVERIFY,"Users with this right are only allowed into the hub if their source IP is listed for their nick in the userrestict list."},
 	{"redirect",    CAP_REDIRECT,    "Users with this right are allowed to redirect users."},
+	{"locallan",    CAP_LOCALLAN,    "Users with this right are allowed to use locallan ips (and avoid ctm and asearch checks)."},
 	{0, 0, 0}
 };
 /* *INDENT-ON* */

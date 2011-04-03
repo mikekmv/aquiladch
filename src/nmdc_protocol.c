@@ -1010,24 +1010,27 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
       }
 
       /* verify IP */
-      n = c;
-      SKIPTOCHAR (c, b->e, ':');
+      if (!((u->rights & CAP_LOCALLAN) && (ISLOCAL (u->ipaddress)))) {
+	n = c;
+	SKIPTOCHAR (c, b->e, ':');
 
-      *c = 0;
-      if (!inet_aton (n, &addr)) {
-	*c = ':';
-	break;
-      }
+	*c = 0;
+	if (!inet_aton (n, &addr)) {
+	  *c = ':';
+	  break;
+	}
 
-      if (u->ipaddress != addr.s_addr) {
-	addr.s_addr = u->ipaddress;
-	proto_nmdc_user_warn (u, &now, "Your client uses IP %s, while you have IP %s\n", n,
-			      inet_ntoa (addr));
-	nmdc_stats.searchcorrupt++;
+	if (u->ipaddress != addr.s_addr) {
+	  addr.s_addr = u->ipaddress;
+	  proto_nmdc_user_warn (u, &now,
+				"Your client uses IP %s for searching, while you have IP %s\n", n,
+				inet_ntoa (addr));
+	  nmdc_stats.searchcorrupt++;
+	  *c = ':';
+	  break;
+	}
 	*c = ':';
-	break;
       }
-      *c = ':';
     }
 
     /* CAP_NOSRCHLIMIT avoids research option */
@@ -1266,25 +1269,29 @@ int proto_nmdc_state_online_ctm (user_t * u, token_t * tkn, buffer_t * output, b
       break;
     }
 
-    n = ++c;
-    //for (; *c && (*c != ':'); c++);
-    SKIPTOCHAR (c, b->e, ':');
-    if (*c != ':')
-      break;
-    l = c - n;
+    if (!((u->rights & CAP_LOCALLAN) && (ISLOCAL (u->ipaddress)))) {
+      n = ++c;
+      SKIPTOCHAR (c, b->e, ':');
+      if (*c != ':')
+	break;
+      l = c - n;
 
-    /* convert address */
-    *c = 0;
-    if (!inet_aton (n, &addr)) {
-      break;
+      /* convert address */
+      *c = 0;
+      if (!inet_aton (n, &addr)) {
+	break;
+      }
+      *c = ':';
+
+      /* must be identical */
+      if (u->ipaddress != addr.s_addr) {
+	addr.s_addr = u->ipaddress;
+	proto_nmdc_user_warn (u, &now,
+			      "Your client uses IP %s for downloading, while you have IP %s\n", n,
+			      inet_ntoa (addr));
+	break;
+      }
     }
-    *c = ':';
-
-    /* must be identical */
-    if (u->ipaddress != addr.s_addr) {
-      break;
-    }
-
     if (t->state == PROTO_STATE_ONLINE) {
       /* queue search result with the correct user
        * \0 termination should not be necessary

@@ -42,6 +42,7 @@
 #define CAP_NOSRCHLIMIT   0x80000
 #define CAP_SOURCEVERIFY 0x100000
 #define CAP_REDIRECT     0x200000
+#define CAP_LOCALLAN     0x400000
 #define CAP_OWNER	0x80000000
 
 /* shortcuts... */

@@ -25,14 +25,24 @@
 #include "leakybucket.h"
 #include "nmdc_nicklistcache.h"
 
+/*
+ * Adress is local if: 10.0.0.0/8, 192.168.0.0/16, 169.254.0.0/16 172.16.0.0/16 or 127.0.0.1
+ */
+
+#define ISLOCAL(ip)	( ((ip & ntohl(0xFF000000)) == ntohl(0x0A000000)) \
+                       || ((ip & ntohl(0xFFFF0000)) == ntohl(0xC0A80000)) \
+                       || ((ip & ntohl(0xFFFF0000)) == ntohl(0xA9FE0000)) \
+                       || ((ip & ntohl(0xFFFF0000)) == ntohl(0xAC100000)) \
+                       || (ip == ntohl(0x7F000001)))
+
 #define PROTOCOL_REBUILD_PERIOD	3
 
 #define NMDC_SUPPORTS_NoGetINFO       1	/* no need for GetINFOs */
 #define NMDC_SUPPORTS_NoHello         2	/* no $Hello for new signons */
 #define NMDC_SUPPORTS_UserCommand     4	/* */
-#define NMDC_SUPPORTS_UserIP2		8	/* */
-#define NMDC_SUPPORTS_QuickList	16	/* NOT SUPPORTED ! deprecated. */
-#define NMDC_SUPPORTS_TTHSearch	32	/* client can handle TTH searches */
+#define NMDC_SUPPORTS_UserIP2	      8	/* */
+#define NMDC_SUPPORTS_QuickList      16	/* NOT SUPPORTED ! deprecated. */
+#define NMDC_SUPPORTS_TTHSearch      32	/* client can handle TTH searches */
 
 #define NMDC_SUPPORTS_ZPipe		1024	/* */
 #define NMDC_SUPPORTS_ZLine		2048	/* */
