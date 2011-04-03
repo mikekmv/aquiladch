@@ -96,19 +96,32 @@ void cpu_parse ()
     goto leave;
   }
 
+  /* This is crap. The kernel really needs some aligning here.
+   * Supported:
+   *    x86, ARM, MIPS, Broadcom BCM947XX, Alpha
+   * Not Support:
+   *    eMac, PowerMac 740/750, PA-RISC
+   * Some supported achitectures may miss clock info.
+   */
   while (!feof (fp)) {
     fgets (buf, 1024, fp);
-    if (!strncmp (buf, "model name", 10)) {
+    if (!strncasecmp (buf, "model name", 10) || !strncmp (buf, "Processor", 9)
+	|| !strncmp (buf, "cpu model", 9)) {
       bf_printf (b, "CPU%.1d: %.*s\n", cpucount++, strlen (buf) - 14, buf + 13);
-    } else if (!strncmp (buf, "cpu MHz", 7)) {
+    } else if (!strncasecmp (buf, "cpu MHz", 7)) {
       bf_printf (b, "     Clock: %.*s MHz ", strlen (buf) - 12, buf + 11);
-    } else if (!strncmp (buf, "bogomips", 8)) {
+    } else if (!strncasecmp (buf, "bogomips", 8)) {
       bf_printf (b, "BogoMIPS: %.*s\n", strlen (buf) - 12, buf + 11);
     }
   }
   fclose (fp);
 
+
 leave:
+  /* fallback */
+  if (!cpucount)
+    cpucount = 1;
+
   cpuinfo = bf_copy (b, 0);
   bf_free (b);
 }

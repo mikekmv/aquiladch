@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	$BotINFO is now warnings rate iso chatrate.
+	Add warning if user banned for flooding.
+	Fix cpu detection for other platforms.
+	Add reconnect ban after clone check.
 	Added violation message, start with full violation credit.
 	Added violation rate controls.
 	banlist command now works.

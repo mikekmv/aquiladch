@@ -490,7 +490,7 @@ user_t *proto_nmdc_user_alloc (void *priv)
   init_bucket (&user->rate_getinfo, now.tv_sec);
   init_bucket (&user->rate_downloads, now.tv_sec);
 
-  /* warnings and searches start with a full token load ! */
+  /* warnings and violationss start with a full token load ! */
   user->rate_warnings.tokens = rates.warnings.burst;
   user->rate_violations.tokens = rates.violations.burst;
 
@@ -744,7 +744,7 @@ int proto_nmdc_user_redirect (user_t * u, buffer_t * message)
 
 int proto_nmdc_violation (user_t * u, struct timeval *now)
 {
-  buffer_t *buf;
+  buffer_t *buf, *report;
 
   /* if there are still tokens left, just return */
   if (get_token (&rates.violations, &u->rate_violations, now->tv_sec))
@@ -768,13 +768,21 @@ int proto_nmdc_violation (user_t * u, struct timeval *now)
 
   /* send message */
   server_write (u->parent, buf);
-  bf_free (buf);
 
   /* disconnect the user */
   if (u->state != PROTO_STATE_DISCONNECTED)
     server_disconnect_user (u->parent);
 
   nmdc_stats.userviolate++;
+
+  report = bf_alloc (1024);
+
+  bf_printf (report, "Flood detected: %s was banned: %.*s\n", u->nick, bf_used (buf), buf->s);
+
+  plugin_report (report);
+
+  bf_free (report);
+  bf_free (buf);
 
   return -1;
 }

@@ -327,10 +327,6 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       break;
     }
 
-    /* add a reconnect ban for the user to prevent quick relogin. */
-    banlist_add (&reconnectbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
-		 bf_buffer ("Do not reconnect too fast."), now.tv_sec + config.ReconnectBantime);
-
     /* if user exists */
     if (existing_user) {
       if (existing_user->ipaddress != u->ipaddress) {
@@ -359,6 +355,10 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
       retval = -1;
       break;
     }
+
+    /* add a reconnect ban for the user to prevent quick relogin. */
+    banlist_add (&reconnectbanlist, HubSec->nick, u->nick, u->ipaddress, 0xFFFFFFFF,
+		 bf_buffer ("Do not reconnect too fast."), now.tv_sec + config.ReconnectBantime);
 
     /* prepare buffer */
     bf_strcat (output, "$Hello ");
@@ -959,7 +959,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
     if (!get_token (u->active ? &rates.asearch : &rates.psearch, &u->rate_search, now.tv_sec)
 	&& (!(u->rights & CAP_NOSRCHLIMIT))) {
       if (u->active) {
-	proto_nmdc_user_warn (u, &now, "Active earches are limited to %u every %u seconds.",
+	proto_nmdc_user_warn (u, &now, "Active searches are limited to %u every %u seconds.",
 			      rates.asearch.refill, rates.asearch.period);
       } else {
 	proto_nmdc_user_warn (u, &now, "Passive searches are limited to %u every %u seconds.",
@@ -1664,9 +1664,9 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
 
   gettimeofday (&now, NULL);
   do {
-    /* we reuse the chat rate here. Should not affect pingers (since they don't chat) and
+    /* we reuse the warning rate here. Should not affect pingers (since they don't do much) and
      * prevents the need for yet another leaky bucket. */
-    if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
+    if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.warnings, &u->rate_warnings, now.tv_sec))) {
       proto_nmdc_user_warn (u, &now, "Think before you ask HubINFO and don't spam.\n");
       retval = proto_nmdc_violation (u, &now);
       break;

@@ -2,9 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.10-pre3-beta3]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.10-pre3-beta5]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
-AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
 
@@ -14,6 +13,7 @@ AC_CHECK_TOOL(GPROF, [gprof], [gprof])
 
 # Checks for programs.
 AC_PROG_CC
+AC_CANONICAL_HOST
 
 if test "${GCC}" = "yes" ;
 then
