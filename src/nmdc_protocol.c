@@ -917,10 +917,11 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
   tth_t tth;
   tth_list_entry_t *e;
   buffer_t *ss = NULL;
-  char *c = NULL;
+  unsigned char *c = NULL, *n;
   unsigned long deadline;
   unsigned int drop = 0;
   struct timeval now;
+  struct in_addr addr;
 
   gettimeofday (&now, NULL);
   deadline = now.tv_sec - researchperiod;
@@ -947,6 +948,60 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
     if ((bf_size (b) > searchmaxlength) && (!(u->rights & CAP_SPAM))) {
       nmdc_stats.searchtoolong++;
       break;
+    }
+
+    /* verify nick, mode and IP */
+    c = tkn->argument;
+    if (*c == 'H') {
+      /* verify and skip Hub: */
+      if (strncasecmp (c, "Hub:", 4)) {
+	nmdc_stats.searchcorrupt++;
+	break;
+      }
+      c += 4;
+
+      /* check mode */
+      if (u->active) {
+	proto_nmdc_user_warn (u, &now, "You claim to be active. Passive search DENIED.");
+	nmdc_stats.searchcorrupt++;
+	break;
+      }
+      /* verify nick */
+      n = c;
+      SKIPTOCHAR (c, b->e, ' ');
+      *c = 0;
+      if (strcasecmp (n, u->nick)) {
+	nmdc_stats.searchcorrupt++;
+	break;
+      }
+      *c = ' ';
+    } else {
+      /* check mode */
+      if (!u->active) {
+	proto_nmdc_user_warn (u, &now, "You claim to be passive. Active search DENIED.");
+	nmdc_stats.searchcorrupt++;
+	break;
+      }
+
+      /* verify IP */
+      n = c;
+      SKIPTOCHAR (c, b->e, ':');
+
+      *c = 0;
+      if (!inet_aton (n, &addr)) {
+	*c = ':';
+	break;
+      }
+
+      if (u->ipaddress != addr.s_addr) {
+	addr.s_addr = u->ipaddress;
+	proto_nmdc_user_warn (u, &now, "Your client uses IP %s, while you have IP %s\n", n,
+			      inet_ntoa (addr));
+	nmdc_stats.searchcorrupt++;
+	*c = ':';
+	break;
+      }
+      *c = ':';
     }
 
     /* CAP_NOSRCHLIMIT avoids research option */
@@ -977,7 +1032,6 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	nmdc_stats.searchnormal++;
     }
 
-    /* TODO verify nick, mode and IP */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_SEARCH, b) != PLUGIN_RETVAL_CONTINUE) {
       nmdc_stats.searchevent++;
       break;

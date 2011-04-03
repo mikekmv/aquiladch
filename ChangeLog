@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre2:
+	Verify IP, nick and mode in searches.
 	Protection from user disconnects in an idle hub.
 	Added -r cli options to auto restart the hub if it crashes or exits.
 	Cleaned up defaults.

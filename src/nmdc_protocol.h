@@ -88,6 +88,7 @@ typedef struct {
   unsigned long myinfooverflow;
   unsigned long myinfoevent;
   unsigned long searchoverflow;
+  unsigned long searchcorrupt;
   unsigned long searchevent;
   unsigned long searchtoolong;
   unsigned long researchdrop;
