@@ -21,7 +21,7 @@ endif
 
 AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_LUA@ @LUA_INCLUDES@
 
-EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h
+EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h
 DISTCLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
 

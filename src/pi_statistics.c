@@ -24,6 +24,10 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#ifdef HAVE_MALLOC_H
+#  include <malloc.h>
+#endif
+
 #include "aqtime.h"
 #include "plugin.h"
 #include "user.h"
@@ -428,9 +432,25 @@ extern unsigned long buf_mem;
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
 					     unsigned int argc, unsigned char **argv)
 {
+  struct mallinfo mi;
+
+  mi = mallinfo ();
+
   bf_printf (output, "Memory Usage:\n");
-  //bf_printf (output, "Resident: %lu\n", procstats[0][current[0]].ps.ru_maxrss);
-  //bf_printf (output, "Shared: %lu\n", procstats[0][current[0]].ps.ru_idrss);
+
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO)
+  bf_printf (output, "GNU LibC memory statistics:\n");
+  bf_printf (output, " Total heap     : %lu (%s)\n", mi.arena, format_size (mi.arena));
+  bf_printf (output, " # Free chunks    : %lu\n", mi.ordblks);
+  bf_printf (output, " # Fastbin blocks : %lu\n", mi.smblks);
+  bf_printf (output, " Total alloced space : %lu (%s)\n", mi.uordblks, format_size (mi.uordblks));
+  bf_printf (output, " Total free space    : %lu (%s)\n", mi.fordblks, format_size (mi.fordblks));
+  bf_printf (output, " keepcost : %lu (%s)\n", mi.keepcost, format_size (mi.keepcost));
+  bf_printf (output, " # MMAP regions : %lu\n", mi.hblks);
+  bf_printf (output, " MMAP space     : %lu (%s)\n\n", mi.hblkhd, format_size (mi.hblkhd));
+#endif
+
+  bf_printf (output, HUBSOFT_NAME " stats:\n");
   bf_printf (output, " Buffering memory: %lu\n", buf_mem);
   return 0;
 }

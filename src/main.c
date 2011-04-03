@@ -221,7 +221,7 @@ void daemonize ()
     sigaddset (&set, SIGCHLD);
     sigprocmask (SIG_SETMASK, &set, &oldset);
 
-    time (&now);
+    time (&tnow);
     do {
       /* record fork time */
       stamp = tnow;

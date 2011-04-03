@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Added advanced glibc memory statistics.
 	Added warning if join rate is overstepped.
 	Added global "now" time variable to reduce gettimeofday/time calls
 	Report the last rate violation when a user gets banned.
