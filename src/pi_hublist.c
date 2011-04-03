@@ -173,7 +173,7 @@ int pi_hublist_handle_input (esocket_t * s)
 
   buf = bf_alloc (PI_HUBLIST_BUFFER_SIZE);
 
-  // read data
+  /* read data */
   n = read (s->socket, buf->s, PI_HUBLIST_BUFFER_SIZE);
   if (n <= 0) {
     bf_clear (buf);
@@ -186,10 +186,11 @@ int pi_hublist_handle_input (esocket_t * s)
   buf->e = buf->s + n;
   buf->s[n - 1] = '\0';
 
+  /* retrieve remote port */
   n = sizeof (local);
   if (getsockname (s->socket, (struct sockaddr *) &local, &n)) {
     bf_clear (buf);
-    bf_printf (buf, "Hublist update ERROR: %s: gethostname: %s\n", ctx->address, strerror (errno));
+    bf_printf (buf, "Hublist update ERROR: %s: getsockname: %s\n", ctx->address, strerror (errno));
     DPRINTF ("pi_hublist: read: %.*s", (int) bf_used (buf), buf->s);
     if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))
       plugin_report (buf);

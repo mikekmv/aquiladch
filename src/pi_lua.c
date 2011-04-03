@@ -1343,7 +1343,7 @@ unsigned long pi_lua_robot_event_handler (plugin_user_t * user, void *dummy,
 {
   int result = PLUGIN_RETVAL_CONTINUE;
   lua_context_t *ctx;
-  lua_robot_context_t *robot;
+  lua_robot_context_t *robot = NULL;
 
   for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next) {
     for (robot = ctx->robots.next; robot != &ctx->robots; robot = robot->next) {

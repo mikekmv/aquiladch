@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.10-pre2-beta4]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.10-pre2]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/banlistclient.c])
@@ -337,7 +337,10 @@ fi
 
 case "${host}" in
   *-*-cygwin*)
-  	CYGWIN_LDFLAGS="-Wl,--subsystem,windows";
+  	if test x$debug = xfalse
+  	then
+  		CYGWIN_LDFLAGS="-Wl,--subsystem,windows";
+  	fi
 	;;
   *)
 	;;

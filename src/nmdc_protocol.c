@@ -1023,6 +1023,7 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	      cache_queue (cache.presearch, u, b);
 	    }
 	    nmdc_stats.researchmatch++;
+	    e->stamp = now.tv_sec;
 	    break;
 	  }
 	} else {

@@ -74,7 +74,42 @@ procstat_t procstat_boot;
 procstat_t procstats[PROCSTAT_LEVELS][PROCSTAT_MEASUREMENTS + 1];
 unsigned int current[PROCSTAT_LEVELS];
 
+buffer_t *cpuinfo = NULL;
+
 /************************* CPU FUNCTIONS ******************************************/
+
+void cpu_parse ()
+{
+  int i;
+  FILE *fp;
+  buffer_t *b;
+  unsigned char buf[1024];
+
+  b = bf_alloc (BUFSIZE);
+
+  fp = fopen ("/proc/cpuinfo", "r");
+  if (!fp) {
+    bf_printf (b, "CPU Unknown\n");
+    goto leave;
+  }
+
+  i = 0;
+  while (!feof (fp)) {
+    fgets (buf, 1024, fp);
+    if (!strncmp (buf, "model name", 10)) {
+      bf_printf (b, "CPU%.1d: %.*s\n", i, strlen (buf) - 14, buf + 13);
+    } else if (!strncmp (buf, "cpu MHz", 7)) {
+      bf_printf (b, "     Clock: %.*s MHz ", strlen (buf) - 12, buf + 11);
+    } else if (!strncmp (buf, "bogomips", 8)) {
+      bf_printf (b, "BogoMIPS: %.*s\n", strlen (buf) - 12, buf + 11);
+    }
+  }
+  fclose (fp);
+
+leave:
+  cpuinfo = bf_copy (b, 0);
+  bf_free (b);
+}
 
 void cpu_init ()
 {
@@ -85,6 +120,8 @@ void cpu_init ()
   gettimeofday (&(procstats[0][0].tv), NULL);
   procstat_boot = procstats[0][0];
   procstats[2][0] = procstats[1][0] = procstats[0][0];
+
+  cpu_parse ();
 }
 
 unsigned int cpu_measure ()
@@ -162,6 +199,9 @@ int cpu_printf (buffer_t * buf)
 			 &procstats[0][current[0]]));
 
   bf_printf (buf, "Since boot %2.2f%%\n", cpu_calc (&procstat_boot, &procstats[0][current[0]]));
+
+  if (cpuinfo)
+    bf_printf (buf, "\n%.*s", bf_used (cpuinfo), cpuinfo->s);
 
   return 0;
 }
@@ -427,6 +467,7 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " myinfooverflow : %lu\n", nmdc_stats.myinfooverflow);
   bf_printf (output, " myinfoevent : %lu\n", nmdc_stats.myinfoevent);
   bf_printf (output, " searchoverflow : %lu\n", nmdc_stats.searchoverflow);
+  bf_printf (output, " searchcorrupt : %lu\n", nmdc_stats.searchcorrupt);
   bf_printf (output, " searchtoolong : %lu\n", nmdc_stats.searchtoolong);
   bf_printf (output, " searchevent : %lu\n", nmdc_stats.searchevent);
   bf_printf (output, " researchdrop : %lu\n", nmdc_stats.researchdrop);
@@ -467,6 +508,7 @@ int pi_statistics_init ()
   memset (&current, 0, sizeof (current));
   memset (&stats, 0, sizeof (statistics_t));
   bandwidth_init ();
+
   cpu_init ();
 
   plugin_stats = plugin_register ("stats");
