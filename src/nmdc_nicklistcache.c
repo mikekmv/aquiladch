@@ -32,18 +32,18 @@
 **                                                                            **
 \******************************************************************************/
 
-int nicklistcache_adduser (user_t * u)
+int nicklistcache_adduser (nmdc_user_t * u)
 {
   unsigned long l;
 
-  cache.length_estimate += strlen (u->nick) + 2;
+  cache.length_estimate += strlen (u->user.nick) + 2;
   cache.length_estimate_info += bf_used (u->MyINFO) + 1;	/* add one for the | */
-  u->flags |= NMDC_FLAG_CACHED;
+  u->user.flags |= NMDC_FLAG_CACHED;
 
   cache.usercount++;
 
   if (u->op) {
-    cache.length_estimate_op += strlen (u->nick) + 2;
+    cache.length_estimate_op += strlen (u->user.nick) + 2;
     cache.needrebuild = 1;
   }
 
@@ -59,7 +59,7 @@ int nicklistcache_adduser (user_t * u)
 
   bf_strncat (cache.infolistupdate, u->MyINFO->s, l);
   bf_strcat (cache.infolistupdate, "|");
-  bf_printf (cache.hellolist, "$Hello %s|", u->nick);
+  bf_printf (cache.hellolist, "$Hello %s|", u->user.nick);
 
   BF_VERIFY (cache.infolistupdate);
   BF_VERIFY (cache.hellolist);
@@ -67,7 +67,7 @@ int nicklistcache_adduser (user_t * u)
   return 0;
 }
 
-int nicklistcache_updateuser (user_t * u, buffer_t * new)
+int nicklistcache_updateuser (nmdc_user_t * u, buffer_t * new)
 {
   unsigned long l;
 
@@ -91,31 +91,31 @@ int nicklistcache_updateuser (user_t * u, buffer_t * new)
   return 0;
 }
 
-int nicklistcache_deluser (user_t * u)
+int nicklistcache_deluser (nmdc_user_t * u)
 {
-  if (!(u->flags & NMDC_FLAG_CACHED))
+  if (!(u->user.flags & NMDC_FLAG_CACHED))
     return 0;
 
-  cache.length_estimate -= (strlen (u->nick) + 2);
+  cache.length_estimate -= (strlen (u->user.nick) + 2);
   cache.length_estimate_info -= (bf_used (u->MyINFO) + 1);
 
   cache.usercount--;
 
   if (u->op) {
     cache.needrebuild = 1;
-    cache.length_estimate_op -= (strlen (u->nick) + 2);
+    cache.length_estimate_op -= (strlen (u->user.nick) + 2);
   }
 
   if (cache.needrebuild)
     return 0;
 
-  if (bf_unused (cache.infolistupdate) < (strlen (u->nick) + 8)) {
+  if (bf_unused (cache.infolistupdate) < (strlen (u->user.nick) + 8)) {
     cache.needrebuild = 1;
     return 0;
   }
 
-  bf_printf (cache.infolistupdate, "$Quit %s|", u->nick);
-  bf_printf (cache.hellolist, "$Quit %s|", u->nick);
+  bf_printf (cache.infolistupdate, "$Quit %s|", u->user.nick);
+  bf_printf (cache.hellolist, "$Quit %s|", u->user.nick);
 
   BF_VERIFY (cache.infolistupdate);
   BF_VERIFY (cache.hellolist);
@@ -126,7 +126,7 @@ int nicklistcache_deluser (user_t * u)
 int nicklistcache_rebuild (struct timeval now)
 {
   unsigned char *s, *o;
-  user_t *t;
+  nmdc_user_t *t;
 
   nmdc_stats.cacherebuild++;
 
@@ -162,14 +162,14 @@ int nicklistcache_rebuild (struct timeval now)
 
   s += sprintf (s, "$NickList ");
   o += sprintf (o, "$OpList ");
-  for (t = userlist; t; t = t->next) {
+  for (t = userlist; t; t = (nmdc_user_t *) t->user.next) {
     if ((t->state != PROTO_STATE_ONLINE) && (t->state != PROTO_STATE_VIRTUAL))
       continue;
     bf_strncat (cache.infolist, t->MyINFO->s, bf_used (t->MyINFO));
     bf_strcat (cache.infolist, "|");
-    s += sprintf (s, "%s$$", t->nick);
+    s += sprintf (s, "%s$$", t->user.nick);
     if (t->op)
-      o += sprintf (o, "%s$$", t->nick);
+      o += sprintf (o, "%s$$", t->user.nick);
   }
   strcat (s++, "|");
   cache.nicklist->e = s;
@@ -199,7 +199,7 @@ int nicklistcache_rebuild (struct timeval now)
   return 0;
 }
 
-int nicklistcache_sendnicklist (user_t * target)
+int nicklistcache_sendnicklist (nmdc_user_t * target)
 {
 
   if ((now.tv_sec - cache.lastrebuild) > PROTOCOL_REBUILD_PERIOD)
@@ -214,45 +214,45 @@ int nicklistcache_sendnicklist (user_t * target)
   if (!(target->supports & NMDC_SUPPORTS_NoHello)) {
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
-      server_write_credit (target->parent, cache.nicklistzpipe);
+      server_write_credit (target->user.parent, cache.nicklistzpipe);
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
-      server_write_credit (target->parent, cache.nicklistzline);
+      server_write_credit (target->user.parent, cache.nicklistzline);
     } else {
-      server_write_credit (target->parent, cache.nicklist);
+      server_write_credit (target->user.parent, cache.nicklist);
     }
 #else
-    server_write_credit (target->parent, cache.nicklist);
+    server_write_credit (target->user.parent, cache.nicklist);
 #endif
   } else {
     if (!(target->supports & NMDC_SUPPORTS_NoGetINFO)) {
-      server_write_credit (target->parent, cache.nicklist);
+      server_write_credit (target->user.parent, cache.nicklist);
     }
   }
   /* always send the oplist */
-  server_write_credit (target->parent, cache.oplist);
+  server_write_credit (target->user.parent, cache.oplist);
 
   /* clients that support NoGetINFO get a infolist and a infolistupdate, other get a  hello list update */
   if (target->supports & NMDC_SUPPORTS_NoGetINFO) {
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
-      server_write_credit (target->parent, cache.infolistzpipe);
+      server_write_credit (target->user.parent, cache.infolistzpipe);
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
-      server_write_credit (target->parent, cache.infolistzline);
+      server_write_credit (target->user.parent, cache.infolistzline);
     } else {
-      server_write_credit (target->parent, cache.infolist);
+      server_write_credit (target->user.parent, cache.infolist);
     }
 #else
-    server_write_credit (target->parent, cache.infolist);
+    server_write_credit (target->user.parent, cache.infolist);
 #endif
-    server_write_credit (target->parent, cache.infolistupdate);
+    server_write_credit (target->user.parent, cache.infolistupdate);
   } else {
-    server_write_credit (target->parent, cache.hellolist);
+    server_write_credit (target->user.parent, cache.hellolist);
   }
 
   return 0;
 }
 
-int nicklistcache_sendoplist (user_t * target)
+int nicklistcache_sendoplist (nmdc_user_t * target)
 {
   nicklistcache_rebuild (now);
 

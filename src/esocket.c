@@ -47,7 +47,7 @@
 #  endif
 #endif
 
-esocket_t *freelist = NULL;
+static esocket_t *freelist = NULL;
 
 /*
  * Handler functions

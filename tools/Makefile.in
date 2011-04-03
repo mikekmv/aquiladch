@@ -450,6 +450,9 @@ aqdtinstall: aqdtinstall.in
 	sed -e 's,@exec_prefix\@,$(prefix),g' ${@}.in > ${@}.tmp
 	chmod +x ${@}.tmp
 	mv ${@}.tmp $@
+
+mrproper: clean
+	-rm -f *.gcov *.gcno *.gcda
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

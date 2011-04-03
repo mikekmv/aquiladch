@@ -84,7 +84,7 @@ extern int bf_vprintf (buffer_t * dst, const char *format, va_list ap);
 
 extern unsigned long bf_size (buffer_t * src);
 
-extern buffer_t *bf_buffer (unsigned char *text);
+extern buffer_t *bf_buffer (const char *text);
 extern int bf_memcpy (buffer_t *buffer, void *data, size_t length);
 
 #endif

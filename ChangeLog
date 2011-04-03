@@ -1,5 +1,12 @@
 This is the Aquila Changelog.
 
+0.2:
+	merged in 0.1-maintenance 816-823
+	merged in 0.1-maintenance 811-815
+	merged in 0.1-maintenance 794-811
+	merged in 0.1-maintenance 750-794
+	Full module support. Major design cleanup.
+
 0.1.10-pre3:
 	Added gettext.h to dist.
 	Fix crash in time_print

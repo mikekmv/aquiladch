@@ -23,7 +23,6 @@
 #include "stringlist.h"
 #include "cap.h"
 #include "leakybucket.h"
-#include "nmdc_nicklistcache.h"
 
 /*
  * Adress is local if: 10.0.0.0/8, 192.168.0.0/16, 169.254.0.0/16 172.16.0.0/16 or 127.0.0.1
@@ -71,11 +70,6 @@ typedef struct ratelimiting {
 } ratelimiting_t;
 
 extern ratelimiting_t rates;
-
-typedef struct nmdc_user {
-  cache_element_t privatemessages;
-  cache_element_t results;
-} nmdc_user_t;
 
 typedef struct {
   unsigned long cacherebuild;	/* rebuild of nick list cache */

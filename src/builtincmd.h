@@ -20,6 +20,8 @@
 #ifndef _BUILTINCMD_H_
 #define _BUILTINCMD_H_
 
-extern int builtincmd_init ();
+#include "plugin.h"
+
+extern plugin_t * builtincmd_init (plugin_manager_t *);
 
 #endif

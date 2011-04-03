@@ -39,6 +39,7 @@
 #include "commands.h"
 #include "utils.h"
 
+plugin_t *builtinplug;
 
 unsigned int MinPwdLength;
 unsigned long AutoSaveInterval;
@@ -91,7 +92,7 @@ unsigned long handler_say (plugin_user_t * user, buffer_t * output, void *priv, 
     buf->s++;
 
   /* make hubsec say it */
-  plugin_user_say (NULL, buf);
+  plugin_user_say (plugin_hubsec (builtinplug), buf);
 
   bf_free (buf);
   return 0;
@@ -110,7 +111,7 @@ unsigned long handler_warn (plugin_user_t * user, buffer_t * output, void *priv,
   }
 
   /* find target */
-  tgt = plugin_user_find (argv[1]);
+  tgt = plugin_user_find (builtinplug, argv[1]);
   if (!tgt) {
     bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
@@ -155,7 +156,7 @@ unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *p
   }
 
   /* send to all users */
-  while (plugin_user_next (&tgt))
+  while (plugin_user_next (builtinplug, &tgt))
     plugin_user_sayto (user, tgt, buf, 1);
 
   bf_free (buf);
@@ -195,7 +196,7 @@ unsigned long handler_massall (plugin_user_t * user, buffer_t * output, void *pr
 
   /* send to all users */
   i = 0;
-  while (plugin_user_next (&tgt)) {
+  while (plugin_user_next (builtinplug, &tgt)) {
     plugin_user_priv (NULL, tgt, user, buf, 1);
     i++;
   }
@@ -229,7 +230,7 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
     return 0;
   }
 
-  tgt = plugin_user_find (argv[1]);
+  tgt = plugin_user_find (builtinplug, argv[1]);
   if (tgt) {
     target.s_addr = tgt->ipaddress;
   } else {
@@ -255,7 +256,7 @@ unsigned long handler_report (plugin_user_t * user, buffer_t * output, void *pri
 
 
   /* extract user */
-  tgt = plugin_user_find (*reporttarget->val.v_string);
+  tgt = plugin_user_find (builtinplug, *reporttarget->val.v_string);
   if (!tgt) {
     if (**reporttarget->val.v_string) {
       bf_printf (output, _("Report could not be sent, %s not found."), *reporttarget->val.v_string);
@@ -308,7 +309,7 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
     bf_printf (buf, " %s", argv[i]);
 
   /* find target */
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (!target) {
     bf_printf (output, _("User %s not found."), argv[1]);
     goto leave;
@@ -374,7 +375,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
     bf_printf (buf, " %s", argv[i]);
 
   /* find target */
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (!target) {
     bf_printf (output, _("User %s not found."), argv[1]);
     goto leave;
@@ -428,7 +429,7 @@ unsigned long handler_zombie (plugin_user_t * user, buffer_t * output, void *pri
     return 0;
   }
 
-  zombie = plugin_user_find (argv[1]);
+  zombie = plugin_user_find (builtinplug, argv[1]);
   if (!zombie) {
     bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
@@ -449,7 +450,8 @@ unsigned long handler_zombielist (plugin_user_t * user, buffer_t * output, void 
 
   /* send to all users */
   bf_printf (output, _("The hub is infested by the following zombie horde:\n"));
-  while (plugin_user_next (&zombie)) {
+
+  while (plugin_user_next (builtinplug, &zombie)) {
     if (!(zombie->flags & PLUGIN_FLAG_ZOMBIE))
       continue;
     if ((zombie == user) && (!(zombie->rights & CAP_OWNER)))
@@ -474,7 +476,7 @@ unsigned long handler_unzombie (plugin_user_t * user, buffer_t * output, void *p
     return 0;
   }
 
-  zombie = plugin_user_find (argv[1]);
+  zombie = plugin_user_find (builtinplug, argv[1]);
   if (!zombie) {
     bf_printf (output, _("User %s not found."), argv[1]);
     return 0;
@@ -501,19 +503,19 @@ unsigned long handler_whoip (plugin_user_t * user, buffer_t * output, void *priv
   if (parse_ip (argv[1], &ip, &netmask)) {
     if (netmask.s_addr == 0xFFFFFFFF) {
       /* looking for single IP */
-      if ((tgt = plugin_user_find_ip (NULL, ip.s_addr))) {
+      if ((tgt = plugin_user_find_ip (builtinplug, NULL, ip.s_addr))) {
 	do {
 	  bf_printf (output, _("User %s is using IP %s\n"), tgt->nick, inet_ntoa (ip));
-	  tgt = plugin_user_find_ip (tgt, ip.s_addr);
+	  tgt = plugin_user_find_ip (builtinplug, tgt, ip.s_addr);
 	} while (tgt);
       } else
 	bf_printf (output, _("No one using IP %s found."), inet_ntoa (ip));
     } else {
-      if ((tgt = plugin_user_find_net (NULL, ip.s_addr, netmask.s_addr))) {
+      if ((tgt = plugin_user_find_net (builtinplug, NULL, ip.s_addr, netmask.s_addr))) {
 	do {
 	  tmp.s_addr = tgt->ipaddress;
 	  bf_printf (output, _("User %s is using IP %s\n"), tgt->nick, inet_ntoa (tmp));
-	  tgt = plugin_user_find_net (tgt, ip.s_addr, netmask.s_addr);
+	  tgt = plugin_user_find_net (builtinplug, tgt, ip.s_addr, netmask.s_addr);
 	} while (tgt);
       } else
 	bf_printf (output, _("No one using IP %s found."), print_ip (ip, netmask));
@@ -533,7 +535,7 @@ unsigned long handler_unban (plugin_user_t * user, buffer_t * output, void *priv
     return 0;
   }
 
-  if (plugin_unban (argv[1])) {
+  if (plugin_unban (user, argv[1])) {
     bf_printf (output, _("Nick %s unbanned."), argv[1]);
   } else {
     bf_printf (output, _("No ban for nick %s found."), argv[1]);
@@ -553,7 +555,7 @@ unsigned long handler_unbanip (plugin_user_t * user, buffer_t * output, void *pr
   };
 
   if (parse_ip (argv[1], &ip, &netmask)) {
-    if (plugin_unban_ip (ip.s_addr, netmask.s_addr)) {
+    if (plugin_unban_ip (user, ip.s_addr, netmask.s_addr)) {
       bf_printf (output, _("IP %s unbanned."), print_ip (ip, netmask));
     } else {
       bf_printf (output, _("No ban for IP %s found."), print_ip (ip, netmask));
@@ -576,7 +578,7 @@ unsigned long handler_unbanip_hard (plugin_user_t * user, buffer_t * output, voi
   };
 
   if (parse_ip (argv[1], &ip, &netmask)) {
-    if (plugin_unban_ip_hard (ip.s_addr, netmask.s_addr)) {
+    if (plugin_unban_ip_hard (user, ip.s_addr, netmask.s_addr)) {
       bf_printf (output, _("IP %s unbanned."), print_ip (ip, netmask));
     } else {
       bf_printf (output, _("No ban for IP %s found."), print_ip (ip, netmask));
@@ -612,7 +614,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (target) {
     ip.s_addr = target->ipaddress;
     if (!period) {
@@ -678,7 +680,7 @@ unsigned long handler_bannick (plugin_user_t * user, buffer_t * output, void *pr
     bf_printf (buf, " %s", argv[i]);
 
   /* find target */
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (!target) {
     bf_printf (output, _("User %s not found."), argv[1]);
   }
@@ -727,7 +729,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
     bf_printf (buf, " %s", argv[i]);
 
 
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (!target) {
     if (!pi_iplog_find (argv[1], &ip.s_addr)) {
       bf_printf (output, _("User %s not found."), argv[1]);
@@ -778,7 +780,7 @@ unsigned long handler_banhard (plugin_user_t * user, buffer_t * output, void *pr
   for (i = period ? 3 : 2; i < argc; i++)
     bf_printf (buf, " %s", argv[i]);
 
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (target) {
     ip.s_addr = target->ipaddress;
     if (!period) {
@@ -820,17 +822,17 @@ unsigned long handler_banlist (plugin_user_t * user, buffer_t * output, void *pr
   }
 
   if (argc < 2) {
-    if (!plugin_banlist (output))
+    if (!plugin_banlist (user, output))
       bf_printf (output, _("No bans found."));
     goto leave;
   }
   if (inet_aton (argv[1], &ip)) {
-    if (!plugin_user_findipban (output, ip.s_addr)) {
+    if (!plugin_user_findipban (user, output, ip.s_addr)) {
       bf_printf (output, _("No IP bans found for %s"), inet_ntoa (ip));
       goto leave;
     }
   } else {
-    if (!plugin_user_findnickban (output, argv[1])) {
+    if (!plugin_user_findnickban (user, output, argv[1])) {
       bf_printf (output, _("No Nick bans found for %s"), argv[1]);
       goto leave;
     }
@@ -1135,7 +1137,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   bf_strcat (output, "\n");
 
   /* if user is online, warm him of his reg and notify to op we did so. */
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (target) {
     buffer_t *message;
 
@@ -1222,7 +1224,7 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
   command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
 		       account->rights | account->classp->rights);
   bf_strcat (output, "\n");
-  if (plugin_user_find (argv[1]))
+  if (plugin_user_find (builtinplug, argv[1]))
     bf_printf (output,
 	       _("User is already logged in. Tell him to rejoin to gain all his new rights.\n"));
 
@@ -1253,7 +1255,7 @@ unsigned long handler_userdel (plugin_user_t * user, buffer_t * output, void *pr
   }
   account_del (account);
   bf_printf (output, _("User account %s deleted.\n"), argv[1]);
-  if (plugin_user_find (argv[1]))
+  if (plugin_user_find (builtinplug, argv[1]))
     bf_printf (output,
 	       _
 	       ("User is still logged in with all rights of the deleted account. Kick the user to take them away.\n"));
@@ -1274,7 +1276,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
     return 0;
   }
 
-  target = plugin_user_find (argv[1]);
+  target = plugin_user_find (builtinplug, argv[1]);
   if (!target) {
     bf_printf (output, _("User %s not found."), argv[1]);
   } else {
@@ -1401,7 +1403,7 @@ unsigned long handler_passwd (plugin_user_t * user, buffer_t * output, void *pri
 		 ("The password is unacceptable, please choose another. You specified a known account name as your password.\n"));
       goto leave;
     }
-    bad = plugin_user_find (argv[1]);
+    bad = plugin_user_find (builtinplug, argv[1]);
     if (bad) {
       bf_printf (output,
 		 _
@@ -1458,7 +1460,7 @@ unsigned long handler_pwgen (plugin_user_t * user, buffer_t * output, void *priv
       goto leave;
     }
 
-    target = plugin_user_find (argv[1]);
+    target = plugin_user_find (builtinplug, argv[1]);
   } else {
     account = account_find (user->nick);
     if (!account) {
@@ -1716,7 +1718,7 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
   bf_printf (output, "New: ");
   printconfig (output, elem);
 
-  plugin_user_event (user, PLUGIN_EVENT_CONFIG, elem);
+  plugin_user_event (builtinplug, user, PLUGIN_EVENT_CONFIG, elem);
 
 leave:
   return 0;
@@ -1726,7 +1728,7 @@ leave:
 unsigned long handler_save (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
 			    unsigned char **argv)
 {
-  unsigned long retval = plugin_config_save (output);
+  unsigned long retval = plugin_config_save (builtinplug, output);
 
   bf_printf (output, _("All Data saved."));
 
@@ -1739,7 +1741,7 @@ unsigned long handler_save (plugin_user_t * user, buffer_t * output, void *priv,
 unsigned long handler_load (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
 			    unsigned char **argv)
 {
-  unsigned long retval = plugin_config_load ();
+  unsigned long retval = plugin_config_load (builtinplug);
 
   bf_printf (output, _("Data reloaded."));
 
@@ -1759,9 +1761,9 @@ unsigned long handler_autosave (plugin_user_t * user, void *ctxt, unsigned long 
     output = bf_alloc (1024);
     bf_printf (output, _("Errors during autosave:\n"));
     l = bf_used (output);
-    plugin_config_save (output);
+    plugin_config_save (builtinplug, output);
     if (bf_used (output) != l) {
-      plugin_report (output);
+      plugin_report (builtinplug, output);
     }
     bf_free (output);
   }
@@ -1771,9 +1773,12 @@ unsigned long handler_autosave (plugin_user_t * user, void *ctxt, unsigned long 
 
 /************************** INIT ******************************/
 
-int builtincmd_init ()
+plugin_t *builtincmd_init (plugin_manager_t * pm)
 {
   /* *INDENT-OFF* */
+
+  builtinplug = plugin_register (pm, "builtin");  
+
   MinPwdLength        = DEFAULT_MINPWDLENGTH;
   AutoSaveInterval    = DEFAULT_AUTOSAVEINTERVAL;
   ReportTarget      = strdup (DEFAULT_REPORTTARGET);
@@ -1838,10 +1843,10 @@ int builtincmd_init ()
   command_register ("bug",	  &handler_bug,		CAP_OWNER,    _("Let " HUBSOFT_NAME " CRASH!."));
 #endif
   gettimeofday (&savetime, NULL);
-  
-  plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *)handler_autosave);
+
+  plugin_request (builtinplug, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *)handler_autosave);
 
   /* *INDENT-ON* */
 
-  return 0;
+  return builtinplug;
 }

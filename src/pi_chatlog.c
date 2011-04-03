@@ -109,9 +109,9 @@ unsigned long pi_chatlog_handler_chat (plugin_user_t * user, void *priv, unsigne
 
 /********************************* INIT *************************************/
 
-int pi_chatlog_init ()
+int pi_chatlog_init (plugin_manager_t * pm)
 {
-  plugin_chatlog = plugin_register ("chatlog");
+  plugin_chatlog = plugin_register (pm, "chatlog");
 
   string_list_init (&chatlog);
 

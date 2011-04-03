@@ -172,9 +172,9 @@ unsigned long pi_configlock_event_config (plugin_user_t * user, void *dummy, uns
 
 /********************************* INIT *************************************/
 
-int pi_configlock_init ()
+int pi_configlock_init (plugin_manager_t * pm)
 {
-  plugin_configlock = plugin_register ("configlock");
+  plugin_configlock = plugin_register (pm, "configlock");
 
   plugin_request (plugin_configlock, PLUGIN_EVENT_CONFIG, (void *) &pi_configlock_event_config);
   plugin_request (plugin_configlock, PLUGIN_EVENT_LOAD, &pi_configlock_event_load);

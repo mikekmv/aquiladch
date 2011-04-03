@@ -19,14 +19,14 @@
 
 #ifndef _NMDC_UTILS_H_
 #define _NMDC_UTILS_H_
-#include "hub.h"
+#include "nmdc_local.h"
 
 /* minimum number of bytes in the buffer before you decide to actually compress it. */
 #define ZLINES_THRESHOLD	100
 
 extern int nmdc_string_unescape (char *output, unsigned int j);
-extern int parse_tag (char *desc, user_t * user);
-extern buffer_t *rebuild_myinfo (user_t * u, buffer_t * b);
+extern int parse_tag (char *desc, nmdc_user_t * user);
+extern buffer_t *rebuild_myinfo (nmdc_user_t * u, buffer_t * b);
 
 #ifdef ZLINES
 

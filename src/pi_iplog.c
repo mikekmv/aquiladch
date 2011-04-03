@@ -145,9 +145,9 @@ unsigned long pi_iplog_handler_clientlist (plugin_user_t * user, buffer_t * outp
 
 /*************************************************************************************************************************/
 
-int pi_iplog_init ()
+int pi_iplog_init (plugin_manager_t * pm)
 {
-  plugin_iplog = plugin_register ("iplog");
+  plugin_iplog = plugin_register (pm, "iplog");
 
   config_register ("iplog.length", CFG_ELEM_UINT, &iplog_length, _("Number of IPs to remember."));
 

@@ -84,8 +84,7 @@ unsigned long pi_user_handler_userstat (plugin_user_t * user, buffer_t * output,
 	     user_unregistered_current, user_unregistered_max,
 	     user_registered_current, user_registered_max,
 	     user_op_current, user_op_max,
-	     users_total, user_unregistered_max + user_registered_max, users_peak, users_dropped,
-	     buffering);
+	     users_total, user_unregistered_max + user_registered_max, users_peak, users_dropped);
 
   return 0;
 }
@@ -276,7 +275,7 @@ unsigned long pi_user_handler_userrestrict (plugin_user_t * user, buffer_t * out
 
   if (parse_ip (argv[2], &ip, &netmask)) {
     banlist_add (&sourcelist, user->nick, argv[1], ip.s_addr, netmask.s_addr, bf_buffer (""), 0);
-    if ((tgt = plugin_user_find (argv[1]))) {
+    if ((tgt = plugin_user_find (plugin_user, argv[1]))) {
       if (!(tgt->rights & CAP_SOURCEVERIFY)) {
 	bf_printf (output,
 		   _("Please do not forget to assign the \"sourceverify\" right to user %s\n"),
@@ -497,14 +496,14 @@ unsigned long pi_user_event_config (plugin_user_t * user, void *dummy, unsigned 
 
 /*************************************************************************************************************************/
 
-int pi_user_init ()
+int pi_user_init (plugin_manager_t * manager)
 {
   int i;
 
   banlist_client_init (&clientbanlist);
   banlist_init (&sourcelist);
 
-  plugin_user = plugin_register ("user");
+  plugin_user = plugin_register (manager, "user");
 
   ClientBanFileName = strdup (PI_USER_CLIENTBANFILE);
 

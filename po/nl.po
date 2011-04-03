@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2006-11-30 23:50+0100\n"
+"POT-Creation-Date: 2006-12-01 15:33+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -16,87 +16,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/builtincmd.c:108
+#: src/builtincmd.c:109
 #, c-format
 msgid "Usage: %s <nick> <warning>"
 msgstr ""
 
-#: src/builtincmd.c:115 src/builtincmd.c:313 src/builtincmd.c:379
-#: src/builtincmd.c:433 src/builtincmd.c:479 src/builtincmd.c:683
-#: src/builtincmd.c:733 src/builtincmd.c:1183 src/builtincmd.c:1279
-#: src/builtincmd.c:1335 src/builtincmd.c:1340 src/builtincmd.c:1386
-#: src/builtincmd.c:1452
+#: src/builtincmd.c:116 src/builtincmd.c:314 src/builtincmd.c:380
+#: src/builtincmd.c:434 src/builtincmd.c:481 src/builtincmd.c:685
+#: src/builtincmd.c:735 src/builtincmd.c:1185 src/builtincmd.c:1281
+#: src/builtincmd.c:1337 src/builtincmd.c:1342 src/builtincmd.c:1388
+#: src/builtincmd.c:1454
 #, c-format
 msgid "User %s not found."
 msgstr "Grebruiker %s niet gevonden."
 
-#: src/builtincmd.c:122
+#: src/builtincmd.c:123
 #, c-format
 msgid "%s is WARNING you: "
 msgstr "%s WAARSCHUWT je: "
 
-#: src/builtincmd.c:154
+#: src/builtincmd.c:155
 msgid "Hub shutdown in progress."
 msgstr "Hub shutdown bezig."
 
-#: src/builtincmd.c:172
+#: src/builtincmd.c:173
 #, c-format
 msgid "This is %s Version %s"
 msgstr "Dit is %s Versie %s"
 
-#: src/builtincmd.c:184
+#: src/builtincmd.c:185
 #, c-format
 msgid "Usage: %s <message>"
 msgstr "Gebruik: %s <bericht>"
 
-#: src/builtincmd.c:205
+#: src/builtincmd.c:206
 #, c-format
 msgid "Message sent to %lu users."
 msgstr "Bericht verzonden aan %lu gebuikers."
 
-#: src/builtincmd.c:221 src/builtincmd.c:300 src/builtincmd.c:365
+#: src/builtincmd.c:222 src/builtincmd.c:301 src/builtincmd.c:366
 #, c-format
 msgid "Usage: %s <nick> <reason>"
 msgstr "Gebruik: %s <naam> <reden>"
 
-#: src/builtincmd.c:228
+#: src/builtincmd.c:229
 msgid "Report could not be sent. Reporting is disabled."
 msgstr "Rapport kon niet worden verzonden. Rapportering is niet toegelaten."
 
-#: src/builtincmd.c:247
+#: src/builtincmd.c:248
 #, c-format
 msgid "User %s (%s) reports %s (%s): "
 msgstr "Gebruiker %s (%s) rapporteert %s (%s): "
 
-#: src/builtincmd.c:249
+#: src/builtincmd.c:250
 #, c-format
 msgid "User %s (%s) reports %s (not logged in): "
 msgstr "Gebruiker %s (%s) rapporteert %s (niet aanwezig): "
 
-#: src/builtincmd.c:261
+#: src/builtincmd.c:262
 #, c-format
 msgid "Report could not be sent, %s not found."
 msgstr "Rapport kon niet worden verzonden, %s niet gevonden."
 
-#: src/builtincmd.c:263
+#: src/builtincmd.c:264
 msgid "Report could not be sent, target not found."
 msgstr "Rapport kon niet worden verzonden, doel niet gevonden."
 
-#: src/builtincmd.c:272
+#: src/builtincmd.c:273
 msgid "Report sent."
 msgstr "Rapport verstuurd."
 
-#: src/builtincmd.c:284
+#: src/builtincmd.c:285
 #, c-format
 msgid "Your IP is %s\n"
 msgstr "Uw IP adres is %s\n"
 
-#: src/builtincmd.c:319
+#: src/builtincmd.c:320
 #, c-format
 msgid "Kicked user %s ( ip %s ) because: %.*s"
 msgstr "Gebruiker %s ( ip %s ) verwijdert omdat: %.*s"
 
-#: src/builtincmd.c:331 src/builtincmd.c:397
+#: src/builtincmd.c:332 src/builtincmd.c:398
 #, c-format
 msgid ""
 "\n"
@@ -105,7 +105,7 @@ msgstr ""
 "\n"
 "Ban gebruiker voor %s\n"
 
-#: src/builtincmd.c:333 src/builtincmd.c:399
+#: src/builtincmd.c:334 src/builtincmd.c:400
 msgid ""
 "\n"
 "Banning user forever"
@@ -113,7 +113,7 @@ msgstr ""
 "\n"
 "Ban gebruiker permanent."
 
-#: src/builtincmd.c:338
+#: src/builtincmd.c:339
 #, c-format
 msgid ""
 "\n"
@@ -122,7 +122,7 @@ msgstr ""
 "\n"
 "Sorry, u kan gebruikers niet langer verbannen dan %s met een kick."
 
-#: src/builtincmd.c:342 src/builtincmd.c:407
+#: src/builtincmd.c:343 src/builtincmd.c:408
 msgid ""
 "\n"
 "Sorry, you cannot ban."
@@ -130,17 +130,17 @@ msgstr ""
 "\n"
 "Sorry, u kan niet verbannen."
 
-#: src/builtincmd.c:372
+#: src/builtincmd.c:373
 #, c-format
 msgid "You were dropped by %s because: "
 msgstr "Uw verbinding werd verbroken door %s omdat: "
 
-#: src/builtincmd.c:385
+#: src/builtincmd.c:386
 #, c-format
 msgid "Dropped user %s (ip %s) because: %.*s"
 msgstr "Verbinging met gebruiker %s (ip %s ) werd verbroken omdat: %.*s"
 
-#: src/builtincmd.c:403
+#: src/builtincmd.c:404
 #, c-format
 msgid ""
 "\n"
@@ -149,695 +149,695 @@ msgstr ""
 "\n"
 "Sorry, u kan gebruikers niet langer dan %s verbannen met een drop"
 
-#: src/builtincmd.c:427 src/builtincmd.c:473 src/builtincmd.c:532
-#: src/builtincmd.c:1240 src/builtincmd.c:1273 src/pi_user.c:331
+#: src/builtincmd.c:428 src/builtincmd.c:475 src/builtincmd.c:534
+#: src/builtincmd.c:1242 src/builtincmd.c:1275 src/pi_user.c:330
 #, c-format
 msgid "Usage: %s <nick>"
 msgstr "Gebruik: %s <naam>"
 
-#: src/builtincmd.c:439
+#: src/builtincmd.c:440
 #, c-format
 msgid "User %s's putrid flesh stinks up the place..."
 msgstr "Het rotte vlees van gebruiker %s verspreid een walgelijke geur..."
 
-#: src/builtincmd.c:451
+#: src/builtincmd.c:452
 msgid "The hub is infested by the following zombie horde:\n"
 msgstr "Deze hub is overrompelt door de volgende zombie meute:\n"
 
-#: src/builtincmd.c:462
+#: src/builtincmd.c:464
 msgid "No zombies found!\n"
 msgstr "Geen zombies gevonden\n"
 
-#: src/builtincmd.c:485
+#: src/builtincmd.c:487
 #, c-format
 msgid "User %s's putrid flesh is miraculously restored..."
 msgstr "Het rotte vlees van gebruiker %s is wonderbaarlijk hersteld."
 
-#: src/builtincmd.c:497 src/builtincmd.c:551 src/builtincmd.c:574
+#: src/builtincmd.c:499 src/builtincmd.c:553 src/builtincmd.c:576
 #, c-format
 msgid "Usage: %s <ip>"
 msgstr "Gebruik: %s <ip>"
 
-#: src/builtincmd.c:506 src/builtincmd.c:515
+#: src/builtincmd.c:508 src/builtincmd.c:517
 #, c-format
 msgid "User %s is using IP %s\n"
 msgstr "Gebruiker %s gebruikt IP %s\n"
 
-#: src/builtincmd.c:510 src/builtincmd.c:519
+#: src/builtincmd.c:512 src/builtincmd.c:521
 #, c-format
 msgid "No one using IP %s found."
 msgstr "Niemand met IP %s gevonden."
 
-#: src/builtincmd.c:522 src/builtincmd.c:562 src/builtincmd.c:585
+#: src/builtincmd.c:524 src/builtincmd.c:564 src/builtincmd.c:587
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address."
 msgstr "Sorry, \"%s\" is geen herkenbaar IP adres."
 
-#: src/builtincmd.c:537
+#: src/builtincmd.c:539
 #, c-format
 msgid "Nick %s unbanned."
 msgstr "Naam %s is niet langer verbannen."
 
-#: src/builtincmd.c:539
+#: src/builtincmd.c:541
 #, c-format
 msgid "No ban for nick %s found."
 msgstr "Geen verbanning voor naam %s gevonden."
 
-#: src/builtincmd.c:557 src/builtincmd.c:580
+#: src/builtincmd.c:559 src/builtincmd.c:582
 #, c-format
 msgid "IP %s unbanned."
 msgstr "IP %s is niet langer verbannen."
 
-#: src/builtincmd.c:559 src/builtincmd.c:582
+#: src/builtincmd.c:561 src/builtincmd.c:584
 #, c-format
 msgid "No ban for IP %s found."
 msgstr "Geen verbanning for IP %s gevonden."
 
-#: src/builtincmd.c:601 src/builtincmd.c:769
+#: src/builtincmd.c:603 src/builtincmd.c:771
 #, c-format
 msgid "Usage: %s <ip/nick> [<period>] <reason>"
 msgstr "Gebruik: %s <ip/naam> [<periode>] <reden>"
 
-#: src/builtincmd.c:619
+#: src/builtincmd.c:621
 #, c-format
 msgid "IP Banning user %s (ip %s) forever: %.*s"
 msgstr "Permanente IP Verbanning voor %s (ip %s): %.*s"
 
-#: src/builtincmd.c:622
+#: src/builtincmd.c:624
 #, c-format
 msgid "IP Banning user %s (ip %s) for %s: %.*s"
 msgstr "Tijdelijke IP Verbanning voor %s (ip %s)voor %s: %.*s"
 
-#: src/builtincmd.c:628
+#: src/builtincmd.c:630
 #, c-format
 msgid "User %s offline, found in iplog\n"
 msgstr "Gebruiker %s is afwezig, maar gevonden in de iplog.\n"
 
-#: src/builtincmd.c:631
+#: src/builtincmd.c:633
 #, c-format
 msgid "IP Banning %s (ip %s) forever: %.*s."
 msgstr "Permanente IP Verbanning voor %s (ip %s): %.*s"
 
-#: src/builtincmd.c:634
+#: src/builtincmd.c:636
 #, c-format
 msgid "IP Banning %s (ip %s) for %s: %.*s"
 msgstr "Tijdelijke IP Verbanning voor %s (ip %s) voor %s: %.*s"
 
-#: src/builtincmd.c:641
+#: src/builtincmd.c:643
 #, c-format
 msgid "IP Banning %s forever: %.*s."
 msgstr "Permanente IP Verbanning voor %s: %.*s"
 
-#: src/builtincmd.c:644
+#: src/builtincmd.c:646
 #, c-format
 msgid "IP Banning %s for %s: %.*s"
 msgstr "IP Verbanning %s voor %s: %.*s"
 
-#: src/builtincmd.c:648
+#: src/builtincmd.c:650
 #, c-format
 msgid "User not found or IP address not valid: %s\n"
 msgstr "Gebruiker niet gevonden of IP adres niet geldig: %s\n"
 
-#: src/builtincmd.c:666 src/builtincmd.c:717
+#: src/builtincmd.c:668 src/builtincmd.c:719
 #, c-format
 msgid "Usage: %s <nick> [<period>] <reason>"
 msgstr "Gebruik: %s <naam> [<periode>] <reden>"
 
-#: src/builtincmd.c:688
+#: src/builtincmd.c:690
 #, c-format
 msgid "Banned nick %s forever: %.*s"
 msgstr "Nick %s permanent verbannen: %.*s"
 
-#: src/builtincmd.c:690
+#: src/builtincmd.c:692
 #, c-format
 msgid "Banned nick %s for %s: %.*s"
 msgstr "Nick %s verbannen voor %s: %.*s"
 
-#: src/builtincmd.c:737
+#: src/builtincmd.c:739
 #, c-format
 msgid "User %s not online, found in iplog.\n"
 msgstr "Gebruiker %s is afwezig, maar gevonden in de iplog.\n"
 
-#: src/builtincmd.c:746
+#: src/builtincmd.c:748
 #, c-format
 msgid "Banning user %s (ip %s) forever: %.*s"
 msgstr "Gebruiker %s (ip %s) permanent verbannen: %.*s"
 
-#: src/builtincmd.c:749
+#: src/builtincmd.c:751
 #, c-format
 msgid "Banning user %s (ip %s) for %s: %.*s"
 msgstr "Gebruiker %s (ip %s) verbannen voor %s: %.*s"
 
-#: src/builtincmd.c:785
+#: src/builtincmd.c:787
 #, c-format
 msgid "HARD Banning user %s (ip %s) forever: %.*s"
 msgstr "Permanente harde verbanning voor gebruiker %s (ip %s): %.*s"
 
-#: src/builtincmd.c:788
+#: src/builtincmd.c:790
 #, c-format
 msgid "HARD Banning user %s (ip %s) for %s: %.*s"
 msgstr "Harde verbanning van gebruiker %s (ip %s) voor %s: %.*s"
 
-#: src/builtincmd.c:795
+#: src/builtincmd.c:797
 #, c-format
 msgid "HARD Banning ip %s forever: %.*s"
 msgstr "Permanente harde verbanning van ip %s: %.*s"
 
-#: src/builtincmd.c:798
+#: src/builtincmd.c:800
 #, c-format
 msgid "HARD Banning ip %s for %s: %.*s"
 msgstr "Harde verbanning van ip %s voor %s: %.*s"
 
-#: src/builtincmd.c:803
+#: src/builtincmd.c:805
 #, c-format
 msgid "User not found or ip address not valid: %s\n"
 msgstr "Gebruiker niet gevonden of IP adres niet geldig: %s\n"
 
-#: src/builtincmd.c:818
+#: src/builtincmd.c:820
 #, c-format
 msgid "Usage: %s [<ip|nick>]"
 msgstr "Gebruik: %s [<ip|nick>]"
 
-#: src/builtincmd.c:824
+#: src/builtincmd.c:826
 msgid "No bans found."
 msgstr "Geen verbanning gevonden."
 
-#: src/builtincmd.c:829
+#: src/builtincmd.c:831
 #, c-format
 msgid "No IP bans found for %s"
 msgstr "Geen IP verbanning gevonden voor %s"
 
-#: src/builtincmd.c:834
+#: src/builtincmd.c:836
 #, c-format
 msgid "No Nick bans found for %s"
 msgstr "Geen naam verbanning gevonden voor %s"
 
-#: src/builtincmd.c:855
+#: src/builtincmd.c:857
 msgid "Available commands:\n"
 msgstr "Beschikbare commandos:\n"
 
-#: src/builtincmd.c:861
+#: src/builtincmd.c:863
 msgid "Commands are preceded with ! or +\n"
 msgstr "Commandos worden voorafggaan door ! of +\n"
 
-#: src/builtincmd.c:880
+#: src/builtincmd.c:882
 #, c-format
 msgid "Command %s not found.\n"
 msgstr "Commando %s niet gevonden\n"
 
-#: src/builtincmd.c:899
+#: src/builtincmd.c:901
 #, c-format
 msgid "Usage: %s <group> <rights>...\n"
 msgstr "Gebruik: %s <group> <rechten>...\n"
 
-#: src/builtincmd.c:905
+#: src/builtincmd.c:907
 #, c-format
 msgid "Group %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:920 src/builtincmd.c:964 src/builtincmd.c:1649
+#: src/builtincmd.c:922 src/builtincmd.c:966 src/builtincmd.c:1651
 msgid "You are not allowed to assign rights.\n"
 msgstr ""
 
-#: src/builtincmd.c:924 src/builtincmd.c:968
+#: src/builtincmd.c:926 src/builtincmd.c:970
 msgid "You are not allowed to assign the following rights to this group: "
 msgstr ""
 
-#: src/builtincmd.c:933
+#: src/builtincmd.c:935
 #, c-format
 msgid "Group %s created with: "
 msgstr ""
 
-#: src/builtincmd.c:948
+#: src/builtincmd.c:950
 #, c-format
 msgid "Usage: %s <group> <[+]right/-right>...\n"
 msgstr ""
 
-#: src/builtincmd.c:954 src/builtincmd.c:1008 src/builtincmd.c:1060
-#: src/builtincmd.c:1100
+#: src/builtincmd.c:956 src/builtincmd.c:1010 src/builtincmd.c:1062
+#: src/builtincmd.c:1102
 #, c-format
 msgid "Group %s does not exist.\n"
 msgstr ""
 
-#: src/builtincmd.c:976
+#: src/builtincmd.c:978
 msgid "You are not allowed to remove the following rights from this group: "
 msgstr ""
 
-#: src/builtincmd.c:987
+#: src/builtincmd.c:989
 #, c-format
 msgid "Group %s modified. Current rights:"
 msgstr ""
 
-#: src/builtincmd.c:1001
+#: src/builtincmd.c:1003
 #, c-format
 msgid "Usage: %s <group>"
 msgstr ""
 
-#: src/builtincmd.c:1013
+#: src/builtincmd.c:1015
 #, c-format
 msgid "Group %s still has %ld users.\n"
 msgstr ""
 
-#: src/builtincmd.c:1018
+#: src/builtincmd.c:1020
 #, c-format
 msgid "Group %s deleted.\n"
 msgstr ""
 
-#: src/builtincmd.c:1063
+#: src/builtincmd.c:1065
 #, c-format
 msgid "Group %s: "
 msgstr ""
 
-#: src/builtincmd.c:1091
+#: src/builtincmd.c:1093
 #, c-format
 msgid "Usage: %s <nick> <group> [<rights...>]"
 msgstr ""
 
-#: src/builtincmd.c:1096
+#: src/builtincmd.c:1098
 #, c-format
 msgid "User %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:1110 src/builtincmd.c:1350
+#: src/builtincmd.c:1112 src/builtincmd.c:1352
 msgid "You are not allowed to assign a user to this group.\n"
 msgstr ""
 
-#: src/builtincmd.c:1116 src/builtincmd.c:1178
+#: src/builtincmd.c:1118 src/builtincmd.c:1180
 msgid "You are not allowed to assign a user extra rights.\n"
 msgstr ""
 
-#: src/builtincmd.c:1120
+#: src/builtincmd.c:1122
 msgid "You are not allowed to assign this user: "
 msgstr ""
 
-#: src/builtincmd.c:1131 src/builtincmd.c:1220
+#: src/builtincmd.c:1133 src/builtincmd.c:1222
 #, c-format
 msgid ""
 "User %s created with group %s.\n"
 "Current rights:"
 msgstr ""
 
-#: src/builtincmd.c:1145
+#: src/builtincmd.c:1147
 #, c-format
 msgid ""
 "You have been registered by %s. Please use !passwd <password> to set a "
 "password and relogin to gain your new rights. You have been assigned:\n"
 msgstr ""
 
-#: src/builtincmd.c:1154
+#: src/builtincmd.c:1156
 msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
 msgstr ""
 
-#: src/builtincmd.c:1158
+#: src/builtincmd.c:1160
 #, c-format
 msgid ""
 "No user with nickname %s is currently logged in. Please notify the user "
 "yourself.\n"
 msgstr ""
 
-#: src/builtincmd.c:1172
+#: src/builtincmd.c:1174
 #, c-format
 msgid "Usage: %s <nick> <[+]right/-right>...\n"
 msgstr ""
 
-#: src/builtincmd.c:1193
+#: src/builtincmd.c:1195
 msgid "You are not allowed to assign the following rights to this user: "
 msgstr ""
 
-#: src/builtincmd.c:1200
+#: src/builtincmd.c:1202
 msgid "You are not allowed to touch: "
 msgstr ""
 
-#: src/builtincmd.c:1213
+#: src/builtincmd.c:1215
 #, c-format
 msgid "Warning! User %s is still awarded the following rights by his group:"
 msgstr ""
 
-#: src/builtincmd.c:1227
+#: src/builtincmd.c:1229
 msgid ""
 "User is already logged in. Tell him to rejoin to gain all his new rights.\n"
 msgstr ""
 
-#: src/builtincmd.c:1245
+#: src/builtincmd.c:1247
 #, c-format
 msgid "User account %s does not exist.\n"
 msgstr ""
 
-#: src/builtincmd.c:1251
+#: src/builtincmd.c:1253
 #, c-format
 msgid "You are not allowed to delete user %s.\n"
 msgstr ""
 
-#: src/builtincmd.c:1255
+#: src/builtincmd.c:1257
 #, c-format
 msgid "User account %s deleted.\n"
 msgstr ""
 
-#: src/builtincmd.c:1259
+#: src/builtincmd.c:1261
 msgid ""
 "User is still logged in with all rights of the deleted account. Kick the "
 "user to take them away.\n"
 msgstr ""
 
-#: src/builtincmd.c:1281
+#: src/builtincmd.c:1283
 #, c-format
 msgid "User information for user %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1285
+#: src/builtincmd.c:1287
 #, c-format
 msgid "Group %s, Rights: "
 msgstr ""
 
-#: src/builtincmd.c:1290
+#: src/builtincmd.c:1292
 msgid "Users password is NOT set.\n"
 msgstr ""
 
-#: src/builtincmd.c:1291
+#: src/builtincmd.c:1293
 #, c-format
 msgid "User was registered by %s on %s"
 msgstr ""
 
-#: src/builtincmd.c:1298
+#: src/builtincmd.c:1300
 #, c-format
 msgid ", last login %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1302
+#: src/builtincmd.c:1304
 msgid ", never logged in.\n"
 msgstr ""
 
-#: src/builtincmd.c:1308
+#: src/builtincmd.c:1310
 #, c-format
 msgid "Using Client %s version %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1316
+#: src/builtincmd.c:1318
 #, c-format
 msgid "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 msgstr ""
 
-#: src/builtincmd.c:1330
+#: src/builtincmd.c:1332
 #, c-format
 msgid "Usage: %s <nick> <group>"
 msgstr ""
 
-#: src/builtincmd.c:1346
+#: src/builtincmd.c:1348
 msgid "You are not allowed to remove a user from this group.\n"
 msgstr ""
 
-#: src/builtincmd.c:1362
+#: src/builtincmd.c:1364
 #, c-format
 msgid "Moved user %s from group %s to %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1378
+#: src/builtincmd.c:1380
 #, c-format
 msgid ""
 "Usage: %s [<nick>] <password>\n"
 " If no nick is specified, your own password is changed."
 msgstr ""
 
-#: src/builtincmd.c:1392 src/builtincmd.c:1457
+#: src/builtincmd.c:1394 src/builtincmd.c:1459
 #, c-format
 msgid "You are not allowed to change %s's password\n"
 msgstr ""
 
-#: src/builtincmd.c:1401
+#: src/builtincmd.c:1403
 msgid ""
 "The password is unacceptable, please choose another. You specified a known "
 "account name as your password.\n"
 msgstr ""
 
-#: src/builtincmd.c:1408
+#: src/builtincmd.c:1410
 msgid ""
 "The password is unacceptable, please choose another. You specified a logged "
 "in username as your password.\n"
 msgstr ""
 
-#: src/builtincmd.c:1413 src/builtincmd.c:1465
+#: src/builtincmd.c:1415 src/builtincmd.c:1467
 #, c-format
 msgid "No account for user %s.\n"
 msgstr ""
 
-#: src/builtincmd.c:1421
+#: src/builtincmd.c:1423
 #, c-format
 msgid ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
 msgstr ""
 
-#: src/builtincmd.c:1428 src/builtincmd.c:1488
+#: src/builtincmd.c:1430 src/builtincmd.c:1490
 msgid "Password set.\n"
 msgstr ""
 
-#: src/builtincmd.c:1444
+#: src/builtincmd.c:1446
 #, c-format
 msgid ""
 "Usage: %s [<nick>]\n"
 " If no nick is specified, your own password is changed."
 msgstr ""
 
-#: src/builtincmd.c:1478
+#: src/builtincmd.c:1480
 #, c-format
 msgid ""
 "Your password was reset. It is now\n"
 "%.*s\n"
 msgstr ""
 
-#: src/builtincmd.c:1482
+#: src/builtincmd.c:1484
 #, c-format
 msgid ""
 "The password of %s was reset. It is now\n"
 "%.*s\n"
 msgstr ""
 
-#: src/builtincmd.c:1564 src/builtincmd.c:1713
+#: src/builtincmd.c:1566 src/builtincmd.c:1715
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr ""
 
-#: src/builtincmd.c:1582 src/builtincmd.c:1605 src/builtincmd.c:1628
+#: src/builtincmd.c:1584 src/builtincmd.c:1607 src/builtincmd.c:1630
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1622
+#: src/builtincmd.c:1624
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr ""
 
-#: src/builtincmd.c:1655
+#: src/builtincmd.c:1657
 msgid "You are not allowed to assign: "
 msgstr ""
 
-#: src/builtincmd.c:1662
+#: src/builtincmd.c:1664
 msgid "You are not allowed to remove: "
 msgstr ""
 
-#: src/builtincmd.c:1691
+#: src/builtincmd.c:1693
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr ""
 
-#: src/builtincmd.c:1702
+#: src/builtincmd.c:1704
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1731
+#: src/builtincmd.c:1733
 msgid "All Data saved."
 msgstr ""
 
-#: src/builtincmd.c:1744
+#: src/builtincmd.c:1746
 msgid "Data reloaded."
 msgstr ""
 
-#: src/builtincmd.c:1760
+#: src/builtincmd.c:1762
 msgid "Errors during autosave:\n"
 msgstr ""
 
-#: src/builtincmd.c:1783
+#: src/builtincmd.c:1788
 msgid "Minimum length of a password."
 msgstr ""
 
-#: src/builtincmd.c:1784
+#: src/builtincmd.c:1789
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr ""
 
-#: src/builtincmd.c:1785
+#: src/builtincmd.c:1790
 msgid "User to send report to. Can be a chatroom."
 msgstr ""
 
-#: src/builtincmd.c:1786
+#: src/builtincmd.c:1791
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
 msgstr ""
 
-#: src/builtincmd.c:1787
+#: src/builtincmd.c:1792
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
 msgstr ""
 
-#: src/builtincmd.c:1790
+#: src/builtincmd.c:1795
 msgid "Make the HubSec say something."
 msgstr ""
 
-#: src/builtincmd.c:1791
+#: src/builtincmd.c:1796
 msgid "Make the HubSec warn user."
 msgstr ""
 
-#: src/builtincmd.c:1792
+#: src/builtincmd.c:1797
 msgid "Shut the hub down."
 msgstr ""
 
-#: src/builtincmd.c:1793
+#: src/builtincmd.c:1798
 msgid "Send a report to the OPs."
 msgstr ""
 
-#: src/builtincmd.c:1794
+#: src/builtincmd.c:1799
 msgid "Displays the Aquila version."
 msgstr ""
 
-#: src/builtincmd.c:1795
+#: src/builtincmd.c:1800
 msgid "Shows you your IP address."
 msgstr ""
 
-#: src/builtincmd.c:1796
+#: src/builtincmd.c:1801
 msgid "Kick a user. Automatic short ban included."
 msgstr ""
 
-#: src/builtincmd.c:1797
+#: src/builtincmd.c:1802
 msgid "Drop a user. Automatic short ban included."
 msgstr ""
 
-#: src/builtincmd.c:1798
+#: src/builtincmd.c:1803
 msgid "IP Ban a user by IP address."
 msgstr ""
 
-#: src/builtincmd.c:1799
+#: src/builtincmd.c:1804
 msgid "Nick ban a user by nick."
 msgstr ""
 
-#: src/builtincmd.c:1800
+#: src/builtincmd.c:1805
 msgid "Ban a user by nick."
 msgstr ""
 
-#: src/builtincmd.c:1801
+#: src/builtincmd.c:1806
 msgid "Show ban by nick/IP."
 msgstr ""
 
-#: src/builtincmd.c:1802
+#: src/builtincmd.c:1807
 msgid "Display help message."
 msgstr ""
 
-#: src/builtincmd.c:1803
+#: src/builtincmd.c:1808
 msgid "Unban a nick."
 msgstr ""
 
-#: src/builtincmd.c:1804
+#: src/builtincmd.c:1809
 msgid "Unban an ip."
 msgstr ""
 
-#: src/builtincmd.c:1805
+#: src/builtincmd.c:1810
 msgid "Hardban an IP."
 msgstr ""
 
-#: src/builtincmd.c:1806
+#: src/builtincmd.c:1811
 msgid "Unhardban an IP."
 msgstr ""
 
-#: src/builtincmd.c:1807
+#: src/builtincmd.c:1812
 msgid "Zombie a user. Can't talk or pm."
 msgstr ""
 
-#: src/builtincmd.c:1808
+#: src/builtincmd.c:1813
 msgid "Show the zombie horde."
 msgstr ""
 
-#: src/builtincmd.c:1809
+#: src/builtincmd.c:1814
 msgid "Unzombie a user. Can talk or pm again."
 msgstr ""
 
-#: src/builtincmd.c:1810
+#: src/builtincmd.c:1815
 msgid "Returns the user using the IP."
 msgstr ""
 
-#: src/builtincmd.c:1812
+#: src/builtincmd.c:1817
 msgid "Send a private message to all users."
 msgstr ""
 
-#: src/builtincmd.c:1814
+#: src/builtincmd.c:1819
 msgid "Add a user group."
 msgstr ""
 
-#: src/builtincmd.c:1815
+#: src/builtincmd.c:1820
 msgid "Delete a user group."
 msgstr ""
 
-#: src/builtincmd.c:1816
+#: src/builtincmd.c:1821
 msgid "Edit the rights of a user group."
 msgstr ""
 
-#: src/builtincmd.c:1817
+#: src/builtincmd.c:1822
 msgid "List all groups with their rights."
 msgstr ""
 
-#: src/builtincmd.c:1819
+#: src/builtincmd.c:1824
 msgid "Add a user."
 msgstr ""
 
-#: src/builtincmd.c:1820
+#: src/builtincmd.c:1825
 msgid "Delete a user."
 msgstr ""
 
-#: src/builtincmd.c:1821
+#: src/builtincmd.c:1826
 msgid "Edit the extra rights of a user."
 msgstr ""
 
-#: src/builtincmd.c:1822
+#: src/builtincmd.c:1827
 msgid "List all users of a user group."
 msgstr ""
 
-#: src/builtincmd.c:1823
+#: src/builtincmd.c:1828
 msgid "Show information of user."
 msgstr ""
 
-#: src/builtincmd.c:1824
+#: src/builtincmd.c:1829
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 
-#: src/builtincmd.c:1826
+#: src/builtincmd.c:1831
 msgid "Show configuration."
 msgstr ""
 
-#: src/builtincmd.c:1827
+#: src/builtincmd.c:1832
 msgid "Show configuration value help string."
 msgstr ""
 
-#: src/builtincmd.c:1828 src/builtincmd.c:1829
+#: src/builtincmd.c:1833 src/builtincmd.c:1834
 msgid "Set configuration values."
 msgstr ""
 
-#: src/builtincmd.c:1831
+#: src/builtincmd.c:1836
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 
-#: src/builtincmd.c:1832
+#: src/builtincmd.c:1837
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
 msgstr ""
 
-#: src/builtincmd.c:1834
+#: src/builtincmd.c:1839
 msgid "Change your password."
 msgstr ""
 
-#: src/builtincmd.c:1835 src/builtincmd.c:1837 src/builtincmd.c:1838
+#: src/builtincmd.c:1840 src/builtincmd.c:1842 src/builtincmd.c:1843
 msgid "Let "
 msgstr ""
 
@@ -860,251 +860,220 @@ msgstr ""
 msgid "Unknown %s.\n"
 msgstr ""
 
-#: src/commands.c:304
+#: src/commands.c:303
 #, c-format
 msgid "Command not found: %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:96
+#: src/nmdc_protocol.c:94
 #, c-format
-msgid "<%s> This hub is running %s Version %s (Uptime .%.3lu).|"
+msgid "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
 msgstr ""
 
-#: src/nmdc_protocol.c:101 src/nmdc_protocol.c:314
+#: src/nmdc_protocol.c:100 src/nmdc_protocol.c:313
 #, c-format
 msgid "<%s> Do not reconnect too fast, time remaining: %s|"
 msgstr ""
 
-#: src/nmdc_protocol.c:239
+#: src/nmdc_protocol.c:238
 msgid "Protocol violation: Bad key."
 msgstr ""
 
-#: src/nmdc_protocol.c:370 src/nmdc_protocol.c:394 src/nmdc_protocol.c:532
+#: src/nmdc_protocol.c:370 src/nmdc_protocol.c:395 src/nmdc_protocol.c:535
 #, c-format
 msgid "<%s> You have been banned by %s because: "
 msgstr ""
 
-#: src/nmdc_protocol.c:374 src/nmdc_protocol.c:398 src/nmdc_protocol.c:536
+#: src/nmdc_protocol.c:375 src/nmdc_protocol.c:400 src/nmdc_protocol.c:539
 #, c-format
 msgid "<%s> Time remaining %s|"
 msgstr ""
 
-#: src/nmdc_protocol.c:1415
+#: src/nmdc_protocol.c:1429
 msgid "Bad From: nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1436
+#: src/nmdc_protocol.c:1450
 msgid "Bad display nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1616
+#: src/nmdc_protocol.c:1634
 msgid "You were kicked."
 msgstr ""
 
-#: src/nmdc_interface.c:846
+#: src/nmdc_interface.c:900
 #, c-format
 msgid "Rate Probation Violation (Last: %s)."
 msgstr ""
 
-#: src/nmdc_interface.c:850
+#: src/nmdc_interface.c:905
 #, c-format
 msgid "Rate Violation (Last: %s)."
 msgstr ""
 
-#: src/nmdc_interface.c:869
+#: src/nmdc_interface.c:924
 #, c-format
 msgid "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"
 msgstr ""
 
-#: src/nmdc_interface.c:892 src/nmdc_interface.c:922
+#: src/nmdc_interface.c:953 src/nmdc_interface.c:985
 msgid "WARNING: "
 msgstr ""
 
-#: src/plugin.c:188
+#: src/plugin.c:214
 #, c-format
 msgid "You have been kicked by %s because: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:221 src/plugin.c:357 src/plugin.c:390 src/plugin.c:423
+#: src/plugin.c:247 src/plugin.c:393 src/plugin.c:426 src/plugin.c:459
 #, c-format
 msgid "You have been banned by %s because: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:442
+#: src/plugin.c:478
 #, c-format
 msgid "Found nick ban by %s for %s for %lus because: %.*s"
 msgstr ""
 
-#: src/plugin.c:445
+#: src/plugin.c:481
 #, c-format
 msgid "Found permanent nick ban by %s for %s because: %.*s"
 msgstr ""
 
-#: src/plugin.c:462
+#: src/plugin.c:499
 #, c-format
 msgid "Found IP ban by %s for %s for %lus because: %.*s"
 msgstr ""
 
-#: src/plugin.c:466
+#: src/plugin.c:503
 #, c-format
 msgid "Found permanent ban by %s for %s because: %.*s"
 msgstr ""
 
-#: src/plugin.c:484
+#: src/plugin.c:522
 #, c-format
 msgid "%s %s by %s Expires: %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:487
+#: src/plugin.c:525
 #, c-format
 msgid "%s %s by %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:972 src/plugin.c:976 src/plugin.c:981 src/plugin.c:985
+#: src/plugin.c:1030 src/plugin.c:1034 src/plugin.c:1039 src/plugin.c:1043
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
 msgstr ""
 
-#: src/pi_statistics.c:100
+#: src/pi_statistics.c:102
 msgid "CPU Unknown\n"
-msgstr ""
-
-#: src/pi_statistics.c:115
-#, c-format
-msgid "CPU%.1d: %.*s\n"
 msgstr ""
 
 #: src/pi_statistics.c:117
 #, c-format
-msgid "     Clock: %.*s MHz "
+msgid "CPU%.1d: %.*s\n"
 msgstr ""
 
 #: src/pi_statistics.c:119
 #, c-format
+msgid "     Clock: %.*s MHz "
+msgstr ""
+
+#: src/pi_statistics.c:121
+#, c-format
 msgid "BogoMIPS: %.*s\n"
 msgstr ""
 
-#: src/pi_statistics.c:204
+#: src/pi_statistics.c:206
 #, c-format
 msgid ""
 "\n"
 "Cpu Statistics at %s"
 msgstr ""
 
-#: src/pi_statistics.c:207
+#: src/pi_statistics.c:209
 #, c-format
 msgid " last hour %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:211
+#: src/pi_statistics.c:213
 #, c-format
 msgid " last minute %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:215
+#: src/pi_statistics.c:217
 #, c-format
 msgid ""
 " last 5 seconds %2.2f%%\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:219
+#: src/pi_statistics.c:221
 #, c-format
 msgid "Since boot %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:320
+#: src/pi_statistics.c:323
 #, c-format
 msgid "Total traffic since boot: In %lu, Out %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:329
+#: src/pi_statistics.c:332
 #, c-format
 msgid "In last %lu ms: In %f kbps, Out %f kbps\n"
 msgstr ""
 
-#: src/pi_statistics.c:340
+#: src/pi_statistics.c:343
 #, c-format
 msgid "Average over %d seconds: In %f kbps, Out %f kbps\n"
 msgstr ""
 
-#: src/pi_statistics.c:379
-#, c-format
-msgid "Total Count: %lu, Total Memory: %lu\n"
-msgstr ""
-
-#: src/pi_statistics.c:381
-#, c-format
-msgid ""
-"ZPipe users: %lu, ZLine users: %lu\n"
-"\n"
-msgstr ""
-
-#: src/pi_statistics.c:383
-#, c-format
-msgid "Nicklist cache (last updated %lu seconds ago).\n"
-msgstr ""
-
-#: src/pi_statistics.c:386
-#, c-format
-msgid "  Nicklist length %lu (zpipe %lu, zline %lu)\n"
-msgstr ""
-
-#: src/pi_statistics.c:388
-#, c-format
-msgid "  Infolist length %lu (zpipe %lu, zline %lu)\n"
-msgstr ""
-
-#: src/pi_statistics.c:391
-#, c-format
-msgid "  Nicklist length %lu\n"
-msgstr ""
-
-#: src/pi_statistics.c:392
-#, c-format
-msgid "  Infolist length %lu\n"
-msgstr ""
-
-#: src/pi_statistics.c:402
+#: src/pi_statistics.c:407
 msgid "Warning: DEBUG build, cpu measurements highly inaccurate.\n"
 msgstr ""
 
-#: src/pi_statistics.c:419
+#: src/pi_statistics.c:422
 #, c-format
-msgid "Allocated size: %llu (max: %llu)\n"
+msgid ""
+"Allocated size: %llu (max: %llu)\n"
+")"
 msgstr ""
 
-#: src/pi_statistics.c:420
+#: src/pi_statistics.c:423
 #, c-format
-msgid "Allocated buffers: %lu (max %lu)\n"
+msgid ""
+"Allocated buffers: %lu (max %lu)\n"
+")"
 msgstr ""
 
-#: src/pi_statistics.c:421
+#: src/pi_statistics.c:424
 #, c-format
-msgid " Users having buffered output: %lu\n"
+msgid ""
+" Users having buffered output: %lu, buffering %lu\n"
+")"
 msgstr ""
 
-#: src/pi_statistics.c:427
+#: src/pi_statistics.c:431
 msgid ""
 "\n"
 "Buffering clients:\n"
 msgstr ""
 
-#: src/pi_statistics.c:434
+#: src/pi_statistics.c:438
 #, c-format
 msgid "Real user %s without socket?\n"
 msgstr ""
 
-#: src/pi_statistics.c:447
+#: src/pi_statistics.c:451
 #, c-format
 msgid " %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:458
+#: src/pi_statistics.c:462
 msgid " None.\n"
 msgstr ""
 
-#: src/pi_statistics.c:462
+#: src/pi_statistics.c:466
 #, c-format
 msgid ""
 "\n"
@@ -1115,110 +1084,110 @@ msgid ""
 " Average bytes to write %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:474
+#: src/pi_statistics.c:478
 msgid "Warning: DEBUG build, cpu measurements higher as normal.\n"
 msgstr ""
 
-#: src/pi_statistics.c:484
+#: src/pi_statistics.c:487
 #, c-format
 msgid "Total IPs remembered (roughly last %us): %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:497
+#: src/pi_statistics.c:499
 msgid "Memory Usage:\n"
 msgstr ""
 
-#: src/pi_statistics.c:505
-msgid "GNU LibC memory statistics:\n"
-msgstr ""
-
-#: src/pi_statistics.c:506
-#, c-format
-msgid " Total heap     : %lu (%s)\n"
-msgstr ""
-
 #: src/pi_statistics.c:507
-#, c-format
-msgid " # Free chunks    : %lu\n"
+msgid "GNU LibC memory statistics:\n"
 msgstr ""
 
 #: src/pi_statistics.c:508
 #, c-format
-msgid " # Fastbin blocks : %lu\n"
+msgid " Total heap     : %lu (%s)\n"
 msgstr ""
 
 #: src/pi_statistics.c:509
 #, c-format
-msgid " Total alloced space : %lu (%s)\n"
+msgid " # Free chunks    : %lu\n"
+msgstr ""
+
+#: src/pi_statistics.c:510
+#, c-format
+msgid " # Fastbin blocks : %lu\n"
 msgstr ""
 
 #: src/pi_statistics.c:511
 #, c-format
-msgid " Total free space    : %lu (%s)\n"
+msgid " Total alloced space : %lu (%s)\n"
 msgstr ""
 
 #: src/pi_statistics.c:513
 #, c-format
+msgid " Total free space    : %lu (%s)\n"
+msgstr ""
+
+#: src/pi_statistics.c:515
+#, c-format
 msgid " keepcost : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:514
+#: src/pi_statistics.c:516
 #, c-format
 msgid " # MMAP regions : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:515
+#: src/pi_statistics.c:517
 #, c-format
 msgid ""
 " MMAP space     : %lu (%s)\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:519
+#: src/pi_statistics.c:521
 #, c-format
 msgid "%s stats:\n"
 msgstr ""
 
-#: src/pi_statistics.c:520
+#: src/pi_statistics.c:522
 #, c-format
 msgid " Buffering memory: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:521
+#: src/pi_statistics.c:523
 #, c-format
 msgid " Cachelist size: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:532
+#: src/pi_statistics.c:535
 #, c-format
 msgid "Booted at %.*s, up %lu seconds (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:616
+#: src/pi_statistics.c:620
 msgid "Show buffer stats."
 msgstr ""
 
-#: src/pi_statistics.c:617 src/pi_statistics.c:618
+#: src/pi_statistics.c:621 src/pi_statistics.c:622
 msgid "Show cache stats."
 msgstr ""
 
-#: src/pi_statistics.c:619
+#: src/pi_statistics.c:623
 msgid "Show cpu usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:621
+#: src/pi_statistics.c:625
 msgid "Show nmdc protocol stats. Experts only."
 msgstr ""
 
-#: src/pi_statistics.c:622
+#: src/pi_statistics.c:626
 msgid "Show memory usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:623
+#: src/pi_statistics.c:627
 msgid "Show connection stats."
 msgstr ""
 
-#: src/pi_statistics.c:624
+#: src/pi_statistics.c:628
 msgid "Show uptime."
 msgstr ""
 
@@ -1336,83 +1305,83 @@ msgstr ""
 msgid "Lists available chatrooms."
 msgstr ""
 
-#: src/pi_hublist.c:138
+#: src/pi_hublist.c:140
 #, c-format
 msgid "Hublist update ERROR: %s: socket: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:148 src/pi_hublist.c:151
+#: src/pi_hublist.c:150 src/pi_hublist.c:153
 #, c-format
 msgid "Hublist update ERROR: %s: connect: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:183
+#: src/pi_hublist.c:185
 #, c-format
 msgid "Hublist update ERROR: %s: read: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:196
+#: src/pi_hublist.c:198
 #, c-format
 msgid "Hublist update ERROR: %s: getsockname: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:216
+#: src/pi_hublist.c:218
 #, c-format
 msgid "Hublist update ERROR: %s: illegal input %.*s\n"
 msgstr ""
 
-#: src/pi_hublist.c:267
+#: src/pi_hublist.c:269
 #, c-format
 msgid "Hublist update ERROR: %s: write: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:277
+#: src/pi_hublist.c:279
 #, c-format
 msgid "Registered at hublist %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:307
+#: src/pi_hublist.c:309
 #, c-format
 msgid "Hublist update ERROR: %s: %s.\n"
 msgstr ""
 
-#: src/pi_hublist.c:327
+#: src/pi_hublist.c:329
 #, c-format
 msgid "Hublist update ERROR: %s: Timed out.\n"
 msgstr ""
 
-#: src/pi_hublist.c:355
+#: src/pi_hublist.c:357
 msgid "Errors during hublist update:\n"
 msgstr ""
 
-#: src/pi_hublist.c:404
+#: src/pi_hublist.c:408
 msgid "list of hublist addresses."
 msgstr ""
 
-#: src/pi_hublist.c:406
+#: src/pi_hublist.c:410
 msgid "Interval of hublist updates."
 msgstr ""
 
-#: src/pi_hublist.c:408
+#: src/pi_hublist.c:412
 msgid ""
 "Do not report errors when hublist registration fails (Use with caution!)."
 msgstr ""
 
-#: src/pi_hublist.c:410
+#: src/pi_hublist.c:414
 msgid "Register at hublists."
 msgstr ""
 
-#: src/pi_lua.c:1418 src/pi_lua.c:1599 src/pi_lua.c:2113
+#: src/pi_lua.c:1421 src/pi_lua.c:1610 src/pi_lua.c:2124
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr ""
 
-#: src/pi_lua.c:1885 src/pi_lua.c:1910
+#: src/pi_lua.c:1896 src/pi_lua.c:1921
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr ""
 
-#: src/pi_lua.c:2010
+#: src/pi_lua.c:2021
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -1420,39 +1389,39 @@ msgid ""
 "Scripts count/peak: %d/%d"
 msgstr ""
 
-#: src/pi_lua.c:2014
+#: src/pi_lua.c:2025
 msgid ""
 "\n"
 "No LUA scripts running.\n"
 msgstr ""
 
-#: src/pi_lua.c:2018
+#: src/pi_lua.c:2029
 msgid ""
 "\n"
 "Running LUA scripts:\n"
 msgstr ""
 
-#: src/pi_lua.c:2033 src/pi_lua.c:2051
+#: src/pi_lua.c:2044 src/pi_lua.c:2062
 #, c-format
 msgid "Usage: %s <script>"
 msgstr ""
 
-#: src/pi_lua.c:2038
+#: src/pi_lua.c:2049
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2040
+#: src/pi_lua.c:2051
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr ""
 
-#: src/pi_lua.c:2056
+#: src/pi_lua.c:2067
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2058
+#: src/pi_lua.c:2069
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr ""
@@ -1621,133 +1590,133 @@ msgid ""
 " Buffering        %lu\n"
 msgstr ""
 
-#: src/pi_user.c:108
+#: src/pi_user.c:107
 #, c-format
 msgid "Sorry, your class has a maximum of %u hubs.\n"
 msgstr ""
 
-#: src/pi_user.c:113
+#: src/pi_user.c:112
 #, c-format
 msgid "Sorry, your class has a minimum of %u hubs.\n"
 msgstr ""
 
-#: src/pi_user.c:118
+#: src/pi_user.c:117
 #, c-format
 msgid "Sorry, your class has a maximum of %u slots.\n"
 msgstr ""
 
-#: src/pi_user.c:123
+#: src/pi_user.c:122
 #, c-format
 msgid "Sorry, your class has a minimum of %u slots.\n"
 msgstr ""
 
-#: src/pi_user.c:140 src/pi_user.c:146 src/pi_user.c:153
+#: src/pi_user.c:139 src/pi_user.c:145 src/pi_user.c:152
 #, c-format
 msgid "Sorry, your class has a minimum share of %s.\n"
 msgstr ""
 
-#: src/pi_user.c:172
+#: src/pi_user.c:171
 #, c-format
 msgid "Sorry, this client is not accepted because: %*s\n"
 msgstr ""
 
-#: src/pi_user.c:183
+#: src/pi_user.c:182
 #, c-format
 msgid "Sorry, your login is not accepted from this IP (%s)"
 msgstr ""
 
-#: src/pi_user.c:215
+#: src/pi_user.c:214
 msgid "Sorry, the hub is full. It cannot accept more users from your class.\n"
 msgstr ""
 
-#: src/pi_user.c:273 src/pi_user.c:302
+#: src/pi_user.c:272 src/pi_user.c:301
 #, c-format
 msgid "Usage: %s <nick> <ip/network>"
 msgstr ""
 
-#: src/pi_user.c:282
+#: src/pi_user.c:281
 #, c-format
 msgid "Please do not forget to assign the \"sourceverify\" right to user %s\n"
 msgstr ""
 
-#: src/pi_user.c:286
+#: src/pi_user.c:285
 #, c-format
 msgid "User %s is now allowed to log in from %s\n"
 msgstr ""
 
-#: src/pi_user.c:289 src/pi_user.c:317
+#: src/pi_user.c:288 src/pi_user.c:316
 #, c-format
 msgid "Sorry, \"%s\" is not a recognisable IP address or network."
 msgstr ""
 
-#: src/pi_user.c:310
+#: src/pi_user.c:309
 #, c-format
 msgid "User %s is no longer allowed to log in from %s\n"
 msgstr ""
 
-#: src/pi_user.c:313
+#: src/pi_user.c:312
 #, c-format
 msgid "Could not find source restriction \"%s\" for nick %s\n"
 msgstr ""
 
-#: src/pi_user.c:336
+#: src/pi_user.c:335
 #, c-format
 msgid "Allow user %s from:\n"
 msgstr ""
 
-#: src/pi_user.c:340
+#: src/pi_user.c:339
 #, c-format
 msgid " Source %s\n"
 msgstr ""
 
-#: src/pi_user.c:344
+#: src/pi_user.c:343
 msgid " None."
 msgstr ""
 
-#: src/pi_user.c:358
+#: src/pi_user.c:357
 #, c-format
 msgid ""
 "Usage: !%s <clienttag> <minversion> <maxversion> <reason>\n"
 "Use 0 for version if unimportant."
 msgstr ""
 
-#: src/pi_user.c:377
+#: src/pi_user.c:376
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) added to banned list because: %s\n"
 msgstr ""
 
-#: src/pi_user.c:391
+#: src/pi_user.c:390
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) because: %.*s\n"
 msgstr ""
 
-#: src/pi_user.c:397
+#: src/pi_user.c:396
 msgid "No clients banned."
 msgstr ""
 
-#: src/pi_user.c:410
+#: src/pi_user.c:409
 #, c-format
 msgid "Usage: !%s <clientname> <min> <max>\n"
 msgstr ""
 
-#: src/pi_user.c:418
+#: src/pi_user.c:417
 #, c-format
 msgid "Client \"%s\" removed from banlist\n"
 msgstr ""
 
-#: src/pi_user.c:420
+#: src/pi_user.c:419
 #, c-format
 msgid "Client \"%s\" not found in banlist\n"
 msgstr ""
 
-#: src/pi_user.c:462
+#: src/pi_user.c:461
 #, c-format
 msgid ""
 "WARNING: resourcelimit for this process allows a absolute maximum of %lu "
 "users, currently %lu are configured.\n"
 msgstr ""
 
-#: src/pi_user.c:472
+#: src/pi_user.c:471
 #, c-format
 msgid ""
 "WARNING: You are using an Aquila version based on select(). This limits the "
@@ -1755,129 +1724,129 @@ msgid ""
 "your hub.\n"
 msgstr ""
 
-#: src/pi_user.c:479
+#: src/pi_user.c:478
 msgid ""
 "WARNING: You are using an Aquila version based on poll(). This limits the "
 "performance of your hub with larger sizes. Please consider moving to kernel "
 "version 2.6 and a recent glibc.\n"
 msgstr ""
 
-#: src/pi_user.c:487
+#: src/pi_user.c:486
 msgid ""
 "WARNING: userlimit.registered equals userlimit.op. userlimit.registered "
 "includes the ops (since they are registered too): setting them equal means "
 "that you only allow OPs, but not normal registered users.\n"
 msgstr ""
 
-#: src/pi_user.c:521
+#: src/pi_user.c:520
 msgid "Maximum unregistered users."
 msgstr ""
 
-#: src/pi_user.c:522
+#: src/pi_user.c:521
 msgid "Maximum registered users."
 msgstr ""
 
-#: src/pi_user.c:523
+#: src/pi_user.c:522
 msgid "Reserve place for this many ops in the registered users."
 msgstr ""
 
-#: src/pi_user.c:527
+#: src/pi_user.c:526
 msgid "Minimum share requirement for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:528
+#: src/pi_user.c:527
 msgid "Minimum share requirement for registered users."
 msgstr ""
 
-#: src/pi_user.c:529
+#: src/pi_user.c:528
 msgid "Minimum share requirement for OPS"
 msgstr ""
 
-#: src/pi_user.c:531
+#: src/pi_user.c:530
 msgid "Minimum hubs for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:532
+#: src/pi_user.c:531
 msgid "Maximum hubs for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:533
+#: src/pi_user.c:532
 msgid "Minimum slots for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:534
+#: src/pi_user.c:533
 msgid "Maximum slots for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:535
+#: src/pi_user.c:534
 msgid "Minimum hubs/slot ratio for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:537
+#: src/pi_user.c:536
 msgid "Minimum hubs for registered users."
 msgstr ""
 
-#: src/pi_user.c:538
+#: src/pi_user.c:537
 msgid "Maximum hubs for registered users."
 msgstr ""
 
-#: src/pi_user.c:539
+#: src/pi_user.c:538
 msgid "Minimum slots for registered users."
 msgstr ""
 
-#: src/pi_user.c:540
+#: src/pi_user.c:539
 msgid "Maximum slots for registered users."
 msgstr ""
 
-#: src/pi_user.c:541
+#: src/pi_user.c:540
 msgid "Minimum hubs/slot ratio for registered users."
 msgstr ""
 
-#: src/pi_user.c:543
+#: src/pi_user.c:542
 msgid "Minimum hubs for Operators."
 msgstr ""
 
-#: src/pi_user.c:544
+#: src/pi_user.c:543
 msgid "Maximum hubs for Operators."
 msgstr ""
 
-#: src/pi_user.c:545
+#: src/pi_user.c:544
 msgid "Minimum slots for Operators."
 msgstr ""
 
-#: src/pi_user.c:546
+#: src/pi_user.c:545
 msgid "Maximum slots for Operators."
 msgstr ""
 
-#: src/pi_user.c:547
+#: src/pi_user.c:546
 msgid "Minimum hubs/slot ratio for Operators."
 msgstr ""
 
-#: src/pi_user.c:558
+#: src/pi_user.c:557
 msgid "Show logged in user counts."
 msgstr ""
 
-#: src/pi_user.c:560
+#: src/pi_user.c:559
 msgid "Ban a client."
 msgstr ""
 
-#: src/pi_user.c:561
+#: src/pi_user.c:560
 msgid "List client bans."
 msgstr ""
 
-#: src/pi_user.c:562
+#: src/pi_user.c:561
 msgid "Unban a client."
 msgstr ""
 
-#: src/pi_user.c:564
+#: src/pi_user.c:563
 msgid "Add a source IP restriction for a user."
 msgstr ""
 
-#: src/pi_user.c:565
+#: src/pi_user.c:564
 msgid "Remove a source IP restriction for a user."
 msgstr ""
 
-#: src/pi_user.c:566
+#: src/pi_user.c:565
 msgid "Show source IP restrictions for a user."
 msgstr ""
 

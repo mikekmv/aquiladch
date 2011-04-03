@@ -67,6 +67,8 @@ extern struct timeval boottime;
 plugin_t *plugin_stats = NULL;
 statistics_t stats;
 
+static server_t *server;
+
 #define PROCSTAT_LEVELS 3
 #define PROCSTAT_MEASUREMENTS 60
 
@@ -250,20 +252,21 @@ unsigned int bandwidth_measure ()
   stat_bw_level_t *lvl, *src;
   unsigned long in, out;
 
-
   gettimeofday (&now, NULL);
 
   /* preparing values */
   timersub (&now, &stats.oldstamp, &diff);
-  if (hubstats.TotalBytesSend >= stats.oldcounters.TotalBytesSend) {
-    out = hubstats.TotalBytesSend - stats.oldcounters.TotalBytesSend;
+  if (server->hubstats.TotalBytesSend >= stats.oldcounters.TotalBytesSend) {
+    out = server->hubstats.TotalBytesSend - stats.oldcounters.TotalBytesSend;
   } else {
-    out = ((ULONG_MAX - stats.oldcounters.TotalBytesSend) + 1 + hubstats.TotalBytesSend);
+    out = ((ULONG_MAX - stats.oldcounters.TotalBytesSend) + 1 + server->hubstats.TotalBytesSend);
   }
-  if (hubstats.TotalBytesReceived >= stats.oldcounters.TotalBytesReceived) {
-    in = hubstats.TotalBytesReceived - stats.oldcounters.TotalBytesReceived;
+  if (server->hubstats.TotalBytesReceived >= stats.oldcounters.TotalBytesReceived) {
+    in = server->hubstats.TotalBytesReceived - stats.oldcounters.TotalBytesReceived;
   } else {
-    in = ((ULONG_MAX - stats.oldcounters.TotalBytesReceived) + 1 + hubstats.TotalBytesReceived);
+    in =
+      ((ULONG_MAX - stats.oldcounters.TotalBytesReceived) + 1 +
+       server->hubstats.TotalBytesReceived);
   }
 
   /* creating new probe */
@@ -278,7 +281,7 @@ unsigned int bandwidth_measure ()
   timeradd (&lvl->TotalTime, &diff, &lvl->TotalTime);
 
   /* storing old data */
-  stats.oldcounters = hubstats;
+  stats.oldcounters = server->hubstats;
   stats.oldstamp = now;
 
   /* handle all the other levels. */
@@ -317,8 +320,8 @@ unsigned int bandwidth_printf (buffer_t * buf)
   stat_bw_level_t *lvl;
   stat_bw_elem_t *elem;
 
-  bf_printf (buf, _("Total traffic since boot: In %lu, Out %lu\n"), hubstats.TotalBytesReceived,
-	     hubstats.TotalBytesSend);
+  bf_printf (buf, _("Total traffic since boot: In %lu, Out %lu\n"),
+	     server->hubstats.TotalBytesReceived, server->hubstats.TotalBytesSend);
 
   lvl = &stats.bandwidth[0];
   elem = &lvl->probes[lvl->current ? lvl->current - 1 : (STATS_NUM_MEASUREMENTS - 1)];
@@ -354,16 +357,16 @@ unsigned long pi_statistics_event_cacheflush (plugin_user_t * user, void *dummy,
 }
 
 
-extern cache_t cache;
-
 #define bfz_used(buf) (buf ? bf_used(buf) : 0)
 
 #define add_elem(buf, name, now) { bf_printf (buf, #name ": count: %lu size: %lu, next: %ld\n", name.messages.count, name.length, name.timertype.period + name.timer.timestamp - now); totalmem += name.length;totallines += name.messages.count; }
 unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * output, void *dummy,
 					       unsigned int argc, unsigned char **argv)
 {
+/* FIXME
   unsigned long totalmem = 0;
   unsigned long totallines = 0;
+
 
   add_elem (output, cache.chat, now.tv_sec);
   add_elem (output, cache.myinfo, now.tv_sec);
@@ -391,6 +394,8 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
   bf_printf (output, _("  Nicklist length %lu\n"), bf_used (cache.nicklist));
   bf_printf (output, _("  Infolist length %lu\n"), bf_used (cache.infolist));
 #endif
+
+*/
   return 0;
 }
 
@@ -404,34 +409,33 @@ unsigned long pi_statistics_handler_statbw (plugin_user_t * user, buffer_t * out
   return 0;
 }
 
-#include "hub.h"
 #include "nmdc_local.h"
-extern unsigned long buffering;
 unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t * output,
 						void *dummy, unsigned int argc,
 						unsigned char **argv)
 {
   client_t *cl;
-  user_t *u;
+  nmdc_user_t *u;
   unsigned long count;
   unsigned long long bufs, total, rest;
 
-  bf_printf (output, _("Allocated size: %llu (max: %llu)\n"), bufferstats.size, bufferstats.peak);
-  bf_printf (output, _("Allocated buffers: %lu (max %lu)\n"), bufferstats.count, bufferstats.max);
-  bf_printf (output, _(" Users having buffered output: %lu\n"), buffering);
+  bf_printf (output, _("Allocated size: %llu (max: %llu)\n)"), bufferstats.size, bufferstats.peak);
+  bf_printf (output, _("Allocated buffers: %lu (max %lu)\n)"), bufferstats.count, bufferstats.max);
+  bf_printf (output, _(" Users having buffered output: %lu, buffering %lu\n)"), server->buffering,
+	     server->buf_mem);
 
   count = 0;
   bufs = 0;
   total = 0;
   rest = 0;
   bf_printf (output, _("\nBuffering clients:\n"));
-  for (u = userlist; u; u = u->next) {
-    cl = (client_t *) u->parent;
+  for (u = userlist; u; u = (nmdc_user_t *) u->user.next) {
+    cl = (client_t *) u->user.parent;
 
     if (!cl) {
       if (u->state == PROTO_STATE_VIRTUAL)
 	continue;
-      bf_printf (output, _("Real user %s without socket?\n"), u->nick);
+      bf_printf (output, _("Real user %s without socket?\n"), u->user.nick);
       continue;
     }
     if (!cl->outgoing.count)
@@ -445,7 +449,7 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
     }
 
     bf_printf (output, _(" %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"),
-	       u->nick, time_print (now.tv_sec - u->joinstamp), cl->outgoing.count,
+	       u->user.nick, time_print (now.tv_sec - u->user.joinstamp), cl->outgoing.count,
 	       cl->outgoing.size, cl->offset, cl->credit);
     bufs += cl->outgoing.count;
     total += cl->outgoing.size;
@@ -477,17 +481,15 @@ unsigned long pi_statistics_handler_statcpu (plugin_user_t * user, buffer_t * ou
 }
 
 #include "iplist.h"
-extern iplist_t lastlist;
 unsigned long pi_statistics_handler_statconn (plugin_user_t * user, buffer_t * output, void *dummy,
 					      unsigned int argc, unsigned char **argv)
 {
   bf_printf (output, _("Total IPs remembered (roughly last %us): %lu\n"), iplist_interval,
-	     lastlist.count);
+	     server->lastlist.count);
   return 0;
 }
 
 /* FIXME read this from proc.*/
-extern unsigned long buf_mem;
 extern unsigned long cachelist_count;
 
 unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * output, void *dummy,
@@ -517,8 +519,9 @@ unsigned long pi_statistics_handler_statmem (plugin_user_t * user, buffer_t * ou
 #endif
 
   bf_printf (output, _("%s stats:\n"), HUBSOFT_NAME);
-  bf_printf (output, _(" Buffering memory: %lu\n"), buf_mem);
+  bf_printf (output, _(" Buffering memory: %lu\n"), server->buf_mem);
   bf_printf (output, _(" Cachelist size: %lu\n"), cachelist_count);
+
   return 0;
 }
 
@@ -535,7 +538,6 @@ unsigned long pi_statistics_handler_uptime (plugin_user_t * user, buffer_t * out
   return 0;
 }
 
-#include "nmdc_protocol.h"
 unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * output, void *dummy,
 					      unsigned int argc, unsigned char **argv)
 {
@@ -599,8 +601,10 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   return 0;
 }
 
-int pi_statistics_init ()
+int pi_statistics_init (plugin_manager_t * pm, server_t * s)
 {
+
+  server = s;
 
   memset (&procstats, 0, sizeof (procstats));
   memset (&current, 0, sizeof (current));
@@ -609,7 +613,7 @@ int pi_statistics_init ()
 
   cpu_init ();
 
-  plugin_stats = plugin_register ("stats");
+  plugin_stats = plugin_register (pm, "stats");
   plugin_request (plugin_stats, PLUGIN_EVENT_CACHEFLUSH, &pi_statistics_event_cacheflush);
 
   command_register ("statbuffer", &pi_statistics_handler_statbuffer, CAP_CONFIG,

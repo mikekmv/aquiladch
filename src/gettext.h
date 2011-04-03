@@ -19,8 +19,8 @@
 #ifndef _LIBGETTEXT_H
 #define _LIBGETTEXT_H 1
 
-#define __(String) gettext (String)
-#define _(String) gettext_noop (String)
+#define __(String) (char *)gettext (String)
+#define _(String) (char *)gettext_noop (String)
 
 /* NLS can be disabled through the configure --disable-nls option.  */
 #if ENABLE_NLS

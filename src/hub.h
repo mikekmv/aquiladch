@@ -29,8 +29,12 @@
 #include "proto.h"
 #include "stringlist.h"
 #include "banlist.h"
+#include "iplist.h"
 
 /* local timeouts */
+
+#define HUB_TIMEOUT_INIT	 5000
+#define HUB_TIMEOUT_ONLINE	30000
 
 #define HUB_STATE_NORMAL	1
 #define HUB_STATE_BUFFERING	2
@@ -41,11 +45,29 @@ typedef struct hub_statitics {
   unsigned long TotalBytesReceived;
 } hub_statistics_t;
 
-extern hub_statistics_t hubstats;
-
 /*
  *  server private context.
  */
+
+typedef struct server {
+  unsigned long buffering;
+  unsigned long buf_mem;
+
+  esocket_handler_t *h;
+
+  /* banlist */
+  banlist_t hardbanlist;
+  iplist_t  lastlist;
+
+  unsigned int es_type_server, es_type_listen;
+
+  hub_statistics_t hubstats;
+} server_t;
+
+typedef struct listener {
+  proto_t  *proto;
+  server_t *server;
+} listener_t;
 
 typedef struct client {
   proto_t *proto;
@@ -55,22 +77,17 @@ typedef struct client {
   unsigned long offset, credit;
   unsigned int state;
 
-  user_t *user;
+  server_t *server;
+  
+  void *user;
 } client_t;
 
-extern unsigned long users;
-
-/*  banlists */
-extern unsigned long buffering;
-extern banlist_t hardbanlist, softbanlist;
-//extern banlist_nick_t nickbanlist;
-
-extern int server_init ();
-extern int server_setup (esocket_handler_t *);
+extern server_t *server_init (unsigned int hint);
+extern int server_setup (server_t *);
 extern int server_disconnect_user (client_t *, char *);
 extern int server_write (client_t *, buffer_t *);
 extern int server_write_credit (client_t *, buffer_t *);
 extern int server_settimeout (client_t * cl, unsigned long timeout);
-extern int server_add_port (esocket_handler_t * h, proto_t * proto,  unsigned long address, int port);
+extern int server_add_port (server_t *, proto_t * proto,  unsigned long address, int port);
 
 #endif /* _HUB_H_ */
