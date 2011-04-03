@@ -231,7 +231,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
   local->e = '\0';
   d = local->s + (c - token->s);
 
-  while (*c && (argc < (COMMAND_MAX_ARGS - 1))) {
+  while (*c && (argc < (COMMAND_MAX_ARGS - 2))) {
     argv[argc] = d;
     /* if argument starts with a ' or a " include everything until next matching quote. */
     if ((*c == '\'') || (*c == '\"')) {
@@ -273,7 +273,7 @@ unsigned long cmd_parser (plugin_user_t * user, plugin_user_t * target, void *pr
     goto leave;
 
   /* string wasn't completely parsed, but we are running out of argv spaces. all the rest in one argument. */
-  if (*c && (argc == (COMMAND_MAX_ARGS - 1))) {
+  if (*c && (argc == (COMMAND_MAX_ARGS - 2))) {
     argv[argc++] = d;
     strncpy (d, c, bf_unused (local));
   }

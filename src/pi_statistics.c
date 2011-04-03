@@ -387,7 +387,7 @@ unsigned long pi_statistics_handler_statcache (plugin_user_t * user, buffer_t * 
   bf_printf (output, _("  Nicklist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"),
 	     bf_used (cache.nicklist), bfz_used (cache.nicklistzpipe),
 	     bfz_used (cache.nicklistzline), cache.length_estimate, cache.nicklist->size);
-  bf_printf (output, _("  Infolist length %lu (zpipe %lu, zline %lu) [Estiamte %lu, Size %lu]\n"),
+  bf_printf (output, _("  Infolist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"),
 	     bf_used (cache.infolist), bfz_used (cache.infolistzpipe),
 	     bfz_used (cache.infolistzline), cache.length_estimate_info, cache.infolist->size);
 #else

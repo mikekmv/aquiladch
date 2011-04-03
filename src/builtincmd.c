@@ -141,7 +141,7 @@ unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *p
 {
   unsigned int i;
   buffer_t *buf;
-  plugin_user_t *tgt = NULL;
+  plugin_user_t *tgt = NULL, *prev = NULL;
 
   buf = bf_alloc (10240);
   *buf->e = '\0';
@@ -157,8 +157,11 @@ unsigned long handler_shutdown (plugin_user_t * user, buffer_t * output, void *p
   }
 
   /* send to all users */
-  while (plugin_user_next (&tgt))
-    plugin_user_sayto (user, tgt, buf, 1);
+  while (plugin_user_next (&tgt)) {
+    prev = tgt;
+    if (plugin_user_sayto (user, tgt, buf, 1) < 0)
+      tgt = prev;
+  }
 
   bf_free (buf);
 
@@ -180,7 +183,7 @@ unsigned long handler_massall (plugin_user_t * user, buffer_t * output, void *pr
 {
   unsigned int i;
   buffer_t *buf;
-  plugin_user_t *tgt = NULL;
+  plugin_user_t *tgt = NULL, *prev = NULL;
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <message>"), argv[0]);
@@ -198,8 +201,12 @@ unsigned long handler_massall (plugin_user_t * user, buffer_t * output, void *pr
   /* send to all users */
   i = 0;
   while (plugin_user_next (&tgt)) {
-    plugin_user_priv (NULL, tgt, user, buf, 1);
-    i++;
+    prev = tgt;
+    if (plugin_user_priv (NULL, tgt, user, buf, 1) < 0) {
+      tgt = prev;
+    } else {
+      i++;
+    }
   }
   bf_free (buf);
 
@@ -1371,7 +1378,7 @@ unsigned long handler_usergroup (plugin_user_t * user, buffer_t * output, void *
   }
 
   if (!(group = account_type_find (argv[2]))) {
-    bf_printf (output, _("User %s not found."), argv[2]);
+    bf_printf (output, _("Group %s does not exist."), argv[2]);
     return 0;
   }
 

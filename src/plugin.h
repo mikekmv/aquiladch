@@ -107,7 +107,7 @@ extern plugin_event_handler_t *plugin_robot_set_handler (plugin_user_t * robot,
 
 extern int plugin_parse (plugin_user_t *, buffer_t *);
 
-extern unsigned int plugin_user_next (plugin_user_t ** user);
+extern int plugin_user_next (plugin_user_t ** user);
 
 /* user management */
 extern plugin_user_t *plugin_user_find (unsigned char *name);
@@ -115,52 +115,52 @@ extern plugin_user_t *plugin_user_find_ip (plugin_user_t *last, unsigned long ip
 extern plugin_user_t *plugin_user_find_net (plugin_user_t *last, unsigned long ip, unsigned long net);
 extern buffer_t * plugin_user_getmyinfo (plugin_user_t *user);
 
-extern unsigned int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message);
-extern unsigned int plugin_user_drop (plugin_user_t * user, buffer_t * message);
-extern unsigned int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+extern int plugin_user_kick (plugin_user_t * op, plugin_user_t * user, buffer_t * message);
+extern int plugin_user_drop (plugin_user_t * user, buffer_t * message);
+extern int plugin_user_banip (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 				       unsigned long period);
-extern unsigned int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+extern int plugin_user_banip_hard (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 					    unsigned long period);
-extern unsigned int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+extern int plugin_user_bannick (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 					 unsigned long period);
-extern unsigned int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
+extern int plugin_user_ban (plugin_user_t * op, plugin_user_t * user, buffer_t * message,
 				     unsigned long period);
-extern unsigned int plugin_user_unban (plugin_user_t * user);
+extern int plugin_user_unban (plugin_user_t * user);
 
-extern unsigned int plugin_user_raw (plugin_user_t * tgt, buffer_t * message);
-extern unsigned int plugin_user_raw_all (buffer_t * message);
+extern int plugin_user_raw (plugin_user_t * tgt, buffer_t * message);
+extern int plugin_user_raw_all (buffer_t * message);
 
-extern unsigned int plugin_user_say (plugin_user_t * src, buffer_t * message);
-extern unsigned int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target,
+extern int plugin_user_say (plugin_user_t * src, buffer_t * message);
+extern int plugin_user_sayto (plugin_user_t * src, plugin_user_t * target,
 				       buffer_t * message,int direct);
-extern unsigned int plugin_user_priv (plugin_user_t * src, plugin_user_t * target,
+extern int plugin_user_priv (plugin_user_t * src, plugin_user_t * target,
 				      plugin_user_t * source, buffer_t * message, int direct);
-extern unsigned int plugin_user_printf (plugin_user_t * user, const char *format, ...);
-extern unsigned int plugin_user_redirect (plugin_user_t * user, buffer_t * message);
-extern unsigned int plugin_user_forcemove (plugin_user_t * user, unsigned char *destination,
+extern int plugin_user_printf (plugin_user_t * user, const char *format, ...);
+extern int plugin_user_redirect (plugin_user_t * user, buffer_t * message);
+extern int plugin_user_forcemove (plugin_user_t * user, unsigned char *destination,
 					   buffer_t * message);
-extern unsigned int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
-extern unsigned int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
-extern unsigned int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
-extern unsigned int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message, unsigned long period);
-extern unsigned int plugin_unban (unsigned char *nick);
-extern unsigned int plugin_unban_ip (unsigned long ip, unsigned long netmask);
-extern unsigned int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask);
-extern unsigned int plugin_unban_nick (unsigned char *nick);
-extern unsigned int plugin_user_zombie (plugin_user_t * user);
-extern unsigned int plugin_user_unzombie (plugin_user_t * user);
+extern int plugin_ban (plugin_user_t * op, unsigned char *nick, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
+extern int plugin_ban_ip (plugin_user_t * op, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
+extern int plugin_ban_ip_hard (plugin_user_t * op, unsigned long ip, unsigned long netmask, buffer_t * message, unsigned long period);
+extern int plugin_ban_nick (plugin_user_t * op, unsigned char *nick, buffer_t * message, unsigned long period);
+extern int plugin_unban (unsigned char *nick);
+extern int plugin_unban_ip (unsigned long ip, unsigned long netmask);
+extern int plugin_unban_ip_hard (unsigned long ip, unsigned long netmask);
+extern int plugin_unban_nick (unsigned char *nick);
+extern int plugin_user_zombie (plugin_user_t * user);
+extern int plugin_user_unzombie (plugin_user_t * user);
 
-extern unsigned int plugin_user_findnickban (buffer_t * buf, unsigned char *nick);
-extern unsigned int plugin_user_findipban (buffer_t * buf, unsigned long ip);
-extern unsigned int plugin_banlist (buffer_t *output);
+extern int plugin_user_findnickban (buffer_t * buf, unsigned char *nick);
+extern int plugin_user_findipban (buffer_t * buf, unsigned long ip);
+extern int plugin_banlist (buffer_t *output);
 
-extern unsigned int plugin_report (buffer_t * message);
-extern unsigned int plugin_perror (unsigned char *format, ...);
-extern unsigned int plugin_config_load ();
-extern unsigned int plugin_config_save (buffer_t * output);
+extern int plugin_report (buffer_t * message);
+extern int plugin_perror (unsigned char *format, ...);
+extern int plugin_config_load ();
+extern int plugin_config_save (buffer_t * output);
 
 extern unsigned long plugin_user_event (plugin_user_t * user, unsigned long event, void *token);
 
-extern unsigned int plugin_user_setrights (plugin_user_t *user, unsigned long cap, unsigned long ncap);
+extern int plugin_user_setrights (plugin_user_t *user, unsigned long cap, unsigned long ncap);
 
 #endif

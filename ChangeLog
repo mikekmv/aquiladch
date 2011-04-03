@@ -1,6 +1,11 @@
 This is the Aquila Changelog.
 
 0.1.10-pre3:
+	Rights parsing in lua now supports + and -. (Report FleetCommand)
+	Fix bug with too many args for commands (Report FleetCommand)
+	Correctly handle return value from plugin function.
+		Fixes !massall bug (Report maksalaatikko).
+	Correctly pass on return values from proto functions in plugin.c
 	Print message with configuration value is locked (req Malte).
 	Add some extra stats for !statcache
 	Fixed bug with buffer reuse. Don't do it.

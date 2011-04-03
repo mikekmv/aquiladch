@@ -1,4 +1,4 @@
-/*                                                                                                                                    
+/*
  *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -1524,6 +1524,7 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
   int retval = 0;
   unsigned char *c, *who, *where, *why;
   user_t *target;
+  buffer_t *buf;
 
   /* unsigned int port; */
   do {
@@ -1605,14 +1606,14 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
        }
      */
 
-    c = output->s;
-    bf_printf (output, "%s", why);
-    if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, output) != PLUGIN_RETVAL_CONTINUE) {
+    buf = bf_alloc (512);
+    bf_printf (buf, "%s", why);
+    if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, buf) != PLUGIN_RETVAL_CONTINUE) {
       proto_nmdc_user_warn (u, &now, __ ("Redirect refused.\n"));
-      output->s = c;
+      bf_free (buf);
       break;
     }
-    output->s = c;
+    bf_free (buf);
 
     /* move user.
      * this check will allow us to forcemove users that are not yet online.
@@ -1633,6 +1634,7 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
   int retval = 0;
   unsigned char *n, *c;
   user_t *target;
+  buffer_t *buf;
 
   do {
     if (!(u->rights & CAP_KICK)) {
@@ -1659,19 +1661,19 @@ int proto_nmdc_state_online_kick (user_t * u, token_t * tkn, buffer_t * output, 
     if (~u->rights & target->rights)
       break;
 
-    c = output->s;
-    bf_printf (output, _("You were kicked."));
-    banlist_add (&softbanlist, u->nick, target->nick, target->ipaddress, 0xFFFFFFFF, output,
+    buf = bf_alloc (512);
+    bf_printf (buf, _("You were kicked."));
+    banlist_add (&softbanlist, u->nick, target->nick, target->ipaddress, 0xFFFFFFFF, buf,
 		 now.tv_sec + config.defaultKickPeriod);
 
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_REDIRECT, NULL) != PLUGIN_RETVAL_CONTINUE) {
       proto_nmdc_user_warn (u, &now, __ ("Redirect refused.\n"));
-      output->s = c;
+      bf_free (buf);
       break;
     }
 
-    retval = proto_nmdc_user_forcemove (target, config.KickBanRedirect, output);
-    output->s = c;
+    retval = proto_nmdc_user_forcemove (target, config.KickBanRedirect, buf);
+    bf_free (buf);
   } while (0);
 
   return retval;

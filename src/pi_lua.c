@@ -124,13 +124,16 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 unsigned int parserights (unsigned char *caps, unsigned long *cap, unsigned long *ncap)
 {
   unsigned int j;
-  unsigned char *c, *tmp;
+  unsigned char *c, *d, *tmp;
 
   tmp = strdup (caps);
   c = strtok (tmp, " ,");
   while (c) {
+    d = c;
+    if ((*d == '-') || (*d == '+'))
+      d++;
     for (j = 0; Capabilities[j].name; j++) {
-      if (!strcasecmp (Capabilities[j].name, c)) {
+      if (!strcasecmp (Capabilities[j].name, d)) {
 	if (c[0] != '-') {
 	  *cap |= Capabilities[j].cap;
 	  *ncap &= ~Capabilities[j].cap;
@@ -1046,7 +1049,7 @@ int pi_lua_sendpmtoall (lua_State * lua)
 {
   unsigned int i;
   buffer_t *b;
-  plugin_user_t *tgt = NULL, *u;
+  plugin_user_t *tgt = NULL, *u, *prev = NULL;
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
 
@@ -1057,10 +1060,15 @@ int pi_lua_sendpmtoall (lua_State * lua)
 
   /* send to all users */
   i = 0;
+  prev = NULL;
   while (plugin_user_next (&tgt)) {
     /* weird is i set direct to 1 it doesn't work. */
-    plugin_user_priv (u, tgt, u, b, 0);
-    i++;
+    prev = tgt;
+    if (plugin_user_priv (u, tgt, u, b, 0) < 0) {
+      tgt = prev;
+    } else {
+      i++;
+    }
   }
   lua_pushnumber (lua, i);
 

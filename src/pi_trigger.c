@@ -283,7 +283,7 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
 				  unsigned int argc, unsigned char **argv)
 {
   trigger_rule_t *r;
-  plugin_user_t *tgt;
+  plugin_user_t *tgt, *prev;
 
   for (r = ruleListCommand.next; r != &ruleListCommand; r = r->next) {
     if (strcmp (argv[0], r->arg))
@@ -302,8 +302,12 @@ unsigned long pi_trigger_command (plugin_user_t * user, buffer_t * output, void 
 	  break;
 	case RULE_FLAG_PM | RULE_FLAG_BC:
 	  tgt = NULL;
-	  while (plugin_user_next (&tgt))
-	    plugin_user_priv (NULL, tgt, NULL, r->trigger->text, 0);
+	  prev = NULL;
+	  while (plugin_user_next (&tgt)) {
+	    prev = tgt;
+	    if (plugin_user_priv (NULL, tgt, NULL, r->trigger->text, 0) < 0)
+	      tgt = prev;
+	  }
 	  break;
 	default:
 	  bf_printf (output, "%.*s", bf_used (r->trigger->text), r->trigger->text->s);
