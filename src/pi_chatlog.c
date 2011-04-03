@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include "plugin.h"
 #include "user.h"
@@ -58,17 +59,39 @@ unsigned long pi_chatlog_handler_chat (plugin_user_t * user, void *priv, unsigne
 				       buffer_t * token)
 {
   unsigned char *c;
+  buffer_t *b;
+  time_t t;
+  struct tm *tmp;
 
+  /* ignore event if no chatlog is configured */
   if (!chatlogmax)
     return PLUGIN_RETVAL_CONTINUE;
 
+  /* skip any and all commands */
   for (c = token->s; *c && (*c != '>'); c++);
   c += 2;
   if ((*c == '!') || (*c == '+'))
     return PLUGIN_RETVAL_CONTINUE;
 
+  /* allocate buffer */
+  b = bf_alloc (bf_used (token) + 11);
+  b->e = '\0';
+
+  /* add timestamp */
+  time (&t);
+  tmp = localtime (&t);
+  b->e += strftime (b->s, b->size, "[%H:%M:%S]", tmp);
+
+  /* add chat message */
+  bf_printf (b, "%.*s", bf_used (token), token->s);
+
+  /* queue message */
   string_list_add (&chatlog, NULL, token);
 
+  /* release scratch buffer */
+  bf_free (b);
+
+  /* delete any overflow */
   while (chatlog.count > chatlogmax)
     string_list_del (&chatlog, chatlog.first);
 

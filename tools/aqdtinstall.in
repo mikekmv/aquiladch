@@ -353,6 +353,16 @@ fi
 echo "Aquila will be started at system boot and restarted should it stop."
 echo
 
+if  test ! -s ${HOME}/service/accounts.conf
+then
+	echo "Do not forget to create a hub owner account:"
+	echo 
+	echo "  aqpasswd ${HOME}/service/accounts.conf nick password"
+	echo 
+	echo "Please replace \"nick\" with the hubowner nick and \"password\" with his password."
+	echo
+fi
+
 if ! eval ${RCSTARTDETECT}
 then
 cat <<EOF
@@ -360,3 +370,4 @@ To start the service now, do:
         ${RCSTART}
 EOF
 fi
+

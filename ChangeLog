@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
 0.1.10-pre1:
+	Expanded build system to allow for runtime profile optimization.
+	Fixed Chatroom bug. Rooms with no settings are now not autojoin.
+	chatlog timestamps
 	!whoip now supports networks.
 	!shutdown now sends warning to all users.
 	Fixed random timeout problems.

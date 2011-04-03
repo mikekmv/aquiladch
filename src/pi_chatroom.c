@@ -302,9 +302,9 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
       bf_strcat (output, "\n");
     }
 
-    if (!(roomflags & (CHATROOM_FLAG_AUTOJOIN_REG | CHATROOM_FLAG_AUTOJOIN_RIGHTS)))
-      roomflags |= CHATROOM_FLAG_AUTOJOIN_NONE;
   }
+  if (!(roomflags & (CHATROOM_FLAG_AUTOJOIN_REG | CHATROOM_FLAG_AUTOJOIN_RIGHTS)))
+    roomflags |= CHATROOM_FLAG_AUTOJOIN_NONE;
 
   if (!chatroom_new
       (argv[1], roomrights, roomflags, argv[2],

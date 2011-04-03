@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.10-pre1-beta6]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.10-pre1-beta7]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/banlistclient.c])
@@ -21,6 +21,7 @@ then
 	case $GCC_VERSION in
 	3.3.*)  GCC_CFLAGS="-Wall -W -Wno-unused-parameter" ;;
 	3.4.*)	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter" ;;
+	4.1.*)	GCC_CFLAGS="" ;;
 	esac
 fi
 AC_SUBST(GCC_CFLAGS)
@@ -49,8 +50,10 @@ AC_ARG_ENABLE(profiler,
 		else
 			sCFLAGS="${sCFLAGS} -p"
 		fi
+		profiler=true;
 		 ;;
 	  no|false) 
+	  	profiler=false;
 	  	 ;;
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-profiler);;
 	esac],
@@ -60,9 +63,25 @@ AC_ARG_ENABLE(testcoverage,
 	AC_HELP_STRING([--enable-testcoverage],[Turn on test coverage logging (default OFF)]),
 	[case "$enableval" in
 	  yes|true) 
-	  	sCFLAGS="${sCFLAGS} -fprofile-arcs -ftest-coverage"
+	  	sCFLAGS="${sCFLAGS} -ggdb -O0 -fprofile-generate -ftest-coverage"
+	  	testcoverage=true;
+	  	 ;;
+	  no|false)
+		testcoverage=false; 
+	  	 ;;
+	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-testcoverage);;
+	esac],
+	[])
+
+AC_ARG_ENABLE(useprofile,
+	AC_HELP_STRING([--enable-useprofile],[Turn on optimization based on run-time profiles. This requires a previous run with option --enable-profiler. See FAQ. (default OFF)]),
+	[case "$enableval" in
+	  yes|true) 
+	  	sCFLAGS="${sCFLAGS} -fprofile-use"
+	  	useprofile=true;
 	  	 ;;
 	  no|false) 
+	  	useprofile=false;
 	  	 ;;
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-testcoverage);;
 	esac],
@@ -375,5 +394,30 @@ then
 else
 	echo "DISABLED"
 fi
+
+echo -n "   Profiler                                          "
+if test "${profiler}" = "true"
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   Test coverage                                     "
+if test "${testcoverage}" = "true"
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
+echo -n "   Compile with runtime profiler optimization        "
+if test "${useprofile}" = "true"
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
 echo "-------------------------------------------------------------------------------"
 
