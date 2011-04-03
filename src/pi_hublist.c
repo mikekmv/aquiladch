@@ -343,8 +343,15 @@ int pi_hublist_handle_error (esocket_t * s)
 
 int pi_hublist_handle_timeout (esocket_t * s)
 {
-  buffer_t *buf = bf_alloc (10240);
+  buffer_t *buf;
   pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
+
+  if (s->state == SOCKSTATE_RESOLVING) {
+    esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
+    return 0;
+  }
+
+  buf = bf_alloc (10240);
 
   bf_printf (buf, _("Hublist update ERROR: %s: Timed out.\n"), ctx->address);
   if ((!pi_hublist_silent) || (ctx->flags & PI_HUBLIST_FLAGS_REPORT))

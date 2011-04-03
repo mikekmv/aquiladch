@@ -1017,8 +1017,6 @@ int esocket_bind (esocket_t * s, unsigned long address, unsigned int port)
 #ifdef USE_PTHREADDNS
 int esocket_connect (esocket_t * s, char *address, unsigned int port)
 {
-
-
   dns_resolve (s->handler->dns, s, address);
 
   /* abusing the error member to store the port. */
@@ -1033,6 +1031,9 @@ int esocket_connect_ai (esocket_t * s, struct addrinfo *address, unsigned int po
 {
   int err;
   struct sockaddr_in ai;
+
+  if (s->state != SOCKSTATE_RESOLVING)
+    return -1;
 
   if (!address) {
     s->error = ENXIO;
@@ -1649,8 +1650,10 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 
 #ifdef USE_PTHREADDNS
   /* dns stuff */
-  while (s = dns_retrieve (h->dns, &res))
-    esocket_connect_ai (s, res, s->error);
+  while ((s = dns_retrieve (h->dns, &res))) {
+    if (esocket_connect_ai (s, res, s->error) < 0)
+      freeaddrinfo (res);
+  }
 #endif
 
   /* timer stuff */
@@ -1781,8 +1784,10 @@ leave:
 
 #ifdef USE_PTHREADDNS
   /* dns stuff */
-  while (s = dns_retrieve (h->dns, &res))
-    esocket_connect_ai (s, res, s->error);
+  while ((s = dns_retrieve (h->dns, &res))) {
+    if (esocket_connect_ai (s, res, s->error) < 0)
+      freeaddrinfo (res);
+  }
 #endif
 
   /* timer stuff */
@@ -1902,8 +1907,10 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 
 #ifdef USE_PTHREADDNS
   /* dns stuff */
-  while (s = dns_retrieve (h->dns, &res))
-    esocket_connect_ai (s, res, s->error);
+  while ((s = dns_retrieve (h->dns, &res))) {
+    if (esocket_connect_ai (s, res, s->error) < 0)
+      freeaddrinfo (res);
+  }
 #endif
 
   /* timer stuff */

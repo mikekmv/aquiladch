@@ -35,9 +35,10 @@ void iplist_clean (iplist_t * list)
   iplistentry_t *entry, *prev, *next;
   time_t age;
 
+  age = now.tv_sec - iplist_interval;
+
   for (i = 0; i < IPLIST_HASHSIZE; i++) {
     hb = &(list->ht[i]);
-    age = now.tv_sec - iplist_interval;
 
     prev = NULL;
     entry = hb->first;

@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta1:
+0.1.11-pre1-beta2:
+	Fixed race in dns.c (don't free sockets that are still resolving).
 	Added dns.h to DISTFILES
 	Fixed hardban stuff.
 	Added blocked and allowed count.
