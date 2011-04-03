@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
 0.1.10-pre1:
+	Put a rate limit on $HubINFO
 	Expanded build system to allow for runtime profile optimization.
 	Fixed Chatroom bug. Rooms with no settings are now not autojoin.
 	chatlog timestamps

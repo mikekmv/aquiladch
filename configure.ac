@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.10-pre1-beta8]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.10-pre1-beta9]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/banlistclient.c])

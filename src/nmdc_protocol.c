@@ -1441,6 +1441,7 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
   int retval = 0;
   unsigned char *c, *who, *where, *why;
   user_t *target;
+  unsigned int port;
 
   do {
     if (!(u->rights & CAP_REDIRECT))
@@ -1507,6 +1508,24 @@ int proto_nmdc_state_online_opforcemove (user_t * u, token_t * tkn, buffer_t * o
       break;
     why = ++c;
 
+    /* check for port in where
+       c = where;
+       SKIPTOCHAR (c, why, ':');
+       if (!*c) {
+       c++;
+       if (!sscanf (c, "%u", &port)) {
+       DPRINTF ("BAD PORT in forcemove %s\n", c);
+       break;
+       }
+       if ((port < 1024) && (port != 411)) {
+       struct timeval now;
+       gettimeofday (&now, NULL);
+       proto_nmdc_user_warn (u, &now, "You are not allow to redirect users to that port.\n");
+       break;
+       }
+       }
+     */
+
     /* move user.
      * this check will allow us to forcemove users that are not yet online.
      * while not forcemoving robots.
@@ -1567,8 +1586,16 @@ int proto_nmdc_state_online_botinfo (user_t * u, token_t * tkn, buffer_t * outpu
 {
   int retval = 0;
   config_element_t *share, *slot, *hub, *users, *owner;
+  struct timeval now;
 
+  gettimeofday (&now, NULL);
   do {
+    /* we reuse the chat rate here. Should not affect pingers (since they don't chat) and
+     * prevents the need for yet another leaky bucket. */
+    if ((!(u->rights & CAP_SPAM)) && (!get_token (&rates.chat, &u->rate_chat, now.tv_sec))) {
+      proto_nmdc_user_warn (u, &now, "Think before you ask HubINFO and don't spam.\n");
+      break;
+    }
 
     share = config_find ("sharemin.unregistered");
     slot = config_find ("slot.unregistered.min");
