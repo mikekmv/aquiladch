@@ -79,7 +79,7 @@ typedef struct plugin_user {
   void *private;
 } plugin_user_t;
 
-extern cap_array_t plugin_supports[];
+extern flag_t plugin_supports[];
 
 /* callback */
 typedef unsigned long (plugin_event_handler_t) (plugin_user_t *, void *, unsigned long event,

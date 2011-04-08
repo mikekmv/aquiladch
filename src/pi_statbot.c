@@ -70,7 +70,16 @@ unsigned long pi_statbot_handler_statbot (plugin_user_t * user, buffer_t * outpu
 	     0L /* permbans */ ,
 	     0L /* timebans */ ,
 	     now.tv_sec - boottime.tv_sec /* uptime */ ,
-	     users_peak, users_alltimepeak, cpu_calculate (60) /* cpu usage */ ,
+#ifdef PLUGIN_USERS
+	     users_peak, users_alltimepeak,
+#else
+	     0, 0,
+#endif
+#ifdef PLUGIN_STATISTICS
+	     cpu_calculate (60) /* cpu usage */ ,
+#else
+	     0.0 /* cpu usage */ ,
+#endif
 	     0.0 /* cpu time */ ,
 	     0.0 /* cpu available */ ,
 	     0L /* memory usage */ ,

@@ -346,7 +346,8 @@ unsigned long handler_kick (plugin_user_t * user, buffer_t * output, void *priv,
 
     if (KickNoBanMayBan || (user->rights & CAP_BAN)) {
       total = time_parse (c + 5);
-      if ((KickMaxBanTime == 0) || ((KickMaxBanTime > 0) && (total <= KickMaxBanTime))
+      if ((KickMaxBanTime == 0)
+	  || ((KickMaxBanTime > 0) && (total <= KickMaxBanTime) && (total > 0))
 	  || (user->rights & CAP_BAN)) {
 	if (total != 0) {
 	  bf_printf (output, _("\nBanning user for %s\n"), time_print (total));
@@ -644,6 +645,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
 		 time_print (period), bf_used (buf), buf->s);
     }
     plugin_user_banip (user, target, buf, period);
+#ifdef PLUGIN_IPLOG
   } else if (pi_iplog_find (argv[1], (uint32_t *) & ip.s_addr)) {
     netmask.s_addr = 0xFFFFFFFF;
     bf_printf (output, _("User %s offline, found in iplog\n"), argv[1]);
@@ -655,6 +657,7 @@ unsigned long handler_banip (plugin_user_t * user, buffer_t * output, void *priv
       bf_printf (output, _("IP Banning %s (ip %s) for %s: %.*s"), argv[1], print_ip (ip, netmask),
 		 time_print (period), bf_used (buf), buf->s);
     }
+#endif
   } else {
     if (parse_ip (argv[1], &ip, &netmask)) {
       plugin_ban_ip (user, ip.s_addr, netmask.s_addr, buf, period);
@@ -749,6 +752,7 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
 
 
   target = plugin_user_find (argv[1]);
+#ifdef PLUGIN_IPLOG
   if (!target) {
     if (!pi_iplog_find (argv[1], (uint32_t *) & ip.s_addr)) {
       bf_printf (output, _("User %s not found."), argv[1]);
@@ -762,6 +766,15 @@ unsigned long handler_ban (plugin_user_t * user, buffer_t * output, void *priv, 
     nick = target->nick;
     plugin_user_ban (user, target, buf, period);
   }
+#else
+  if (!target) {
+    bf_printf (output, _("User %s not found."), argv[1]);
+    goto leave;
+  }
+  ip.s_addr = target->ipaddress;
+  nick = target->nick;
+  plugin_user_ban (user, target, buf, period);
+#endif
 
   if (!period) {
     bf_printf (output, _("Banning user %s (ip %s) forever: %.*s"), nick, inet_ntoa (ip),
@@ -948,7 +961,7 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <group> <rights>...\n"), argv[0]);
-    command_flags_help ((command_flag_t *) Capabilities, output);
+    flags_help (Capabilities, output);
     goto leave;
   }
 
@@ -958,7 +971,7 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
   }
 
   if (argc > 2)
-    command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
+    flags_parse (Capabilities, output, argc, argv, 2, &cap, &ncap);
 
   if (!cap) {
     defaultrights = config_find ("user.defaultrights");
@@ -973,8 +986,7 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
     }
     if (cap & ~user->rights) {
       bf_printf (output, _("You are not allowed to assign the following rights to this group: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   cap & ~user->rights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, cap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
@@ -982,7 +994,7 @@ unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *p
   account_type_add (argv[1], cap);
 
   bf_printf (output, _("Group %s created with: "), argv[1]);
-  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output, cap);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), output, cap);
   bf_strcat (output, "\n");
 
 leave:
@@ -997,7 +1009,7 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <group> <[+]right/-right>...\n"), argv[0]);
-    command_flags_help ((command_flag_t *) Capabilities, output);
+    flags_help (Capabilities, output);
     goto leave;
   }
 
@@ -1007,7 +1019,7 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
   }
 
   if (argc > 2)
-    command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
+    flags_parse (Capabilities, output, argc, argv, 2, &cap, &ncap);
 
   /* verify if the user can actually assign these extra rights... */
   if (!(user->rights & CAP_OWNER)) {
@@ -1017,16 +1029,14 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
     }
     if (cap & ~user->rights) {
       bf_printf (output, _("You are not allowed to assign the following rights to this group: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   cap & ~user->rights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, cap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
 
     if (ncap & ~user->rights) {
       bf_printf (output, _("You are not allowed to remove the following rights from this group: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   ncap & ~user->rights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, ncap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
@@ -1036,7 +1046,7 @@ unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *p
   type->rights &= ~ncap;
 
   bf_printf (output, _("Group %s modified. Current rights:"), argv[1]);
-  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output, type->rights);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), output, type->rights);
   bf_strcat (output, "\n");
 
 leave:
@@ -1079,8 +1089,7 @@ unsigned long handler_grouplist (plugin_user_t * user, buffer_t * output, void *
 
   for (type = accountTypes; type; type = type->next) {
     bf_printf (output, "%s: ", type->name);
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 type->rights);
+    flags_print ((Capabilities + CAP_PRINT_OFFSET), output, type->rights);
     bf_strcat (output, "\n");
   };
 
@@ -1157,7 +1166,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
   }
 
   if (argc > 3)
-    command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 3, &cap, &ncap);
+    flags_parse (Capabilities, output, argc, argv, 3, &cap, &ncap);
 
   if (!(user->rights & CAP_OWNER)) {
     /* verify the user can assign users to this group */
@@ -1173,8 +1182,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
     }
     if (cap & ~user->rights) {
       bf_printf (output, _("You are not allowed to assign this user: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   cap & ~user->rights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, cap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
@@ -1185,8 +1193,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
 
   bf_printf (output, _("User %s created with group %s.\nCurrent rights:"), account->nick,
 	     type->name);
-  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-		       account->rights | type->rights);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), output, account->rights | type->rights);
   bf_strcat (output, "\n");
 
   /* if user is online, warm him of his reg and notify to op we did so. */
@@ -1199,8 +1206,7 @@ unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *pr
     bf_printf (message,
 	       _("You have been registered by %s. Please use !passwd <password> to set a password "
 		 "and relogin to gain your new rights. You have been assigned:\n"), user->nick);
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), message,
-			 account->rights | type->rights);
+    flags_print ((Capabilities + CAP_PRINT_OFFSET), message, account->rights | type->rights);
     plugin_user_sayto (NULL, target, message, 0);
     bf_free (message);
 
@@ -1225,7 +1231,7 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
 
   if (argc < 3) {
     bf_printf (output, _("Usage: %s <nick> <[+]right/-right>...\n"), argv[0]);
-    command_flags_help ((command_flag_t *) Capabilities, output);
+    flags_help (Capabilities, output);
     goto leave;
   }
 
@@ -1240,21 +1246,19 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
   }
 
   if (argc > 2)
-    command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
+    flags_parse (Capabilities, output, argc, argv, 2, &cap, &ncap);
 
   /* verify if the user can actually assign these extra rights... */
   if (!(user->rights & CAP_OWNER)) {
     if (cap & ~user->rights) {
       bf_printf (output, _("You are not allowed to assign the following rights to this user: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   cap & ~user->rights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, cap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
     if (ncap & ~user->rights) {
       bf_printf (output, _("You are not allowed to touch: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   ncap & ~user->rights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, ncap & ~user->rights);
       bf_strcat (output, "\n");
       goto leave;
     }
@@ -1267,15 +1271,14 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
   if (account->classp->rights & ncap) {
     bf_printf (output, _("Warning! User %s is still awarded the following rights by his group:"),
 	       account->nick);
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 ncap & account->classp->rights);
+    flags_print ((Capabilities + CAP_PRINT_OFFSET), output, ncap & account->classp->rights);
   }
 
 
   bf_printf (output, _("User %s created with group %s.\nCurrent rights:"), account->nick,
 	     account->classp->name);
-  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-		       account->rights | account->classp->rights);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), output,
+	       account->rights | account->classp->rights);
   bf_strcat (output, "\n");
   if (plugin_user_find (argv[1]))
     bf_printf (output,
@@ -1339,8 +1342,8 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
 
   if ((account = account_find (argv[1]))) {
     bf_printf (output, _("Group %s, Rights: "), account->classp->name);
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			 account->rights | account->classp->rights);
+    flags_print ((Capabilities + CAP_PRINT_OFFSET), output,
+		 account->rights | account->classp->rights);
     bf_strcat (output, "\n");
     if (!account->passwd[0])
       bf_printf (output, _("Users password is NOT set.\n"));
@@ -1560,8 +1563,6 @@ leave:
 unsigned long handler_setlocale (plugin_user_t * user, buffer_t * output, void *priv,
 				 unsigned int argc, unsigned char **argv)
 {
-  unsigned char *locale;
-
   if (argc < 2) {
     bf_printf (output, "Usage: %s <local>", argv[0]);
     return 0;
@@ -1569,7 +1570,7 @@ unsigned long handler_setlocale (plugin_user_t * user, buffer_t * output, void *
 
   /* Change language.  */
   setenv ("LANGUAGE", argv[1], 1);
-  bf_printf (output, "Locale set to %s", locale);
+  bf_printf (output, "Locale set to %s", argv[1]);
 
   /* Make change known.  */
   {
@@ -1662,8 +1663,7 @@ int printconfig (buffer_t * buf, config_element_t * elem)
       break;
     case CFG_ELEM_CAP:
       bf_printf (buf, "%s ", elem->name);
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), buf,
-			   *elem->val.v_cap);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), buf, *elem->val.v_cap);
       bf_strcat (buf, "\n");
       break;
     case CFG_ELEM_INT:
@@ -1801,19 +1801,17 @@ unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *
 	bf_printf (output, _("You are not allowed to assign rights.\n"));
 	break;
       }
-      command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, 2, &cap, &ncap);
+      flags_parse (Capabilities, output, argc, argv, 2, &cap, &ncap);
       if (!(user->rights & CAP_OWNER)) {
 	if (cap & ~user->rights) {
 	  bf_printf (output, _("You are not allowed to assign: "));
-	  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			       cap & ~user->rights);
+	  flags_print ((Capabilities + CAP_PRINT_OFFSET), output, cap & ~user->rights);
 	  bf_strcat (output, "\n");
 	  break;
 	}
 	if (ncap & ~user->rights) {
 	  bf_printf (output, _("You are not allowed to remove: "));
-	  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			       ncap & ~user->rights);
+	  flags_print ((Capabilities + CAP_PRINT_OFFSET), output, ncap & ~user->rights);
 	  bf_strcat (output, "\n");
 	  break;
 	}

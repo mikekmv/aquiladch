@@ -841,8 +841,8 @@ int pi_statistics_init ()
   memset (&procstats, 0, sizeof (procstats));
   memset (&current, 0, sizeof (current));
   memset (&stats, 0, sizeof (statistics_t));
-  bandwidth_init ();
 
+  bandwidth_init ();
   cpu_init ();
 
   plugin_stats = plugin_register ("stats");

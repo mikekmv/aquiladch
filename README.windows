@@ -1,0 +1,15 @@
+to build successfully for windows without needing cygwin you have to create
+a directory lib in src/ with:
+
+src/lib/libcrypt.a
+src/lib/liblua.a
+src/lib/libz.a
+
+for the liblua, use the static library from lua5_0_3_Win32_mingw3_lib.zip
+  (rename liblua50.a to liblua.a or use --with-lua-suffix=50)
+
+configure with:
+	./configure --disable-nls --with-lua-prefix=/usr/local
+
+build with:
+	make

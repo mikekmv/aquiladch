@@ -40,19 +40,72 @@ endif
 endif
 
 #
-## Set LUA variables
+## Add plugins
 #
-if LUA
-LUA_SOURCES = pi_lua.c
-else
-LUA_SOURCES =
+
+if PLUGIN_CHATLOG
+CHATLOG_SOURCES = pi_chatlog.c
 endif
+if PLUGIN_CHATROOM
+CHATROOM_SOURCES = pi_chatroom.c
+endif 
+if PLUGIN_CONFIGLOCK
+CONFIGLOCK_SOURCES =  pi_configlock.c
+endif
+if PLUGIN_HUBLIST
+HUBLIST_SOURCES =  pi_hublist.c
+endif
+if PLUGIN_IPLOG
+IPLOG_SOURCES =  pi_iplog.c
+endif
+if PLUGIN_LUA
+LUA_SOURCES = pi_lua.c
+LUA_LIBS = 
+endif
+if PLUGIN_STATBOT
+STATBOT_SOURCES =  pi_statbot.c
+endif
+if PLUGIN_STATISTICS
+STATISTICS_SOURCES =  pi_statistics.c
+endif
+if PLUGIN_TRIGGER
+TRIGGER_SOURCES =  pi_trigger.c
+endif
+if PLUGIN_USER
+USER_SOURCES =  pi_user.c banlistclient.c
+endif
+
+PLUGIN_SOURCES= $(CHATLOG_SOURCES) \
+		$(CHATROOM_SOURCES) \
+		$(CONFIGLOCK_SOURCES) \
+		$(HUBLIST_SOURCES) \
+		$(IPLOG_SOURCES) \
+		$(LUA_SOURCES) \
+		$(STATBOT_SOURCES) \
+		$(STATISTICS_SOURCES) \
+		$(TRIGGER_SOURCES) \
+		$(USER_SOURCES)
+
+PLUGIN_CFLAGS = @PLUGIN_CHATLOG@ \
+		@PLUGIN_CHATROOM@ \
+		@PLUGIN_CONFIGLOCK@ \
+		@PLUGIN_HUBLIST@ \
+		@PLUGIN_IPLOG@ \
+		@PLUGIN_LUA@ @LUA_INCLUDES@ \
+		@PLUGIN_STATBOT@ \
+		@PLUGIN_STATISTICS@ \
+		@PLUGIN_TRIGGER@ \
+		@PLUGIN_USER@
+
+PLUGIN_LIBS =	@LUALIB@
+		
+# end plugins
 
 DEFS = @DEFS@ $(LOCALE_DEFS) $(WINDOWS_DEFS)
 
-AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_LUA@ @LUA_INCLUDES@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS)
+AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS) $(PLUGIN_CFLAGS)
 
-EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h searchlist.c searchlist.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h
+EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h sys_windows.h flags.h
 DISTCLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
 
@@ -69,36 +122,26 @@ aquila_SOURCES = buffer.c \
 		 config.c \
 		 hub.c \
 		 core_config.c \
-		 $(NMDC_SOURCES) \
 		 hashlist.c \
 		 user.c \
 		 banlist.c \
-		 banlistclient.c \
 		 plugin.c \
 		 commands.c \
 		 builtincmd.c \
+		 flags.c \
 		 cap.c \
-		 pi_user.c \
-		 pi_statistics.c \
-		 pi_chatroom.c \
-		 pi_trigger.c \
-		 pi_chatlog.c \
-		 pi_statbot.c \
-		 pi_iplog.c \
-		 pi_hublist.c \
-		 $(LUA_SOURCES) \
 		 main.c \
-		 searchlist.c \
-		 $(DEBUG_FILES) \
-		 $(GETADDRINFO_SOURCES) \
 		 tth.c \
 		 aqtime.c \
 		 iplist.c \
-		 pi_configlock.c \
-		 $(DNS_FILES) \
-		 xml.c
+		 xml.c \
+		 $(NMDC_SOURCES) \
+		 $(PLUGIN_SOURCES) \
+		 $(DEBUG_FILES) \
+		 $(GETADDRINFO_SOURCES) \
+		 $(DNS_FILES)
 
-aquila_LDADD = @ZLIB@ @LUALIB@ @CYGWIN_LDFLAGS@ @LIBINTL@
+aquila_LDADD = @ZLIB@ @CYGWIN_LDFLAGS@ @LIBINTL@ $(PLUGIN_LIBS)
 
 indent: .indent
 

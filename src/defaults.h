@@ -29,13 +29,19 @@
 #undef HAVE_SYS_SOCKET_H
 #undef HAVE_NETINET_IN_H
 #undef HAVE_SYS_POLL_H
+
+#define WIN32	" Win32"
+
+#else
+#define WIN32
+
 #endif
 
 
 #ifdef SVNREVISION
 #define AQUILA_VERSION			VERSION " (" SVNREVISION ")"
 #else
-#define AQUILA_VERSION			VERSION
+#define AQUILA_VERSION			VERSION WIN32
 #endif
 
 #define HUBSOFT_NAME		"Aquila"
@@ -189,6 +195,7 @@
 #define MIN_FORK_RETRY_PERIOD		3
 
 #ifdef DEBUG
+#include <stdio.h>
 #include "stacktrace.h"
 #define DPRINTF	printf
 //#define ASSERT assert

@@ -35,6 +35,14 @@ void bf_verify (buffer_t * buffer)
   ASSERT (buffer->e <= (buffer->buffer + buffer->size));
 }
 
+buffer_t *bf_enlarge (buffer_t * buf, unsigned long size)
+{
+  buffer_t *b = bf_copy (buf, size);
+
+  bf_free (buf);
+  return b;
+}
+
 buffer_t *bf_alloc (unsigned long size)
 {
   buffer_t *b;

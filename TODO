@@ -1,7 +1,7 @@
 
 Develstatus:
+	- remove those damned cache.* timings. all 1.
 	- pi_rss...
-	- xml config files
 	- implement delayed close on windows.
 	- LUA 5.1
 	- move AcceptEx to handler. Add ConnectEx and the other one.
@@ -9,13 +9,11 @@ Develstatus:
 	- <FleetCommand> another request: when !unban nick both unbans ip and nick, it should report not just "nick bah unbanned" but it should let you know that the whole ban (ip and nick too) is removed
 	- no kicking ppl with same rights?
 	- create some sort of external statistics support.
-	- fix the unregsitered/registered/op counter?
-	- detect changes in *.conf files
+	- detect changes in Aquila.xml files
 	- Add some sort of command "context" support. 
 		(allow !help and !leave etc to work in chatrooms)
 	- SSL (not for 0.1)
 	- ADC (future)
-	- redo tag parsing, make it more flexible. (allow missing fields).
 	- add a hideuser right?
 
 Large changes:

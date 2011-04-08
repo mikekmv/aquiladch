@@ -76,6 +76,7 @@ extern buffer_t *bf_sep_char (buffer_t ** list, unsigned char sep);
 extern int bf_prepend (buffer_t ** list, buffer_t * buf);
 
 extern buffer_t *bf_copy (buffer_t * src, unsigned long extra);
+extern buffer_t *bf_enlarge (buffer_t *buf, unsigned long size);
 
 extern int bf_strcat (buffer_t * dst, unsigned char *data);
 extern int bf_strncat (buffer_t * dst, unsigned char *data, unsigned long length);

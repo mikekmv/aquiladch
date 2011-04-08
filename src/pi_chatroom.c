@@ -353,12 +353,10 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
       roomflags |= CHATROOM_FLAG_AUTOJOIN_RIGHTS;
       counter++;
       if (argc > counter)
-	command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, counter,
-			     &roomrights, &ncap);
+	flags_parse (Capabilities, output, argc, argv, counter, &roomrights, &ncap);
       roomrights &= ~ncap;
       bf_printf (output, _("Room requires: "));
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), output,
-			   roomrights);
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), output, roomrights);
       bf_strcat (output, "\n");
     }
 
@@ -408,7 +406,7 @@ unsigned int pi_chatroom_show (buffer_t * buf, chatroom_t * room)
     bf_printf (buf, _(", autojoins users with sufficient rights"));
   if (room->flags & CHATROOM_FLAG_AUTOJOIN_RIGHTS) {
     bf_printf (buf, _(" and requires rights "));
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), buf, room->rights);
+    flags_print ((Capabilities + CAP_PRINT_OFFSET), buf, room->rights);
   }
   bf_strcat (buf, ".\n");
 

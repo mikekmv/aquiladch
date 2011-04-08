@@ -187,8 +187,7 @@ xml_node_t *xml_node_add_value (xml_node_t * parent, char *name, xml_type_t type
 #endif
       break;
     case XML_TYPE_CAP:
-      command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), buf,
-			   *((unsigned long *) value));
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), buf, *((unsigned long *) value));
       break;
     case XML_TYPE_INT:
       bf_printf (buf, "%d", *((int *) value));
@@ -290,7 +289,7 @@ xml_node_t *xml_node_get (xml_node_t * node, xml_type_t type, void *value)
 	argv[0] = node->value;
 	argv[1] = NULL;
 
-	command_flags_parse ((command_flag_t *) Capabilities, NULL, 1, argv, 0, &cap, &ncap);
+	flags_parse (Capabilities, NULL, 1, argv, 0, &cap, &ncap);
 
 	*((unsigned long *) value) = cap;
 	*((unsigned long *) value) &= ~ncap;

@@ -27,7 +27,6 @@
 #include "plugin.h"
 #include "user.h"
 #include "commands.h"
-#include "banlistclient.h"
 #include "utils.h"
 #include "defaults.h"
 

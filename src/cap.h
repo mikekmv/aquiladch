@@ -20,6 +20,8 @@
 #ifndef _CAP_H_
 #define _CAP_H_
 
+#include "flags.h"
+
 #define CAP_SHARE  	   0x0001
 #define CAP_KICK   	   0x0002
 #define CAP_BAN    	   0x0004
@@ -56,12 +58,6 @@
 
 #define CAP_PRINT_OFFSET 7
 
-typedef struct cap_array {
-  unsigned char *name;
-  unsigned long cap;
-  unsigned char *help;
-} cap_array_t;
-
-extern cap_array_t Capabilities[];
+extern flag_t Capabilities[];
 
 #endif

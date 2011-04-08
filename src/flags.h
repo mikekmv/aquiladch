@@ -17,36 +17,22 @@
  *  
  */
 
-#ifndef _COMMANDS_H_
-#define _COMMANDS_H_
+#ifndef _FLAGS_H_
+#define _FLAGS_H_
 
-#include "plugin.h"
-#include "flags.h"
+#include "buffer.h"
 
-#define COMMAND_MAX_LENGTH	 64
-#define COMMAND_MAX_ARGS	256
-
-#define COMMAND_HASHTABLE	256
-#define COMMAND_HASHMASK	(COMMAND_HASHTABLE-1)
-
-typedef unsigned long (command_handler_t) (plugin_user_t *, buffer_t *, void *, unsigned int,
-					   unsigned char **);
-
-typedef struct command {
-  struct command *next, *prev;
-  struct command *onext, *oprev;
-
-  unsigned char name[COMMAND_MAX_LENGTH];
-  command_handler_t *handler;
-  unsigned long req_cap;
+typedef struct flag {
+  unsigned char *name;
+  unsigned long flag;
   unsigned char *help;
-} command_t;
+} flag_t;
 
-extern int command_init ();
-extern int command_setup ();
-extern int command_register (unsigned char *name, command_handler_t * handler, unsigned long cap,
-			     unsigned char *help);
-extern int command_unregister (unsigned char *name);
-extern int command_setrights (unsigned char *name, unsigned long cap, unsigned long ncap);
+extern unsigned int flags_print (flag_t * flags, buffer_t * buf,
+					 unsigned long flag);
+extern unsigned int flags_help (flag_t * flags, buffer_t * buf);
+extern unsigned int flags_parse (flag_t * flags, buffer_t * buf, unsigned int argc,
+					 unsigned char **argv, unsigned int flagstart,
+					 unsigned long *flag, unsigned long *nflag);
 
 #endif

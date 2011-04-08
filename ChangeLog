@@ -1,6 +1,18 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta11:
+0.1.11-pre1-beta12:
+	Fix printing bug in !setlocale.
+	Split off flags printing: get rid of all the type-punning errors.
+	Removed unused searchlist.[ch]
+	Add banlistclient to pi_user files.
+	Fix pi_hublist dependency on pi_user.
+	Make lua plugin use generic plugin stuff.
+	Buildsys update. Plugins can now be omitted through configure.
+	Add sys_windows.h and README.windows to dist (Thanks en_dator).
+	Disable cache.* settings (forced to 1).
+	Fixed bug in kickmaxbantime. Do not accept 0 bantime.
+	Add Win32 in version string for Windows.
+	Close settings file after reading it.
 	Fixed xml.c escaping bug.
 	Compiles on windows.
 	Added xml.[ch] into svn and dist.

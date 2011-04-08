@@ -342,15 +342,34 @@ int main (int argc, char **argv)
   nmdc_init ();
 
   /* initialize the plugins */
+#ifdef PLUGIN_IPLOG
   pi_iplog_init ();
+#endif
+#ifdef PLUGIN_USER
   pi_user_init ();
+#endif
+#ifdef PLUGIN_CHATROOM
   pi_chatroom_init ();
+#endif
+#ifdef PLUGIN_STATISTICS
   pi_statistics_init ();
+#endif
+#ifdef PLUGIN_TRIGGER
   pi_trigger_init ();
+#endif
+#ifdef PLUGIN_CHATLOG
   pi_chatlog_init ();
+#endif
+#ifdef PLUGIN_STATBOT
   pi_statbot_init ();
+#endif
+#ifdef PLUGIN_HUBLIST
   pi_hublist_init ();
+#endif
+#ifdef PLUGIN_CONFIGLOCK
   pi_configlock_init ();
+#endif
+
   plugin_config_load (NULL);
 
   /* add lowest member of the statistics */
@@ -368,9 +387,11 @@ int main (int argc, char **argv)
   server_setup (h);
   nmdc_setup (h);
   command_setup ();
+#ifdef PLUGIN_HUBLST
   pi_hublist_setup (h);
+#endif
 
-#ifdef ALLOW_LUA
+#ifdef PLUGIN_LUA
 #ifdef HAVE_LUA_H
   /* lua must only be loaded last. */
   pi_lua_init ();

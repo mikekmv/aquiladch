@@ -39,15 +39,16 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure ABOUT-NLS AUTHORS COPYING ChangeLog \
 	INSTALL NEWS TODO compile config.guess config.rpath config.sub \
-	depcomp install-sh missing
+	depcomp install-sh ltmain.sh missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
-	$(top_srcdir)/m4/herrno.m4 $(top_srcdir)/m4/iconv.m4 \
-	$(top_srcdir)/m4/lib-ld.m4 $(top_srcdir)/m4/lib-link.m4 \
-	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/nls.m4 \
-	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
-	$(top_srcdir)/m4/sockinttypes.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/aquila.m4 \
+	$(top_srcdir)/m4/gettext.m4 $(top_srcdir)/m4/herrno.m4 \
+	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/lib-ld.m4 \
+	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
+	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
+	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/sockinttypes.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -80,7 +81,6 @@ distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 ALLOW_EPOLL = @ALLOW_EPOLL@
 ALLOW_IOCP = @ALLOW_IOCP@
-ALLOW_LUA = @ALLOW_LUA@
 ALLOW_POLL = @ALLOW_POLL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -146,6 +146,36 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PLUGIN_CHATLOG = @PLUGIN_CHATLOG@
+PLUGIN_CHATLOG_FALSE = @PLUGIN_CHATLOG_FALSE@
+PLUGIN_CHATLOG_TRUE = @PLUGIN_CHATLOG_TRUE@
+PLUGIN_CHATROOM = @PLUGIN_CHATROOM@
+PLUGIN_CHATROOM_FALSE = @PLUGIN_CHATROOM_FALSE@
+PLUGIN_CHATROOM_TRUE = @PLUGIN_CHATROOM_TRUE@
+PLUGIN_CONFIGLOCK = @PLUGIN_CONFIGLOCK@
+PLUGIN_CONFIGLOCK_FALSE = @PLUGIN_CONFIGLOCK_FALSE@
+PLUGIN_CONFIGLOCK_TRUE = @PLUGIN_CONFIGLOCK_TRUE@
+PLUGIN_HUBLIST = @PLUGIN_HUBLIST@
+PLUGIN_HUBLIST_FALSE = @PLUGIN_HUBLIST_FALSE@
+PLUGIN_HUBLIST_TRUE = @PLUGIN_HUBLIST_TRUE@
+PLUGIN_IPLOG = @PLUGIN_IPLOG@
+PLUGIN_IPLOG_FALSE = @PLUGIN_IPLOG_FALSE@
+PLUGIN_IPLOG_TRUE = @PLUGIN_IPLOG_TRUE@
+PLUGIN_LUA = @PLUGIN_LUA@
+PLUGIN_LUA_FALSE = @PLUGIN_LUA_FALSE@
+PLUGIN_LUA_TRUE = @PLUGIN_LUA_TRUE@
+PLUGIN_STATBOT = @PLUGIN_STATBOT@
+PLUGIN_STATBOT_FALSE = @PLUGIN_STATBOT_FALSE@
+PLUGIN_STATBOT_TRUE = @PLUGIN_STATBOT_TRUE@
+PLUGIN_STATISTICS = @PLUGIN_STATISTICS@
+PLUGIN_STATISTICS_FALSE = @PLUGIN_STATISTICS_FALSE@
+PLUGIN_STATISTICS_TRUE = @PLUGIN_STATISTICS_TRUE@
+PLUGIN_TRIGGER = @PLUGIN_TRIGGER@
+PLUGIN_TRIGGER_FALSE = @PLUGIN_TRIGGER_FALSE@
+PLUGIN_TRIGGER_TRUE = @PLUGIN_TRIGGER_TRUE@
+PLUGIN_USER = @PLUGIN_USER@
+PLUGIN_USER_FALSE = @PLUGIN_USER_FALSE@
+PLUGIN_USER_TRUE = @PLUGIN_USER_TRUE@
 POSUB = @POSUB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -203,7 +233,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRA_DIST = config.rpath  TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README doc/aquila-manual.txt config.h.in depcomp install-sh missing ABOUT-NLS
+EXTRA_DIST = config.rpath TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README.windows README.getaddrinfo README doc/aquila-manual.txt config.h.in depcomp install-sh missing ABOUT-NLS
 SUBDIRS = po src tools
 ACLOCAL_AMFLAGS = -I m4
 CURRENTURL = $(shell svn info | grep URL | cut -c 6-)

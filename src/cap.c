@@ -24,7 +24,7 @@
 	otherwise printcapabilities will not work correctly */
 
 /* *INDENT-OFF* */
-cap_array_t Capabilities[] = {
+flag_t Capabilities[] = {
 	{"default",	CAP_DEFAULT,	_("Default capabilities: chat, pmop, dl and search.")},
 	{"reg",		CAP_REG,	_("Default REG capabilities: chat, search, pm, dl.")},
 	{"vip",		CAP_VIP,	_("Default VIP capabilities: chat, search, pm, dl, share.")},

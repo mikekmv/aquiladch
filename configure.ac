@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta11]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta12]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -96,8 +96,6 @@ then
 		sCFLAGS="${sCFLAGS} -DDUMP_CORE"
 	fi
 fi;
-
-
 
 #######################################
 #
@@ -286,17 +284,20 @@ else
   	unset ALLOW_IOCP
 fi
 
+AQ_PLUGIN_OPTION([PLUGIN_CHATLOG],	[chatlog],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_CHATROOM],	[chatroom],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_CONFIGLOCK],	[configlock],	[OFF])
+AQ_PLUGIN_OPTION([PLUGIN_HUBLIST],	[hublist],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_IPLOG],	[iplog],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_STATBOT],	[statbot],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_STATISTICS],	[statistics],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_TRIGGER],	[trigger],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_USER],		[user],		[ON])
+
 #
 ## LUA Support
 #
-AC_ARG_ENABLE(lua,
-	AC_HELP_STRING([--enable-lua],[Support LUA if available (default ON).]),
-	[case "$enableval" in
-	  yes|true) ALLOW_LUA=-DALLOW_LUA ;;
-	  no|false) unset ALLOW_LUA ;;
-	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-lua);;
-	esac],
-	[ALLOW_LUA=-DALLOW_LUA])
+AQ_PLUGIN_OPTION([PLUGIN_LUA],		[lua],		[ON])
 
 # some extra lua options
 AC_ARG_WITH([lua-prefix],
@@ -400,7 +401,7 @@ then
 	AC_CHECK_HEADERS([zlib.h], [], [unset ZLINE])
 fi
 
-if test "${ALLOW_LUA}" != "" ;
+if test "${PLUGIN_LUA}" != "" ;
 then
 
 	save_CPPFLAGS="$CPPFLAGS"
@@ -414,36 +415,37 @@ then
 	AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_call],
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
-             [],
+             [unset LUA_LIBS],
              [$LUA_LIBS $lua_extra_libs])
+	if test "$LUA_LIBS" != ""
+	then
+		AC_MSG_CHECKING([for liblua version 5.0.x])
+		save_CPPFLAGS="$CPPFLAGS"
+		save_LIBS="$LIBS"
+		CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+		LIBS="$LIBS $LUA_LIBS"
+		AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
-	AC_MSG_CHECKING([for liblua version 5.0.x])
-	save_CPPFLAGS="$CPPFLAGS"
-	save_LIBS="$LIBS"
-	CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
-	LIBS="$LIBS $LUA_LIBS"
-	AC_RUN_IFELSE([AC_LANG_SOURCE([[
+			#include <lua.h>
+			#include <stdlib.h>
+			#include <string.h>
+			#include <stdio.h>
 
-		#include <lua.h>
-		#include <stdlib.h>
-		#include <string.h>
-		#include <stdio.h>
+			int main()
+			{
+			    printf("(found %s)... ", LUA_VERSION);
+			    if(strstr (LUA_VERSION, "5.0"))
+			        exit(EXIT_SUCCESS);
+			    exit(EXIT_FAILURE);
+			}
 
-		int main()
-		{
-		    printf("(found %s)... ", LUA_VERSION);
-		    if(strstr (LUA_VERSION, "5.0"))
-		        exit(EXIT_SUCCESS);
-		    exit(EXIT_FAILURE);
-		}
-
-		]])],
-              [AC_MSG_RESULT([yes])],
-              [AC_MSG_RESULT([no])
-               unset LUA_LIBS])
-
-	CPPFLAGS="$save_CPPFLAGS"
-	LIBS="$save_LIBS"
+			]])],
+        	      [AC_MSG_RESULT([yes])],
+	              [AC_MSG_RESULT([no])
+        	       unset LUA_LIBS])
+		CPPFLAGS="$save_CPPFLAGS"
+		LIBS="$save_LIBS"
+	fi
 fi
 
 LUALIB=${LUA_LIBS}
@@ -453,9 +455,8 @@ AM_CONDITIONAL(LUA, test "${LUALIB}" != "" )
 
 if test "${LUALIB}" = ""
 then
-	unset ALLOW_LUA
+	AQ_PLUGIN_DISABLE([PLUGIN_LUA], [lua])
 fi
-AC_SUBST(ALLOW_LUA)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -597,14 +598,6 @@ else
 	echo "DISABLED"
 fi
 
-echo -n "   LUA Support                                       "
-if test "${ALLOW_LUA}" != ""
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
-
 echo -n "   NLS Support                                       "
 if test "${USE_NLS}" = "yes"
 then
@@ -620,6 +613,19 @@ then
 else
 	echo "DISABLED"
 fi
+
+echo
+echo    " Plugins:"
+AQ_PLUGIN_REPORT([chatlog])
+AQ_PLUGIN_REPORT([chatroom])
+AQ_PLUGIN_REPORT([configlock])
+AQ_PLUGIN_REPORT([hublist])
+AQ_PLUGIN_REPORT([iplog])
+AQ_PLUGIN_REPORT([lua])
+AQ_PLUGIN_REPORT([statbot])
+AQ_PLUGIN_REPORT([statistics])
+AQ_PLUGIN_REPORT([trigger])
+AQ_PLUGIN_REPORT([user])
 
 echo
 echo    " These should be disabled for a normal build:"

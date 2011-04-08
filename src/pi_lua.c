@@ -140,11 +140,11 @@ unsigned int parserights (unsigned char *caps, unsigned long *cap, unsigned long
     for (j = 0; Capabilities[j].name; j++) {
       if (!strcasecmp (Capabilities[j].name, d)) {
 	if (c[0] != '-') {
-	  *cap |= Capabilities[j].cap;
-	  *ncap &= ~Capabilities[j].cap;
+	  *cap |= Capabilities[j].flag;
+	  *ncap &= ~Capabilities[j].flag;
 	} else {
-	  *ncap |= Capabilities[j].cap;
-	  *cap &= ~Capabilities[j].cap;
+	  *ncap |= Capabilities[j].flag;
+	  *cap &= ~Capabilities[j].flag;
 	}
 	break;
       }
@@ -218,8 +218,7 @@ int pi_lua_getconfig (lua_State * lua)
       {
 	buffer_t *b = bf_alloc (1024);
 
-	command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b,
-			     *elem->val.v_ulong);
+	flags_print ((Capabilities + CAP_PRINT_OFFSET), b, *elem->val.v_ulong);
 
 	lua_pushstring (lua, b->s);
 
@@ -320,7 +319,11 @@ int pi_lua_setconfig (lua_State * lua)
 extern long users_total;
 int pi_lua_getuserstotal (lua_State * lua)
 {
+#ifdef PLUGIN_USER
   lua_pushnumber (lua, users_total);
+#else
+  lua_pushnumber (lua, 0);
+#endif
 
   return 1;
 }
@@ -534,7 +537,7 @@ int pi_lua_getuserrights (lua_State * lua)
     lua_pushnil (lua);
   } else {
     b = bf_alloc (10240);
-    command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, user->rights);
+    flags_print ((Capabilities + CAP_PRINT_OFFSET), b, user->rights);
     lua_pushlstring (lua, b->s, bf_used (b));
     bf_free (b);
   }
@@ -581,7 +584,7 @@ int pi_lua_getusersupports (lua_State * lua)
     lua_pushnil (lua);
   } else {
     b = bf_alloc (10240);
-    command_flags_print ((command_flag_t *) (plugin_supports), b, user->supports);
+    flags_print ((plugin_supports), b, user->supports);
     lua_pushlstring (lua, b->s, bf_used (b));
     bf_free (b);
   }
@@ -1382,7 +1385,7 @@ int pi_lua_account_find (lua_State * lua)
   PUSH_TABLE_ENTRY (lua, "nick", acc->nick);
 
   b = bf_alloc (10240);
-  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
   PUSH_TABLE_ENTRY (lua, "rights", b->s);
   bf_free (b);
 
@@ -1472,7 +1475,7 @@ int pi_lua_group_find (lua_State * lua)
   PUSH_TABLE_ENTRY (lua, "name", acc->name);
 
   b = bf_alloc (10240);
-  command_flags_print ((command_flag_t *) (Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
   PUSH_TABLE_ENTRY (lua, "rights", b->s);
   bf_free (b);
 

@@ -51,7 +51,7 @@ extern user_t *userlist;
 plugin_manager_t *manager;
 unsigned long pluginIDs;
 
-cap_array_t plugin_supports[] = {
+flag_t plugin_supports[] = {
   {"NoGetINFO", 1, ""},
   {"NoHello", 2, ""},
   {"UserCommand", 4, ""},
@@ -1120,6 +1120,9 @@ int plugin_config_load (buffer_t * output)
   }
 
   node = xml_read (fp);
+
+  fclose (fp);
+
   if (!node)
     goto leave;
 
@@ -1134,7 +1137,6 @@ int plugin_config_load (buffer_t * output)
   banlist_load (&hardbanlist, list);
   list = xml_node_find (node, "SoftBanList");
   banlist_load (&softbanlist, list);
-
 
   plugin_send_event (NULL, PLUGIN_EVENT_LOAD, node);
 

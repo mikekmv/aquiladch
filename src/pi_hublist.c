@@ -272,14 +272,25 @@ int pi_hublist_handle_input (esocket_t * s)
 	     *hostname->val.v_string ? *hostname->val.v_string : (unsigned char *) "",
 	     *listenport->val.v_uint ? *listenport->val.v_uint : 411,
 	     *hubdesc->val.v_string ? *hubdesc->val.v_string : (unsigned char *) "",
-	     users_total, 0LL);
+#ifdef PLUGIN_USER
+	     users_total,
+#else
+	     0,
+#endif
+	     0LL);
 #else
   bf_printf (output, "%s|%s:%u|%s|%d|%I64u|",
 	     *hubname->val.v_string ? *hubname->val.v_string : (unsigned char *) "",
 	     *hostname->val.v_string ? *hostname->val.v_string : (unsigned char *) "",
 	     *listenport->val.v_uint ? *listenport->val.v_uint : 411,
 	     *hubdesc->val.v_string ? *hubdesc->val.v_string : (unsigned char *) "",
-	     users_total, 0LL);
+#ifdef PLUGIN_USER
+	     users_total,
+#else
+	     0,
+#endif
+	     0LL);
+
 #endif
   DPRINTF ("pi_hublist:  Send: %.*s\n", (int) bf_used (output), output->s);
 

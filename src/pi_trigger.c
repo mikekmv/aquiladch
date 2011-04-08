@@ -968,8 +968,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
 
   if (argv[capstart] && !strcasecmp (argv[capstart], "rights")) {
     capstart++;
-    command_flags_parse ((command_flag_t *) Capabilities, output, argc, argv, capstart, &cap,
-			 &ncap);
+    flags_parse (Capabilities, output, argc, argv, capstart, &cap, &ncap);
     cap &= ~ncap;
   }
 
@@ -1054,7 +1053,7 @@ unsigned int rule_show (buffer_t * buf, trigger_rule_t * rule)
   if (rule->flags & RULE_FLAG_BC)
     bf_printf (buf, "broadcast, ");
   bf_printf (buf, " cap ");
-  command_flags_print ((command_flag_t *) Capabilities, buf, rule->cap);
+  flags_print (Capabilities, buf, rule->cap);
   bf_strcat (buf, "\n");
 
   return bf_used (buf);

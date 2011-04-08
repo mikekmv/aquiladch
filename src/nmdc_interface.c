@@ -1249,13 +1249,13 @@ int proto_nmdc_init ()
 
   init_bucket_type (&cache.chat.timertype, 1, 1, 1);
   init_bucket_type (&cache.myinfo.timertype, 1, 1, 1);
-  init_bucket_type (&cache.myinfoupdate.timertype, 300, 1, 1);	/* every 5 minutes */
+  init_bucket_type (&cache.myinfoupdate.timertype, 1, 1, 1);	/* every 5 minutes */
   init_bucket_type (&cache.myinfoupdateop.timertype, 1, 1, 1);
-  init_bucket_type (&cache.asearch.timertype, 30, 1, 1);
-  init_bucket_type (&cache.psearch.timertype, 30, 1, 1);
-  init_bucket_type (&cache.aresearch.timertype, 30, 1, 1);
-  init_bucket_type (&cache.presearch.timertype, 30, 1, 1);
-  init_bucket_type (&cache.results.timertype, 20, 1, 1);
+  init_bucket_type (&cache.asearch.timertype, 1, 1, 1);
+  init_bucket_type (&cache.psearch.timertype, 1, 1, 1);
+  init_bucket_type (&cache.aresearch.timertype, 1, 1, 1);
+  init_bucket_type (&cache.presearch.timertype, 1, 1, 1);
+  init_bucket_type (&cache.results.timertype, 1, 1, 1);
   init_bucket_type (&cache.privatemessages.timertype, 1, 1, 1);
 
   gettimeofday (&now, NULL);
@@ -1271,6 +1271,7 @@ int proto_nmdc_init ()
   init_bucket (&cache.results.timer, now.tv_sec);
   init_bucket (&cache.privatemessages.timer, now.tv_sec);
 
+/* FIXME this should be removed entirely.
   config_register ("cache.chat.period", CFG_ELEM_ULONG, &cache.chat.timertype.period,
 		   _
 		   ("Period of chat cache flush. This controls how often chat messages are sent to users. Keep this low."));
@@ -1303,6 +1304,7 @@ int proto_nmdc_init ()
 		   &cache.presearch.timertype.period,
 		   _
 		   ("Period of passive repeated search cache flush. This controls how often search messages are sent to passive users."));
+*/
 
   cloning = DEFAULT_CLONING;
   chatmaxlength = DEFAULT_MAXCHATLENGTH;

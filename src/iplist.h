@@ -36,8 +36,9 @@ typedef struct iplisthashbucket {
 
 typedef struct iplist {
   unsigned int count;
-  unsigned int found;
-  unsigned int new;
+
+  unsigned long found;
+  unsigned long new;
 
   iplistentry_t *freelist;
   iplisthashbucket_t ht[IPLIST_HASHSIZE];
