@@ -387,7 +387,7 @@ int main (int argc, char **argv)
   server_setup (h);
   nmdc_setup (h);
   command_setup ();
-#ifdef PLUGIN_HUBLST
+#ifdef PLUGIN_HUBLIST
   pi_hublist_setup (h);
 #endif
 

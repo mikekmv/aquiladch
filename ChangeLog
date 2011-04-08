@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta13:
+0.1.11-pre1-beta14:
+	Fix hublist init.
 	Fix windows warning.
 	Added custom rights.
 	Rename Win32 tag define to disable warning.
