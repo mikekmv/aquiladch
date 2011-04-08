@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta10:
+0.1.11-pre1-beta11:
+	Fixed xml.c escaping bug.
 	Compiles on windows.
 	Added xml.[ch] into svn and dist.
 	Added XML loading.

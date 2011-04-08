@@ -1,3 +1,22 @@
+/*                                                                                                                                    
+ *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *  
+ */
+
 #include "xml.h"
 
 #include <string.h>
@@ -50,15 +69,15 @@ unsigned char *xml_unescape (buffer_t * target, unsigned char *src)
 	switch (*src) {
 	  case 'l':
 	    bf_strncat (target, "<", 1);
-	    src += 3;
+	    src += 2;
 	    break;
 	  case 'g':
 	    bf_strncat (target, ">", 1);
-	    src += 3;
+	    src += 2;
 	    break;
 	  case 'a':
 	    bf_strncat (target, "&", 1);
-	    src += 4;
+	    src += 3;
 	    break;
 	}
 	break;
