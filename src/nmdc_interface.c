@@ -635,7 +635,7 @@ int proto_nmdc_user_userip2 (user_t * target)
   buf = bf_alloc (128);
 
   addr.s_addr = target->ipaddress;
-  bf_printf (buf, "$UserIP %s|", inet_ntoa (addr));
+  bf_printf (buf, "$UserIP %s %s|", target->nick, inet_ntoa (addr));
 
   retval = server_write (target->parent, buf);
 

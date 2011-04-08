@@ -57,6 +57,7 @@
 
 #define TRIGGER_RULE_LOGIN	1
 #define TRIGGER_RULE_COMMAND	2
+#define TRIGGER_RULE_TIMER	3
 
 typedef struct trigger {
   struct trigger *next, *prev;
@@ -89,6 +90,8 @@ typedef struct trigger_rule {
   unsigned char *help;
   unsigned long cap;
   unsigned long flags;
+  unsigned long interval;
+  unsigned long deadline;
 } trigger_rule_t;
 
 /* local data */
@@ -97,12 +100,27 @@ plugin_t *plugin_trigger = NULL;
 trigger_t triggerList;
 trigger_rule_t ruleListCommand;
 trigger_rule_t ruleListLogin;
+trigger_rule_t ruleListTimer;
+
+unsigned long deadline = ULONG_MAX;
 
 unsigned char *pi_trigger_SaveFile;
 
 void trigger_rule_delete (trigger_rule_t * rule);
 
 /************************************************************************************************/
+
+unsigned int trigger_deadline ()
+{
+  trigger_rule_t *r;
+
+  deadline = ULONG_MAX;
+  for (r = ruleListTimer.next; r != &ruleListTimer; r = r->next)
+    if (r->deadline < deadline)
+      deadline = r->deadline;
+
+  return 0;
+}
 
 unsigned int trigger_cache (trigger_t * trigger)
 {
@@ -354,6 +372,44 @@ unsigned long pi_trigger_login (plugin_user_t * user, void *dummy, unsigned long
   return 0;
 }
 
+unsigned long pi_trigger_timer (plugin_user_t * user, void *dummy, unsigned long event,
+				buffer_t * token)
+{
+  trigger_rule_t *r;
+  plugin_user_t *tgt, *prev;
+
+  if (((unsigned long) now.tv_sec) < deadline)
+    return 0;
+
+  for (r = ruleListTimer.next; r != &ruleListTimer; r = r->next) {
+    if (r->deadline > deadline)
+      continue;
+
+    r->trigger->usecnt++;
+    r->deadline += r->interval;
+
+    trigger_verify (r->trigger);
+
+    if (bf_used (r->trigger->text)) {
+      if (r->flags & RULE_FLAG_PM) {
+	tgt = NULL;
+	prev = NULL;
+	while (plugin_user_next (&tgt)) {
+	  prev = tgt;
+	  if (plugin_user_priv (NULL, tgt, NULL, r->trigger->text, 0) < 0)
+	    tgt = prev;
+	}
+      } else {
+	plugin_user_say (NULL, r->trigger->text);
+      }
+    }
+  }
+
+  trigger_deadline ();
+
+  return 0;
+}
+
 trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned long cap,
 				     unsigned long flags, unsigned char *arg, unsigned char *help)
 {
@@ -389,6 +445,12 @@ trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned
       command_register (rule->arg, &pi_trigger_command, cap, rule->help);
       list = &ruleListCommand;
       break;
+    case TRIGGER_RULE_TIMER:
+      rule->interval = (unsigned long) arg;
+      rule->deadline = now.tv_sec + rule->interval;
+      rule->arg = NULL;
+      list = &ruleListTimer;
+      break;
     default:
       t->refcnt--;
       if (rule->help)
@@ -402,6 +464,9 @@ trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned
   rule->prev = list->prev;
   rule->next->prev = rule;
   rule->prev->next = rule;
+
+  if (type == TRIGGER_RULE_TIMER)
+    trigger_deadline ();
 
   return rule;
 }
@@ -418,6 +483,10 @@ trigger_rule_t *trigger_rule_find (trigger_t * t, unsigned long id)
     if ((rule->trigger == t) && (rule->id == id))
       return rule;
 
+  for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next)
+    if ((rule->trigger == t) && (rule->id == id))
+      return rule;
+
   return NULL;
 }
 
@@ -430,6 +499,9 @@ void trigger_rule_delete (trigger_rule_t * rule)
     case TRIGGER_RULE_COMMAND:
       command_unregister (rule->arg);
       free (rule->arg);
+      break;
+    case TRIGGER_RULE_TIMER:
+      trigger_deadline ();
       break;
   }
 
@@ -481,6 +553,11 @@ int trigger_save (unsigned char *file)
 	     rule->flags, rule->arg, rule->help ? (char *) rule->help : "");
   }
 
+  for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next) {
+    fprintf (fp, "rule %s %lu %lu %lu %lu\n", rule->trigger->name, rule->type, rule->cap,
+	     rule->flags, rule->interval);
+  }
+
   fclose (fp);
 
   return 0;
@@ -492,7 +569,7 @@ int trigger_load (unsigned char *file)
   unsigned char buffer[1024];
   unsigned char name[TRIGGER_NAME_LENGTH];
   unsigned char cmd[TRIGGER_NAME_LENGTH];
-  unsigned long type, flags, cap;
+  unsigned long type, flags, cap, interval;
   int offset;
   unsigned int i;
 
@@ -542,6 +619,12 @@ int trigger_load (unsigned char *file)
 	    rule =
 	      trigger_rule_create (trigger, TRIGGER_RULE_COMMAND, cap, flags, cmd, buffer + offset);
 	    break;
+	  case TRIGGER_RULE_TIMER:
+	    sscanf (buffer, "rule %s %lu %lu %lu %lu", name, &type, &cap, &flags, &interval);
+	    rule =
+	      trigger_rule_create (trigger, TRIGGER_RULE_TIMER, cap, flags, (void *) interval,
+				   NULL);
+	    break;
 	}
 	break;
       default:
@@ -569,7 +652,7 @@ unsigned long pi_trigger_handler_triggeradd (plugin_user_t * user, buffer_t * ou
 			 "   type: one of:\n"
 			 "      - text : the trigger will dump the text provided in arg, \n"
 			 "      - file : the trigger will dump the contents of the file provided in arg\n"
-			 "	 - command : the trigger will dump the output of the command provided in arg\n"
+			 "	- command : the trigger will dump the output of the command provided in arg\n"
 			 "   arg: depends on type\n"), argv[0]);
     return 0;
   }
@@ -649,7 +732,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   trigger_t *t;
   trigger_rule_t *r;
   unsigned char *arg, *help;
-  unsigned long cap = 0, ncap = 0, capstart = 0, flags = 0;
+  unsigned long cap = 0, ncap = 0, capstart = 0, flags = 0, interval = 0;
 
   if (argc < 3)
     goto printhelp;
@@ -673,6 +756,16 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     capstart = 5;
     help = argv[4];
     arg = argv[3];
+  } else if (!strcasecmp (argv[2], "timer")) {
+    if (argc < 4)
+      goto printhelp;
+    type = TRIGGER_RULE_TIMER;
+    capstart = 4;
+    help = NULL;
+    interval = atoi (argv[3]);
+    if (!interval)
+      goto printhelp;
+    arg = (void *) interval;
   } else {
     bf_printf (output, _("Unknown trigger rule type %s."), argv[2]);
     return 0;
@@ -709,11 +802,12 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
 
 printhelp:
   bf_printf (output,
-	     _("Usage: %s <name> <type> [<arg> <help>] [<pm>] [<broadcast>] [rights <cap>]\n"
+	     _("Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights <cap>]\n"
 	       "   name: name of the trigger\n" "   type: one of:\n"
 	       "      - login   : the trigger will be triggered on user login, provide rights after type\n"
 	       "      - command : the trigger will be triggered by a command, provide the command in <arg>,\n"
 	       "                    then a help msg for the command, followed by any required rights\n"
+	       "      - timer   : the trigger will be triggered every <arg> seconds (cannot be 0).\n"
 	       "   arg: depends on type\n"
 	       "   help: help message for command (only for command triggers)\n"
 	       "   pm: always send trigger as a private message\n"
@@ -764,6 +858,10 @@ unsigned int rule_show (buffer_t * buf, trigger_rule_t * rule)
 
     case TRIGGER_RULE_LOGIN:
       bf_printf (buf, "login, ");
+      break;
+
+    case TRIGGER_RULE_TIMER:
+      bf_printf (buf, "timer (%s), ", time_print (rule->interval));
       break;
 
     default:
@@ -821,6 +919,10 @@ unsigned long pi_trigger_handler_rulelist (plugin_user_t * user, buffer_t * outp
     for (r = ruleListCommand.next; r != &ruleListCommand; r = r->next)
       if (r->trigger == t)
 	rule_show (output, r);
+
+    for (r = ruleListTimer.next; r != &ruleListTimer; r = r->next)
+      if (r->trigger == t)
+	rule_show (output, r);
   };
 
   return 0;
@@ -854,9 +956,12 @@ int pi_trigger_init ()
   ruleListCommand.prev = &ruleListCommand;
   ruleListLogin.next = &ruleListLogin;
   ruleListLogin.prev = &ruleListLogin;
+  ruleListTimer.next = &ruleListTimer;
+  ruleListTimer.prev = &ruleListTimer;
 
   plugin_trigger = plugin_register ("trigger");
   plugin_request (plugin_trigger, PLUGIN_EVENT_LOGIN, &pi_trigger_login);
+  plugin_request (plugin_trigger, PLUGIN_EVENT_CACHEFLUSH, &pi_trigger_timer);
 
   command_register ("triggeradd", &pi_trigger_handler_triggeradd, CAP_CONFIG, _("Add a trigger."));
   command_register ("triggerlist", &pi_trigger_handler_rulelist, CAP_CONFIG, _("List triggers."));

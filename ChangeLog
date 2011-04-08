@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta2:
+0.1.11-pre1-beta3:
+	Added timer trigger type.
+	Fixed UserIP2 support (Thanks FleetCommand)
 	Fixed race in dns.c (don't free sockets that are still resolving).
 	Added dns.h to DISTFILES
 	Fixed hardban stuff.

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta28\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-02-16 22:48+0100\n"
+"POT-Creation-Date: 2007-02-18 22:53+0100\n"
 "PO-Revision-Date: 2006-12-02 10:13+0200\n"
 "Last-Translator: maksalaatikko <maksis@adrenaline-network.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -2236,8 +2236,8 @@ msgstr "Lataa lua-scripti"
 msgid "Remove a lua script."
 msgstr "Poista lua-scripti."
 
-#: src/pi_trigger.c:567
-#, c-format
+#: src/pi_trigger.c:650
+#, fuzzy, c-format
 msgid ""
 "Usage: %s <name> <type> <arg>\n"
 "   name: name of the trigger\n"
@@ -2245,7 +2245,7 @@ msgid ""
 "      - text : the trigger will dump the text provided in arg, \n"
 "      - file : the trigger will dump the contents of the file provided in "
 "arg\n"
-"\t - command : the trigger will dump the output of the command provided in "
+"\t- command : the trigger will dump the output of the command provided in "
 "arg\n"
 "   arg: depends on type\n"
 msgstr ""
@@ -2258,32 +2258,32 @@ msgstr ""
 "\t - komento : trigger lähettää argumentissä olevan komennon sisällön\n"
 "   arg: riippuu tyypistä\n"
 
-#: src/pi_trigger.c:578
+#: src/pi_trigger.c:661
 #, c-format
 msgid "Triggername %s is too long. Max %d characters\n"
 msgstr "Triggerin %s nimi on liian pitkä. Enimmäispituus on %d kirjainta\n"
 
-#: src/pi_trigger.c:584
+#: src/pi_trigger.c:667
 #, c-format
 msgid "Triggername %s already exists."
 msgstr "Triggerin nimi %s on jo olemassa."
 
-#: src/pi_trigger.c:595
+#: src/pi_trigger.c:678
 #, c-format
 msgid "Unknown trigger type %s."
 msgstr "Tuntematon triggerin tyyppi %s."
 
-#: src/pi_trigger.c:601
+#: src/pi_trigger.c:684
 #, c-format
 msgid "Trigger %s created successfully."
 msgstr "Trigger %s luotu onnistuneesti."
 
-#: src/pi_trigger.c:603
+#: src/pi_trigger.c:686
 #, c-format
 msgid "Trigger %s creation failed."
 msgstr "Triggerin %s luominen epäonnistui."
 
-#: src/pi_trigger.c:614
+#: src/pi_trigger.c:697
 #, c-format
 msgid ""
 "Usage: %s <name>\n"
@@ -2292,44 +2292,45 @@ msgstr ""
 "Käyttö: %s <name>\n"
 "   nimi: triggerin nimi\n"
 
-#: src/pi_trigger.c:620 src/pi_trigger.c:658 src/pi_trigger.c:739
+#: src/pi_trigger.c:703 src/pi_trigger.c:741 src/pi_trigger.c:833
 #, c-format
 msgid "Triggername %s doesn't exist."
 msgstr "Triggerin nimeä %s ei ole olemassa."
 
-#: src/pi_trigger.c:625
+#: src/pi_trigger.c:708
 #, c-format
 msgid "Trigger %s deleted."
 msgstr "Trigger %s poistettu."
 
-#: src/pi_trigger.c:634
+#: src/pi_trigger.c:717
 #, c-format
 msgid "Trigger %s dumps file %s (Hits %ld)\n"
 msgstr "Trigger %s lähettää tekstin tiedostosta %s (Osumat %ld)\n"
 
-#: src/pi_trigger.c:638
+#: src/pi_trigger.c:721
 #, c-format
 msgid "Trigger %s dumps text %.*s (Hits %ld)\n"
 msgstr "Trigger %s lähettää tekstin %.*s (Osumat %ld)\n"
 
-#: src/pi_trigger.c:677
+#: src/pi_trigger.c:770
 #, c-format
 msgid "Unknown trigger rule type %s."
 msgstr "Tuntematon triggerin säännön tyyppi %s."
 
-#: src/pi_trigger.c:703
+#: src/pi_trigger.c:796
 #, c-format
 msgid "Rule for trigger %s created successfully."
 msgstr "Sääntö triggerille %s luotiin onnistuneesti."
 
-#: src/pi_trigger.c:705
+#: src/pi_trigger.c:798
 msgid "Rule creation failed."
 msgstr "Säännön luominen epäonnistui."
 
-#: src/pi_trigger.c:712
-#, c-format
+#: src/pi_trigger.c:805
+#, fuzzy, c-format
 msgid ""
-"Usage: %s <name> <type> [<arg> <help>] [<pm>] [<broadcast>] [rights <cap>]\n"
+"Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights "
+"<cap>]\n"
 "   name: name of the trigger\n"
 "   type: one of:\n"
 "      - login   : the trigger will be triggered on user login, provide "
@@ -2338,6 +2339,8 @@ msgid ""
 "command in <arg>,\n"
 "                    then a help msg for the command, followed by any "
 "required rights\n"
+"      - timer   : the trigger will be triggered every <arg> seconds (cannot "
+"be 0).\n"
 "   arg: depends on type\n"
 "   help: help message for command (only for command triggers)\n"
 "   pm: always send trigger as a private message\n"
@@ -2360,7 +2363,7 @@ msgstr ""
 "   broadcast: lähettää viestin mainchattiin kaikille käyttäjille\n"
 "   rights: triggerin käyttöön vaadittavat oikeudet\n"
 
-#: src/pi_trigger.c:733
+#: src/pi_trigger.c:827
 #, c-format
 msgid ""
 "Usage: %s <name> <id>\n"
@@ -2371,48 +2374,48 @@ msgstr ""
 "   nimi: triggerin nimi\n"
 "   id  : säännön ID (Esim Rule 0)\n"
 
-#: src/pi_trigger.c:746
+#: src/pi_trigger.c:840
 #, c-format
 msgid "Trigger %s Rule ID %lu doesn't exist."
 msgstr "Triggeriä %s Säännön ID:lla %lu ei ole olemassa."
 
-#: src/pi_trigger.c:751
+#: src/pi_trigger.c:845
 #, c-format
 msgid "Trigger %s Rule ID %lu deleted."
 msgstr "Trigger %s Säännön ID:lla %lu poistettu."
 
-#: src/pi_trigger.c:759
+#: src/pi_trigger.c:853
 #, c-format
 msgid "  Rule %lu type "
 msgstr "  Sääntö %lu tyyppi "
 
-#: src/pi_trigger.c:795
+#: src/pi_trigger.c:893
 #, c-format
 msgid "Cannot find trigger %s\n"
 msgstr "Triggeriä %s ei löydy\n"
 
-#: src/pi_trigger.c:802
+#: src/pi_trigger.c:900
 #, c-format
 msgid "Cannot find trigger %s rule ID %u\n"
 msgstr "Triggeriä %s säännön ID:lla %u ei löydy\n"
 
-#: src/pi_trigger.c:861
+#: src/pi_trigger.c:966
 msgid "Add a trigger."
 msgstr "Lisää trigger."
 
-#: src/pi_trigger.c:862
+#: src/pi_trigger.c:967
 msgid "List triggers."
 msgstr "Listaa triggerit."
 
-#: src/pi_trigger.c:864
+#: src/pi_trigger.c:969
 msgid "Delete a trigger."
 msgstr "Poista trigger."
 
-#: src/pi_trigger.c:866
+#: src/pi_trigger.c:971
 msgid "Add a rule."
 msgstr "Lisää sääntö."
 
-#: src/pi_trigger.c:867
+#: src/pi_trigger.c:972
 msgid "Delete a rule."
 msgstr "Poista sääntö."
 
