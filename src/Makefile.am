@@ -34,8 +34,8 @@ if GETADDRINFO
 GETADDRINFO_SOURCES = getaddrinfo.c
 endif
 if USE_PTHREADDNS
-DNS_FILES:=dns.c
-DNS_FLAGS:=-D_REENTRANT -DUSE_PTHREADDNS
+DNS_FILES = dns.c
+DNS_FLAGS = -D_REENTRANT -DUSE_PTHREADDNS
 endif
 endif
 
@@ -110,11 +110,10 @@ commit:
 	make -C .. commit
 
 %.gcno: %.c
-	touch %.gcno
+	touch $@
 
 %.gcda: %.c
-	touch %.gcda
-
+	touch $@
 
 %.c.gcov : %.c %.gcno %.gcda
 	gcov $(*).c || touch $(*).c.gcov

@@ -35,9 +35,6 @@
 #  endif
 #else
 #  include "sys_windows.h"
-
-char *crypt (char *, char *);
-
 #endif /* USE_WINDOWS */
 
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-02-21 09:48+0100\n"
+"POT-Creation-Date: 2007-02-21 16:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -881,26 +881,26 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: src/commands.c:90
+#: src/commands.c:91
 #, c-format
 msgid "Added %s.\n"
 msgstr ""
 
-#: src/commands.c:94
+#: src/commands.c:96
 #, c-format
 msgid "Removed %s.\n"
 msgstr ""
 
-#: src/commands.c:102
+#: src/commands.c:104
 #, c-format
 msgid "Unknown %s.\n"
 msgstr ""
 
-#: src/commands.c:143
+#: src/commands.c:145
 msgid "No help available."
 msgstr ""
 
-#: src/commands.c:328
+#: src/commands.c:330
 #, c-format
 msgid "Command not found: %s\n"
 msgstr ""

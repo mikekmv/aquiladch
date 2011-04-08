@@ -87,18 +87,20 @@ unsigned int command_flags_parse (command_flag_t * flags, buffer_t * buf, unsign
       for (j = 0; flags[j].name; j++) {
 	if (!strcasecmp (flags[j].name, name)) {
 	  if (arg[0] != '-') {
-	    bf_printf (buf, _("Added %s.\n"), flags[j].name);
+	    if (buf)
+	      bf_printf (buf, _("Added %s.\n"), flags[j].name);
 	    *flag |= flags[j].flag;
 	    *nflag &= ~flags[j].flag;
 	  } else {
-	    bf_printf (buf, _("Removed %s.\n"), flags[j].name);
+	    if (buf)
+	      bf_printf (buf, _("Removed %s.\n"), flags[j].name);
 	    *nflag |= flags[j].flag;
 	    *flag &= ~flags[j].flag;
 	  }
 	  break;
 	}
       }
-      if (!flags[j].name)
+      if (buf && !flags[j].name)
 	bf_printf (buf, _("Unknown %s.\n"), argv[i]);
 
       name = strtok (NULL, ", ");

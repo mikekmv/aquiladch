@@ -245,8 +245,8 @@ LOCALE_DEFS = -DLOCALEDIR=\"$(localedir)\"
 #
 @USE_WINDOWS_TRUE@WINDOWS_DEFS = -DUSE_WINDOWS
 @GETADDRINFO_TRUE@@USE_WINDOWS_FALSE@GETADDRINFO_SOURCES = getaddrinfo.c
-@USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@DNS_FILES := dns.c
-@USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@DNS_FLAGS := -D_REENTRANT -DUSE_PTHREADDNS
+@USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@DNS_FILES = dns.c
+@USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@DNS_FLAGS = -D_REENTRANT -DUSE_PTHREADDNS
 @LUA_FALSE@LUA_SOURCES = 
 
 #
@@ -600,10 +600,10 @@ commit:
 	make -C .. commit
 
 %.gcno: %.c
-	touch %.gcno
+	touch $@
 
 %.gcda: %.c
-	touch %.gcda
+	touch $@
 
 %.c.gcov : %.c %.gcno %.gcda
 	gcov $(*).c || touch $(*).c.gcov

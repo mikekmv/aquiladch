@@ -2,23 +2,25 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta5]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta6]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
-
-# check for gdb
-AC_CHECK_TOOL(GDB, [gdb], [gdb])
-AC_CHECK_TOOL(GPROF, [gprof], [gprof])
-
-AM_GNU_GETTEXT([external], [need-ngettext])
-AM_CONDITIONAL(ENABLE_NLS, test "${USE_NLS}" = "yes")
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
 AM_PROG_CC_C_O
 AC_CANONICAL_HOST
+
+# check for gdb
+AC_CHECK_TOOL(GDB, [gdb], [gdb])
+AC_CHECK_TOOL(GPROF, [gprof], [gprof])
+AC_CHECK_TOOL([STRIP],[strip])
+
+
+AM_GNU_GETTEXT([external], [need-ngettext])
+AM_CONDITIONAL(ENABLE_NLS, test "${USE_NLS}" = "yes")
 
 # initialize local variables
 sCFLAGS=
@@ -93,7 +95,6 @@ then
 	then
 		sCFLAGS="${sCFLAGS} -DDUMP_CORE"
 	fi
-	
 fi;
 
 
@@ -107,7 +108,6 @@ fi;
 #
 ## profiler arguent. This enables profiler options for the compiler.
 #
-sCFLAGS=""
 AC_ARG_ENABLE(profiler,
 	AC_HELP_STRING([--enable-profiler],[Turn on profiling (default OFF)]),
 	[case "$enableval" in
@@ -252,7 +252,6 @@ then
   		AC_CHECK_HEADERS([windows.h])
   		save_CFLAGS="$CFLAGS"
   		save_LDFLAGS="$LDFLAGS"
-  		CFLAGS="$CFLAGS -mno-cygwin"
   		LDFLAGS="$LDFLAGS -lwsock32"
   		AC_MSG_CHECKING([for CreateIoCompletionPort])
   		AC_LINK_IFELSE(
@@ -411,7 +410,7 @@ then
 
 	AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
 	AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
-	AC_CHECK_LIB([lua$with_lua_suffix], [luaL_checklstring], [], [lua_extra_libs="-llualib$with_lua_suffix $lua_extra_libs"])
+	AC_CHECK_LIB([lua$with_lua_suffix], [luaL_checklstring], [lua_extra_libs="$lua_extra_libs" ], [lua_extra_libs="-llualib$with_lua_suffix $lua_extra_libs"])
 	AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_call],
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],

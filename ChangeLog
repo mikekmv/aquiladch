@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta5:
+0.1.11-pre1-beta6:
+	Fix trigger timer after reload.
+	Clean up build system
+	remove any trace of the cygbin dist.
+	Fix availability of crypt() on windows.
 	Invalid char in timestrings just ends the string (reported maksalaatikko).
 	Correctly delete timer rule when trigger is deleted (Reported FD).
 	Fix to make it build on mingw
