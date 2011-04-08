@@ -630,6 +630,8 @@ int trigger_load (xml_node_t * base)
       continue;
 
     trigger = trigger_find (name);
+    if (!trigger)
+      continue;
     trigger_rule_create (trigger, type, rights, flags, NULL, NULL);
   }
 
@@ -649,6 +651,8 @@ int trigger_load (xml_node_t * base)
       continue;
 
     trigger = trigger_find (name);
+    if (!trigger)
+      continue;
     trigger_rule_create (trigger, type, rights, flags, arg, help);
   }
 
@@ -666,6 +670,8 @@ int trigger_load (xml_node_t * base)
       continue;
 
     trigger = trigger_find (name);
+    if (!trigger)
+      continue;
     trigger_rule_create (trigger, type, rights, flags, (void *) interval, NULL);
   }
 

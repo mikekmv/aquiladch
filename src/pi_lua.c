@@ -1400,6 +1400,24 @@ leave:
   return 1;
 }
 
+int pi_lua_account_lastlogin (lua_State * lua)
+{
+  account_t *acc;
+
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+
+  acc = account_find (nick);
+  if (!acc)
+    goto leave;
+
+  lua_pushnumber (lua, acc->lastlogin);
+
+  return 1;
+leave:
+  lua_pushnil (lua);
+  return 1;
+}
+
 int pi_lua_group_create (lua_State * lua)
 {
   unsigned int retval = 0;
@@ -1933,6 +1951,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"AccountPasswd", pi_lua_account_passwd,},
   {"AccountPwGen", pi_lua_account_pwgen,},
   {"AccountFind", pi_lua_account_find,},
+  {"AccountLastLogin", pi_lua_account_lastlogin,},
 
   /* hubinfo stat related info */
   {"GetActualUsersTotal", pi_lua_getuserstotal,},

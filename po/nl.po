@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-14 14:31+0100\n"
+"POT-Creation-Date: 2007-03-14 21:52+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -2039,29 +2039,29 @@ msgstr ""
 msgid "Not a valid IP address.\n"
 msgstr ""
 
-#: src/pi_lua.c:1547 src/pi_lua.c:1728 src/pi_lua.c:2259
+#: src/pi_lua.c:1565 src/pi_lua.c:1746 src/pi_lua.c:2278
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr ""
 
-#: src/pi_lua.c:1759
+#: src/pi_lua.c:1777
 msgid "No such LUA function."
 msgstr ""
 
-#: src/pi_lua.c:1767
+#: src/pi_lua.c:1785
 msgid "Command failed to register."
 msgstr ""
 
-#: src/pi_lua.c:1775
+#: src/pi_lua.c:1793
 msgid "Could not allocate memory."
 msgstr ""
 
-#: src/pi_lua.c:2031 src/pi_lua.c:2056
+#: src/pi_lua.c:2050 src/pi_lua.c:2075
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr ""
 
-#: src/pi_lua.c:2156
+#: src/pi_lua.c:2175
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -2069,61 +2069,61 @@ msgid ""
 "Scripts count/peak: %d/%d"
 msgstr ""
 
-#: src/pi_lua.c:2160
+#: src/pi_lua.c:2179
 msgid ""
 "\n"
 "No LUA scripts running.\n"
 msgstr ""
 
-#: src/pi_lua.c:2164
+#: src/pi_lua.c:2183
 msgid ""
 "\n"
 "Running LUA scripts:\n"
 msgstr ""
 
-#: src/pi_lua.c:2179 src/pi_lua.c:2197
+#: src/pi_lua.c:2198 src/pi_lua.c:2216
 #, c-format
 msgid "Usage: %s <script>"
 msgstr ""
 
-#: src/pi_lua.c:2184
+#: src/pi_lua.c:2203
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2186
+#: src/pi_lua.c:2205
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr ""
 
-#: src/pi_lua.c:2202
+#: src/pi_lua.c:2221
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2204
+#: src/pi_lua.c:2223
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr ""
 
-#: src/pi_lua.c:2334
+#: src/pi_lua.c:2353
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr ""
 
-#: src/pi_lua.c:2419
+#: src/pi_lua.c:2438
 msgid "Show lua stats."
 msgstr ""
 
-#: src/pi_lua.c:2420
+#: src/pi_lua.c:2439
 msgid "Load a lua script."
 msgstr ""
 
-#: src/pi_lua.c:2421
+#: src/pi_lua.c:2440
 msgid "Remove a lua script."
 msgstr ""
 
-#: src/pi_trigger.c:851
+#: src/pi_trigger.c:857
 #, c-format
 msgid ""
 "Usage: %s <name> <type> <arg>\n"
@@ -2137,73 +2137,73 @@ msgid ""
 "   arg: depends on type\n"
 msgstr ""
 
-#: src/pi_trigger.c:862
+#: src/pi_trigger.c:868
 #, c-format
 msgid "Triggername %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_trigger.c:868
+#: src/pi_trigger.c:874
 #, c-format
 msgid "Triggername %s already exists."
 msgstr ""
 
-#: src/pi_trigger.c:879
+#: src/pi_trigger.c:885
 #, c-format
 msgid "Unknown trigger type %s."
 msgstr ""
 
-#: src/pi_trigger.c:885
+#: src/pi_trigger.c:891
 #, c-format
 msgid "Trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:887
+#: src/pi_trigger.c:893
 #, c-format
 msgid "Trigger %s creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:898
+#: src/pi_trigger.c:904
 #, c-format
 msgid ""
 "Usage: %s <name>\n"
 "   name: name of the trigger\n"
 msgstr ""
 
-#: src/pi_trigger.c:904 src/pi_trigger.c:943 src/pi_trigger.c:1034
+#: src/pi_trigger.c:910 src/pi_trigger.c:949 src/pi_trigger.c:1040
 #, c-format
 msgid "Triggername %s doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:909
+#: src/pi_trigger.c:915
 #, c-format
 msgid "Trigger %s deleted."
 msgstr ""
 
-#: src/pi_trigger.c:918
+#: src/pi_trigger.c:924
 #, c-format
 msgid "Trigger %s dumps file %s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:922
+#: src/pi_trigger.c:928
 #, c-format
 msgid "Trigger %s dumps text %.*s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:972
+#: src/pi_trigger.c:978
 #, c-format
 msgid "Unknown trigger rule type %s."
 msgstr ""
 
-#: src/pi_trigger.c:997
+#: src/pi_trigger.c:1003
 #, c-format
 msgid "Rule for trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:999
+#: src/pi_trigger.c:1005
 msgid "Rule creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:1006
+#: src/pi_trigger.c:1012
 #, c-format
 msgid ""
 "Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights "
@@ -2225,7 +2225,7 @@ msgid ""
 "   rights: rights required to activate rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1028
+#: src/pi_trigger.c:1034
 #, c-format
 msgid ""
 "Usage: %s <name> <id>\n"
@@ -2233,48 +2233,48 @@ msgid ""
 "   id  : ID of the rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1041
+#: src/pi_trigger.c:1047
 #, c-format
 msgid "Trigger %s Rule ID %lu doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:1046
+#: src/pi_trigger.c:1052
 #, c-format
 msgid "Trigger %s Rule ID %lu deleted."
 msgstr ""
 
-#: src/pi_trigger.c:1054
+#: src/pi_trigger.c:1060
 #, c-format
 msgid "  Rule %lu type "
 msgstr ""
 
-#: src/pi_trigger.c:1094
+#: src/pi_trigger.c:1100
 #, c-format
 msgid "Cannot find trigger %s\n"
 msgstr ""
 
-#: src/pi_trigger.c:1101
+#: src/pi_trigger.c:1107
 #, c-format
 msgid "Cannot find trigger %s rule ID %u\n"
 msgstr ""
 
-#: src/pi_trigger.c:1173
+#: src/pi_trigger.c:1179
 msgid "Add a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1174
+#: src/pi_trigger.c:1180
 msgid "List triggers."
 msgstr ""
 
-#: src/pi_trigger.c:1176
+#: src/pi_trigger.c:1182
 msgid "Delete a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1178
+#: src/pi_trigger.c:1184
 msgid "Add a rule."
 msgstr ""
 
-#: src/pi_trigger.c:1179
+#: src/pi_trigger.c:1185
 msgid "Delete a rule."
 msgstr ""
 

@@ -519,22 +519,22 @@ buffer_t *xml_export_element (xml_node_t * node, buffer_t * buf, int level)
     return buf;
 
   if (node->value) {
-    buf = bf_printf (buf, "%*s<%s", level, "", node->name);
+    buf = bf_printf_resize (buf, "%*s<%s", level, "", node->name);
     /* FIXME add attr */
-    buf = bf_printf (buf, ">");
+    buf = bf_printf_resize (buf, ">");
     xml_escape (buf, node->value);
-    buf = bf_printf (buf, "</%s>\n", node->name);
+    buf = bf_printf_resize (buf, "</%s>\n", node->name);
     return buf;
   }
 
   if (!node->children) {
-    buf = bf_printf (buf, "%*s<%s ", level, "", node->name);
+    buf = bf_printf_resize (buf, "%*s<%s ", level, "", node->name);
     /* FIXME add attr */
-    buf = bf_printf (buf, "/>\n");
+    buf = bf_printf_resize (buf, "/>\n");
     return buf;
   }
 
-  buf = bf_printf (buf, "%*s<%s>\n", level, "", node->name);
+  buf = bf_printf_resize (buf, "%*s<%s>\n", level, "", node->name);
   if (node->children) {
     child = node->children;
     do {
@@ -542,7 +542,7 @@ buffer_t *xml_export_element (xml_node_t * node, buffer_t * buf, int level)
       child = child->next;
     } while (child != node->children);
   }
-  buf = bf_printf (buf, "%*s</%s>\n", level, "", node->name);
+  buf = bf_printf_resize (buf, "%*s</%s>\n", level, "", node->name);
 
   return buf;
 }
