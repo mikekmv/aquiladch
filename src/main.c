@@ -333,6 +333,7 @@ int main (int argc, char **argv)
 
   /* initialize the global configuration */
   gettime ();
+
   config_init ();
   accounts_init ();
   plugin_init ();

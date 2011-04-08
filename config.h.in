@@ -1,5 +1,23 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Aquila beta version */
+#undef AQVER_BETA
+
+/* Aquila major version */
+#undef AQVER_MAJOR
+
+/* Aquila minor version */
+#undef AQVER_MINOR
+
+/* Aquila prerelease */
+#undef AQVER_PRE
+
+/* Aquila revision */
+#undef AQVER_REV
+
+/* Aquila sub version, calculated from prerelease and beta version */
+#undef AQVER_SUB
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS

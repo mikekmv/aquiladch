@@ -1,6 +1,11 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta17:
+0.1.11-pre1-beta18:
+	Fix timer rules - obey rights setting.
+	Fixed custom rights mask.
+	Cosmetic fix in xml saving.
+	Fix bug in XML timer rule interval loading.
+	Added windows icon and build info.
 	More xml saving bugs.
 	Fixed bug in xml saving... again.
 	Added lua function AccountLastLogin() (Req maksalaatikko)

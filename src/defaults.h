@@ -46,6 +46,7 @@
 
 #define HUBSOFT_NAME		"Aquila"
 #define HUBSOFT_HOMEPAGE	"http://aquiladc.sourceforge.net/"
+#define HUBSOFT_AUTHOR		"Johan Verrept"
 /*
  * These values determine the size and mask of the configuration value
  *   hash tables.

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta17]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta18]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -542,6 +542,30 @@ fi
 #
 #
 ##################################################################################################
+
+#
+## Windows specific version numbering.
+#
+aquilaversion_MAJOR=`echo $VERSION | cut -d. -f 1`
+aquilaversion_MINOR=`echo $VERSION | cut -d. -f 2`
+aquilaversion_REV=`echo $VERSION | cut -d. -f3 | cut -d- -f1`
+aquilaversion_PRE=`echo $VERSION | cut -d- -f2 | cut -c 4-`
+aquilaversion_BETA=`echo $VERSION | cut -d- -f3 | sed 's/beta//' | sed 's/alpha//'`
+if test x$aquilaversion_PRE = x
+then
+	aquilaversion_PRE=0
+fi
+if test x$aquilaversion_BETA = x
+then
+	aquilaversion_BETA=0
+fi
+
+AC_DEFINE_UNQUOTED(AQVER_MAJOR,	$aquilaversion_MAJOR,	[Aquila major version])
+AC_DEFINE_UNQUOTED(AQVER_MINOR,	$aquilaversion_MINOR,	[Aquila minor version])
+AC_DEFINE_UNQUOTED(AQVER_REV,	$aquilaversion_REV,	[Aquila revision])
+AC_DEFINE_UNQUOTED(AQVER_PRE,	$aquilaversion_PRE,	[Aquila prerelease])
+AC_DEFINE_UNQUOTED(AQVER_BETA,	$aquilaversion_BETA, 	[Aquila beta version])
+AC_DEFINE_UNQUOTED(AQVER_SUB,	[(AQVER_PRE * 1000 + AQVER_BETA)], [Aquila sub version, calculated from prerelease and beta version])
 
 AC_CONFIG_FILES([Makefile po/Makefile.in
                  src/Makefile

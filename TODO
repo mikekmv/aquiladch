@@ -1,5 +1,6 @@
 
 Develstatus:
+	- maintain group order. cosmetic fix. (ffrag)
 	- remove those damned cache.* timings. all 1.
 	- pi_rss...
 	- implement delayed close on windows.

@@ -588,7 +588,7 @@ unsigned long xml_write (FILE * fp, xml_node_t * tree)
   unsigned long l = 0;
   buffer_t *b, *buf;
 
-  fwrite ("<?xml version=\"1.1\" ?>\n", 1, 22, fp);
+  fwrite ("<?xml version=\"1.1\" ?>\n", 1, 23, fp);
   buf = xml_export (tree);
   b = buf;
   while (b) {

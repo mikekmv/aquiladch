@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-14 21:52+0100\n"
+"POT-Creation-Date: 2007-03-16 14:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2023,7 +2023,7 @@ msgstr ""
 msgid "Remove a lua script."
 msgstr ""
 
-#: src/pi_trigger.c:857
+#: src/pi_trigger.c:860
 #, c-format
 msgid ""
 "Usage: %s <name> <type> <arg>\n"
@@ -2037,73 +2037,73 @@ msgid ""
 "   arg: depends on type\n"
 msgstr ""
 
-#: src/pi_trigger.c:868
+#: src/pi_trigger.c:871
 #, c-format
 msgid "Triggername %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_trigger.c:874
+#: src/pi_trigger.c:877
 #, c-format
 msgid "Triggername %s already exists."
 msgstr ""
 
-#: src/pi_trigger.c:885
+#: src/pi_trigger.c:888
 #, c-format
 msgid "Unknown trigger type %s."
 msgstr ""
 
-#: src/pi_trigger.c:891
+#: src/pi_trigger.c:894
 #, c-format
 msgid "Trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:893
+#: src/pi_trigger.c:896
 #, c-format
 msgid "Trigger %s creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:904
+#: src/pi_trigger.c:907
 #, c-format
 msgid ""
 "Usage: %s <name>\n"
 "   name: name of the trigger\n"
 msgstr ""
 
-#: src/pi_trigger.c:910 src/pi_trigger.c:949 src/pi_trigger.c:1040
+#: src/pi_trigger.c:913 src/pi_trigger.c:952 src/pi_trigger.c:1043
 #, c-format
 msgid "Triggername %s doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:915
+#: src/pi_trigger.c:918
 #, c-format
 msgid "Trigger %s deleted."
 msgstr ""
 
-#: src/pi_trigger.c:924
+#: src/pi_trigger.c:927
 #, c-format
 msgid "Trigger %s dumps file %s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:928
+#: src/pi_trigger.c:931
 #, c-format
 msgid "Trigger %s dumps text %.*s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:978
+#: src/pi_trigger.c:981
 #, c-format
 msgid "Unknown trigger rule type %s."
 msgstr ""
 
-#: src/pi_trigger.c:1003
+#: src/pi_trigger.c:1006
 #, c-format
 msgid "Rule for trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:1005
+#: src/pi_trigger.c:1008
 msgid "Rule creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:1012
+#: src/pi_trigger.c:1015
 #, c-format
 msgid ""
 "Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights "
@@ -2125,7 +2125,7 @@ msgid ""
 "   rights: rights required to activate rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1034
+#: src/pi_trigger.c:1037
 #, c-format
 msgid ""
 "Usage: %s <name> <id>\n"
@@ -2133,48 +2133,48 @@ msgid ""
 "   id  : ID of the rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1047
+#: src/pi_trigger.c:1050
 #, c-format
 msgid "Trigger %s Rule ID %lu doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:1052
+#: src/pi_trigger.c:1055
 #, c-format
 msgid "Trigger %s Rule ID %lu deleted."
 msgstr ""
 
-#: src/pi_trigger.c:1060
+#: src/pi_trigger.c:1063
 #, c-format
 msgid "  Rule %lu type "
 msgstr ""
 
-#: src/pi_trigger.c:1100
+#: src/pi_trigger.c:1103
 #, c-format
 msgid "Cannot find trigger %s\n"
 msgstr ""
 
-#: src/pi_trigger.c:1107
+#: src/pi_trigger.c:1110
 #, c-format
 msgid "Cannot find trigger %s rule ID %u\n"
 msgstr ""
 
-#: src/pi_trigger.c:1179
+#: src/pi_trigger.c:1182
 msgid "Add a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1180
+#: src/pi_trigger.c:1183
 msgid "List triggers."
 msgstr ""
 
-#: src/pi_trigger.c:1182
+#: src/pi_trigger.c:1185
 msgid "Delete a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1184
+#: src/pi_trigger.c:1187
 msgid "Add a rule."
 msgstr ""
 
-#: src/pi_trigger.c:1185
+#: src/pi_trigger.c:1188
 msgid "Delete a rule."
 msgstr ""
 

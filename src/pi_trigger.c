@@ -398,16 +398,19 @@ unsigned long pi_trigger_timer (plugin_user_t * user, void *dummy, unsigned long
     trigger_verify (r->trigger);
 
     if (bf_used (r->trigger->text)) {
-      if (r->flags & RULE_FLAG_PM) {
-	tgt = NULL;
-	prev = NULL;
-	while (plugin_user_next (&tgt)) {
-	  prev = tgt;
+      tgt = NULL;
+      prev = NULL;
+      while (plugin_user_next (&tgt)) {
+	prev = tgt;
+	if ((tgt->rights & r->cap) != r->cap)
+	  continue;
+	if (r->flags & RULE_FLAG_PM) {
 	  if (plugin_user_priv (NULL, tgt, NULL, r->trigger->text, 0) < 0)
 	    tgt = prev;
+	} else {
+	  if (plugin_user_sayto (NULL, tgt, r->trigger->text, 0) < 0)
+	    tgt = prev;
 	}
-      } else {
-	plugin_user_say (NULL, r->trigger->text);
       }
     }
   }
@@ -666,7 +669,7 @@ int trigger_load (xml_node_t * base)
       continue;
     if (!xml_child_get (node, "Flags", XML_TYPE_ULONG, &flags))
       continue;
-    if (!xml_child_get (node, "Interval", XML_TYPE_ULONG, &flags))
+    if (!xml_child_get (node, "Interval", XML_TYPE_ULONG, &interval))
       continue;
 
     trigger = trigger_find (name);
