@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-02-28 15:33+0100\n"
+"POT-Creation-Date: 2007-03-04 00:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -984,11 +984,11 @@ msgid ""
 "passwd or !pwgen."
 msgstr ""
 
-#: src/nmdc_protocol.c:653 src/nmdc_protocol.c:906
+#: src/nmdc_protocol.c:653 src/nmdc_protocol.c:909
 msgid "WARNING: You should use a client that uses tags!"
 msgstr ""
 
-#: src/nmdc_protocol.c:659 src/nmdc_protocol.c:915
+#: src/nmdc_protocol.c:659 src/nmdc_protocol.c:918
 msgid "This hub requires tags, please upgrade to a client that supports them."
 msgstr ""
 
@@ -1012,109 +1012,109 @@ msgstr ""
 msgid "Your chat message was too long."
 msgstr ""
 
-#: src/nmdc_protocol.c:924
+#: src/nmdc_protocol.c:927
 msgid "Broken MyINFO, get lost."
 msgstr ""
 
-#: src/nmdc_protocol.c:939
+#: src/nmdc_protocol.c:942
 msgid "Sorry, you no longer satisfy the necessary requirements for this hub."
-msgstr ""
-
-#: src/nmdc_protocol.c:1024
-#, c-format
-msgid "Active searches are limited to %u every %u seconds."
 msgstr ""
 
 #: src/nmdc_protocol.c:1027
 #, c-format
+msgid "Active searches are limited to %u every %u seconds."
+msgstr ""
+
+#: src/nmdc_protocol.c:1030
+#, c-format
 msgid "Passive searches are limited to %u every %u seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1037
+#: src/nmdc_protocol.c:1040
 msgid "Your search message is too long."
 msgstr ""
 
-#: src/nmdc_protocol.c:1054
+#: src/nmdc_protocol.c:1057
 msgid "You claim to be active. Passive search DENIED."
 msgstr ""
 
-#: src/nmdc_protocol.c:1070
+#: src/nmdc_protocol.c:1073
 msgid "You claim to be passive. Active search DENIED."
 msgstr ""
 
-#: src/nmdc_protocol.c:1089
+#: src/nmdc_protocol.c:1092
 #, c-format
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1106
+#: src/nmdc_protocol.c:1109
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1288 src/nmdc_protocol.c:1367
+#: src/nmdc_protocol.c:1291 src/nmdc_protocol.c:1370
 msgid "You are not allowed to download."
 msgstr ""
 
-#: src/nmdc_protocol.c:1315 src/nmdc_protocol.c:1407
+#: src/nmdc_protocol.c:1318 src/nmdc_protocol.c:1410
 #, c-format
 msgid "You cannot download from %s."
 msgstr ""
 
-#: src/nmdc_protocol.c:1336
+#: src/nmdc_protocol.c:1339
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1438
+#: src/nmdc_protocol.c:1441
 msgid "You are not allowed to send private messages."
 msgstr ""
 
-#: src/nmdc_protocol.c:1447
+#: src/nmdc_protocol.c:1450
 msgid "Don't send private messages so fast."
 msgstr ""
 
-#: src/nmdc_protocol.c:1477
+#: src/nmdc_protocol.c:1480
 msgid "Bad From: nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1479
+#: src/nmdc_protocol.c:1482
 msgid "Attempted PM faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1498
+#: src/nmdc_protocol.c:1501
 msgid "Bad display nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1500
+#: src/nmdc_protocol.c:1503
 msgid "Attempted display nick faking"
 msgstr ""
 
-#: src/nmdc_protocol.c:1514
+#: src/nmdc_protocol.c:1517
 msgid "Sorry, you can only send private messages to operators."
 msgstr ""
 
-#: src/nmdc_protocol.c:1547
+#: src/nmdc_protocol.c:1550
 msgid "You are not allowed to redirect users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1627 src/nmdc_protocol.c:1685
+#: src/nmdc_protocol.c:1630 src/nmdc_protocol.c:1688
 msgid "Redirect refused.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1656
+#: src/nmdc_protocol.c:1659
 msgid "You are not allowed to kick users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1680
+#: src/nmdc_protocol.c:1683
 msgid "You were kicked."
 msgstr ""
 
-#: src/nmdc_protocol.c:1706
+#: src/nmdc_protocol.c:1709
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1772
+#: src/nmdc_protocol.c:1775
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr ""
@@ -1956,42 +1956,42 @@ msgstr ""
 msgid "Register at hublists."
 msgstr ""
 
-#: src/pi_lua.c:171 src/pi_lua.c:247
+#: src/pi_lua.c:172 src/pi_lua.c:248
 msgid "Unknown config value."
 msgstr ""
 
-#: src/pi_lua.c:229 src/pi_lua.c:306
+#: src/pi_lua.c:230 src/pi_lua.c:307
 msgid "Element Type not supported."
 msgstr ""
 
-#: src/pi_lua.c:285 src/pi_lua.c:820 src/pi_lua.c:849 src/pi_lua.c:889
-#: src/pi_lua.c:904 src/pi_lua.c:972
+#: src/pi_lua.c:286 src/pi_lua.c:821 src/pi_lua.c:850 src/pi_lua.c:890
+#: src/pi_lua.c:905 src/pi_lua.c:973
 msgid "Not a valid IP address.\n"
 msgstr ""
 
-#: src/pi_lua.c:1543 src/pi_lua.c:1724 src/pi_lua.c:2255
+#: src/pi_lua.c:1544 src/pi_lua.c:1725 src/pi_lua.c:2256
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr ""
 
-#: src/pi_lua.c:1755
+#: src/pi_lua.c:1756
 msgid "No such LUA function."
 msgstr ""
 
-#: src/pi_lua.c:1763
+#: src/pi_lua.c:1764
 msgid "Command failed to register."
 msgstr ""
 
-#: src/pi_lua.c:1771
+#: src/pi_lua.c:1772
 msgid "Could not allocate memory."
 msgstr ""
 
-#: src/pi_lua.c:2027 src/pi_lua.c:2052
+#: src/pi_lua.c:2028 src/pi_lua.c:2053
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr ""
 
-#: src/pi_lua.c:2152
+#: src/pi_lua.c:2153
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -1999,57 +1999,57 @@ msgid ""
 "Scripts count/peak: %d/%d"
 msgstr ""
 
-#: src/pi_lua.c:2156
+#: src/pi_lua.c:2157
 msgid ""
 "\n"
 "No LUA scripts running.\n"
 msgstr ""
 
-#: src/pi_lua.c:2160
+#: src/pi_lua.c:2161
 msgid ""
 "\n"
 "Running LUA scripts:\n"
 msgstr ""
 
-#: src/pi_lua.c:2175 src/pi_lua.c:2193
+#: src/pi_lua.c:2176 src/pi_lua.c:2194
 #, c-format
 msgid "Usage: %s <script>"
 msgstr ""
 
-#: src/pi_lua.c:2180
+#: src/pi_lua.c:2181
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2182
+#: src/pi_lua.c:2183
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr ""
 
-#: src/pi_lua.c:2198
+#: src/pi_lua.c:2199
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2200
+#: src/pi_lua.c:2201
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr ""
 
-#: src/pi_lua.c:2285
+#: src/pi_lua.c:2286
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr ""
 
-#: src/pi_lua.c:2368
+#: src/pi_lua.c:2369
 msgid "Show lua stats."
 msgstr ""
 
-#: src/pi_lua.c:2369
+#: src/pi_lua.c:2370
 msgid "Load a lua script."
 msgstr ""
 
-#: src/pi_lua.c:2370
+#: src/pi_lua.c:2371
 msgid "Remove a lua script."
 msgstr ""
 
@@ -2216,7 +2216,7 @@ msgid ""
 "Operators           %lu / %lu\n"
 " Total      %lu / %lu\n"
 " Peak             %lu\n"
-" Dropped          %lu\n"
+" Refused          %lu\n"
 " Buffering        %lu\n"
 msgstr ""
 

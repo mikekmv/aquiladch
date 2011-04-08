@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta8:
+0.1.11-pre1-beta9:
+	Changed "Dropped" to "Refused" in !statuser
+	Added EventZombie: this is a zombie chatmessage.
 	Fixed esocket_check_connect error handling.
 	Fixed esocket_connect on windows (reported rick/XP9).
 	Fix !setlocale: set the LANGUAGE env variable to switch.

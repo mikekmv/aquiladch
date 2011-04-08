@@ -62,6 +62,7 @@ const unsigned char *pi_lua_eventnames[] = {
   "EventSave",
   "EventConfig",
   "EventDisconnect",
+  "EventZombie",
   NULL
 };
 

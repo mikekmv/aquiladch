@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta8]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta9]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -14,8 +14,8 @@ AM_PROG_CC_C_O
 AC_CANONICAL_HOST
 
 # check for gdb
-AC_CHECK_TOOL(GDB, [gdb], [gdb])
-AC_CHECK_TOOL(GPROF, [gprof], [gprof])
+AC_CHECK_TOOL([GDB], [gdb], [gdb])
+AC_CHECK_TOOL([GPROF], [gprof], [gprof])
 AC_CHECK_TOOL([STRIP],[strip])
 
 

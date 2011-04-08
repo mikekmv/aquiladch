@@ -882,6 +882,9 @@ int proto_nmdc_state_online_chat (user_t * u, token_t * tkn, buffer_t * output, 
       /* add empty chat buffer as marker */
       buffer_t *mark = bf_alloc (1);
 
+      if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_ZOMBIE, b) != PLUGIN_RETVAL_CONTINUE)
+	break;
+
       cache_queue (cache.chat, u, mark);
       bf_free (mark);
     }
