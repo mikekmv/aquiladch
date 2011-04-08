@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta3:
+0.1.11-pre1-beta4:
+	Fix to make it build on mingw
+	Make timer trigger type accept standard time strings.
 	Added timer trigger type.
 	Fixed UserIP2 support (Thanks FleetCommand)
 	Fixed race in dns.c (don't free sockets that are still resolving).

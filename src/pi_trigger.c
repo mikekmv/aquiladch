@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <assert.h>
+#include <limits.h>
 #ifdef __USE_W32_SOCKETS
 #include <winsock2.h>
 #endif
@@ -762,7 +763,7 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
     type = TRIGGER_RULE_TIMER;
     capstart = 4;
     help = NULL;
-    interval = atoi (argv[3]);
+    interval = time_parse (argv[3]);
     if (!interval)
       goto printhelp;
     arg = (void *) interval;
