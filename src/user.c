@@ -28,6 +28,7 @@
 #include "../config.h"
 
 #include "user.h"
+#include "cap.h"
 
 #ifndef USE_WINDOWS
 #  ifdef HAVE_CRYPT_H
@@ -46,7 +47,7 @@ unsigned long account_count = 0;
 account_type_t *accountTypes;
 account_t *accounts;
 
-account_type_t *account_type_add (unsigned char *name, unsigned long rights)
+account_type_t *account_type_add (unsigned char *name, unsigned long long rights)
 {
   account_type_t *t;
 
@@ -344,8 +345,11 @@ unsigned int accounts_load_old (const unsigned char *filename)
       case 'T':
 	t = malloc (sizeof (account_type_t));
 	memset (t, 0, sizeof (account_type_t));
-	sscanf (buffer, "T %s %lu %u", t->name, &t->rights, &t->id);
-
+#ifndef USE_WINDOWS
+	sscanf (buffer, "T %s %llu %u", t->name, &t->rights, &t->id);
+#else
+	sscanf (buffer, "T %s %I64u %u", t->name, &t->rights, &t->id);
+#endif
 	if ((ot = account_type_find (t->name)))
 	  account_type_del (ot);
 
@@ -364,9 +368,13 @@ unsigned int accounts_load_old (const unsigned char *filename)
       case 'A':
 	a = malloc (sizeof (account_t));
 	memset (a, 0, sizeof (account_t));
-	sscanf (buffer, "A %s %s %lu %u %lu %s %lu %lu", a->nick, a->passwd, &a->rights, &a->class,
+#ifndef USE_WINDOWS
+	sscanf (buffer, "A %s %s %llu %u %lu %s %lu %lu", a->nick, a->passwd, &a->rights, &a->class,
 		&a->id, a->op, &a->regged, &a->lastlogin);
-
+#else
+	sscanf (buffer, "A %s %s %I64u %u %lu %s %lu %lu", a->nick, a->passwd, &a->rights,
+		&a->class, &a->id, a->op, &a->regged, &a->lastlogin);
+#endif
 	if ((oa = account_find (a->nick)))
 	  account_del (oa);
 
@@ -416,14 +424,25 @@ unsigned int accounts_save_old (const unsigned char *filename)
   if (!fp)
     return errno;
 
+#ifndef USE_WINDOWS
   for (t = accountTypes; t; t = t->next)
-    fprintf (fp, "T %s %lu %d\n", t->name, t->rights, t->id);
+    fprintf (fp, "T %s %llu %d\n", t->name, t->rights & ~CAP_CUSTOM_MASK, t->id);
 
   for (a = accounts; a; a = a->next)
-    fprintf (fp, "A %s %s %lu %d %lu %s %lu %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd,
-	     a->rights, a->class, a->id, a->op[0] ? a->op : (unsigned char *) HUBSOFT_NAME,
-	     a->regged ? a->regged : time (NULL), a->lastlogin);
+    fprintf (fp, "A %s %s %llu %d %lu %s %lu %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd,
+	     a->rights & ~CAP_CUSTOM_MASK, a->class, a->id,
+	     a->op[0] ? a->op : (unsigned char *) HUBSOFT_NAME, a->regged ? a->regged : time (NULL),
+	     a->lastlogin);
+#else
+  for (t = accountTypes; t; t = t->next)
+    fprintf (fp, "T %s %I64u %d\n", t->name, t->rights & ~CAP_CUSTOM_MASK, t->id);
 
+  for (a = accounts; a; a = a->next)
+    fprintf (fp, "A %s %s %I64u %d %lu %s %lu %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd,
+	     a->rights & ~CAP_CUSTOM_MASK, a->class, a->id,
+	     a->op[0] ? a->op : (unsigned char *) HUBSOFT_NAME, a->regged ? a->regged : time (NULL),
+	     a->lastlogin);
+#endif
   fclose (fp);
   return 0;
 }

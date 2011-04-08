@@ -24,7 +24,7 @@
 	otherwise printcapabilities will not work correctly */
 
 /* *INDENT-OFF* */
-flag_t Capabilities[] = {
+flag_t Capabilities[CAP_CUSTOM_MAX + 1] = {
 	{"default",	CAP_DEFAULT,	_("Default capabilities: chat, pmop, dl and search.")},
 	{"reg",		CAP_REG,	_("Default REG capabilities: chat, search, pm, dl.")},
 	{"vip",		CAP_VIP,	_("Default VIP capabilities: chat, search, pm, dl, share.")},
@@ -57,6 +57,120 @@ flag_t Capabilities[] = {
 	{"sourceverify",CAP_SOURCEVERIFY,_("Users with this right are only allowed into the hub if their source IP is listed for their nick in the userrestict list.")},
 	{"redirect",    CAP_REDIRECT,    _("Users with this right are allowed to redirect users.")},
 	{"locallan",    CAP_LOCALLAN,    _("Users with this right are allowed to use locallan ips (and avoid ctm and asearch checks).")},
-	{0, 0, 0}
+	{0, 0, 0},
 };
+
+unsigned long long next_right = (1LL << CAP_CUSTOM_FIRST);
+unsigned long long used_rights = ~CAP_CUSTOM_MASK;
+
+unsigned long long find_right () {
+	unsigned long long right;
+	
+	if (next_right & CAP_CUSTOM_MASK) {
+		right = next_right;
+		next_right = next_right << 1;
+		return right;
+	};
+	
+	right = (1LL << CAP_CUSTOM_FIRST);
+	while (right & used_rights) 
+		right = right << 1;
+	
+	if (right & CAP_CUSTOM_MASK)
+		return right;
+
+	return 0;
+}
+
+flag_t *cap_custom_add (unsigned char *name, unsigned char *help) {
+	unsigned int i;
+	
+	/* verify right does not exist */
+	for (i = 0; (i < CAP_CUSTOM_MAX) && Capabilities[i].name; i++)
+		if (!strcmp (Capabilities[i].name, name))   
+			break;
+	if (Capabilities[i].flag)
+		return NULL;
+
+	/* create new right if there isn't an old deleted one. */
+	if (!Capabilities[i].name) {
+		/* find empty spot */
+		for (i = CAP_CUSTOM_OFFSET; i < CAP_CUSTOM_MAX; i++)
+			if (!Capabilities[i].name) break;
+		/* out of room? */
+		if (i == CAP_CUSTOM_MAX)
+			return NULL;
+	}
+	
+	Capabilities[i].name = strdup(name);
+	Capabilities[i].help = strdup(help);
+	Capabilities[i].flag = find_right();
+	used_rights |=  Capabilities[i].flag;
+	i++;
+	Capabilities[i].name = NULL;
+	Capabilities[i].help = NULL;
+	Capabilities[i].flag = 0;
+	i--;
+	return Capabilities + i;
+};
+
+int cap_custom_remove (unsigned char *name) {
+	unsigned int i;
+	
+	/* find right */
+	for (i = CAP_CUSTOM_OFFSET; i < CAP_CUSTOM_MAX; i++)
+		if (!strcmp (Capabilities[i].name, name))
+			break;
+	/* not found */ 
+	if (i == CAP_CUSTOM_MAX)
+		return -1;
+
+	// FIXME need to find a solution for this. i cannot know if this right is assigned already.
+	//   this temp solution limits available rights but prevents collisions. also, assigned rights
+	//   that are destroyed will not be saved.
+	//used_rights &= ~Capabilities[i].flag;
+	//free (Capabilities[i].name);
+	//free (Capabilities[i].help); 
+	//memmove (Capabilities + i, Capabilities+i+1, sizeof (flag_t)* (CAP_CUSTOM_MAX - i - 1));
+	Capabilities[i].flag = 0;
+	
+	return 0;
+}
+
+int cap_save (xml_node_t *node) {
+	unsigned int i;
+	
+	node = xml_node_add (node, "CustomRights");
+
+	for (i = CAP_CUSTOM_OFFSET; i < CAP_CUSTOM_MAX; i++) {
+		if (!Capabilities[i].flag) continue;
+		node = xml_node_add (node, "Right");
+			xml_node_add_value (node, "Name", XML_TYPE_STRING, Capabilities[i].name);
+			xml_node_add_value (node, "Help", XML_TYPE_STRING, Capabilities[i].help);
+		node = xml_parent (node);
+	}
+	return 0;
+}
+
+int cap_load (xml_node_t *node) {
+	unsigned char *name = NULL, *help = NULL;
+	
+	node = xml_node_find (node, "CustomRights");
+	if (!node) return 0;
+	
+	for (node = node->children; node; node = xml_next (node)) {
+		if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+			continue;
+		if (!xml_child_get (node, "Help", XML_TYPE_STRING, &help))
+			continue;
+		cap_custom_add (name, help);
+	}
+	if (name)
+		free (name);
+	if (help)
+		free (help);
+	
+	return 0;
+}
+
 /* *INDENT-ON* */

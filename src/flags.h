@@ -24,15 +24,15 @@
 
 typedef struct flag {
   unsigned char *name;
-  unsigned long flag;
+  unsigned long long flag;
   unsigned char *help;
 } flag_t;
 
 extern unsigned int flags_print (flag_t * flags, buffer_t * buf,
-					 unsigned long flag);
+					 unsigned long long flag);
 extern unsigned int flags_help (flag_t * flags, buffer_t * buf);
 extern unsigned int flags_parse (flag_t * flags, buffer_t * buf, unsigned int argc,
 					 unsigned char **argv, unsigned int flagstart,
-					 unsigned long *flag, unsigned long *nflag);
+					 unsigned long long *flag, unsigned long long *nflag);
 
 #endif

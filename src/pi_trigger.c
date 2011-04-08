@@ -89,7 +89,7 @@ typedef struct trigger_rule {
   unsigned long type;
   unsigned char *arg;
   unsigned char *help;
-  unsigned long cap;
+  unsigned long long cap;
   unsigned long flags;
   unsigned long interval;
   unsigned long deadline;
@@ -417,7 +417,7 @@ unsigned long pi_trigger_timer (plugin_user_t * user, void *dummy, unsigned long
   return 0;
 }
 
-trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned long cap,
+trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned long long cap,
 				     unsigned long flags, unsigned char *arg, unsigned char *help)
 {
   trigger_rule_t *rule;
@@ -710,20 +710,39 @@ int trigger_save_old (unsigned char *file)
     }
   }
 
+#ifndef USE_WINDOWS
   for (rule = ruleListLogin.next; rule != &ruleListLogin; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %lu %lu\n", rule->trigger->name, rule->type, rule->cap, rule->flags);
+    fprintf (fp, "rule %s %lu %llu %lu\n", rule->trigger->name, rule->type,
+	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags);
   }
 
   for (rule = ruleListCommand.next; rule != &ruleListCommand; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %lu %lu %s %s\n", rule->trigger->name, rule->type, rule->cap,
-	     rule->flags, rule->arg, rule->help ? (char *) rule->help : "");
+    fprintf (fp, "rule %s %lu %llu %lu %s %s\n", rule->trigger->name, rule->type,
+	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->arg,
+	     rule->help ? (char *) rule->help : "");
   }
 
   for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %lu %lu %lu\n", rule->trigger->name, rule->type, rule->cap,
-	     rule->flags, rule->interval);
+    fprintf (fp, "rule %s %lu %llu %lu %lu\n", rule->trigger->name, rule->type,
+	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->interval);
+  }
+#else
+  for (rule = ruleListLogin.next; rule != &ruleListLogin; rule = rule->next) {
+    fprintf (fp, "rule %s %lu %I64u %lu\n", rule->trigger->name, rule->type,
+	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags);
   }
 
+  for (rule = ruleListCommand.next; rule != &ruleListCommand; rule = rule->next) {
+    fprintf (fp, "rule %s %lu %I64u %lu %s %s\n", rule->trigger->name, rule->type,
+	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->arg,
+	     rule->help ? (char *) rule->help : "");
+  }
+
+  for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next) {
+    fprintf (fp, "rule %s %lu %I64u %lu %lu\n", rule->trigger->name, rule->type,
+	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->interval);
+  }
+#endif
   fclose (fp);
 
   return 0;
@@ -914,7 +933,8 @@ unsigned long pi_trigger_handler_ruleadd (plugin_user_t * user, buffer_t * outpu
   trigger_t *t;
   trigger_rule_t *r;
   unsigned char *arg, *help;
-  unsigned long cap = 0, ncap = 0, capstart = 0, flags = 0, interval = 0;
+  unsigned long long cap = 0, ncap = 0;
+  unsigned long long capstart = 0, flags = 0, interval = 0;
 
   if (argc < 3)
     goto printhelp;

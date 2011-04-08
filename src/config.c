@@ -194,6 +194,8 @@ int config_load (xml_node_t * node)
 
   for (node = node->children; node; node = xml_next (node)) {
     elem = config_find (node->name);
+    if (!elem)
+      continue;
     xml_node_get (node, elem->type, elem->val.v_ptr);
   }
 
@@ -218,9 +220,15 @@ int config_save_old (unsigned char *filename)
 	fprintf (fp, "%s %ld\n", elem->name, *elem->val.v_long);
 	break;
       case CFG_ELEM_ULONG:
-      case CFG_ELEM_CAP:
       case CFG_ELEM_MEMSIZE:
 	fprintf (fp, "%s %lu\n", elem->name, *elem->val.v_ulong);
+	break;
+      case CFG_ELEM_CAP:
+#ifndef USE_WINDOWS
+	fprintf (fp, "%s %Lu\n", elem->name, *elem->val.v_ulonglong & ~CAP_CUSTOM_MASK);
+#else
+	fprintf (fp, "%s %I64u\n", elem->name, *elem->val.v_ulonglong & ~CAP_CUSTOM_MASK);
+#endif
 	break;
       case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
@@ -298,10 +306,10 @@ int config_load_old (unsigned char *filename)
 	sscanf (c, "%ld", elem->val.v_long);
 	break;
       case CFG_ELEM_ULONG:
-      case CFG_ELEM_CAP:
       case CFG_ELEM_MEMSIZE:
 	sscanf (c, "%lu", elem->val.v_ulong);
 	break;
+      case CFG_ELEM_CAP:
       case CFG_ELEM_BYTESIZE:
       case CFG_ELEM_ULONGLONG:
 #ifndef USE_WINDOWS

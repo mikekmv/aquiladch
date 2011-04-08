@@ -49,7 +49,7 @@ typedef struct chatroom {
   unsigned char *name;
   unsigned char *description;
   unsigned long flags;
-  unsigned long rights;
+  unsigned long long rights;
   unsigned long count;
   chatroom_member_t members;
 } chatroom_t;
@@ -111,7 +111,7 @@ unsigned int chatroom_member_del (chatroom_t * room, chatroom_member_t * member)
 }
 
 
-chatroom_t *chatroom_new (unsigned char *name, unsigned long rights, unsigned long flags,
+chatroom_t *chatroom_new (unsigned char *name, unsigned long long rights, unsigned long flags,
 			  unsigned char *description, plugin_event_handler_t * handler)
 {
   chatroom_t *room;
@@ -190,7 +190,8 @@ unsigned int chatroom_save (xml_node_t * node)
 unsigned int chatroom_load (xml_node_t * node)
 {
   unsigned char *name = NULL, *desc = NULL;
-  unsigned long flags, rights = 0;
+  unsigned long flags = 0;
+  unsigned long long rights = 0;
   chatroom_t *room;
 
   node = xml_node_find (node, "ChatRooms");
@@ -234,10 +235,17 @@ unsigned int chatroom_save_old (unsigned char *filename)
     plugin_perror ("ERROR saving %s", filename);
     return errno;
   }
-
+#ifndef USE_WINDOWS
   for (room = chatrooms.next; (room != &chatrooms); room = room->next) {
-    fprintf (fp, "%s %lu %lu %s\n", room->name, room->flags, room->rights, room->description);
+    fprintf (fp, "%s %lu %llu %s\n", room->name, room->flags, room->rights & ~CAP_CUSTOM_MASK,
+	     room->description);
   }
+#else
+  for (room = chatrooms.next; (room != &chatrooms); room = room->next) {
+    fprintf (fp, "%s %lu %I64u %s\n", room->name, room->flags, room->rights & ~CAP_CUSTOM_MASK,
+	     room->description);
+  }
+#endif
   fclose (fp);
 
   return 0;
@@ -248,7 +256,8 @@ unsigned int chatroom_load_old (unsigned char *filename)
   FILE *fp;
   unsigned char buffer[1024];
   unsigned char name[NICKLENGTH];
-  unsigned long flags, rights;
+  unsigned long flags;
+  unsigned long long rights;
   int offset, i;
   chatroom_t *room;
 
@@ -260,8 +269,11 @@ unsigned int chatroom_load_old (unsigned char *filename)
 
   fgets (buffer, 1024, fp);
   while (!feof (fp)) {
-    sscanf (buffer, "%s %lu %lu %n", name, &flags, &rights, &offset);
-
+#ifndef USE_WINDOWS
+    sscanf (buffer, "%s %lu %llu %n", name, &flags, &rights, &offset);
+#else
+    sscanf (buffer, "%s %lu %I64u %n", name, &flags, &rights, &offset);
+#endif
     /* scrap any \n's in the description. */
     for (i = offset; buffer[i] && buffer[i] != '\n'; i++);
     if (buffer[i] == '\n')
@@ -292,7 +304,8 @@ unsigned int chatroom_load_old (unsigned char *filename)
 unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * output, void *dummy,
 					   unsigned int argc, unsigned char **argv)
 {
-  unsigned long roomflags = 0, roomrights = 0, ncap = 0, counter = 0;
+  unsigned long roomflags = 0, counter = 0;
+  unsigned long long ncap = 0, roomrights = 0;
 
   if (argc < 3) {
     bf_printf (output,

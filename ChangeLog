@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta12:
+0.1.11-pre1-beta13:
+	Fix windows warning.
+	Added custom rights.
+	Rename Win32 tag define to disable warning.
 	Fix printing bug in !setlocale.
 	Split off flags printing: get rid of all the type-punning errors.
 	Removed unused searchlist.[ch]

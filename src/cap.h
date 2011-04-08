@@ -21,31 +21,41 @@
 #define _CAP_H_
 
 #include "flags.h"
+#include "xml.h"
 
-#define CAP_SHARE  	   0x0001
-#define CAP_KICK   	   0x0002
-#define CAP_BAN    	   0x0004
-#define CAP_KEY    	   0x0008
-#define CAP_CONFIG 	   0x0010
-#define CAP_SAY    	   0x0020
-#define CAP_USER   	   0x0040
-#define CAP_GROUP  	   0x0080
-#define CAP_INHERIT	   0x0100
-#define CAP_CHAT   	   0x0200
-#define CAP_PM     	   0x0400
-#define CAP_DL	   	   0x0800
-#define CAP_BANHARD	   0x1000
-#define CAP_SEARCH	   0x2000
-#define CAP_PMOP	   0x4000
-#define CAP_TAG		   0x8000
-#define CAP_SHAREHIDE	  0x10000
-#define CAP_SHAREBLOCK	  0x20000
-#define CAP_SPAM	  0x40000
-#define CAP_NOSRCHLIMIT   0x80000
-#define CAP_SOURCEVERIFY 0x100000
-#define CAP_REDIRECT     0x200000
-#define CAP_LOCALLAN     0x400000
-#define CAP_OWNER	0x80000000
+#define CAP_SHARE  	   0x0001LL
+#define CAP_KICK   	   0x0002LL
+#define CAP_BAN    	   0x0004LL
+#define CAP_KEY    	   0x0008LL
+#define CAP_CONFIG 	   0x0010LL
+#define CAP_SAY    	   0x0020LL
+#define CAP_USER   	   0x0040LL
+#define CAP_GROUP  	   0x0080LL
+#define CAP_INHERIT	   0x0100LL
+#define CAP_CHAT   	   0x0200LL
+#define CAP_PM     	   0x0400LL
+#define CAP_DL	   	   0x0800LL
+#define CAP_BANHARD	   0x1000LL
+#define CAP_SEARCH	   0x2000LL
+#define CAP_PMOP	   0x4000LL
+#define CAP_TAG		   0x8000LL
+#define CAP_SHAREHIDE	  0x10000LL
+#define CAP_SHAREBLOCK	  0x20000LL
+#define CAP_SPAM	  0x40000LL
+#define CAP_NOSRCHLIMIT   0x80000LL
+#define CAP_SOURCEVERIFY 0x100000LL
+#define CAP_REDIRECT     0x200000LL
+#define CAP_LOCALLAN     0x400000LL
+#define CAP_OWNER	 0x800000LL
+
+
+#define CAP_PRINT_OFFSET 	7
+
+/* custom rights availability */
+#define CAP_CUSTOM_OFFSET 	31
+#define CAP_CUSTOM_MAX		72
+#define CAP_CUSTOM_FIRST	24
+#define CAP_CUSTOM_MASK  0xFFFFFFFFF0000000LL
 
 /* shortcuts... */
 #define CAP_DEFAULT (CAP_CHAT | CAP_PMOP | CAP_DL | CAP_SEARCH)
@@ -56,8 +66,11 @@
 #define CAP_CHEEF (CAP_OP   | CAP_USER)
 #define CAP_ADMIN (CAP_CHEEF | CAP_CONFIG | CAP_INHERIT | CAP_GROUP)
 
-#define CAP_PRINT_OFFSET 7
-
 extern flag_t Capabilities[];
+
+extern flag_t *cap_custom_add (unsigned char *name, unsigned char *help);
+extern int cap_custom_remove (unsigned char *name);
+
+extern int cap_save (xml_node_t *);
 
 #endif

@@ -573,7 +573,7 @@ int plugin_hardbanlist (buffer_t * output)
   return (n > 0);
 }
 
-int plugin_user_setrights (plugin_user_t * user, unsigned long cap, unsigned long ncap)
+int plugin_user_setrights (plugin_user_t * user, unsigned long long cap, unsigned long long ncap)
 {
   user_t *u;
 
@@ -586,6 +586,18 @@ int plugin_user_setrights (plugin_user_t * user, unsigned long cap, unsigned lon
   u->rights &= ~ncap;
 
   return 0;
+}
+
+unsigned long long plugin_right_create (unsigned char *name, unsigned char *help)
+{
+  flag_t *f = cap_custom_add (name, help);
+
+  return f ? f->flag : 0LL;
+}
+
+int plugin_right_destroy (unsigned char *name)
+{
+  return cap_custom_remove (name);
 }
 
 /******************************* UTILITIES: USER MANAGEMENT **************************************/
@@ -1059,6 +1071,7 @@ int plugin_config_save (buffer_t * output)
   node = xml_node_add (NULL, HUBSOFT_NAME);
 
   /* add configvalues */
+  retval = cap_save (node);
   retval = config_save (node);
   retval = accounts_save (node);
   retval = banlist_save (&hardbanlist, xml_node_add (node, "HardBanList"));
@@ -1131,6 +1144,7 @@ int plugin_config_load (buffer_t * output)
     goto leave;
   }
 
+  cap_load (node);
   config_load (node);
   accounts_load (node);
   list = xml_node_find (node, "HardBanList");

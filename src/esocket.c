@@ -2038,7 +2038,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
   for (; count; count--) {
     s = NULL;
     ol = NULL;
-    ret = GetQueuedCompletionStatus (h->iocp, &bytes, (PULONG_PTR) & s, &ol, ms);
+    ret = GetQueuedCompletionStatus (h->iocp, &bytes, (void *) &s, &ol, ms);
     if (!ret && !ol) {
       int err = GetLastError ();
 

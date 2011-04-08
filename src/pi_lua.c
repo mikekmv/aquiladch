@@ -126,7 +126,7 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
  *   Utilities
  */
 
-unsigned int parserights (unsigned char *caps, unsigned long *cap, unsigned long *ncap)
+unsigned int parserights (unsigned char *caps, unsigned long long *cap, unsigned long long *ncap)
 {
   unsigned int j;
   unsigned char *c, *d, *tmp;
@@ -294,7 +294,7 @@ int pi_lua_setconfig (lua_State * lua)
 
     case CFG_ELEM_PTR:
       {
-	unsigned long caps = 0, ncaps = 0;
+	unsigned long long caps = 0, ncaps = 0;
 
 	parserights (value, &caps, &ncaps);
 
@@ -615,7 +615,7 @@ int pi_lua_setuserrights (lua_State * lua)
 {
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *right = (unsigned char *) luaL_checkstring (lua, 2);
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   plugin_user_t *user;
 
   user = PLUGIN_USER_FIND (nick);
@@ -1121,7 +1121,7 @@ int pi_lua_sendtorights (lua_State * lua)
   unsigned int i;
   buffer_t *b;
   plugin_user_t *tgt = NULL, *u, *prev = NULL;
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
@@ -1158,7 +1158,7 @@ int pi_lua_rawtorights (lua_State * lua)
   unsigned int i;
   buffer_t *b;
   plugin_user_t *tgt = NULL, *prev = NULL;
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 2);
 
@@ -1193,7 +1193,7 @@ int pi_lua_sendpmtorights (lua_State * lua)
   unsigned int i;
   buffer_t *b;
   plugin_user_t *tgt = NULL, *u, *prev = NULL;
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
@@ -1403,7 +1403,7 @@ leave:
 int pi_lua_group_create (lua_State * lua)
 {
   unsigned int retval = 0;
-  unsigned long caps = 0, ncaps = 0;
+  unsigned long long caps = 0, ncaps = 0;
   account_type_t *grp;
   unsigned char *group = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
@@ -1747,7 +1747,7 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
 int pi_lua_cmdreg (lua_State * lua)
 {
   pi_lua_command_context_t *ctx;
-  unsigned long caps = 0, ncaps = 0;
+  unsigned long long caps = 0, ncaps = 0;
   unsigned char *cmd = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
   unsigned char *desc = (unsigned char *) luaL_checkstring (lua, 3);
@@ -1815,7 +1815,7 @@ int pi_lua_cmddel (lua_State * lua)
 
 int pi_lua_cmdsetrights (lua_State * lua)
 {
-  unsigned long caps = 0, ncaps = 0;
+  unsigned long long caps = 0, ncaps = 0;
   unsigned char *cmd = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
 

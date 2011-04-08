@@ -39,7 +39,7 @@ typedef union config_value {
     long *v_long;
     unsigned long *v_ulong;
     unsigned long long *v_ulonglong;
-    unsigned long *v_cap;
+    unsigned long long *v_cap;
     unsigned long *v_ip;
     int *v_int;
     unsigned int *v_uint;

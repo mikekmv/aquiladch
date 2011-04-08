@@ -76,7 +76,7 @@ typedef struct user {
   double version;
   unsigned int op;
   unsigned int flags;
-  unsigned long rights;
+  unsigned long long rights;
 
   /* user data */
   unsigned char lock[LOCKLENGTH];

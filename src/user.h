@@ -26,7 +26,7 @@ typedef struct account_type {
   struct account_type *next, *prev;
 
   unsigned char name[NICKLENGTH];
-  unsigned long rights;
+  unsigned long long rights;
   unsigned int id;
 
   unsigned long refcnt;
@@ -38,7 +38,7 @@ typedef struct account {
   unsigned char nick[NICKLENGTH];
   unsigned char passwd[NICKLENGTH];
   unsigned char op[NICKLENGTH];
-  unsigned long rights;
+  unsigned long long rights;
   unsigned int class;
   unsigned long id;
 
@@ -51,7 +51,7 @@ typedef struct account {
   account_type_t *classp;
 } account_t;
 
-extern account_type_t *account_type_add (unsigned char *name, unsigned long rights);
+extern account_type_t *account_type_add (unsigned char *name, unsigned long long rights);
 extern account_type_t *account_type_find (unsigned char *name);
 extern unsigned int account_type_del (account_type_t *);
 extern account_type_t *account_type_find_byid (unsigned long id);

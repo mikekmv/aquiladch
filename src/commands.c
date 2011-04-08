@@ -32,7 +32,7 @@ command_t cmd_hashtable[COMMAND_HASHTABLE];
 command_t cmd_sorted;
 
 /* FIXME check for duplicates */
-int command_register (unsigned char *name, command_handler_t * handler, unsigned long cap,
+int command_register (unsigned char *name, command_handler_t * handler, unsigned long long cap,
 		      unsigned char *help)
 {
   unsigned int hash = SuperFastHash (name, strlen (name));
@@ -82,7 +82,7 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
   return 0;
 }
 
-int command_setrights (unsigned char *name, unsigned long cap, unsigned long ncap)
+int command_setrights (unsigned char *name, unsigned long long cap, unsigned long long ncap)
 {
   unsigned int hash = SuperFastHash (name, strlen (name));
   command_t *cmd;

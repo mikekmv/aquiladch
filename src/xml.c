@@ -187,7 +187,7 @@ xml_node_t *xml_node_add_value (xml_node_t * parent, char *name, xml_type_t type
 #endif
       break;
     case XML_TYPE_CAP:
-      flags_print ((Capabilities + CAP_PRINT_OFFSET), buf, *((unsigned long *) value));
+      flags_print ((Capabilities + CAP_PRINT_OFFSET), buf, *((unsigned long long *) value));
       break;
     case XML_TYPE_INT:
       bf_printf (buf, "%d", *((int *) value));
@@ -283,7 +283,7 @@ xml_node_t *xml_node_get (xml_node_t * node, xml_type_t type, void *value)
       break;
     case XML_TYPE_CAP:
       {
-	unsigned long cap = 0, ncap = 0;
+	unsigned long long cap = 0, ncap = 0;
 	unsigned char *argv[2];
 
 	argv[0] = node->value;
@@ -291,8 +291,8 @@ xml_node_t *xml_node_get (xml_node_t * node, xml_type_t type, void *value)
 
 	flags_parse (Capabilities, NULL, 1, argv, 0, &cap, &ncap);
 
-	*((unsigned long *) value) = cap;
-	*((unsigned long *) value) &= ~ncap;
+	*((unsigned long long *) value) = cap;
+	*((unsigned long long *) value) &= ~ncap;
       }
       break;
     case XML_TYPE_INT:
@@ -519,8 +519,8 @@ buffer_t *xml_export_element (xml_node_t * node, buffer_t * buf, int level)
   if (!node)
     return buf;
 
-  s = buf->e;
 repeat:
+  s = buf->e;
   if (node->value) {
     bf_printf (buf, "%*s<%s", level, "", node->name);
     /* FIXME add attr */
@@ -554,9 +554,16 @@ repeat:
 
 toosmall:
   {
-    buffer_t *b = bf_alloc (IMPORT_BUFSIZE);
+    buffer_t *b;
+
+    if (bf_used (buf)) {
+      b = bf_alloc (IMPORT_BUFSIZE);
+    } else {
+      b = bf_alloc (buf->size * 2);
+    }
 
     buf->e = s;
+    *buf->e = 0;
     bf_append (&buf, b);
     buf = b;
   }

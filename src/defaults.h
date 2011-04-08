@@ -30,10 +30,10 @@
 #undef HAVE_NETINET_IN_H
 #undef HAVE_SYS_POLL_H
 
-#define WIN32	" Win32"
+#define WIN32TAG	" Win32"
 
 #else
-#define WIN32
+#define WIN32TAG
 
 #endif
 
@@ -41,7 +41,7 @@
 #ifdef SVNREVISION
 #define AQUILA_VERSION			VERSION " (" SVNREVISION ")"
 #else
-#define AQUILA_VERSION			VERSION WIN32
+#define AQUILA_VERSION			VERSION WIN32TAG
 #endif
 
 #define HUBSOFT_NAME		"Aquila"

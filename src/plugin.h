@@ -158,6 +158,9 @@ extern int plugin_user_findiphardban (buffer_t * buf, unsigned long ip);
 extern int plugin_banlist (buffer_t *output);
 extern int plugin_hardbanlist (buffer_t * output);
 
+extern unsigned long long plugin_right_create (unsigned char *name, unsigned char *right);
+extern int plugin_right_destroy (unsigned char *name);
+
 extern int plugin_report (buffer_t * message);
 extern int plugin_perror (unsigned char *format, ...);
 extern int plugin_config_load ();
@@ -165,6 +168,6 @@ extern int plugin_config_save (buffer_t * output);
 
 extern unsigned long plugin_user_event (plugin_user_t * user, unsigned long event, void *token);
 
-extern int plugin_user_setrights (plugin_user_t *user, unsigned long cap, unsigned long ncap);
+extern int plugin_user_setrights (plugin_user_t *user, unsigned long long cap, unsigned long long ncap);
 
 #endif

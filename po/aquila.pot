@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-14 11:33+0100\n"
+"POT-Creation-Date: 2007-03-14 14:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,9 +24,9 @@ msgstr ""
 
 #: src/builtincmd.c:129 src/builtincmd.c:334 src/builtincmd.c:401
 #: src/builtincmd.c:455 src/builtincmd.c:501 src/builtincmd.c:707
-#: src/builtincmd.c:758 src/builtincmd.c:771 src/builtincmd.c:1244
-#: src/builtincmd.c:1338 src/builtincmd.c:1404 src/builtincmd.c:1455
-#: src/builtincmd.c:1521
+#: src/builtincmd.c:758 src/builtincmd.c:771 src/builtincmd.c:1289
+#: src/builtincmd.c:1383 src/builtincmd.c:1449 src/builtincmd.c:1500
+#: src/builtincmd.c:1566
 #, c-format
 msgid "User %s not found."
 msgstr ""
@@ -141,7 +141,7 @@ msgid ""
 msgstr ""
 
 #: src/builtincmd.c:449 src/builtincmd.c:495 src/builtincmd.c:554
-#: src/builtincmd.c:1298 src/builtincmd.c:1332 src/pi_user.c:337
+#: src/builtincmd.c:1343 src/builtincmd.c:1377 src/pi_user.c:337
 #, c-format
 msgid "Usage: %s <nick>"
 msgstr ""
@@ -344,65 +344,95 @@ msgstr ""
 msgid "Command %s not found.\n"
 msgstr ""
 
-#: src/builtincmd.c:963
+#: src/builtincmd.c:959
+#, c-format
+msgid "Usage: %s <name> <help>\n"
+msgstr ""
+
+#: src/builtincmd.c:971
+#, c-format
+msgid "Right %s could not be created.\n"
+msgstr ""
+
+#: src/builtincmd.c:973
+#, c-format
+msgid "Right %s created.\n"
+msgstr ""
+
+#: src/builtincmd.c:983
+#, c-format
+msgid "Usage: %s <name>\n"
+msgstr ""
+
+#: src/builtincmd.c:988
+#, c-format
+msgid "Right %s could not be found.\n"
+msgstr ""
+
+#: src/builtincmd.c:990
+#, c-format
+msgid "Right %s destroyed.\n"
+msgstr ""
+
+#: src/builtincmd.c:1008
 #, c-format
 msgid "Usage: %s <group> <rights>...\n"
 msgstr ""
 
-#: src/builtincmd.c:969
+#: src/builtincmd.c:1014
 #, c-format
 msgid "Group %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:984 src/builtincmd.c:1027 src/builtincmd.c:1801
+#: src/builtincmd.c:1029 src/builtincmd.c:1072 src/builtincmd.c:1846
 msgid "You are not allowed to assign rights.\n"
 msgstr ""
 
-#: src/builtincmd.c:988 src/builtincmd.c:1031
+#: src/builtincmd.c:1033 src/builtincmd.c:1076
 msgid "You are not allowed to assign the following rights to this group: "
 msgstr ""
 
-#: src/builtincmd.c:996
+#: src/builtincmd.c:1041
 #, c-format
 msgid "Group %s created with: "
 msgstr ""
 
-#: src/builtincmd.c:1011
+#: src/builtincmd.c:1056
 #, c-format
 msgid "Usage: %s <group> <[+]right/-right>...\n"
 msgstr ""
 
-#: src/builtincmd.c:1017 src/builtincmd.c:1069 src/builtincmd.c:1125
-#: src/builtincmd.c:1164
+#: src/builtincmd.c:1062 src/builtincmd.c:1114 src/builtincmd.c:1170
+#: src/builtincmd.c:1209
 #, c-format
 msgid "Group %s does not exist.\n"
 msgstr ""
 
-#: src/builtincmd.c:1038
+#: src/builtincmd.c:1083
 msgid "You are not allowed to remove the following rights from this group: "
 msgstr ""
 
-#: src/builtincmd.c:1048
+#: src/builtincmd.c:1093
 #, c-format
 msgid "Group %s modified. Current rights:"
 msgstr ""
 
-#: src/builtincmd.c:1062
+#: src/builtincmd.c:1107
 #, c-format
 msgid "Usage: %s <group>"
 msgstr ""
 
-#: src/builtincmd.c:1074
+#: src/builtincmd.c:1119
 #, c-format
 msgid "Group %s still has %ld users.\n"
 msgstr ""
 
-#: src/builtincmd.c:1079
+#: src/builtincmd.c:1124
 #, c-format
 msgid "Group %s deleted.\n"
 msgstr ""
 
-#: src/builtincmd.c:1128
+#: src/builtincmd.c:1173
 #, c-format
 msgid ""
 "\n"
@@ -410,478 +440,486 @@ msgid ""
 " "
 msgstr ""
 
-#: src/builtincmd.c:1155
+#: src/builtincmd.c:1200
 #, c-format
 msgid "Usage: %s <nick> <group> [<rights...>]"
 msgstr ""
 
-#: src/builtincmd.c:1160
+#: src/builtincmd.c:1205
 #, c-format
 msgid "User %s already exists.\n"
 msgstr ""
 
-#: src/builtincmd.c:1174 src/builtincmd.c:1419
+#: src/builtincmd.c:1219 src/builtincmd.c:1464
 msgid "You are not allowed to assign a user to this group.\n"
 msgstr ""
 
-#: src/builtincmd.c:1180 src/builtincmd.c:1239
+#: src/builtincmd.c:1225 src/builtincmd.c:1284
 msgid "You are not allowed to assign a user extra rights.\n"
 msgstr ""
 
-#: src/builtincmd.c:1184
+#: src/builtincmd.c:1229
 msgid "You are not allowed to assign this user: "
 msgstr ""
 
-#: src/builtincmd.c:1194 src/builtincmd.c:1278
+#: src/builtincmd.c:1239 src/builtincmd.c:1323
 #, c-format
 msgid ""
 "User %s created with group %s.\n"
 "Current rights:"
 msgstr ""
 
-#: src/builtincmd.c:1207
+#: src/builtincmd.c:1252
 #, c-format
 msgid ""
 "You have been registered by %s. Please use !passwd <password> to set a "
 "password and relogin to gain your new rights. You have been assigned:\n"
 msgstr ""
 
-#: src/builtincmd.c:1215
+#: src/builtincmd.c:1260
 msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
 msgstr ""
 
-#: src/builtincmd.c:1219
+#: src/builtincmd.c:1264
 #, c-format
 msgid ""
 "No user with nickname %s is currently logged in. Please notify the user "
 "yourself.\n"
 msgstr ""
 
-#: src/builtincmd.c:1233
+#: src/builtincmd.c:1278
 #, c-format
 msgid "Usage: %s <nick> <[+]right/-right>...\n"
 msgstr ""
 
-#: src/builtincmd.c:1254
+#: src/builtincmd.c:1299
 msgid "You are not allowed to assign the following rights to this user: "
 msgstr ""
 
-#: src/builtincmd.c:1260
+#: src/builtincmd.c:1305
 msgid "You are not allowed to touch: "
 msgstr ""
 
-#: src/builtincmd.c:1272
+#: src/builtincmd.c:1317
 #, c-format
 msgid "Warning! User %s is still awarded the following rights by his group:"
 msgstr ""
 
-#: src/builtincmd.c:1285
+#: src/builtincmd.c:1330
 msgid ""
 "User is already logged in. Tell him to rejoin to gain all his new rights.\n"
 msgstr ""
 
-#: src/builtincmd.c:1303
+#: src/builtincmd.c:1348
 #, c-format
 msgid "User account %s does not exist.\n"
 msgstr ""
 
-#: src/builtincmd.c:1309
+#: src/builtincmd.c:1354
 #, c-format
 msgid "You are not allowed to delete user %s.\n"
 msgstr ""
 
-#: src/builtincmd.c:1314
+#: src/builtincmd.c:1359
 #, c-format
 msgid "User account %s deleted.\n"
 msgstr ""
 
-#: src/builtincmd.c:1318
+#: src/builtincmd.c:1363
 msgid ""
 "User is still logged in with all rights of the deleted account. Kick the "
 "user to take them away.\n"
 msgstr ""
 
-#: src/builtincmd.c:1340
+#: src/builtincmd.c:1385
 #, c-format
 msgid "User information for user %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1344
+#: src/builtincmd.c:1389
 #, c-format
 msgid "Group %s, Rights: "
 msgstr ""
 
-#: src/builtincmd.c:1349
+#: src/builtincmd.c:1394
 msgid "Users password is NOT set.\n"
 msgstr ""
 
-#: src/builtincmd.c:1350
+#: src/builtincmd.c:1395
 #, c-format
 msgid "User was registered by %s on %s"
 msgstr ""
 
-#: src/builtincmd.c:1357
+#: src/builtincmd.c:1402
 #, c-format
 msgid ", last login %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1361
+#: src/builtincmd.c:1406
 msgid ", never logged in.\n"
 msgstr ""
 
-#: src/builtincmd.c:1367
+#: src/builtincmd.c:1412
 #, c-format
 msgid "Using Client %s version %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1385
+#: src/builtincmd.c:1430
 #, c-format
 msgid "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 msgstr ""
 
-#: src/builtincmd.c:1399
+#: src/builtincmd.c:1444
 #, c-format
 msgid "Usage: %s <nick> <group>"
 msgstr ""
 
-#: src/builtincmd.c:1409
+#: src/builtincmd.c:1454
 #, c-format
 msgid "Group %s does not exist."
 msgstr ""
 
-#: src/builtincmd.c:1415
+#: src/builtincmd.c:1460
 msgid "You are not allowed to remove a user from this group.\n"
 msgstr ""
 
-#: src/builtincmd.c:1431
+#: src/builtincmd.c:1476
 #, c-format
 msgid "Moved user %s from group %s to %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1447
+#: src/builtincmd.c:1492
 #, c-format
 msgid ""
 "Usage: %s [<nick>] <password>\n"
 " If no nick is specified, your own password is changed."
 msgstr ""
 
-#: src/builtincmd.c:1461 src/builtincmd.c:1526
+#: src/builtincmd.c:1506 src/builtincmd.c:1571
 #, c-format
 msgid "You are not allowed to change %s's password\n"
 msgstr ""
 
-#: src/builtincmd.c:1470
+#: src/builtincmd.c:1515
 msgid ""
 "The password is unacceptable, please choose another. You specified a known "
 "account name as your password.\n"
 msgstr ""
 
-#: src/builtincmd.c:1477
+#: src/builtincmd.c:1522
 msgid ""
 "The password is unacceptable, please choose another. You specified a logged "
 "in username as your password.\n"
 msgstr ""
 
-#: src/builtincmd.c:1482 src/builtincmd.c:1534
+#: src/builtincmd.c:1527 src/builtincmd.c:1579
 #, c-format
 msgid "No account for user %s.\n"
 msgstr ""
 
-#: src/builtincmd.c:1490
+#: src/builtincmd.c:1535
 #, c-format
 msgid ""
 "The password is unacceptable, please choose another. Minimum length is %d\n"
 msgstr ""
 
-#: src/builtincmd.c:1497 src/builtincmd.c:1557
+#: src/builtincmd.c:1542 src/builtincmd.c:1602
 msgid "Password set.\n"
 msgstr ""
 
-#: src/builtincmd.c:1513
+#: src/builtincmd.c:1558
 #, c-format
 msgid ""
 "Usage: %s [<nick>]\n"
 " If no nick is specified, your own password is changed."
 msgstr ""
 
-#: src/builtincmd.c:1547
+#: src/builtincmd.c:1592
 #, c-format
 msgid ""
 "Your password was reset. It is now\n"
 "%.*s\n"
 msgstr ""
 
-#: src/builtincmd.c:1551
+#: src/builtincmd.c:1596
 #, c-format
 msgid ""
 "The password of %s was reset. It is now\n"
 "%.*s\n"
 msgstr ""
 
-#: src/builtincmd.c:1607
+#: src/builtincmd.c:1652
 #, c-format
 msgid "Local is determined by variable %s and set to %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1609
+#: src/builtincmd.c:1654
 #, c-format
 msgid "Locale is set to %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1615
+#: src/builtincmd.c:1660
 #, c-format
 msgid ""
 "WARNING: decimal point is '%c', this will cause problems in parsing tags. "
 "Set LC_NUMERIC to \"C\""
 msgstr ""
 
-#: src/builtincmd.c:1697 src/builtincmd.c:1863
+#: src/builtincmd.c:1742 src/builtincmd.c:1908
 #, c-format
 msgid "%s !Unknown Type!\n"
 msgstr ""
 
-#: src/builtincmd.c:1715 src/builtincmd.c:1746 src/builtincmd.c:1776
+#: src/builtincmd.c:1760 src/builtincmd.c:1791 src/builtincmd.c:1821
 #, c-format
 msgid "Sorry, unknown configuration value %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1770
+#: src/builtincmd.c:1815
 #, c-format
 msgid "Usage: %s <setting> <value>"
 msgstr ""
 
-#: src/builtincmd.c:1807
+#: src/builtincmd.c:1852
 msgid "You are not allowed to assign: "
 msgstr ""
 
-#: src/builtincmd.c:1813
+#: src/builtincmd.c:1858
 msgid "You are not allowed to remove: "
 msgstr ""
 
-#: src/builtincmd.c:1841
+#: src/builtincmd.c:1886
 #, c-format
 msgid "\"%s\" is not a valid IP address.\n"
 msgstr ""
 
-#: src/builtincmd.c:1852
+#: src/builtincmd.c:1897
 #, c-format
 msgid "The maximum value for this element is %s\n"
 msgstr ""
 
-#: src/builtincmd.c:1867
+#: src/builtincmd.c:1912
 msgid "Configuration change denied.\n"
 msgstr ""
 
-#: src/builtincmd.c:1884
+#: src/builtincmd.c:1929
 msgid "All Data saved."
 msgstr ""
 
-#: src/builtincmd.c:1897
+#: src/builtincmd.c:1942
 msgid "Data reloaded."
 msgstr ""
 
-#: src/builtincmd.c:1913
+#: src/builtincmd.c:1958
 msgid "Errors during autosave:\n"
 msgstr ""
 
-#: src/builtincmd.c:1936
+#: src/builtincmd.c:1981
 msgid "Minimum length of a password."
 msgstr ""
 
-#: src/builtincmd.c:1937
+#: src/builtincmd.c:1982
 msgid "Period for autosaving settings, set to 0 to disable."
 msgstr ""
 
-#: src/builtincmd.c:1938
+#: src/builtincmd.c:1983
 msgid "User to send report to. Can be a chatroom."
 msgstr ""
 
-#: src/builtincmd.c:1939
+#: src/builtincmd.c:1984
 msgid ""
 "This is the maximum bantime you can give with a kick (and using _ban_). This "
 "does not affect someone with the ban right."
 msgstr ""
 
-#: src/builtincmd.c:1940
+#: src/builtincmd.c:1985
 msgid ""
 "If set, then a user without the ban right can use _ban_ to ban anyway. The "
 "maximum time can be set with kickmaxbantime."
 msgstr ""
 
-#: src/builtincmd.c:1943
+#: src/builtincmd.c:1988
 msgid "Make the HubSec say something."
 msgstr ""
 
-#: src/builtincmd.c:1944
+#: src/builtincmd.c:1989
 msgid "Make the HubSec warn user."
 msgstr ""
 
-#: src/builtincmd.c:1945
+#: src/builtincmd.c:1990
 msgid "Shut the hub down."
 msgstr ""
 
-#: src/builtincmd.c:1946
+#: src/builtincmd.c:1991
 msgid "Send a report to the OPs."
 msgstr ""
 
-#: src/builtincmd.c:1947
+#: src/builtincmd.c:1992
 msgid "Displays the Aquila version."
 msgstr ""
 
-#: src/builtincmd.c:1948
+#: src/builtincmd.c:1993
 msgid "Shows you your IP address."
 msgstr ""
 
-#: src/builtincmd.c:1949
+#: src/builtincmd.c:1994
 msgid "Kick a user. Automatic short ban included."
 msgstr ""
 
-#: src/builtincmd.c:1950
+#: src/builtincmd.c:1995
 msgid "Drop a user. Automatic short ban included."
 msgstr ""
 
-#: src/builtincmd.c:1951
+#: src/builtincmd.c:1996
 msgid "IP Ban a user by IP address."
 msgstr ""
 
-#: src/builtincmd.c:1952
+#: src/builtincmd.c:1997
 msgid "Nick ban a user by nick."
 msgstr ""
 
-#: src/builtincmd.c:1953
+#: src/builtincmd.c:1998
 msgid "Ban a user by nick."
 msgstr ""
 
-#: src/builtincmd.c:1954
+#: src/builtincmd.c:1999
 msgid "Show ban by nick/IP."
 msgstr ""
 
-#: src/builtincmd.c:1955
+#: src/builtincmd.c:2000
 msgid "Display help message."
 msgstr ""
 
-#: src/builtincmd.c:1956
+#: src/builtincmd.c:2001
 msgid "Unban a nick."
 msgstr ""
 
-#: src/builtincmd.c:1957
+#: src/builtincmd.c:2002
 msgid "Unban an ip."
 msgstr ""
 
-#: src/builtincmd.c:1958
+#: src/builtincmd.c:2003
 msgid "Hardban an IP."
 msgstr ""
 
-#: src/builtincmd.c:1959
+#: src/builtincmd.c:2004
 msgid "Unhardban an IP."
 msgstr ""
 
-#: src/builtincmd.c:1960
+#: src/builtincmd.c:2005
 msgid "Show hard bans by nick/IP."
 msgstr ""
 
-#: src/builtincmd.c:1961
+#: src/builtincmd.c:2006
 msgid "Zombie a user. Can't talk or pm."
 msgstr ""
 
-#: src/builtincmd.c:1962
+#: src/builtincmd.c:2007
 msgid "Show the zombie horde."
 msgstr ""
 
-#: src/builtincmd.c:1963
+#: src/builtincmd.c:2008
 msgid "Unzombie a user. Can talk or pm again."
 msgstr ""
 
-#: src/builtincmd.c:1964
+#: src/builtincmd.c:2009
 msgid "Returns the user using the IP."
 msgstr ""
 
-#: src/builtincmd.c:1966
+#: src/builtincmd.c:2011
 msgid "Send a private message to all users."
 msgstr ""
 
-#: src/builtincmd.c:1968
+#: src/builtincmd.c:2013
+msgid "Create a custom right."
+msgstr ""
+
+#: src/builtincmd.c:2014
+msgid "Destroy a custom right."
+msgstr ""
+
+#: src/builtincmd.c:2016
 msgid "Add a user group."
 msgstr ""
 
-#: src/builtincmd.c:1969
+#: src/builtincmd.c:2017
 msgid "Delete a user group."
 msgstr ""
 
-#: src/builtincmd.c:1970
+#: src/builtincmd.c:2018
 msgid "Edit the rights of a user group."
 msgstr ""
 
-#: src/builtincmd.c:1971
+#: src/builtincmd.c:2019
 msgid "List all groups with their rights."
 msgstr ""
 
-#: src/builtincmd.c:1973
+#: src/builtincmd.c:2021
 msgid "Add a user."
 msgstr ""
 
-#: src/builtincmd.c:1974
+#: src/builtincmd.c:2022
 msgid "Delete a user."
 msgstr ""
 
-#: src/builtincmd.c:1975
+#: src/builtincmd.c:2023
 msgid "Edit the extra rights of a user."
 msgstr ""
 
-#: src/builtincmd.c:1976
+#: src/builtincmd.c:2024
 msgid "List all users of a user group."
 msgstr ""
 
-#: src/builtincmd.c:1977
+#: src/builtincmd.c:2025
 msgid "Show information of user."
 msgstr ""
 
-#: src/builtincmd.c:1978
+#: src/builtincmd.c:2026
 msgid "Move user to new group. Reconnect for change to activate."
 msgstr ""
 
-#: src/builtincmd.c:1980
+#: src/builtincmd.c:2028
 msgid "Show configuration."
 msgstr ""
 
-#: src/builtincmd.c:1981
+#: src/builtincmd.c:2029
 msgid "Show configuration value help string."
 msgstr ""
 
-#: src/builtincmd.c:1982 src/builtincmd.c:1983
+#: src/builtincmd.c:2030 src/builtincmd.c:2031
 msgid "Set configuration values."
 msgstr ""
 
-#: src/builtincmd.c:1985
+#: src/builtincmd.c:2033
 msgid ""
 "Reload all data from files. WARNING: All unsaved changes will be discarded."
 msgstr ""
 
-#: src/builtincmd.c:1986
+#: src/builtincmd.c:2034
 msgid ""
 "Save all changes to file. WARNING: All previously saved settings will be "
 "lost!"
 msgstr ""
 
-#: src/builtincmd.c:1988
+#: src/builtincmd.c:2036
 msgid "Change your password."
 msgstr ""
 
-#: src/builtincmd.c:1989
+#: src/builtincmd.c:2037
 msgid "Let the hub generate a random password."
 msgstr ""
 
-#: src/builtincmd.c:1992
+#: src/builtincmd.c:2040
 msgid "Set the locale of the hub."
 msgstr ""
 
-#: src/builtincmd.c:1993
+#: src/builtincmd.c:2041
 msgid "Get the locale of the hub."
 msgstr ""
 
-#: src/builtincmd.c:1997 src/builtincmd.c:1999
+#: src/builtincmd.c:2045 src/builtincmd.c:2047
 msgid "Let the hub CRASH!."
 msgstr ""
 
@@ -1406,13 +1444,13 @@ msgstr ""
 msgid "%s %s by %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:1070 src/plugin.c:1088 src/plugin.c:1092 src/plugin.c:1097
-#: src/plugin.c:1101
+#: src/plugin.c:1083 src/plugin.c:1101 src/plugin.c:1105 src/plugin.c:1110
+#: src/plugin.c:1114
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
 msgstr ""
 
-#: src/plugin.c:1117
+#: src/plugin.c:1130
 #, c-format
 msgid "Error loading configuration from %s: %s\n"
 msgstr ""
@@ -1716,7 +1754,7 @@ msgstr ""
 msgid "Command returns last chatlines."
 msgstr ""
 
-#: src/pi_chatroom.c:300
+#: src/pi_chatroom.c:313
 #, c-format
 msgid ""
 "Usage: %s <room> <description> [<private>] [<autoreg>] [<autorights>] "
@@ -1731,90 +1769,90 @@ msgid ""
 "\"\"."
 msgstr ""
 
-#: src/pi_chatroom.c:311
+#: src/pi_chatroom.c:324
 #, c-format
 msgid "Chatroom name %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_chatroom.c:316
+#: src/pi_chatroom.c:329
 #, c-format
 msgid "Chatroom %s already exists."
 msgstr ""
 
-#: src/pi_chatroom.c:321
+#: src/pi_chatroom.c:334
 msgid "Spaces are not allowed in chatroom names."
 msgstr ""
 
-#: src/pi_chatroom.c:330
+#: src/pi_chatroom.c:343
 msgid "Room is private.\n"
 msgstr ""
 
-#: src/pi_chatroom.c:336
+#: src/pi_chatroom.c:349
 msgid "Room will autojoin registered users.\n"
 msgstr ""
 
-#: src/pi_chatroom.c:342
+#: src/pi_chatroom.c:355
 msgid "Room will autojoin users with sufficient rights.\n"
 msgstr ""
 
-#: src/pi_chatroom.c:349
+#: src/pi_chatroom.c:362
 #, c-format
 msgid "Ignoring unknown argument %s\n"
 msgstr ""
 
-#: src/pi_chatroom.c:358
+#: src/pi_chatroom.c:371
 msgid "Room requires: "
 msgstr ""
 
-#: src/pi_chatroom.c:370
+#: src/pi_chatroom.c:383
 msgid "Room creation failed!\n"
 msgstr ""
 
-#: src/pi_chatroom.c:372
+#: src/pi_chatroom.c:385
 #, c-format
 msgid "Room %s created successfully!\n"
 msgstr ""
 
-#: src/pi_chatroom.c:384
+#: src/pi_chatroom.c:397
 #, c-format
 msgid "Usage: %s <room>\n"
 msgstr ""
 
-#: src/pi_chatroom.c:390 src/pi_chatroom.c:427
+#: src/pi_chatroom.c:403 src/pi_chatroom.c:440
 #, c-format
 msgid "Cannot find room %s\n"
 msgstr ""
 
-#: src/pi_chatroom.c:400
+#: src/pi_chatroom.c:413
 #, c-format
 msgid "Room %s has %d users"
 msgstr ""
 
-#: src/pi_chatroom.c:402
+#: src/pi_chatroom.c:415
 msgid ", is private"
 msgstr ""
 
-#: src/pi_chatroom.c:404
+#: src/pi_chatroom.c:417
 msgid ", autojoins registered users"
 msgstr ""
 
-#: src/pi_chatroom.c:406
+#: src/pi_chatroom.c:419
 msgid ", autojoins users with sufficient rights"
 msgstr ""
 
-#: src/pi_chatroom.c:408
+#: src/pi_chatroom.c:421
 msgid " and requires rights "
 msgstr ""
 
-#: src/pi_chatroom.c:620
+#: src/pi_chatroom.c:633
 msgid "Add a chatroom."
 msgstr ""
 
-#: src/pi_chatroom.c:622
+#: src/pi_chatroom.c:635
 msgid "Remove a chatroom."
 msgstr ""
 
-#: src/pi_chatroom.c:624
+#: src/pi_chatroom.c:637
 msgid "Lists available chatrooms."
 msgstr ""
 
@@ -1985,7 +2023,7 @@ msgstr ""
 msgid "Remove a lua script."
 msgstr ""
 
-#: src/pi_trigger.c:832
+#: src/pi_trigger.c:851
 #, c-format
 msgid ""
 "Usage: %s <name> <type> <arg>\n"
@@ -1999,73 +2037,73 @@ msgid ""
 "   arg: depends on type\n"
 msgstr ""
 
-#: src/pi_trigger.c:843
+#: src/pi_trigger.c:862
 #, c-format
 msgid "Triggername %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_trigger.c:849
+#: src/pi_trigger.c:868
 #, c-format
 msgid "Triggername %s already exists."
 msgstr ""
 
-#: src/pi_trigger.c:860
+#: src/pi_trigger.c:879
 #, c-format
 msgid "Unknown trigger type %s."
 msgstr ""
 
-#: src/pi_trigger.c:866
+#: src/pi_trigger.c:885
 #, c-format
 msgid "Trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:868
+#: src/pi_trigger.c:887
 #, c-format
 msgid "Trigger %s creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:879
+#: src/pi_trigger.c:898
 #, c-format
 msgid ""
 "Usage: %s <name>\n"
 "   name: name of the trigger\n"
 msgstr ""
 
-#: src/pi_trigger.c:885 src/pi_trigger.c:923 src/pi_trigger.c:1014
+#: src/pi_trigger.c:904 src/pi_trigger.c:943 src/pi_trigger.c:1034
 #, c-format
 msgid "Triggername %s doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:890
+#: src/pi_trigger.c:909
 #, c-format
 msgid "Trigger %s deleted."
 msgstr ""
 
-#: src/pi_trigger.c:899
+#: src/pi_trigger.c:918
 #, c-format
 msgid "Trigger %s dumps file %s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:903
+#: src/pi_trigger.c:922
 #, c-format
 msgid "Trigger %s dumps text %.*s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:952
+#: src/pi_trigger.c:972
 #, c-format
 msgid "Unknown trigger rule type %s."
 msgstr ""
 
-#: src/pi_trigger.c:977
+#: src/pi_trigger.c:997
 #, c-format
 msgid "Rule for trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:979
+#: src/pi_trigger.c:999
 msgid "Rule creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:986
+#: src/pi_trigger.c:1006
 #, c-format
 msgid ""
 "Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights "
@@ -2087,7 +2125,7 @@ msgid ""
 "   rights: rights required to activate rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1008
+#: src/pi_trigger.c:1028
 #, c-format
 msgid ""
 "Usage: %s <name> <id>\n"
@@ -2095,48 +2133,48 @@ msgid ""
 "   id  : ID of the rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1021
+#: src/pi_trigger.c:1041
 #, c-format
 msgid "Trigger %s Rule ID %lu doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:1026
+#: src/pi_trigger.c:1046
 #, c-format
 msgid "Trigger %s Rule ID %lu deleted."
 msgstr ""
 
-#: src/pi_trigger.c:1034
+#: src/pi_trigger.c:1054
 #, c-format
 msgid "  Rule %lu type "
 msgstr ""
 
-#: src/pi_trigger.c:1074
+#: src/pi_trigger.c:1094
 #, c-format
 msgid "Cannot find trigger %s\n"
 msgstr ""
 
-#: src/pi_trigger.c:1081
+#: src/pi_trigger.c:1101
 #, c-format
 msgid "Cannot find trigger %s rule ID %u\n"
 msgstr ""
 
-#: src/pi_trigger.c:1153
+#: src/pi_trigger.c:1173
 msgid "Add a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1154
+#: src/pi_trigger.c:1174
 msgid "List triggers."
 msgstr ""
 
-#: src/pi_trigger.c:1156
+#: src/pi_trigger.c:1176
 msgid "Delete a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1158
+#: src/pi_trigger.c:1178
 msgid "Add a rule."
 msgstr ""
 
-#: src/pi_trigger.c:1159
+#: src/pi_trigger.c:1179
 msgid "Delete a rule."
 msgstr ""
 

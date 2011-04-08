@@ -22,7 +22,7 @@
 #include "flags.h"
 #include "defaults.h"
 
-unsigned int flags_print (flag_t * flags, buffer_t * buf, unsigned long flag)
+unsigned int flags_print (flag_t * flags, buffer_t * buf, unsigned long long flag)
 {
   unsigned int cnt = 0, j;
 
@@ -31,11 +31,14 @@ unsigned int flags_print (flag_t * flags, buffer_t * buf, unsigned long flag)
     return 0;
   }
 
-  for (j = 0; flags[j].flag != 0; j++)
+  for (j = 0; flags[j].name != 0; j++) {
+    if (!flags[j].flag)
+      continue;
     if ((flags[j].flag & flag) == flags[j].flag) {
       bf_printf (buf, "%s,", flags[j].name);
       cnt++;
     }
+  }
   if (cnt) {
     buf->e--;
     *buf->e = '\0';
@@ -48,15 +51,18 @@ unsigned int flags_help (flag_t * flags, buffer_t * buf)
 {
   unsigned int j;
 
-  for (j = 0; flags[j].flag != 0; j++)
+  for (j = 0; flags[j].name != 0; j++) {
+    if (!flags[j].flag)
+      continue;
     bf_printf (buf, "%s : %s\n", flags[j].name, gettext (flags[j].help));
+  }
 
   return 0;
 }
 
 unsigned int flags_parse (flag_t * flags, buffer_t * buf, unsigned int argc,
-			  unsigned char **argv, unsigned int flagstart, unsigned long *flag,
-			  unsigned long *nflag)
+			  unsigned char **argv, unsigned int flagstart, unsigned long long *flag,
+			  unsigned long long *nflag)
 {
   unsigned int i, j;
   unsigned char *name, *arg, *work;
@@ -76,6 +82,8 @@ unsigned int flags_parse (flag_t * flags, buffer_t * buf, unsigned int argc,
 	name++;
 
       for (j = 0; flags[j].name; j++) {
+	if (!flags[j].flag)
+	  continue;
 	if (!strcasecmp (flags[j].name, name)) {
 	  if (arg[0] != '-') {
 	    if (buf)

@@ -38,15 +38,15 @@ typedef struct command {
 
   unsigned char name[COMMAND_MAX_LENGTH];
   command_handler_t *handler;
-  unsigned long req_cap;
+  unsigned long long req_cap;
   unsigned char *help;
 } command_t;
 
 extern int command_init ();
 extern int command_setup ();
-extern int command_register (unsigned char *name, command_handler_t * handler, unsigned long cap,
+extern int command_register (unsigned char *name, command_handler_t * handler, unsigned long long cap,
 			     unsigned char *help);
 extern int command_unregister (unsigned char *name);
-extern int command_setrights (unsigned char *name, unsigned long cap, unsigned long ncap);
+extern int command_setrights (unsigned char *name, unsigned long long cap, unsigned long long ncap);
 
 #endif

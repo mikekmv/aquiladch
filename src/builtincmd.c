@@ -948,6 +948,51 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
   return 0;
 }
 
+/* right handling */
+unsigned long handler_rightcreate (plugin_user_t * user, buffer_t * output, void *priv,
+				   unsigned int argc, unsigned char **argv)
+{
+  unsigned int i;
+  buffer_t *buf;
+
+  if (argc < 3) {
+    bf_printf (output, _("Usage: %s <name> <help>\n"), argv[0]);
+    return 0;
+  }
+
+  buf = bf_alloc (1024);
+  *buf->e = '\0';
+  for (i = 2; i < argc; i++)
+    bf_printf (buf, " %s", argv[i]);
+  if (*buf->s == ' ')
+    buf->s++;
+
+  if (!cap_custom_add (argv[1], buf->s)) {
+    bf_printf (output, _("Right %s could not be created.\n"), argv[1]);
+  } else {
+    bf_printf (output, _("Right %s created.\n"), argv[1]);
+  }
+
+  return 0;
+}
+
+unsigned long handler_rightdestroy (plugin_user_t * user, buffer_t * output, void *priv,
+				    unsigned int argc, unsigned char **argv)
+{
+  if (argc < 3) {
+    bf_printf (output, _("Usage: %s <name>\n"), argv[0]);
+    return 0;
+  }
+
+  if (cap_custom_remove (argv[1]) < 0) {
+    bf_printf (output, _("Right %s could not be found.\n"), argv[1]);
+  } else {
+    bf_printf (output, _("Right %s destroyed.\n"), argv[1]);
+  }
+
+  return 0;
+}
+
 /* user handling */
 #include "user.h"
 extern account_t *accounts;
@@ -956,7 +1001,7 @@ extern account_type_t *accountTypes;
 unsigned long handler_groupadd (plugin_user_t * user, buffer_t * output, void *priv,
 				unsigned int argc, unsigned char **argv)
 {
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   config_element_t *defaultrights;
 
   if (argc < 2) {
@@ -1004,7 +1049,7 @@ leave:
 unsigned long handler_groupcap (plugin_user_t * user, buffer_t * output, void *priv,
 				unsigned int argc, unsigned char **argv)
 {
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   account_type_t *type;
 
   if (argc < 2) {
@@ -1146,7 +1191,7 @@ unsigned long handler_userlist (plugin_user_t * user, buffer_t * output, void *p
 unsigned long handler_useradd (plugin_user_t * user, buffer_t * output, void *priv,
 			       unsigned int argc, unsigned char **argv)
 {
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   account_type_t *type;
   account_t *account;
   plugin_user_t *target;
@@ -1226,7 +1271,7 @@ leave:
 unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *priv,
 			       unsigned int argc, unsigned char **argv)
 {
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   account_t *account;
 
   if (argc < 3) {
@@ -1292,7 +1337,7 @@ unsigned long handler_userdel (plugin_user_t * user, buffer_t * output, void *pr
 			       unsigned int argc, unsigned char **argv)
 {
   account_t *account;
-  unsigned long cap = 0;
+  unsigned long long cap = 0;
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <nick>"), argv[0]);
@@ -1763,7 +1808,7 @@ unsigned long handler_confighelp (plugin_user_t * user, buffer_t * output, void 
 unsigned long handler_configset (plugin_user_t * user, buffer_t * output, void *priv,
 				 unsigned int argc, unsigned char **argv)
 {
-  unsigned long cap = 0, ncap = 0;
+  unsigned long long cap = 0, ncap = 0;
   config_element_t *elem;
 
   if (argc < 3) {
@@ -1964,6 +2009,9 @@ int builtincmd_init ()
   command_register ("whoip",      &handler_whoip,        CAP_KICK,    _("Returns the user using the IP."));
 
   command_register ("massall",	  &handler_massall,    CAP_CONFIG,     _("Send a private message to all users."));
+
+  command_register ("rightcreate",  &handler_rightcreate,   CAP_ADMIN|CAP_INHERIT, _("Create a custom right."));
+  command_register ("rightdestroy", &handler_rightdestroy,  CAP_ADMIN|CAP_INHERIT, _("Destroy a custom right."));
 
   command_register ("groupadd",   &handler_groupadd,   CAP_GROUP,     _("Add a user group."));
   command_register ("groupdel",   &handler_groupdel,   CAP_GROUP,     _("Delete a user group."));
