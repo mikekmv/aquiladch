@@ -332,7 +332,7 @@ int main (int argc, char **argv)
   daemonize (argv);
 
   /* initialize the global configuration */
-  gettime();
+  gettime ();
   config_init ();
   accounts_init ();
   plugin_init ();

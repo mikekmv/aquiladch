@@ -908,6 +908,8 @@ unsigned long handler_help (plugin_user_t * user, buffer_t * output, void *priv,
 	bf_printf (output, "%s: %s\n", cmd->name, cmd->help);
 
     bf_printf (output, _("Commands are preceded with ! or +\n"));
+    bf_printf (output, _("\nThis hub is running %s Version %s. For more help, see %s\n"),
+	       HUBSOFT_NAME, AQUILA_VERSION, HUBSOFT_HOMEPAGE);
     return 0;
   }
 
@@ -1565,11 +1567,15 @@ unsigned long handler_setlocale (plugin_user_t * user, buffer_t * output, void *
     return 0;
   }
 
-  locale = setlocale (LC_MESSAGES, argv[1]);
-  if (locale) {
-    bf_printf (output, "Locale set to %s", locale);
-  } else {
-    bf_printf (output, "Locale %s could not be set.", argv[1]);
+  /* Change language.  */
+  setenv ("LANGUAGE", argv[1], 1);
+  bf_printf (output, "Locale set to %s", locale);
+
+  /* Make change known.  */
+  {
+    extern int _nl_msg_cat_cntr;
+
+    ++_nl_msg_cat_cntr;
   }
 
   return 0;

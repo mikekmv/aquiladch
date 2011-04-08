@@ -350,6 +350,12 @@ int pi_hublist_handle_timeout (esocket_t * s)
     esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
     return 0;
   }
+#ifdef USE_WINDOWS
+  if (s->state == SOCKSTATE_CONNECTING) {
+    if (!esocket_check_connect (s))
+      return 0;
+  }
+#endif
 
   buf = bf_alloc (10240);
 

@@ -70,6 +70,9 @@ esocket_t *freelist = NULL;
 
 #ifdef USE_IOCP
 
+//extern BOOL WSAAPI ConnectEx(SOCKET, const struct sockaddr*, int, PVOID, DWORD, LPDWORD, LPOVERLAPPED);
+
+
 /******************************** IOCP specific stuff *******************************************/
 
 /*
@@ -1058,25 +1061,71 @@ int esocket_connect (esocket_t * s, char *address, unsigned int port)
 {
   int err;
 
+  //esocket_ioctx_t *ctxt;
+
   if (s->addr)
     freeaddrinfo (s->addr);
 
   if ((err = getaddrinfo (address, NULL, NULL, &s->addr))) {
-    return err;
+    errno = translate_error (WSAGetLastError ());
+    return -1;
   }
 
   ((struct sockaddr_in *) s->addr->ai_addr)->sin_port = htons (port);
 
+/*  ctxt = ioctx_alloc (s, 0);
+  if (!ctxt)
+    return -1;
+
+  ctxt->iotype = ESIO_CONNECT;
+
+  if ((err = ConnectEx (s->socket, s->addr->ai_addr, sizeof (struct sockaddr), NULL, 0, NULL, &ctxt->Overlapped))) {
+    if ((err == SOCKET_ERROR) && (ERROR_IO_PENDING != WSAGetLastError ())) {
+      perror ("ConnectEx:");
+      IOCTX_FREE (ctxt);
+      es_iocp_error (s);
+      return -1;
+    }
+  }
+*/
+
   err = connect (s->socket, s->addr->ai_addr, sizeof (struct sockaddr));
-//  if (err && (errno != EINPROGRESS)) {
-//    /* perror ("connect()");*/
-//    return -errno;
-//  }
+  if (err == SOCKET_ERROR) {
+    err = WSAGetLastError ();
+    if (err && (err != WSAEWOULDBLOCK)) {
+      errno = translate_error (err);
+      return -1;
+    }
+  }
 
   esocket_update_state (s, SOCKSTATE_CONNECTING);
 
   return 0;
 }
+
+
+int esocket_check_connect (esocket_t * s)
+{
+  esocket_handler_t *h = s->handler;
+  int err, len;
+
+  len = sizeof (s->error);
+  err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, (void *) &s->error, &len);
+  if (s->error != 0) {
+    s->error = translate_error (s->error);
+    return -1;
+  }
+
+  DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
+
+  esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
+  if (h->types[s->type].error)
+    h->types[s->type].error (s);
+
+
+  return 0;
+}
+
 #endif
 
 /*
@@ -2062,6 +2111,9 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	break;
 
       case ESIO_CONNECT:
+
+	//setsockopt(s->socket, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0);
+
 	//if (h->types[s->type].input)
 	//  h->types[s->type].input (s);
 

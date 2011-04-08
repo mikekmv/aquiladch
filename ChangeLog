@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta6:
+0.1.11-pre1-beta7:
+	Fixed esocket_connect on windows (reported rick/XP9).
+	Fix !setlocale: set the LANGUAGE env variable to switch.
+	Fix printf on windows.
 	Fix trigger timer after reload.
 	Clean up build system
 	remove any trace of the cygbin dist.

@@ -612,7 +612,7 @@ unsigned long pi_statistics_handler_statbuffer (plugin_user_t * user, buffer_t *
 #ifndef USE_WINDOWS
   bf_printf (output, _("Allocated size: %llu (max: %llu)\n"), bufferstats.size, bufferstats.peak);
 #else
-  bf_printf (output, _("Allocated size: %I64u (max: %llu)\n"), bufferstats.size, bufferstats.peak);
+  bf_printf (output, _("Allocated size: %I64u (max: %I64u)\n"), bufferstats.size, bufferstats.peak);
 #endif
   bf_printf (output, _("Allocated buffers: %lu (max %lu)\n"), bufferstats.count, bufferstats.max);
   bf_printf (output, _(" Users having buffered output: %lu\n"), buffering);
