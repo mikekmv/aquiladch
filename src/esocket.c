@@ -268,7 +268,7 @@ unsigned int es_iocp_error (esocket_t * s)
 {
   esocket_handler_t *h = s->handler;
 
-  s->error = WSAGetLastError ();
+  s->error = translate_error (WSAGetLastError ());
 
   if (h->types[s->type].error)
     h->types[s->type].error (s);
@@ -1108,20 +1108,42 @@ int esocket_check_connect (esocket_t * s)
 {
   esocket_handler_t *h = s->handler;
   int err, len;
+  struct sockaddr sa;
+
+  s->error = 0;
+  len = sizeof (sa);
+  err = getpeername (s->socket, &sa, &len);
+  if (err == SOCKET_ERROR) {
+    err = WSAGetLastError ();
+    if (err && (err != WSAEWOULDBLOCK)) {
+      s->error = translate_error (err);
+      goto error;
+    }
+    return -1;
+  }
+
 
   len = sizeof (s->error);
   err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, (void *) &s->error, &len);
+  if (err) {
+    err = WSAGetLastError ();
+    s->error = translate_error (err);
+    goto error;
+  }
+
   if (s->error != 0) {
     s->error = translate_error (s->error);
-    return -1;
+    goto error;
   }
 
   DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
 
+  err = s->error;
   esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
+
+error:
   if (h->types[s->type].error)
     h->types[s->type].error (s);
-
 
   return 0;
 }

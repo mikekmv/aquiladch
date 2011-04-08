@@ -319,11 +319,17 @@ int pi_hublist_handle_error (esocket_t * s)
   buffer_t *buf;
   pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
 
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
+
+  /* we are connected, just wait for input */
   if (!s->error) {
     esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
     return 0;
   }
 
+
+  /* an error occured */
   buf = bf_alloc (10240);
 
   bf_printf (buf, _("Hublist update ERROR: %s: %s.\n"), ctx->address, strerror (s->error));
@@ -345,6 +351,9 @@ int pi_hublist_handle_timeout (esocket_t * s)
 {
   buffer_t *buf;
   pi_hublist_ctx_t *ctx = (pi_hublist_ctx_t *) s->context;
+
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
 
   if (s->state == SOCKSTATE_RESOLVING) {
     esocket_settimeout (s, PI_HUBLIST_TIMEOUT);

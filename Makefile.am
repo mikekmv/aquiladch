@@ -43,10 +43,6 @@ aquila-${VERSION}-win32.tgz: src/aquila.exe tools/aqpasswd.exe
 	mkdir -p windist
 	cp src/aquila.exe windist
 	cp tools/aqpasswd.exe windist
-if !DEBUG
-	$(STRIP) windist/aquila.exe
-	$(STRIP) windist/aqpasswd.exe
-endif
 	tar -C windist -zcvf aquila-${VERSION}-win32.tgz .
 
 windist: aquila-${VERSION}-win32.tgz
