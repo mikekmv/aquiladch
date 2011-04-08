@@ -1,7 +1,8 @@
 
 Develstatus:
+	- pi_rss...
+	- xml config files
 	- implement delayed close on windows.
-	- async DNS resolving
 	- LUA 5.1
 	- move AcceptEx to handler. Add ConnectEx and the other one.
 	- <FleetCommand> plus, !iplog could accept ips too, not just nicks.. or, even better: ip patterns :)

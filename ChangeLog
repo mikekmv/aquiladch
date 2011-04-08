@@ -1,6 +1,8 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta4:
+0.1.11-pre1-beta5:
+	Invalid char in timestrings just ends the string (reported maksalaatikko).
+	Correctly delete timer rule when trigger is deleted (Reported FD).
 	Fix to make it build on mingw
 	Make timer trigger type accept standard time strings.
 	Added timer trigger type.

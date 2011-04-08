@@ -142,7 +142,8 @@ unsigned long time_parse (unsigned char *string)
       total += reg;
       reg = 0;
     } else {
-      return 0;
+      /* stop interpreting on diff character */
+      break;
     }
     c++;
   }

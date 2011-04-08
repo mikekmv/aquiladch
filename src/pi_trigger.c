@@ -295,6 +295,12 @@ void trigger_delete (trigger_t * trigger)
       if (rule->trigger == trigger)
 	trigger_rule_delete (rule);
     };
+
+    for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = next) {
+      next = rule->next;
+      if (rule->trigger == trigger)
+	trigger_rule_delete (rule);
+    };
   }
 
   trigger->next->prev = trigger->prev;
