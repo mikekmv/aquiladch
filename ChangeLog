@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta16:
+0.1.11-pre1-beta17:
+	More xml saving bugs.
 	Fixed bug in xml saving... again.
 	Added lua function AccountLastLogin() (Req maksalaatikko)
 	Fixed buf in xml saving for large xmls.

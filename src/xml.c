@@ -39,25 +39,30 @@
 
 #define IMPORT_BUFSIZE 10000
 
-unsigned char *xml_escape (buffer_t * target, unsigned char *src)
+buffer_t *xml_escape (buffer_t * target, unsigned char *src)
 {
   for (; *src; src++) {
     switch (*src) {
       case '<':
-	bf_strcat (target, "&lt;");
+	target = bf_printf_resize (target, "&lt;");
 	break;
       case '>':
-	bf_strcat (target, "&gt;");
+	target = bf_printf_resize (target, "&gt;");
 	break;
       case '&':
-	bf_strcat (target, "&amp;");
+	target = bf_printf_resize (target, "&amp;");
 	break;
       default:
-	bf_strncat (target, src, 1);
+	if (bf_unused (target) < 2) {
+	  target = bf_printf_resize (target, "%c", *src);
+	} else {
+	  *target->e++ = *src;
+	  *target->e = 0;
+	}
 	break;
     }
   }
-  return 0;
+  return target;
 }
 
 unsigned char *xml_unescape (buffer_t * target, unsigned char *src)
@@ -522,7 +527,7 @@ buffer_t *xml_export_element (xml_node_t * node, buffer_t * buf, int level)
     buf = bf_printf_resize (buf, "%*s<%s", level, "", node->name);
     /* FIXME add attr */
     buf = bf_printf_resize (buf, ">");
-    xml_escape (buf, node->value);
+    buf = xml_escape (buf, node->value);
     buf = bf_printf_resize (buf, "</%s>\n", node->name);
     return buf;
   }
@@ -583,11 +588,12 @@ unsigned long xml_write (FILE * fp, xml_node_t * tree)
   unsigned long l = 0;
   buffer_t *b, *buf;
 
-  fwrite ("<?xml version=\"1.1\"?>\n", 1, 22, fp);
+  fwrite ("<?xml version=\"1.1\" ?>\n", 1, 22, fp);
   buf = xml_export (tree);
   b = buf;
   while (b) {
-    l += fwrite (b->s, 1, b->e - b->s, fp);
+    if (bf_used (b))
+      l += fwrite (b->s, 1, bf_used (b), fp);
     b = b->next;
   };
 

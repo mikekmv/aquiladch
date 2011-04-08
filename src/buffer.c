@@ -435,7 +435,7 @@ buffer_t *bf_printf_resize (buffer_t * dst, const char *format, ...)
 repeat:
   /* if the buffer is full, resize it */
   available = bf_unused (dst);
-  if (!available)
+  if (available < 2)
     goto resize;
 
   /* print to the buffer */
@@ -444,8 +444,10 @@ repeat:
   va_end (ap);
 
   /* make sure dst->e is always valid */
-  if (retval > available)
+  if (retval >= available)
     goto resize;
+
+  dst->e += retval;
 
   return dst;
 
@@ -460,9 +462,9 @@ resize:
     }
 
     dst->e = s;
-    *dst->e = 0;
     bf_append (&dst, b);
     dst = b;
+    s = dst->e;
   }
   goto repeat;
 }
