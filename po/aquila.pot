@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-04 00:43+0100\n"
+"POT-Creation-Date: 2007-03-07 17:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1484,9 +1484,15 @@ msgstr ""
 msgid "%s %s by %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:1058 src/plugin.c:1062 src/plugin.c:1067 src/plugin.c:1071
+#: src/plugin.c:1070 src/plugin.c:1088 src/plugin.c:1092 src/plugin.c:1097
+#: src/plugin.c:1101
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
+msgstr ""
+
+#: src/plugin.c:1117
+#, c-format
+msgid "Error loading configuration from %s: %s\n"
 msgstr ""
 
 #: src/utils.c:98
@@ -1788,7 +1794,7 @@ msgstr ""
 msgid "Command returns last chatlines."
 msgstr ""
 
-#: src/pi_chatroom.c:246
+#: src/pi_chatroom.c:300
 #, c-format
 msgid ""
 "Usage: %s <room> <description> [<private>] [<autoreg>] [<autorights>] "
@@ -1803,86 +1809,90 @@ msgid ""
 "\"\"."
 msgstr ""
 
-#: src/pi_chatroom.c:257
+#: src/pi_chatroom.c:311
 #, c-format
 msgid "Chatroom name %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_chatroom.c:262
+#: src/pi_chatroom.c:316
 #, c-format
 msgid "Chatroom %s already exists."
 msgstr ""
 
-#: src/pi_chatroom.c:271
+#: src/pi_chatroom.c:321
+msgid "Spaces are not allowed in chatroom names."
+msgstr ""
+
+#: src/pi_chatroom.c:330
 msgid "Room is private.\n"
 msgstr ""
 
-#: src/pi_chatroom.c:277
+#: src/pi_chatroom.c:336
 msgid "Room will autojoin registered users.\n"
 msgstr ""
 
-#: src/pi_chatroom.c:283
+#: src/pi_chatroom.c:342
 msgid "Room will autojoin users with sufficient rights.\n"
 msgstr ""
 
-#: src/pi_chatroom.c:290
+#: src/pi_chatroom.c:349
 #, c-format
 msgid "Ignoring unknown argument %s\n"
 msgstr ""
 
-#: src/pi_chatroom.c:300
+#: src/pi_chatroom.c:359
 msgid "Room requires: "
 msgstr ""
 
-#: src/pi_chatroom.c:313
+#: src/pi_chatroom.c:372
 msgid "Room creation failed!\n"
 msgstr ""
 
-#: src/pi_chatroom.c:315
+#: src/pi_chatroom.c:374
 #, c-format
 msgid "Room %s created successfully!\n"
 msgstr ""
 
-#: src/pi_chatroom.c:327
+#: src/pi_chatroom.c:386
 #, c-format
 msgid "Usage: %s <room>\n"
 msgstr ""
 
-#: src/pi_chatroom.c:333 src/pi_chatroom.c:370
+#: src/pi_chatroom.c:392 src/pi_chatroom.c:429
 #, c-format
 msgid "Cannot find room %s\n"
 msgstr ""
 
-#: src/pi_chatroom.c:343
+#: src/pi_chatroom.c:402
 #, c-format
 msgid "Room %s has %d users"
 msgstr ""
 
-#: src/pi_chatroom.c:345
+#: src/pi_chatroom.c:404
 msgid ", is private"
 msgstr ""
 
-#: src/pi_chatroom.c:347
+#: src/pi_chatroom.c:406
 msgid ", autojoins registered users"
 msgstr ""
 
-#: src/pi_chatroom.c:349
+#: src/pi_chatroom.c:408
 msgid ", autojoins users with sufficient rights"
 msgstr ""
 
-#: src/pi_chatroom.c:351
+#: src/pi_chatroom.c:410
 msgid " and requires rights "
 msgstr ""
 
-#: src/pi_chatroom.c:557
+#: src/pi_chatroom.c:622
 msgid "Add a chatroom."
 msgstr ""
 
-#: src/pi_chatroom.c:559
+#: src/pi_chatroom.c:624
 msgid "Remove a chatroom."
 msgstr ""
 
-#: src/pi_chatroom.c:561
+#: src/pi_chatroom.c:626
 msgid "Lists available chatrooms."
 msgstr ""
 
@@ -2036,24 +2046,24 @@ msgstr ""
 msgid "Lua script '%s' not found.\n"
 msgstr ""
 
-#: src/pi_lua.c:2286
+#: src/pi_lua.c:2331
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr ""
 
-#: src/pi_lua.c:2369
+#: src/pi_lua.c:2416
 msgid "Show lua stats."
 msgstr ""
 
-#: src/pi_lua.c:2370
+#: src/pi_lua.c:2417
 msgid "Load a lua script."
 msgstr ""
 
-#: src/pi_lua.c:2371
+#: src/pi_lua.c:2418
 msgid "Remove a lua script."
 msgstr ""
 
-#: src/pi_trigger.c:657
+#: src/pi_trigger.c:832
 #, c-format
 msgid ""
 "Usage: %s <name> <type> <arg>\n"
@@ -2067,73 +2077,73 @@ msgid ""
 "   arg: depends on type\n"
 msgstr ""
 
-#: src/pi_trigger.c:668
+#: src/pi_trigger.c:843
 #, c-format
 msgid "Triggername %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_trigger.c:674
+#: src/pi_trigger.c:849
 #, c-format
 msgid "Triggername %s already exists."
 msgstr ""
 
-#: src/pi_trigger.c:685
+#: src/pi_trigger.c:860
 #, c-format
 msgid "Unknown trigger type %s."
 msgstr ""
 
-#: src/pi_trigger.c:691
+#: src/pi_trigger.c:866
 #, c-format
 msgid "Trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:693
+#: src/pi_trigger.c:868
 #, c-format
 msgid "Trigger %s creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:704
+#: src/pi_trigger.c:879
 #, c-format
 msgid ""
 "Usage: %s <name>\n"
 "   name: name of the trigger\n"
 msgstr ""
 
-#: src/pi_trigger.c:710 src/pi_trigger.c:748 src/pi_trigger.c:840
+#: src/pi_trigger.c:885 src/pi_trigger.c:923 src/pi_trigger.c:1015
 #, c-format
 msgid "Triggername %s doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:715
+#: src/pi_trigger.c:890
 #, c-format
 msgid "Trigger %s deleted."
 msgstr ""
 
-#: src/pi_trigger.c:724
+#: src/pi_trigger.c:899
 #, c-format
 msgid "Trigger %s dumps file %s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:728
+#: src/pi_trigger.c:903
 #, c-format
 msgid "Trigger %s dumps text %.*s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:777
+#: src/pi_trigger.c:952
 #, c-format
 msgid "Unknown trigger rule type %s."
 msgstr ""
 
-#: src/pi_trigger.c:803
+#: src/pi_trigger.c:978
 #, c-format
 msgid "Rule for trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:805
+#: src/pi_trigger.c:980
 msgid "Rule creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:812
+#: src/pi_trigger.c:987
 #, c-format
 msgid ""
 "Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights "
@@ -2155,7 +2165,7 @@ msgid ""
 "   rights: rights required to activate rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:834
+#: src/pi_trigger.c:1009
 #, c-format
 msgid ""
 "Usage: %s <name> <id>\n"
@@ -2163,48 +2173,48 @@ msgid ""
 "   id  : ID of the rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:847
+#: src/pi_trigger.c:1022
 #, c-format
 msgid "Trigger %s Rule ID %lu doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:852
+#: src/pi_trigger.c:1027
 #, c-format
 msgid "Trigger %s Rule ID %lu deleted."
 msgstr ""
 
-#: src/pi_trigger.c:860
+#: src/pi_trigger.c:1035
 #, c-format
 msgid "  Rule %lu type "
 msgstr ""
 
-#: src/pi_trigger.c:900
+#: src/pi_trigger.c:1075
 #, c-format
 msgid "Cannot find trigger %s\n"
 msgstr ""
 
-#: src/pi_trigger.c:907
+#: src/pi_trigger.c:1082
 #, c-format
 msgid "Cannot find trigger %s rule ID %u\n"
 msgstr ""
 
-#: src/pi_trigger.c:973
+#: src/pi_trigger.c:1154
 msgid "Add a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:974
+#: src/pi_trigger.c:1155
 msgid "List triggers."
 msgstr ""
 
-#: src/pi_trigger.c:976
+#: src/pi_trigger.c:1157
 msgid "Delete a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:978
+#: src/pi_trigger.c:1159
 msgid "Add a rule."
 msgstr ""
 
-#: src/pi_trigger.c:979
+#: src/pi_trigger.c:1160
 msgid "Delete a rule."
 msgstr ""
 
@@ -2310,53 +2320,53 @@ msgid ""
 "Use 0 for version if unimportant."
 msgstr ""
 
-#: src/pi_user.c:384
+#: src/pi_user.c:385
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) added to banned list because: %s\n"
 msgstr ""
 
-#: src/pi_user.c:387
+#: src/pi_user.c:388
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) added to banned list\n"
 msgstr ""
 
-#: src/pi_user.c:402
+#: src/pi_user.c:403
 #, c-format
 msgid "Client \"%s\" (%lf, %lf) because: %.*s\n"
 msgstr ""
 
-#: src/pi_user.c:405
+#: src/pi_user.c:406
 #, c-format
 msgid "Client \"%s\" (%lf, %lf)\n"
 msgstr ""
 
-#: src/pi_user.c:412
+#: src/pi_user.c:413
 msgid "No clients banned."
 msgstr ""
 
-#: src/pi_user.c:425
+#: src/pi_user.c:426
 #, c-format
 msgid "Usage: !%s <clientname> <min> <max>\n"
 msgstr ""
 
-#: src/pi_user.c:433
+#: src/pi_user.c:434
 #, c-format
 msgid "Client \"%s\" removed from banlist\n"
 msgstr ""
 
-#: src/pi_user.c:435
+#: src/pi_user.c:436
 #, c-format
 msgid "Client \"%s\" not found in banlist\n"
 msgstr ""
 
-#: src/pi_user.c:485
+#: src/pi_user.c:495
 #, c-format
 msgid ""
 "WARNING: resourcelimit for this process allows a absolute maximum of %lu "
 "users, currently %lu are configured.\n"
 msgstr ""
 
-#: src/pi_user.c:496
+#: src/pi_user.c:506
 #, c-format
 msgid ""
 "WARNING: You are using an Aquila version based on select(). This limits the "
@@ -2364,133 +2374,133 @@ msgid ""
 "your hub.\n"
 msgstr ""
 
-#: src/pi_user.c:504
+#: src/pi_user.c:514
 msgid ""
 "WARNING: You are using an Aquila version based on poll(). This limits the "
 "performance of your hub with larger sizes. Please consider moving to kernel "
 "version 2.6 and a recent glibc.\n"
 msgstr ""
 
-#: src/pi_user.c:511
+#: src/pi_user.c:521
 msgid ""
 "WARNING: userlimit.registered equals userlimit.op. userlimit.registered "
 "includes the ops (since they are registered too): setting them equal means "
 "that you only allow OPs, but not normal registered users.\n"
 msgstr ""
 
-#: src/pi_user.c:545
+#: src/pi_user.c:555
 msgid "Maximum number of users (set to 0 to ignore)."
 msgstr ""
 
-#: src/pi_user.c:546
+#: src/pi_user.c:556
 msgid "Maximum unregistered users."
 msgstr ""
 
-#: src/pi_user.c:547
+#: src/pi_user.c:557
 msgid "Maximum registered users."
 msgstr ""
 
-#: src/pi_user.c:548
+#: src/pi_user.c:558
 msgid "Reserve place for this many ops in the registered users."
 msgstr ""
 
-#: src/pi_user.c:552
+#: src/pi_user.c:562
 msgid "Minimum share requirement for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:553
+#: src/pi_user.c:563
 msgid "Minimum share requirement for registered users."
 msgstr ""
 
-#: src/pi_user.c:554
+#: src/pi_user.c:564
 msgid "Minimum share requirement for OPS"
 msgstr ""
 
-#: src/pi_user.c:556
+#: src/pi_user.c:566
 msgid "Minimum hubs for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:557
+#: src/pi_user.c:567
 msgid "Maximum hubs for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:558
+#: src/pi_user.c:568
 msgid "Minimum slots for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:559
+#: src/pi_user.c:569
 msgid "Maximum slots for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:560
+#: src/pi_user.c:570
 msgid "Minimum hubs/slot ratio for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:562
+#: src/pi_user.c:572
 msgid "Minimum hubs for registered users."
 msgstr ""
 
-#: src/pi_user.c:563
+#: src/pi_user.c:573
 msgid "Maximum hubs for registered users."
 msgstr ""
 
-#: src/pi_user.c:564
+#: src/pi_user.c:574
 msgid "Minimum slots for registered users."
 msgstr ""
 
-#: src/pi_user.c:565
+#: src/pi_user.c:575
 msgid "Maximum slots for registered users."
 msgstr ""
 
-#: src/pi_user.c:566
+#: src/pi_user.c:576
 msgid "Minimum hubs/slot ratio for registered users."
 msgstr ""
 
-#: src/pi_user.c:568
+#: src/pi_user.c:578
 msgid "Minimum hubs for Operators."
 msgstr ""
 
-#: src/pi_user.c:569
+#: src/pi_user.c:579
 msgid "Maximum hubs for Operators."
 msgstr ""
 
-#: src/pi_user.c:570
+#: src/pi_user.c:580
 msgid "Minimum slots for Operators."
 msgstr ""
 
-#: src/pi_user.c:571
+#: src/pi_user.c:581
 msgid "Maximum slots for Operators."
 msgstr ""
 
-#: src/pi_user.c:572
+#: src/pi_user.c:582
 msgid "Minimum hubs/slot ratio for Operators."
 msgstr ""
 
-#: src/pi_user.c:583
+#: src/pi_user.c:593
 msgid "Show logged in user counts."
 msgstr ""
 
-#: src/pi_user.c:585
+#: src/pi_user.c:595
 msgid "Ban a client."
 msgstr ""
 
-#: src/pi_user.c:586
+#: src/pi_user.c:596
 msgid "List client bans."
 msgstr ""
 
-#: src/pi_user.c:587
+#: src/pi_user.c:597
 msgid "Unban a client."
 msgstr ""
 
-#: src/pi_user.c:589
+#: src/pi_user.c:599
 msgid "Add a source IP restriction for a user."
 msgstr ""
 
-#: src/pi_user.c:590
+#: src/pi_user.c:600
 msgid "Remove a source IP restriction for a user."
 msgstr ""
 
-#: src/pi_user.c:591
+#: src/pi_user.c:601
 msgid "Show source IP restrictions for a user."
 msgstr ""
 
@@ -2524,24 +2534,24 @@ msgstr ""
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:346 src/hub.c:486
+#: src/hub.c:345 src/hub.c:485
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:577
+#: src/hub.c:576
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:599
+#: src/hub.c:598
 msgid "Timeout"
 msgstr ""
 
-#: src/hub.c:611
+#: src/hub.c:610
 #, c-format
 msgid "Socket error %d."
 msgstr ""
 
-#: src/hub.c:613
+#: src/hub.c:612
 #, c-format
 msgid "Socket errno %d."
 msgstr ""

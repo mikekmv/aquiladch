@@ -22,6 +22,8 @@
 
 #include "defaults.h"
 
+#include "xml.h"
+
 typedef enum { CFG_ELEM_PTR,
   CFG_ELEM_LONG, CFG_ELEM_ULONG, CFG_ELEM_CAP, CFG_ELEM_ULONGLONG,
   CFG_ELEM_INT, CFG_ELEM_UINT,
@@ -64,7 +66,7 @@ extern config_element_t *config_register (unsigned char *name, config_type_t typ
 extern int config_unregister (unsigned char *name);
 extern config_element_t *config_find (unsigned char *name);
 extern void *config_retrieve (unsigned char *name);
-extern int config_save (unsigned char *file);
-extern int config_load (unsigned char *file);
+extern int config_save (xml_node_t *);
+extern int config_load (xml_node_t *);
 
 #endif /* _CONFIG_H_ */

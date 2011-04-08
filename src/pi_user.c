@@ -370,8 +370,9 @@ unsigned long pi_user_handler_clientban (plugin_user_t * user, buffer_t * output
   sscanf (argv[3], "%lf", &max);
 
   if (argv[4]) {
-    buf = bf_alloc (strlen (argv[4]));
+    buf = bf_alloc (strlen (argv[4]) + 1);
     bf_strcat (buf, argv[4]);
+    *buf->e = 0;
   } else
     buf = NULL;
 
@@ -439,21 +440,30 @@ unsigned long pi_user_handler_clientunban (plugin_user_t * user, buffer_t * outp
 }
 
 
-unsigned long pi_user_event_save (plugin_user_t * user, void *dummy, unsigned long event,
-				  buffer_t * token)
+unsigned long pi_user_event_save (plugin_user_t * user, void *dummy, unsigned long event, void *arg)
 {
-  banlist_client_save (&clientbanlist, ClientBanFileName);
-  banlist_save (&sourcelist, PI_USER_RESTRICTFILE);
+  xml_node_t *node = arg;
+
+  banlist_client_save (&clientbanlist, node);
+  banlist_save (&sourcelist, xml_node_add (node, "SourceList"));
+
+  banlist_client_save_old (&clientbanlist, ClientBanFileName);
+  banlist_save_old (&sourcelist, PI_USER_RESTRICTFILE);
+
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_user_event_load (plugin_user_t * user, void *dummy, unsigned long event,
-				  buffer_t * token)
+unsigned long pi_user_event_load (plugin_user_t * user, void *dummy, unsigned long event, void *arg)
 {
-  banlist_client_clear (&clientbanlist);
-  banlist_client_load (&clientbanlist, ClientBanFileName);
-  banlist_clear (&sourcelist);
-  banlist_load (&sourcelist, PI_USER_RESTRICTFILE);
+  if (arg) {
+    banlist_client_clear (&clientbanlist);
+    banlist_client_load (&clientbanlist, arg);
+    banlist_load (&sourcelist, arg);
+  } else {
+    banlist_client_clear (&clientbanlist);
+    banlist_client_load_old (&clientbanlist, ClientBanFileName);
+    banlist_load_old (&sourcelist, PI_USER_RESTRICTFILE);
+  }
   return PLUGIN_RETVAL_CONTINUE;
 }
 
@@ -575,8 +585,8 @@ int pi_user_init ()
   plugin_request (plugin_user, PLUGIN_EVENT_LOGOUT,     (plugin_event_handler_t *) &pi_user_event_logout);
   plugin_request (plugin_user, PLUGIN_EVENT_INFOUPDATE, (plugin_event_handler_t *) &pi_user_event_infoupdate);
 
-  plugin_request (plugin_user, PLUGIN_EVENT_LOAD,  &pi_user_event_load);
-  plugin_request (plugin_user, PLUGIN_EVENT_SAVE,  &pi_user_event_save);
+  plugin_request (plugin_user, PLUGIN_EVENT_LOAD,  (plugin_event_handler_t *)&pi_user_event_load);
+  plugin_request (plugin_user, PLUGIN_EVENT_SAVE,  (plugin_event_handler_t *)&pi_user_event_save);
   
   plugin_request (plugin_user, PLUGIN_EVENT_CONFIG,  (plugin_event_handler_t *) &pi_user_event_config);
   

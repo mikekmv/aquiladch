@@ -1051,42 +1051,106 @@ unsigned long plugin_del_user (plugin_private_t ** priv)
 
 int plugin_config_save (buffer_t * output)
 {
+  FILE *fp;
   int retval = 0;
+  xml_node_t *node;
 
-  retval = config_save (ConfigFile);
+  /* start tree */
+  node = xml_node_add (NULL, HUBSOFT_NAME);
+
+  /* add configvalues */
+  retval = config_save (node);
+  retval = accounts_save (node);
+  retval = banlist_save (&hardbanlist, xml_node_add (node, "HardBanList"));
+  retval = banlist_save (&softbanlist, xml_node_add (node, "SoftBanList"));
+
+  /* write to file */
+  fp = fopen (HUBSOFT_NAME ".xml", "w+");
+  if (!fp) {
+    bf_printf (output, _("Error saving configuration to %s: %s\n"), HUBSOFT_NAME ".xml",
+	       strerror (errno));
+    goto leave;
+  }
+
+  plugin_send_event (NULL, PLUGIN_EVENT_SAVE, node);
+
+  xml_write (fp, node);
+  fclose (fp);
+
+leave:
+  /* clear tree */
+  xml_free (node);
+
+  //return 0;
+
+  retval = config_save_old (ConfigFile);
   if (retval)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), ConfigFile, strerror (retval));
 
-  retval = accounts_save (AccountsFile);
+  retval = accounts_save_old (AccountsFile);
   if (retval)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), AccountsFile,
 	       strerror (retval));
 
-  retval = banlist_save (&hardbanlist, HardBanFile);
+  retval = banlist_save_old (&hardbanlist, HardBanFile);
   if (retval)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), HardBanFile, strerror (retval));
 
-  retval = banlist_save (&softbanlist, SoftBanFile);
+  retval = banlist_save_old (&softbanlist, SoftBanFile);
   if (retval)
     bf_printf (output, _("Error saving configuration to %s: %s\n"), SoftBanFile, strerror (retval));
 
-  plugin_send_event (NULL, PLUGIN_EVENT_SAVE, output);
 
   return 0;
+
 }
 
-int plugin_config_load ()
+int plugin_config_load (buffer_t * output)
 {
-  config_load (ConfigFile);
-  accounts_load (AccountsFile);
-  banlist_clear (&hardbanlist);
-  banlist_load (&hardbanlist, HardBanFile);
-  banlist_clear (&softbanlist);
-  banlist_load (&softbanlist, SoftBanFile);
+  int retval = 0;
+  FILE *fp;
+  xml_node_t *node, *list;
+
+  fp = fopen (HUBSOFT_NAME ".xml", "r+");
+  if (!fp) {
+    if (output)
+      bf_printf (output, _("Error loading configuration from %s: %s\n"), HUBSOFT_NAME ".xml",
+		 strerror (errno));
+    goto leave;
+  }
+
+  node = xml_read (fp);
+  if (!node)
+    goto leave;
+
+  if (strcmp (node->name, HUBSOFT_NAME)) {
+    xml_free (node);
+    goto leave;
+  }
+
+  config_load (node);
+  accounts_load (node);
+  list = xml_node_find (node, "HardBanList");
+  banlist_load (&hardbanlist, list);
+  list = xml_node_find (node, "SoftBanList");
+  banlist_load (&softbanlist, list);
+
+
+  plugin_send_event (NULL, PLUGIN_EVENT_LOAD, node);
+
+  xml_free (node);
+
+  return 0;
+leave:
+
+  config_load_old (ConfigFile);
+  accounts_load_old (AccountsFile);
+  banlist_load_old (&hardbanlist, HardBanFile);
+  banlist_load_old (&softbanlist, SoftBanFile);
 
   plugin_send_event (NULL, PLUGIN_EVENT_LOAD, NULL);
 
-  return 0;
+  return retval;
 }
 
 /******************************* INIT *******************************************/

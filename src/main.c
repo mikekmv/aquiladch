@@ -351,7 +351,7 @@ int main (int argc, char **argv)
   pi_statbot_init ();
   pi_hublist_init ();
   pi_configlock_init ();
-  plugin_config_load ();
+  plugin_config_load (NULL);
 
   /* add lowest member of the statistics */
   gettimeofday (&boottime, NULL);

@@ -59,8 +59,8 @@ extern banlist_client_entry_t *banlist_client_find (banlist_client_t * list, uns
 extern unsigned int banlist_client_cleanup (banlist_client_t * list);
 extern void banlist_client_clear (banlist_client_t * list);
 
-extern unsigned int banlist_client_save (banlist_client_t * list, unsigned char *file);
-extern unsigned int banlist_client_load (banlist_client_t * list, unsigned char *file);
+extern unsigned int banlist_client_save (banlist_client_t * list, xml_node_t *);
+extern unsigned int banlist_client_load (banlist_client_t * list, xml_node_t *);
 
 extern void banlist_client_init (banlist_client_t * list);
 

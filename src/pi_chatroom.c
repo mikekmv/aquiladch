@@ -170,7 +170,61 @@ unsigned int chatroom_del (chatroom_t * room)
   return 0;
 }
 
-unsigned int chatroom_save (unsigned char *filename)
+unsigned int chatroom_save (xml_node_t * node)
+{
+  chatroom_t *room;
+
+  node = xml_node_add (node, "ChatRooms");
+  for (room = chatrooms.next; (room != &chatrooms); room = room->next) {
+    node = xml_node_add (node, "Room");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, room->name);
+    xml_node_add_value (node, "Flags", XML_TYPE_ULONG, &room->flags);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &room->rights);
+    xml_node_add_value (node, "Desc", XML_TYPE_STRING, room->description);
+    node = xml_parent (node);
+  }
+
+  return 0;
+}
+
+unsigned int chatroom_load (xml_node_t * node)
+{
+  unsigned char *name = NULL, *desc = NULL;
+  unsigned long flags, rights = 0;
+  chatroom_t *room;
+
+  node = xml_node_find (node, "ChatRooms");
+  for (node = node->children; node; node = xml_next (node)) {
+    if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+      continue;
+    if (!xml_child_get (node, "Flags", XML_TYPE_ULONG, &flags))
+      continue;
+    if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights))
+      continue;
+    if (!xml_child_get (node, "Desc", XML_TYPE_STRING, &desc))
+      continue;
+
+    room = chatroom_find (name);
+    /* room hasn't changed: do not recreate it to keep userlist intact */
+    if (room && (room->rights == rights) && (room->flags == flags)
+	&& (!strcmp (room->description, desc)))
+      continue;
+    /* delete changed room */
+    if (room)
+      chatroom_del (room);
+
+    chatroom_new (name, rights, flags, desc, (plugin_event_handler_t *) & pi_chatroom_event_pm);
+  }
+
+  if (name)
+    free (name);
+  if (desc)
+    free (desc);
+
+  return 0;
+}
+
+unsigned int chatroom_save_old (unsigned char *filename)
 {
   FILE *fp;
   chatroom_t *room;
@@ -189,7 +243,7 @@ unsigned int chatroom_save (unsigned char *filename)
   return 0;
 }
 
-unsigned int chatroom_load (unsigned char *filename)
+unsigned int chatroom_load_old (unsigned char *filename)
 {
   FILE *fp;
   unsigned char buffer[1024];
@@ -213,7 +267,7 @@ unsigned int chatroom_load (unsigned char *filename)
     if (buffer[i] == '\n')
       buffer[i] = '\0';
 
-    /* all this to make sure we do not recreate a room that hasn't changed. it would loose it's users. */
+    /* all this to make sure we do not recreate a room that hasn't changed. it would loose its users. */
     if ((room = chatroom_find (name))) {
       if ((room->rights != rights) ||
 	  (room->flags != flags) || (strcmp (room->description, buffer + offset))) {
@@ -260,6 +314,11 @@ unsigned long pi_chatroom_handler_roomadd (plugin_user_t * user, buffer_t * outp
 
   if (chatroom_find (argv[1])) {
     bf_printf (output, _("Chatroom %s already exists."), argv[1]);
+    return 0;
+  }
+
+  if (strchr (argv[1], ' ')) {
+    bf_printf (output, _("Spaces are not allowed in chatroom names."));
     return 0;
   }
 
@@ -390,7 +449,7 @@ unsigned long pi_chatroom_handler_userstat (plugin_user_t * user, buffer_t * out
 
 /********************************* EVENT HANDLERS *************************************/
 
-unsigned long pi_chatroom_event_login (plugin_user_t * user, buffer_t * output, void *dummy,
+unsigned long pi_chatroom_event_login (plugin_user_t * user, void *dummy,
 				       unsigned long event, buffer_t * token)
 {
   chatroom_t *room;
@@ -413,7 +472,7 @@ unsigned long pi_chatroom_event_login (plugin_user_t * user, buffer_t * output, 
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_chatroom_event_logout (plugin_user_t * user, buffer_t * output, void *dummy,
+unsigned long pi_chatroom_event_logout (plugin_user_t * user, void *dummy,
 					unsigned long event, buffer_t * token)
 {
   chatroom_t *room;
@@ -517,17 +576,23 @@ leave:
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_chatroom_event_save (plugin_user_t * user, buffer_t * output, void *dummy,
-				      unsigned long event, buffer_t * token)
+unsigned long pi_chatroom_event_save (plugin_user_t * user, void *dummy,
+				      unsigned long event, void *arg)
 {
-  chatroom_save (pi_chatroom_savefile);
+  chatroom_save (arg);
+  chatroom_save_old (pi_chatroom_savefile);
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_chatroom_event_load (plugin_user_t * user, buffer_t * output, void *dummy,
-				      unsigned long event, buffer_t * token)
+unsigned long pi_chatroom_event_load (plugin_user_t * user, void *dummy,
+				      unsigned long event, void *arg)
 {
-  chatroom_load (pi_chatroom_savefile);
+
+  if (arg) {
+    chatroom_load (arg);
+  } else {
+    chatroom_load_old (pi_chatroom_savefile);
+  };
   return PLUGIN_RETVAL_CONTINUE;
 }
 

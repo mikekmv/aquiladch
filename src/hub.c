@@ -324,8 +324,7 @@ int server_write (client_t * cl, buffer_t * b)
     }
 
     /* try sending some of that data */
-    server_handle_output (s);
-    return 0;
+    return server_handle_output (s);
   }
 
   /* write as much as we are able */

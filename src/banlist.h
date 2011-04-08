@@ -32,6 +32,7 @@
 #include "defaults.h"
 #include "buffer.h"
 #include "dllist.h"
+#include "xml.h"
 
 typedef struct banlist_entry {
   dllist_entry_t list_ip;
@@ -71,8 +72,8 @@ extern banlist_entry_t *banlist_find (banlist_t * list, unsigned char *, uint32_
 extern unsigned int banlist_cleanup (banlist_t * list);
 extern void banlist_clear (banlist_t * list);
 
-extern unsigned int banlist_save (banlist_t * list, unsigned char *file);
-extern unsigned int banlist_load (banlist_t * list, unsigned char *file);
+extern unsigned int banlist_save (banlist_t * list, xml_node_t *node);
+extern unsigned int banlist_load (banlist_t * list, xml_node_t *node);
 
 extern void banlist_init (banlist_t * list);
 

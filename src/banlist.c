@@ -358,7 +358,77 @@ unsigned int banlist_cleanup (banlist_t * list)
   return 0;
 }
 
-unsigned int banlist_save (banlist_t * list, unsigned char *file)
+unsigned int banlist_save (banlist_t * list, xml_node_t * node)
+{
+  uint32_t i;
+  banlist_entry_t *e;
+  dllist_entry_t *l, *p, *n;
+
+  node = xml_node_add (node, "BanList");
+  dlhashlist_foreach (&list->list_ip, i) {
+    l = dllist_bucket (&list->list_ip, i);
+    for (p = l->next; p != dllist_end (l); p = n) {
+      n = p->next;
+      e = (banlist_entry_t *) p;
+      if (e->expire && (e->expire < now.tv_sec)) {
+	banlist_del (list, e);
+	continue;
+      }
+      node = xml_node_add (node, "Ban");
+      xml_node_add_value (node, "IP", XML_TYPE_IP, &e->ip);
+      xml_node_add_value (node, "Netmask", XML_TYPE_IP, &e->netmask);
+      xml_node_add_value (node, "Nick", XML_TYPE_STRING, &e->nick);
+      xml_node_add_value (node, "OP", XML_TYPE_STRING, &e->op);
+      xml_node_add_value (node, "Expire", XML_TYPE_ULONG, &e->expire);
+      xml_node_add_value (node, "Message", XML_TYPE_STRING, e->message ? e->message->s : NULL);
+      node = xml_parent (node);
+    }
+  }
+  return 0;
+}
+
+unsigned int banlist_load (banlist_t * list, xml_node_t * node)
+{
+  unsigned long ip, netmask;
+  long expire;
+  unsigned char *nick = NULL, *op = NULL, *message = NULL;
+
+  banlist_clear (list);
+
+  node = xml_node_find (node, "BanList");
+  if (!node)
+    return 0;
+
+  for (node = node->children; node; node = xml_next (node)) {
+    if (!xml_child_get (node, "IP", XML_TYPE_IP, &ip))
+      continue;
+    if (!xml_child_get (node, "Netmask", XML_TYPE_IP, &netmask))
+      continue;
+    if (!xml_child_get (node, "Nick", XML_TYPE_STRING, &nick))
+      continue;
+    if (!xml_child_get (node, "OP", XML_TYPE_STRING, &op))
+      continue;
+    if (!xml_child_get (node, "Expire", XML_TYPE_LONG, &expire))
+      continue;
+    if (!xml_child_get (node, "Message", XML_TYPE_STRING, &message))
+      continue;
+
+    if (expire && (expire < now.tv_sec))
+      continue;
+
+    banlist_add (list, op, nick, ip, netmask, bf_buffer (message), expire);
+  }
+  if (nick)
+    free (nick);
+  if (op)
+    free (op);
+  if (message)
+    free (message);
+
+  return 0;
+}
+
+unsigned int banlist_save_old (banlist_t * list, unsigned char *file)
 {
   FILE *fp;
   uint32_t i;
@@ -394,7 +464,8 @@ unsigned int banlist_save (banlist_t * list, unsigned char *file)
   return 0;
 }
 
-unsigned int banlist_load (banlist_t * list, unsigned char *file)
+
+unsigned int banlist_load_old (banlist_t * list, unsigned char *file)
 {
   FILE *fp;
   unsigned long l;

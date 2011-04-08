@@ -33,8 +33,8 @@ unsigned char *filename = "configlock.conf";
 configlock_t *locklist = NULL;
 plugin_t *plugin_configlock;
 
-unsigned long pi_configlock_event_load (plugin_user_t * user, void *dummy, unsigned long event,
-					buffer_t * token)
+unsigned long pi_configlock_event_load_old (plugin_user_t * user, void *dummy, unsigned long event,
+					    buffer_t * token)
 {
   FILE *fp;
   unsigned long l;
@@ -48,7 +48,7 @@ unsigned long pi_configlock_event_load (plugin_user_t * user, void *dummy, unsig
     free (lock);
   }
 
-  config_load (filename);
+  config_load_old (filename);
 
   fp = fopen (filename, "r");
   if (!fp)
@@ -130,6 +130,67 @@ unsigned long pi_configlock_event_load (plugin_user_t * user, void *dummy, unsig
   return PLUGIN_RETVAL_CONTINUE;
 }
 
+unsigned long pi_configlock_event_load (plugin_user_t * user, void *dummy, unsigned long event,
+					void *arg)
+{
+  FILE *fp;
+  configlock_t *lock;
+  config_element_t *elem;
+  xml_node_t *base, *node;
+
+  if (!arg)
+    goto leave;
+
+  while (locklist) {
+    lock = locklist;
+    locklist = locklist->next;
+    free (lock);
+  }
+
+  fp = fopen ("configlock.xml", "r");
+  if (!fp)
+    goto leave;
+
+  base = xml_read (fp);
+  if (!base) {
+    fclose (fp);
+    goto leave;
+  }
+
+  if (strcmp (base->name, HUBSOFT_NAME)) {
+    xml_free (base);
+    goto leave;
+  }
+
+  config_load (base);
+
+  node = xml_node_find (base, "Config");
+  for (node = node->children; node; node = xml_next (node)) {
+    elem = config_find (node->name);
+    if (!elem)
+      continue;
+
+    lock = malloc (sizeof (configlock_t));
+    memset (lock, 0, sizeof (configlock_t));
+
+    lock->elem = elem;
+    strncpy (lock->name, elem->name, CONFIG_NAMELENGTH);
+
+    xml_node_get (node, elem->type, &lock->data.v_ptr);
+
+    lock->next = locklist;
+    locklist = lock;
+  }
+
+  xml_free (base);
+
+  fclose (fp);
+
+  return PLUGIN_RETVAL_CONTINUE;
+
+leave:
+  return pi_configlock_event_load_old (user, dummy, event, NULL);
+}
 
 unsigned long pi_configlock_event_config (plugin_user_t * user, void *dummy, unsigned long event,
 					  config_element_t * elem)
@@ -187,7 +248,7 @@ int pi_configlock_init ()
   plugin_configlock = plugin_register ("configlock");
 
   plugin_request (plugin_configlock, PLUGIN_EVENT_CONFIG, (void *) &pi_configlock_event_config);
-  plugin_request (plugin_configlock, PLUGIN_EVENT_LOAD, &pi_configlock_event_load);
+  plugin_request (plugin_configlock, PLUGIN_EVENT_LOAD, (void *) &pi_configlock_event_load);
 
   return 0;
 }

@@ -163,7 +163,44 @@ void *config_retrieve (unsigned char *name)
   return NULL;
 }
 
-int config_save (unsigned char *filename)
+
+
+int config_save (xml_node_t * base)
+{
+  xml_node_t *node;
+  config_element_t *elem;
+
+  node = xml_node_add (base, "Config");
+
+  for (elem = config_sorted.onext; elem != &config_sorted; elem = elem->onext) {
+    switch (elem->type) {
+      case CFG_ELEM_STRING:
+	xml_node_add_value (node, elem->name, elem->type, *elem->val.v_string);
+	break;
+      default:
+	xml_node_add_value (node, elem->name, elem->type, elem->val.v_ptr);
+    }
+  }
+  return 0;
+}
+
+int config_load (xml_node_t * node)
+{
+  config_element_t *elem;
+
+  node = xml_node_find (node, "Config");
+  if (!node)
+    return 0;
+
+  for (node = node->children; node; node = xml_next (node)) {
+    elem = config_find (node->name);
+    xml_node_get (node, elem->type, elem->val.v_ptr);
+  }
+
+  return 0;
+}
+
+int config_save_old (unsigned char *filename)
 {
   FILE *fp;
   config_element_t *elem;
@@ -232,7 +269,7 @@ int config_save (unsigned char *filename)
   return 0;
 }
 
-int config_load (unsigned char *filename)
+int config_load_old (unsigned char *filename)
 {
   unsigned int l;
   FILE *fp;
@@ -313,7 +350,6 @@ int config_load (unsigned char *filename)
   fclose (fp);
 
   return 0;
-
 }
 
 int config_init ()

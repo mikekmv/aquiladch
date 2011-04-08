@@ -520,7 +520,166 @@ void trigger_rule_delete (trigger_rule_t * rule)
   free (rule);
 }
 
-int trigger_save (unsigned char *file)
+int trigger_save (xml_node_t * node)
+{
+  trigger_t *trigger;
+  trigger_rule_t *rule;
+
+  node = xml_node_add (node, "TriggerConfig");
+
+  node = xml_node_add (node, "Triggers");
+  for (trigger = triggerList.next; trigger != &triggerList; trigger = trigger->next) {
+    node = xml_node_add (node, "Trigger");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, trigger->name);
+    xml_node_add_value (node, "Type", XML_TYPE_ULONG, &trigger->type);
+    switch (trigger->type) {
+      case TRIGGER_TYPE_FILE:
+	xml_node_add_value (node, "File", XML_TYPE_STRING, trigger->file);
+	break;
+      case TRIGGER_TYPE_TEXT:
+	xml_node_add_value (node, "Text", XML_TYPE_STRING, trigger->text->s);
+	break;
+      case TRIGGER_TYPE_COMMAND:
+	break;
+    }
+    node = xml_parent (node);
+  }
+  node = xml_parent (node);
+
+  node = xml_node_add (node, "Rules");
+
+  node = xml_node_add (node, "LoginRules");
+  for (rule = ruleListLogin.next; rule != &ruleListLogin; rule = rule->next) {
+    node = xml_node_add (node, "Rule");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, rule->trigger->name);
+    xml_node_add_value (node, "Type", XML_TYPE_ULONG, &rule->type);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &rule->cap);
+    xml_node_add_value (node, "Flags", XML_TYPE_ULONG, &rule->flags);
+    node = xml_parent (node);
+  }
+  node = xml_parent (node);
+
+  node = xml_node_add (node, "CommandRules");
+  for (rule = ruleListCommand.next; rule != &ruleListCommand; rule = rule->next) {
+    node = xml_node_add (node, "Rule");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, rule->trigger->name);
+    xml_node_add_value (node, "Type", XML_TYPE_ULONG, &rule->type);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &rule->cap);
+    xml_node_add_value (node, "Flags", XML_TYPE_ULONG, &rule->flags);
+    xml_node_add_value (node, "Command", XML_TYPE_STRING, rule->arg);
+    xml_node_add_value (node, "Help", XML_TYPE_STRING, rule->help ? (char *) rule->help : "");
+    node = xml_parent (node);
+  }
+  node = xml_parent (node);
+
+  node = xml_node_add (node, "TimerRules");
+  for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next) {
+    node = xml_node_add (node, "Rule");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, rule->trigger->name);
+    xml_node_add_value (node, "Type", XML_TYPE_ULONG, &rule->type);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &rule->cap);
+    xml_node_add_value (node, "Flags", XML_TYPE_ULONG, &rule->flags);
+    xml_node_add_value (node, "Interval", XML_TYPE_ULONG, &rule->interval);
+    node = xml_parent (node);
+  }
+  node = xml_parent (node);
+
+  return 0;
+}
+
+int trigger_load (xml_node_t * base)
+{
+  unsigned char *name = NULL, *arg = NULL, *help = NULL;
+  unsigned long type = 0, flags = 0, interval = 0;
+  unsigned long long rights = 0;
+  trigger_t *trigger;
+  xml_node_t *node = NULL;
+
+  base = xml_node_find (base, "TriggerConfig");
+
+  node = xml_node_find (base, "Triggers");
+  for (node = node->children; node; node = xml_next (node)) {
+    if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+      continue;
+    if (!xml_child_get (node, "Type", XML_TYPE_ULONG, &type))
+      continue;
+    switch (type) {
+      case TRIGGER_TYPE_FILE:
+	if (!xml_child_get (node, "File", XML_TYPE_STRING, &arg))
+	  continue;
+	break;
+      case TRIGGER_TYPE_TEXT:
+	if (!xml_child_get (node, "Text", XML_TYPE_STRING, &arg))
+	  continue;
+	break;
+    }
+    trigger_create (name, type, arg);
+  }
+
+  base = xml_node_find (base, "Rules");
+
+  node = xml_node_find (base, "LoginRules");
+  for (node = node->children; node; node = xml_next (node)) {
+    if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+      continue;
+    if (!xml_child_get (node, "Type", XML_TYPE_ULONG, &type))
+      continue;
+    if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights))
+      continue;
+    if (!xml_child_get (node, "Flags", XML_TYPE_ULONG, &flags))
+      continue;
+
+    trigger = trigger_find (name);
+    trigger_rule_create (trigger, type, rights, flags, NULL, NULL);
+  }
+
+  node = xml_node_find (base, "CommandRules");
+  for (node = node->children; node; node = xml_next (node)) {
+    if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+      continue;
+    if (!xml_child_get (node, "Type", XML_TYPE_ULONG, &type))
+      continue;
+    if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights))
+      continue;
+    if (!xml_child_get (node, "Flags", XML_TYPE_ULONG, &flags))
+      continue;
+    if (!xml_child_get (node, "Command", XML_TYPE_STRING, &arg))
+      continue;
+    if (!xml_child_get (node, "Help", XML_TYPE_STRING, &help))
+      continue;
+
+    trigger = trigger_find (name);
+    trigger_rule_create (trigger, type, rights, flags, arg, help);
+  }
+
+  node = xml_node_find (base, "TimerRules");
+  for (node = node->children; node; node = xml_next (node)) {
+    if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+      continue;
+    if (!xml_child_get (node, "Type", XML_TYPE_ULONG, &type))
+      continue;
+    if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights))
+      continue;
+    if (!xml_child_get (node, "Flags", XML_TYPE_ULONG, &flags))
+      continue;
+    if (!xml_child_get (node, "Interval", XML_TYPE_ULONG, &flags))
+      continue;
+
+    trigger = trigger_find (name);
+    trigger_rule_create (trigger, type, rights, flags, (void *) interval, NULL);
+  }
+
+  if (name)
+    free (name);
+  if (arg)
+    free (arg);
+  if (help)
+    free (help);
+
+  return 0;
+}
+
+int trigger_save_old (unsigned char *file)
 {
   FILE *fp;
   trigger_t *trigger;
@@ -570,7 +729,8 @@ int trigger_save (unsigned char *file)
   return 0;
 }
 
-int trigger_load (unsigned char *file)
+
+int trigger_load_old (unsigned char *file)
 {
   FILE *fp;
   unsigned char buffer[1024];
@@ -643,6 +803,21 @@ int trigger_load (unsigned char *file)
   fclose (fp);
 
   return 0;
+}
+
+void trigger_clear ()
+{
+  while (ruleListCommand.next != &ruleListCommand)
+    trigger_rule_delete (ruleListCommand.next);
+
+  while (ruleListLogin.next != &ruleListLogin)
+    trigger_rule_delete (ruleListLogin.next);
+
+  while (ruleListTimer.next != &ruleListTimer)
+    trigger_rule_delete (ruleListTimer.next);
+
+  while (triggerList.next != &triggerList)
+    trigger_delete (triggerList.next);
 }
 
 /************************************************************************************************/
@@ -935,17 +1110,23 @@ unsigned long pi_trigger_handler_rulelist (plugin_user_t * user, buffer_t * outp
   return 0;
 }
 
-unsigned long pi_trigger_event_save (plugin_user_t * user, buffer_t * output, void *dummy,
-				     unsigned long event, buffer_t * token)
+unsigned long pi_trigger_event_save (plugin_user_t * user, void *dummy,
+				     unsigned long event, void *arg)
 {
-  trigger_save (pi_trigger_SaveFile);
+  trigger_save (arg);
+  trigger_save_old (pi_trigger_SaveFile);
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_trigger_event_load (plugin_user_t * user, buffer_t * output, void *dummy,
-				     unsigned long event, buffer_t * token)
+unsigned long pi_trigger_event_load (plugin_user_t * user, void *dummy,
+				     unsigned long event, void *arg)
 {
-  trigger_load (pi_trigger_SaveFile);
+  trigger_clear ();
+  if (arg) {
+    trigger_load (arg);
+  } else {
+    trigger_load_old (pi_trigger_SaveFile);
+  }
   return PLUGIN_RETVAL_CONTINUE;
 }
 

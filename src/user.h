@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-
 typedef struct account_type {
   struct account_type *next, *prev;
 
@@ -65,8 +64,8 @@ extern unsigned int account_del (account_t * a);
 extern int account_pwd_set (account_t * account, unsigned char *pwd);
 extern int account_pwd_check (account_t * account, unsigned char *pwd);
 
-extern unsigned int accounts_load (const unsigned char *filename);
-extern unsigned int accounts_save (const unsigned char *filename);
+extern unsigned int accounts_load (xml_node_t *);
+extern unsigned int accounts_save (xml_node_t *);
 
 extern unsigned int accounts_init ();
 

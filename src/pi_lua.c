@@ -2275,8 +2275,53 @@ unsigned long pi_lua_event_handler (plugin_user_t * user, buffer_t * output,
 }
 
 
-unsigned long pi_lua_event_save (plugin_user_t * user, buffer_t * output, void *dummy,
-				 unsigned long event, buffer_t * token)
+unsigned long pi_lua_event_save (plugin_user_t * user, void *dummy, unsigned long event, void *arg)
+{
+  xml_node_t *node = arg;
+  lua_context_t *ctx;
+
+  node = xml_node_add (node, "Lua");
+  for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
+    xml_node_add_value (node, "LuaScript", XML_TYPE_STRING, ctx->name);
+
+  return PLUGIN_RETVAL_CONTINUE;
+}
+
+unsigned long pi_lua_event_load_old (plugin_user_t * user, void *dummy, unsigned long event,
+				     buffer_t * token);
+unsigned long pi_lua_event_load (plugin_user_t * user, void *dummy, unsigned long event, void *arg)
+{
+  xml_node_t *node = arg;
+  lua_context_t *ctx;
+  buffer_t *buf;
+
+  if (!arg)
+    return pi_lua_event_load_old (user, dummy, event, NULL);
+
+  /* unload all scripts */
+  ctx = lua_list.next;
+  while (ctx != &lua_list) {
+    pi_lua_close (ctx->name);
+    ctx = lua_list.next;
+  }
+
+  buf = bf_alloc (10240);
+
+  node = xml_node_find (node, "Lua");
+  for (node = node->children; node; node = xml_next (node)) {
+    pi_lua_load (buf, node->value);
+    if (bf_used (buf)) {
+      plugin_report (buf);
+      bf_clear (buf);
+    }
+  }
+  bf_free (buf);
+
+  return PLUGIN_RETVAL_CONTINUE;
+}
+
+unsigned long pi_lua_event_save_old (plugin_user_t * user, void *dummy,
+				     unsigned long event, buffer_t * token)
 {
   FILE *fp;
   lua_context_t *ctx;
@@ -2295,8 +2340,8 @@ unsigned long pi_lua_event_save (plugin_user_t * user, buffer_t * output, void *
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_lua_event_load (plugin_user_t * user, buffer_t * output, void *dummy,
-				 unsigned long event, buffer_t * token)
+unsigned long pi_lua_event_load_old (plugin_user_t * user, void *dummy,
+				     unsigned long event, buffer_t * token)
 {
   unsigned int i;
   FILE *fp;
@@ -2365,12 +2410,14 @@ int pi_lua_init ()
 
   plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
   plugin_request (plugin_lua, PLUGIN_EVENT_SAVE, (plugin_event_handler_t *) & pi_lua_event_save);
+  plugin_request (plugin_lua, PLUGIN_EVENT_SAVE,
+		  (plugin_event_handler_t *) & pi_lua_event_save_old);
 
   command_register ("luastat", &handler_luastat, CAP_CONFIG, _("Show lua stats."));
   command_register ("luaload", &handler_luaload, CAP_CONFIG, _("Load a lua script."));
   command_register ("luaremove", &handler_luaclose, CAP_CONFIG, _("Remove a lua script."));
 
-  pi_lua_event_load (NULL, NULL, NULL, 0, NULL);
+  pi_lua_event_load (NULL, NULL, 0, NULL);
 
   return 0;
 }

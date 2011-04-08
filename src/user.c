@@ -222,9 +222,110 @@ void accounts_clear ()
 
   while (accountTypes)
     account_type_del (accountTypes);
+
+  type_ids = 0;
+  account_ids = 0;
 }
 
-unsigned int accounts_load (const unsigned char *filename)
+unsigned int accounts_load (xml_node_t * base)
+{
+  xml_node_t *node;
+  unsigned char *name = NULL, *passwd = NULL, *group = NULL, *op = NULL;
+  unsigned long long rights;
+  unsigned long regdate, lastlogin;
+  account_type_t *t;
+  account_t *a;
+
+  accounts_clear ();
+
+  node = xml_node_find (base, "Groups");
+  if (node) {
+    for (node = node->children; node; node = xml_next (node)) {
+      if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+	continue;
+      if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights))
+	continue;
+
+      account_type_add (name, rights);
+    }
+  }
+
+  node = xml_node_find (base, "Accounts");
+  if (node) {
+    for (node = node->children; node; node = xml_next (node)) {
+      if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
+	continue;
+      if (!xml_child_get (node, "Passwd", XML_TYPE_STRING, &passwd))
+	continue;
+      if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights))
+	continue;
+      if (!xml_child_get (node, "Group", XML_TYPE_STRING, &group))
+	continue;
+      if (!xml_child_get (node, "Creator", XML_TYPE_STRING, &op))
+	continue;
+      if (!xml_child_get (node, "RegDate", XML_TYPE_ULONG, &regdate))
+	continue;
+      if (!xml_child_get (node, "LastLogin", XML_TYPE_ULONG, &lastlogin))
+	continue;
+
+      t = account_type_find (group);
+      if (!t)
+	continue;
+
+      a = account_add (t, op, name);
+      strncpy (a->passwd, passwd, NICKLENGTH);
+      a->rights = rights;
+      a->regged = regdate;
+      a->lastlogin = lastlogin;
+    }
+  }
+
+  if (name)
+    free (name);
+  if (passwd)
+    free (passwd);
+  if (group)
+    free (group);
+  if (op)
+    free (op);
+
+  return 0;
+}
+
+unsigned int accounts_save (xml_node_t * base)
+{
+  xml_node_t *node;
+  account_type_t *t;
+  account_t *a;
+
+  node = xml_node_add (base, "Groups");
+
+  for (t = accountTypes; t; t = t->next) {
+    node = xml_node_add (node, "Group");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, t->name);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &t->rights);
+    node = xml_parent (node);
+  }
+
+  node = xml_node_add (base, "Accounts");
+
+  for (a = accounts; a; a = a->next) {
+    node = xml_node_add (node, "Account");
+    xml_node_add_value (node, "Name", XML_TYPE_STRING, &a->nick);
+    xml_node_add_value (node, "Passwd", XML_TYPE_STRING, &a->passwd);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &a->rights);
+    xml_node_add_value (node, "Group", XML_TYPE_STRING, &a->classp->name);
+    xml_node_add_value (node, "Creator", XML_TYPE_STRING, &a->op);
+    xml_node_add_value (node, "RegDate", XML_TYPE_ULONG, &a->regged);
+    xml_node_add_value (node, "LastLogin", XML_TYPE_ULONG, &a->lastlogin);
+    node = xml_parent (node);
+  }
+
+  return 0;
+}
+
+
+unsigned int accounts_load_old (const unsigned char *filename)
 {
   FILE *fp;
   account_type_t *t, *ot;
@@ -301,7 +402,8 @@ unsigned int accounts_load (const unsigned char *filename)
   return 0;
 }
 
-unsigned int accounts_save (const unsigned char *filename)
+
+unsigned int accounts_save_old (const unsigned char *filename)
 {
   FILE *fp;
   account_type_t *t;

@@ -1,6 +1,12 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta9:
+0.1.11-pre1-beta10:
+	Compiles on windows.
+	Added xml.[ch] into svn and dist.
+	Added XML loading.
+	Don't accept spaces in chatroom names.
+	Added XML saving.
+	Fixed a return value bug in server_write.
 	Changed "Dropped" to "Refused" in !statuser
 	Added EventZombie: this is a zombie chatmessage.
 	Fixed esocket_check_connect error handling.
