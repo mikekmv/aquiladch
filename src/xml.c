@@ -513,34 +513,28 @@ xml_node_t *xml_import (buffer_t * buf)
 
 buffer_t *xml_export_element (xml_node_t * node, buffer_t * buf, int level)
 {
-  unsigned char *s;
   xml_node_t *child;
 
   if (!node)
     return buf;
 
-repeat:
-  s = buf->e;
   if (node->value) {
-    bf_printf (buf, "%*s<%s", level, "", node->name);
+    buf = bf_printf (buf, "%*s<%s", level, "", node->name);
     /* FIXME add attr */
-    bf_printf (buf, ">");
+    buf = bf_printf (buf, ">");
     xml_escape (buf, node->value);
-    bf_printf (buf, "</%s>\n", node->name);
-    if (!bf_unused (buf))
-      goto toosmall;
-    return buf;
-  }
-  if (!node->children) {
-    bf_printf (buf, "%*s<%s ", level, "", node->name);
-    /* FIXME add attr */
-    bf_printf (buf, "/>\n");
-    if (!bf_unused (buf))
-      goto toosmall;
+    buf = bf_printf (buf, "</%s>\n", node->name);
     return buf;
   }
 
-  bf_printf (buf, "%*s<%s>\n", level, "", node->name);
+  if (!node->children) {
+    buf = bf_printf (buf, "%*s<%s ", level, "", node->name);
+    /* FIXME add attr */
+    buf = bf_printf (buf, "/>\n");
+    return buf;
+  }
+
+  buf = bf_printf (buf, "%*s<%s>\n", level, "", node->name);
   if (node->children) {
     child = node->children;
     do {
@@ -548,26 +542,9 @@ repeat:
       child = child->next;
     } while (child != node->children);
   }
-  bf_printf (buf, "%*s</%s>\n", level, "", node->name);
+  buf = bf_printf (buf, "%*s</%s>\n", level, "", node->name);
 
   return buf;
-
-toosmall:
-  {
-    buffer_t *b;
-
-    if (bf_used (buf)) {
-      b = bf_alloc (IMPORT_BUFSIZE);
-    } else {
-      b = bf_alloc (buf->size * 2);
-    }
-
-    buf->e = s;
-    *buf->e = 0;
-    bf_append (&buf, b);
-    buf = b;
-  }
-  goto repeat;
 }
 
 buffer_t *xml_export (xml_node_t * tree)

@@ -425,6 +425,48 @@ int bf_printf (buffer_t * dst, const char *format, ...)
   return retval;
 }
 
+
+buffer_t *bf_printf_resize (buffer_t * dst, const char *format, ...)
+{
+  va_list ap;
+  int retval, available;
+  unsigned char *s = dst->e;
+
+repeat:
+  /* if the buffer is full, resize it */
+  available = bf_unused (dst);
+  if (!available)
+    goto resize;
+
+  /* print to the buffer */
+  va_start (ap, format);
+  retval = vsnprintf (dst->e, available, gettext (format), ap);
+  va_end (ap);
+
+  /* make sure dst->e is always valid */
+  if (retval > available)
+    goto resize;
+
+  return dst;
+
+resize:
+  {
+    buffer_t *b;
+
+    if (bf_used (dst)) {
+      b = bf_alloc (dst->size);
+    } else {
+      b = bf_alloc (dst->size * 2);
+    }
+
+    dst->e = s;
+    *dst->e = 0;
+    bf_append (&dst, b);
+    dst = b;
+  }
+  goto repeat;
+}
+
 int bf_vprintf (buffer_t * dst, const char *format, va_list ap)
 {
   int retval, available;

@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta14:
+0.1.11-pre1-beta15:
+	Fixed buf in xml saving for large xmls.
 	Fix hublist init.
 	Fix windows warning.
 	Added custom rights.

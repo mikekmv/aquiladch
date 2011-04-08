@@ -82,6 +82,7 @@ extern int bf_strcat (buffer_t * dst, unsigned char *data);
 extern int bf_strncat (buffer_t * dst, unsigned char *data, unsigned long length);
 extern int bf_printf (buffer_t * dst, const char *format, ...);
 extern int bf_vprintf (buffer_t * dst, const char *format, va_list ap);
+extern buffer_t * bf_printf_resize (buffer_t * dst, const char *format, ...);
 
 extern unsigned long bf_size (buffer_t * src);
 
