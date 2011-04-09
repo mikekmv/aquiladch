@@ -271,7 +271,7 @@ int ioctx_flush (esocket_t * s)
 }
 
 /* send error up */
-unsigned int es_iocp_error (esocket_t * s)
+int es_iocp_error (esocket_t * s)
 {
   esocket_handler_t *h = s->handler;
 
@@ -284,7 +284,7 @@ unsigned int es_iocp_error (esocket_t * s)
 }
 
 
-unsigned int es_iocp_trigger (esocket_t * s, int type)
+int es_iocp_trigger (esocket_t * s, int type)
 {
   esocket_ioctx_t *ctxt;
 
@@ -313,7 +313,7 @@ unsigned int es_iocp_trigger (esocket_t * s, int type)
  * all the queued data.
  */
 
-unsigned int es_iocp_recv (esocket_t * s)
+int es_iocp_recv (esocket_t * s)
 {
   int ret;
   WSABUF buf;
@@ -343,7 +343,7 @@ unsigned int es_iocp_recv (esocket_t * s)
 	OUTSTANDING_FAILED;
 
       es_iocp_error (s);
-      return ret;
+      return -1;
     }
   }
 
@@ -352,7 +352,7 @@ unsigned int es_iocp_recv (esocket_t * s)
   return 0;
 }
 
-unsigned int es_iocp_accept (esocket_t * s, int family, int type, int protocol)
+int es_iocp_accept (esocket_t * s, int family, int type, int protocol)
 {
   int ret, err;
   DWORD bytesReceived = 0;

@@ -1,6 +1,12 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta29:
+0.1.11-pre1-beta30:
+	TRIGGER: react corretly on return value of command_register 
+		(Reported en_dator)
+	ESOCKET: fix return values of es_iocp_* functions
+	RSS: report moved target and bad feeds.
+	RSS: fix bug with empty path. (Reported maksalaatikko)
+	commands_register now returns error if command already exists.
 	ESOCKET: improve error handling. Should fix crash in accept_new_user
 		(Reported en_dator)
 	RSS: more memleaks fixed.

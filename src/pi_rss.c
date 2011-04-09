@@ -704,7 +704,7 @@ int pi_rss_report (rss_feed_t * feed, unsigned long stamp)
   buffer_t *output = bf_alloc (1024);
 
   if (!output)
-    return NULL;
+    return 0;
 
   bf_printf (output, "\n%s", feed->title);
   if (feed->description)
@@ -770,6 +770,8 @@ int pi_rss_finish (rss_feed_t * feed)
   c = buf->s;
   /* skip HTTP/1.x */
   c = strchr (c, ' ');
+  if (!c)
+    goto leave;
   c++;
   code = atoi (c);
   switch (code) {
@@ -777,11 +779,24 @@ int pi_rss_finish (rss_feed_t * feed)
     case 200:
       break;
 
+      /* moved permanently */
+    case 301:
+      c = strstr (c, "Location: ");
+      if (!c)
+	goto leave;
+      c += 10;
+      e = strstr (c, "\r\n");
+      *e = 0;
+      DPRINTF ("RSS: Feed %s got 301 Moved Permanently: %s\n", feed->name, c);
+
+      errno = 0;
+      plugin_perror ("RSS fetch failed, destination moved permanently: %s", c);
+      goto leave;
+
       /* not changed */
     case 304:
       DPRINTF ("RSS: Feed %s got 304 Not Changed\n", feed->name);
-      bf_free (buf);
-      return 0;
+      goto leave;
 
       /* error */
     default:
@@ -789,10 +804,9 @@ int pi_rss_finish (rss_feed_t * feed)
       *e = 0;
       errno = 0;
       if (!rss_silent)
-	plugin_perror ("RSS fetch failed: %s\n", c);
+	plugin_perror ("RSS fetch failed: %s", c);
 
-      bf_free (buf);
-      return -1;
+      goto leave;
   }
 
   /* we try to find a Last-Modified header */
@@ -819,17 +833,21 @@ int pi_rss_finish (rss_feed_t * feed)
   DPRINTF ("RSS: Succesfully updated %s\n", feed->name);
 
   /* parse result */
+  errno = 0;
   switch (feed->state) {
     case PI_RSS_STATE_UPDATE:
-      rss_feed_parse (feed, buf);
+      if (rss_feed_parse (feed, buf) < 0)
+	plugin_perror ("RSS: %s is not a valid RSS feed.\n", feed->name);
       if (!feed->target)
 	pi_rss_report (feed, stamp);
       break;
     case PI_RSS_STATE_EVAL:
-      rss_feed_describe (feed, feed->target, buf);
+      if (rss_feed_describe (feed, feed->target, buf) < 0)
+	plugin_perror ("RSS: %s is not a valid RSS feed.\n", feed->name);
       break;
   }
 
+leave:
   bf_free (buf);
 
   return 0;
@@ -949,7 +967,7 @@ int pi_rss_handle_output (esocket_t * s)
   buffer_t *buf;
   rss_feed_t *feed = (rss_feed_t *) s->context;
 
-  buf = bf_alloc (256 + strlen (feed->path));
+  buf = bf_alloc (256 + (feed->path ? strlen (feed->path) : 0));
   if (!buf)
     goto leave;
 
@@ -961,7 +979,8 @@ int pi_rss_handle_output (esocket_t * s)
    */
   bf_printf (buf, "GET /%s HTTP/1.0\r\n"
 	     "Host: %s\r\n"
-	     "User-Agent: %s/%s\r\n", feed->path, feed->address, HUBSOFT_NAME, VERSION);
+	     "User-Agent: %s/%s\r\n", feed->path ? feed->path : (unsigned char *) "", feed->address,
+	     HUBSOFT_NAME, VERSION);
   if (feed->lastmodified)
     bf_printf (buf, "If-Modified-Since: %s\r\n", feed->lastmodified);
   bf_printf (buf, "\r\n");

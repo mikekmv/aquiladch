@@ -44,7 +44,7 @@ int command_register (unsigned char *name, command_handler_t * handler, unsigned
       break;
 
   if (cmd != list)
-    return 0;
+    return -1;
 
   cmd = malloc (sizeof (command_t));
   memset (cmd, 0, sizeof (command_t));
