@@ -79,9 +79,6 @@
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
-/* Define to 1 if you have the <linux/eventpoll.h> header file. */
-#undef HAVE_LINUX_EVENTPOLL_H
-
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 

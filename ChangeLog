@@ -1,11 +1,12 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta32:
+0.1.11-pre1-beta32+:
+	BUILDSYS: fixed problems with decision cascade.
 	STATS: fix help message.
 	BUILTIN: fix !userinfo for offline users.
 	RSS: fix typo in !rsstarget help.
 	RSS: fix rss list cleaning. Only items in the actual feed are kept.
-	Buidl system tested and fixed on windows.
+	Build system tested and fixed on windows.
 	Updated build system further. Now uses pretty macros for report.
 	Include ChangeLog, README and LICENSE in windist
 	Build system now decides wether to use EPOLL, POLL, SELECT or IOCP

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta32]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta33]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -411,7 +411,7 @@ AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h netinet/tcp.h sys/socket.h lo
 # if epoll is enables, check for the header
 if test "${ALLOW_EPOLL}" != "" ;
 then
-	AC_CHECK_HEADERS([sys/epoll.h linux/eventpoll.h])
+	AC_CHECK_HEADERS([sys/epoll.h])
 fi
 
 # if epoll is enables, check for the header
@@ -631,19 +631,29 @@ then
 	#   sys/epoll.h
 	#   working epoll_wait
 	#   linux/eventpoll.h
-	if test x$ac_cv_header_sys_epoll_h$ac_cv_func_epoll_wait$ac_cv_header_linux_eventpoll_h = xyesyesyes
+	if test x$ac_cv_header_sys_epoll_h$ac_cv_func_epoll_wait = xyesyes
 	then
 		eval "USE_EPOLL=1"
+	else
+		unset ALLOW_EPOLL
 	fi
-else
+fi
+
+if test x$USE_EPOLL = x
+then
 	if test x$ALLOW_POLL != x -a x$ac_cv_header_sys_poll_h$ac_cv_func_poll = xyesyes
 	then
 		eval "USE_POLL=1"
 	else
-		if test x$ac_cv_func_select = xyes
-		then
-			eval "USE_SELECT=1"
-		fi
+		unset ALLOW_EPOLL
+	fi
+fi
+
+if test x$USE_EPOLL$USE_POLL = x
+then
+	if test x$ac_cv_func_select = xyes
+	then
+		eval "USE_SELECT=1"
 	fi
 fi
 
@@ -654,8 +664,12 @@ then
 		if test x$ac_cv_header_windows_h$ac_cv_func_createiocompletionport = xyesyes
 		then
 			eval "USE_IOCP=1"
+		else
+			unset ALLOW_IOCP
 		fi
-	else
+	fi
+	if test x$USE_IOCP != x
+	then
 		echo "ERROR: you are building for Windows but your system does not support IOCP."
 	fi
 	# whatever we do, don't use these on Windows.
@@ -750,7 +764,7 @@ AQ_REPORT_SECTION([Hub options])
 
 AQ_OPTION_REPORT([x$GEOIP != x],[GeoIP Support])
 AQ_OPTION_REPORT([x$ZLINE != x],[ZLine/ZPipe Support])
-AQ_OPTION_REPORT([x$USE_NLS != x],[NLS Support])
+AQ_OPTION_REPORT([x$USE_NLS != xno],[NLS Support])
 AQ_OPTION_REPORT([x$ac_cv_lib_pthread_pthread_create = xyes],[Posix Threads Async Resolver])
 
 AQ_REPORT_SECTION([Plugins])
