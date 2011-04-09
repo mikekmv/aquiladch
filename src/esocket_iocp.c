@@ -18,12 +18,7 @@
  */
 
 #include "esocket.h"
-
-#ifndef USE_IOCP
-#ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
-#endif
-#endif
+#include "etimer.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -33,11 +28,6 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#ifdef USE_POLL
-#include <sys/poll.h>
-#endif
-
-#ifdef USE_IOCP
 #include <io.h>
 #include <ws2tcpip.h>
 #include <mswsock.h>
@@ -46,8 +36,6 @@
 void WSAAPI freeaddrinfo (struct addrinfo *);
 int WSAAPI getaddrinfo (const char *, const char *, const struct addrinfo *, struct addrinfo **);
 int WSAAPI getnameinfo (const struct sockaddr *, socklen_t, char *, DWORD, char *, DWORD, int);
-#endif
-
 #endif
 
 #ifndef ASSERT
@@ -68,12 +56,11 @@ int WSAAPI getnameinfo (const struct sockaddr *, socklen_t, char *, DWORD, char 
 
 esocket_t *freelist = NULL;
 
-#ifdef USE_IOCP
-
 //extern BOOL WSAAPI ConnectEx(SOCKET, const struct sockaddr*, int, PVOID, DWORD, LPDWORD, LPOVERLAPPED);
 
 
 /******************************** IOCP specific stuff *******************************************/
+
 
 /*
  *  These settings control the maximum writes outstanding per connection.
@@ -82,7 +69,10 @@ esocket_t *freelist = NULL;
  *  the MIN was chosen at 2 tcp packets per fragment for throughput reasons. should support more than 10k users at 1Gb
  */
 
-#define IOCP_COMPLETION_FRAGMENTS 2
+unsigned long iocpFragments = 2;
+
+#define IOCP_COMPLETION_FRAGMENTS iocpFragments
+//#define IOCP_COMPLETION_FRAGMENTS 2
 #define IOCP_COMPLETION_SIZE_MAX      131071
 #define IOCP_COMPLETION_SIZE_MIN      2*1460*IOCP_COMPLETION_FRAGMENTS
 
@@ -405,10 +395,6 @@ int es_iocp_accept (esocket_t * s, int family, int type, int protocol)
   return 0;
 }
 
-
-#endif
-
-
 /*
  * Handler functions
  */
@@ -429,24 +415,12 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
   memset (h->types, 0, sizeof (esocket_type_t) * numtypes);
   h->numtypes = numtypes;
 
-  /* default timeout 1 hour ie, no timeout */
-  h->toval.tv_sec = 3600;
-
-#ifdef USE_EPOLL
-  h->epfd = epoll_create (ESOCKET_MAX_FDS);
-#endif
-
-#ifdef USE_IOCP
   h->iocp = CreateIoCompletionPort (INVALID_HANDLE_VALUE, NULL, (ULONG_PTR) 0, 1);
   if (h->iocp == NULL) {
     perror ("CreateIoCompletionPort (Create)");
     free (h);
     return NULL;
   }
-#endif
-
-  initRoot (&h->root);
-
 #ifdef USE_PTHREADDNS
   h->dns = dns_init ();
 #endif
@@ -455,8 +429,7 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
 }
 
 int esocket_add_type (esocket_handler_t * h, unsigned int events,
-		      input_handler_t input, output_handler_t output,
-		      error_handler_t error, timeout_handler_t timeout)
+		      input_handler_t input, output_handler_t output, error_handler_t error)
 {
   if (h->curtypes == h->numtypes)
     return -1;
@@ -465,7 +438,6 @@ int esocket_add_type (esocket_handler_t * h, unsigned int events,
   h->types[h->curtypes].input = input;
   h->types[h->curtypes].output = output;
   h->types[h->curtypes].error = error;
-  h->types[h->curtypes].timeout = timeout;
 
   h->types[h->curtypes].default_events = events;
 
@@ -479,177 +451,33 @@ int esocket_add_type (esocket_handler_t * h, unsigned int events,
 
 int esocket_setevents (esocket_t * s, unsigned int events)
 {
-#ifdef USE_EPOLL
-  esocket_handler_t *h = s->handler;
-
-  if (events != s->events) {
-    struct epoll_event ee;
-
-    ee.events = events;
-    ee.data.ptr = s;
-    epoll_ctl (h->epfd,
-	       events ? (s->
-			 events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL, s->socket, &ee);
-    s->events = events;
-  }
-#endif
-
-#ifdef USE_POLL
-  s->events = events;
-#endif
-
-#ifdef USE_SELECT
-  esocket_handler_t *h = s->handler;
-  unsigned int e = ~s->events & events;
-
-  if (e & ESOCKET_EVENT_IN) {
-    FD_SET (s->socket, &h->input);
-    h->ni++;
-  };
-  if (e & ESOCKET_EVENT_OUT) {
-    FD_SET (s->socket, &h->output);
-    h->no++;
-  };
-  if (e & ESOCKET_EVENT_ERR) {
-    FD_SET (s->socket, &h->error);
-    h->ne++;
-  };
-
-  e = s->events & events;
-  if (e & ESOCKET_EVENT_IN) {
-    FD_CLR (s->socket, &h->input);
-    h->ni--;
-  };
-  if (e & ESOCKET_EVENT_OUT) {
-    FD_CLR (s->socket, &h->output);
-    h->no--;
-  };
-  if (e & ESOCKET_EVENT_ERR) {
-    FD_CLR (s->socket, &h->error);
-    h->ne--;
-  };
-
-  s->events = events;
-#endif
-
-#ifdef USE_IOCP
   if ((!(s->events & ESOCKET_EVENT_IN)) && (events & ESOCKET_EVENT_IN) && (!s->protinfo))
     if (es_iocp_recv (s) < 0)
       return -1;
   s->events = events;
-#endif
 
   return 0;
 }
 
 int esocket_addevents (esocket_t * s, unsigned int events)
 {
-#ifdef USE_EPOLL
-  esocket_handler_t *h = s->handler;
-
-  if ((events | s->events) != s->events) {
-    struct epoll_event ee;
-
-    memset (&ee, 0, sizeof (ee));
-    ee.events = s->events | events;
-    ee.data.ptr = s;
-    epoll_ctl (h->epfd,
-	       ee.events ? (s->
-			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
-	       EPOLL_CTL_DEL, s->socket, &ee);
-    s->events = ee.events;
-  }
-#endif
-
-#ifdef USE_POLL
-  s->events |= events;
-#endif
-
-#ifdef USE_SELECT
-  esocket_handler_t *h = s->handler;
-  unsigned int e = ~s->events & events;
-
-  if (e & ESOCKET_EVENT_IN) {
-    FD_SET (s->socket, &h->input);
-    h->ni++;
-  };
-  if (e & ESOCKET_EVENT_OUT) {
-    FD_SET (s->socket, &h->output);
-    h->no++;
-  };
-  if (e & ESOCKET_EVENT_ERR) {
-    FD_SET (s->socket, &h->error);
-    h->ne++;
-  };
-  s->events |= events;
-#endif
-
-#ifdef USE_IOCP
   if ((!(s->events & ESOCKET_EVENT_IN)) && (events & ESOCKET_EVENT_IN) && (!s->protinfo))
     if (es_iocp_recv (s) < 0)
       return -1;
   s->events |= events;
-#endif
 
   return 0;
 }
 
 int esocket_clearevents (esocket_t * s, unsigned int events)
 {
-#ifdef USE_EPOLL
-  esocket_handler_t *h = s->handler;
-
-  if (events & s->events) {
-    struct epoll_event ee;
-
-    memset (&ee, 0, sizeof (ee));
-    ee.events = s->events & ~events;
-    ee.data.ptr = s;
-    epoll_ctl (h->epfd,
-	       ee.events ? (s->
-			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
-	       EPOLL_CTL_DEL, s->socket, &ee);
-    s->events = ee.events;
-  }
-#endif
-
-#ifdef USE_POLL
-  s->events = s->events & ~events;
-#endif
-
-#ifdef USE_SELECT
-  esocket_handler_t *h = s->handler;
-  unsigned int e = s->events & events;
-
-  if (e & ESOCKET_EVENT_IN) {
-    FD_CLR (s->socket, &h->input);
-    h->ni--;
-  };
-  if (e & ESOCKET_EVENT_OUT) {
-    FD_CLR (s->socket, &h->output);
-    h->no--;
-  };
-  if (e & ESOCKET_EVENT_ERR) {
-    FD_CLR (s->socket, &h->error);
-    h->ne--;
-  };
   s->events &= ~events;
-#endif
-
-#ifdef USE_IOCP
-  s->events &= ~events;
-#endif
-
   return 0;
 }
 
 
 int esocket_update_state (esocket_t * s, unsigned int newstate)
 {
-#ifdef USE_EPOLL
-  uint32_t events = 0;
-#endif
-
   esocket_handler_t *h = s->handler;
 
   if (s->state == newstate)
@@ -662,51 +490,12 @@ int esocket_update_state (esocket_t * s, unsigned int newstate)
       break;
     case SOCKSTATE_CONNECTING:
       /* remove the wait for connect" */
-#ifdef USE_SELECT
-      FD_CLR (s->socket, &h->output);
-      h->no--;
-#endif
-
-#ifdef USE_POLL
-      s->events &= ~POLLOUT;
-#endif
-
-#ifdef USE_EPOLL
-      events &= ~EPOLLOUT;
-#endif
-
-#ifdef USE_IOCP
       s->events &= ~ESOCKET_EVENT_OUT;
-#endif
 
       break;
     case SOCKSTATE_CONNECTED:
       /* remove according to requested callbacks */
-#ifdef USE_SELECT
-      if (esocket_hasevent (s, ESOCKET_EVENT_IN)) {
-	FD_CLR (s->socket, &h->input);
-	h->ni--;
-      };
-      if (esocket_hasevent (s, ESOCKET_EVENT_OUT)) {
-	FD_CLR (s->socket, &h->output);
-	h->no--;
-      };
-      if (esocket_hasevent (s, ESOCKET_EVENT_ERR)) {
-	FD_CLR (s->socket, &h->error);
-	h->ne--;
-      };
-#endif
-#ifdef USE_POLL
       s->events = 0;
-#endif
-
-#ifdef USE_EPOLL
-      events &= ~s->events;
-#endif
-
-#ifdef USE_IOCP
-      s->events = 0;
-#endif
 
       break;
     case SOCKSTATE_CLOSED:
@@ -726,86 +515,31 @@ int esocket_update_state (esocket_t * s, unsigned int newstate)
       break;
     case SOCKSTATE_CONNECTING:
       /* add to wait for connect */
-#ifdef USE_POLL
-      s->events |= POLLOUT;
-#endif
-
-#ifdef USE_SELECT
-      FD_SET (s->socket, &h->output);
-      h->no++;
-#endif
-
-#ifdef USE_EPOLL
-      events |= EPOLLOUT;
-#endif
-
-#ifdef USE_IOCP
       s->events |= ESOCKET_EVENT_OUT;
-#endif
-
       break;
+
     case SOCKSTATE_CONNECTED:
       /* add according to requested callbacks */
-#ifdef USE_SELECT
-      s->events = h->types[s->type].default_events;
-      if (esocket_hasevent (s, ESOCKET_EVENT_IN)) {
-	FD_SET (s->socket, &h->input);
-	h->ni++;
-      };
-      if (esocket_hasevent (s, ESOCKET_EVENT_OUT)) {
-	FD_SET (s->socket, &h->output);
-	h->no++;
-      };
-      if (esocket_hasevent (s, ESOCKET_EVENT_ERR)) {
-	FD_SET (s->socket, &h->error);
-	h->ne++;
-      };
-#endif
-#ifdef USE_POLL
-      s->events |= h->types[s->type].default_events;
-#endif
-
-#ifdef USE_EPOLL
-      events |= h->types[s->type].default_events;
-#endif
-
-#ifdef USE_IOCP
       if ((!(s->events & ESOCKET_EVENT_IN))
 	  && (h->types[s->type].default_events & ESOCKET_EVENT_IN) && (!s->protinfo))
 	if (es_iocp_recv (s) < 0)
 	  return -1;
 
       s->events |= h->types[s->type].default_events;
-#endif
 
       break;
     case SOCKSTATE_CLOSING:
       break;
 
     case SOCKSTATE_CLOSED:
-#ifdef USE_IOCP
       ioctx_flush (s);
       break;
-#endif
+
     case SOCKSTATE_ERROR:
     default:
       /* nothing to add */
       break;
   }
-
-#ifdef USE_EPOLL
-  if (events != s->events) {
-    struct epoll_event ee;
-
-    ee.events = events;
-    ee.data.ptr = s;
-    epoll_ctl (h->epfd,
-	       ee.events ? (s->
-			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
-	       EPOLL_CTL_DEL, s->socket, &ee);
-    s->events = events;
-  }
-#endif
 
   return 0;
 }
@@ -816,11 +550,6 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
 
   if (type >= h->curtypes)
     return NULL;
-
-#ifdef USE_SELECT
-  if (s >= FD_SETSIZE)
-    return NULL;
-#endif
 
   socket = malloc (sizeof (esocket_t));
   if (!socket)
@@ -834,7 +563,6 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   socket->state = SOCKSTATE_INIT;
   socket->addr = NULL;
   socket->events = 0;
-  socket->tovalid = 0;
 
   socket->prev = NULL;
   socket->next = h->sockets;
@@ -846,7 +574,6 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   if (s == -1)
     return socket;
 
-#ifdef USE_IOCP
   {
     int len = 0;
 
@@ -861,27 +588,15 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   }
 
   USERS_INC;
-#endif
-
-#ifdef USE_SELECT
-  if (h->n <= s)
-    h->n = s + 1;
-#endif
-
-#ifdef USE_POLL
-  ++(h->n);
-#endif
 
   return socket;
 
-#ifdef USE_IOCP
 remove:
   h->sockets = socket->next;
   if (h->sockets)
     h->sockets->prev = NULL;
   free (socket);
   return NULL;
-#endif
 }
 
 esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
@@ -893,25 +608,12 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   if (etype >= h->curtypes)
     return NULL;
 
-#ifndef USE_IOCP
-  fd = socket (domain, type, protocol);
-  if (fd < 0)
-    return NULL;
-#else
   fd = WSASocket (domain, type, protocol, NULL, 0, WSA_FLAG_OVERLAPPED);
   if ((SOCKET) fd == INVALID_SOCKET) {
     errno = translate_error (WSAGetLastError ());
     return NULL;
   }
-#endif
 
-#ifndef USE_IOCP
-  if (fcntl (fd, F_SETFL, O_NONBLOCK)) {
-    perror ("ioctl()");
-    close (fd);
-    return NULL;
-  };
-#else
   {
     DWORD yes = 1;
     DWORD bytes = 0;
@@ -923,7 +625,7 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
       return NULL;
     }
   }
-#endif
+
   s = malloc (sizeof (esocket_t));
   if (!s)
     return NULL;
@@ -934,7 +636,6 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   s->context = context;
   s->handler = h;
   s->state = SOCKSTATE_INIT;
-  s->tovalid = 0;
   s->events = 0;
   s->addr = NULL;
 
@@ -948,7 +649,6 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   if (fd == -1)
     return s;
 
-#ifdef USE_IOCP
   {
     int len = 0;
 
@@ -962,20 +662,9 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   }
 
   USERS_INC;
-#endif
-
-#ifdef USE_SELECT
-  if (h->n <= s)
-    h->n = s + 1;
-#endif
-
-#ifdef USE_POLL
-  ++(h->n);
-#endif
 
   return s;
 
-#ifdef USE_IOCP
 remove:
   h->sockets = s->next;
   if (h->sockets)
@@ -983,12 +672,10 @@ remove:
   free (s);
   close (fd);
   return NULL;
-#endif
 }
 
 int esocket_close (esocket_t * s)
 {
-#ifdef USE_IOCP
   if (s->state == SOCKSTATE_CLOSING)
     return 0;
 
@@ -996,7 +683,7 @@ int esocket_close (esocket_t * s)
     esocket_update_state (s, SOCKSTATE_CLOSING);
     return 0;
   }
-#endif
+
   if (s->state == SOCKSTATE_CLOSED)
     return 0;
 
@@ -1005,15 +692,10 @@ int esocket_close (esocket_t * s)
   close (s->socket);
   s->socket = INVALID_SOCKET;
 
-  if (s->tovalid)
-    esocket_deltimeout (s);
-
-#ifdef USE_IOCP
   if (s->protinfo) {
     free (s->protinfo);
     s->protinfo = NULL;
   }
-#endif
 
   return 0;
 }
@@ -1031,9 +713,7 @@ int esocket_bind (esocket_t * s, unsigned long address, unsigned int port)
   /* bind the socket to the local port */
   if (bind (s->socket, (struct sockaddr *) &a, sizeof (a))) {
     perror ("bind:");
-#ifdef USE_IOCP
     errno = translate_error (WSAGetLastError ());
-#endif
     return -1;
   }
 
@@ -1080,6 +760,58 @@ int esocket_connect_ai (esocket_t * s, struct addrinfo *address, unsigned int po
 }
 
 #else
+
+int esocket_check_connect (esocket_t * s)
+{
+  esocket_handler_t *h = s->handler;
+  int err, len;
+  struct sockaddr sa;
+
+  s->error = 0;
+  len = sizeof (sa);
+  err = getpeername (s->socket, &sa, &len);
+  if (err == SOCKET_ERROR) {
+    err = WSAGetLastError ();
+    if (err && (err != WSAEWOULDBLOCK)) {
+      s->error = translate_error (err);
+      goto error;
+    }
+    /* try again */
+    etimer_set (&s->timer, IOCP_CONNECT_INTERVAL);
+    return -1;
+  }
+
+  len = sizeof (s->error);
+  err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, (void *) &s->error, &len);
+  if (err) {
+    err = WSAGetLastError ();
+    s->error = translate_error (err);
+    goto error;
+  }
+
+  if (s->error != 0) {
+    s->error = translate_error (s->error);
+    goto error;
+  }
+
+  DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
+
+  err = s->error;
+  esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
+
+  if (!s->error) {
+    if (h->types[s->type].output)
+      h->types[s->type].output (s);
+    return 0;
+  }
+
+error:
+  if (h->types[s->type].error)
+    h->types[s->type].error (s);
+
+  return -1;
+}
+
 int esocket_connect (esocket_t * s, char *address, unsigned int port)
 {
   int err;
@@ -1123,58 +855,13 @@ int esocket_connect (esocket_t * s, char *address, unsigned int port)
 
   esocket_update_state (s, SOCKSTATE_CONNECTING);
 
+  etimer_init (&s->timer, (etimer_handler_t *) esocket_check_connect, s);
+  etimer_set (&s->timer, IOCP_CONNECT_INTERVAL);
+
   return 0;
 }
 
 
-int esocket_check_connect (esocket_t * s)
-{
-  esocket_handler_t *h = s->handler;
-  int err, len;
-  struct sockaddr sa;
-
-  s->error = 0;
-  len = sizeof (sa);
-  err = getpeername (s->socket, &sa, &len);
-  if (err == SOCKET_ERROR) {
-    err = WSAGetLastError ();
-    if (err && (err != WSAEWOULDBLOCK)) {
-      s->error = translate_error (err);
-      goto error;
-    }
-    return -1;
-  }
-
-  len = sizeof (s->error);
-  err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, (void *) &s->error, &len);
-  if (err) {
-    err = WSAGetLastError ();
-    s->error = translate_error (err);
-    goto error;
-  }
-
-  if (s->error != 0) {
-    s->error = translate_error (s->error);
-    goto error;
-  }
-
-  DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
-
-  err = s->error;
-  esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-
-  if (!s->error) {
-    if (h->types[s->type].output)
-      h->types[s->type].output (s);
-    return 0;
-  }
-
-error:
-  if (h->types[s->type].error)
-    h->types[s->type].error (s);
-
-  return -1;
-}
 
 #endif
 
@@ -1236,11 +923,9 @@ int esocket_connect (esocket_t *s, char *address, unsigned int port) {
 
 #endif
 */
+
 int esocket_remove_socket (esocket_t * s)
 {
-#ifdef USE_SELECT
-  int max;
-#endif
   esocket_handler_t *h;
 
   if (!s)
@@ -1250,7 +935,6 @@ int esocket_remove_socket (esocket_t * s)
 
   h = s->handler;
 
-#ifdef USE_IOCP
   if (s->state == SOCKSTATE_CLOSING)
     return 0;
 
@@ -1258,7 +942,6 @@ int esocket_remove_socket (esocket_t * s)
     esocket_update_state (s, SOCKSTATE_CLOSING);
     return 0;
   }
-#endif
 
   if (s->state != SOCKSTATE_CLOSED)
     esocket_update_state (s, SOCKSTATE_CLOSED);
@@ -1268,16 +951,11 @@ int esocket_remove_socket (esocket_t * s)
     s->socket = INVALID_SOCKET;
   }
 
-  if (s->tovalid)
-    esocket_deltimeout (s);
-
-#ifdef USE_IOCP
   if (s->protinfo) {
     free (s->protinfo);
     s->protinfo = NULL;
   }
   USERS_DEC;
-#endif
 
   /* remove from list */
   if (s->next)
@@ -1294,211 +972,16 @@ int esocket_remove_socket (esocket_t * s)
   s->prev = NULL;
   s->state = SOCKSTATE_FREED;
 
-#ifdef USE_SELECT
-  /* recalculate fd upperlimit for select */
-  max = 0;
-  for (s = h->sockets; s; s = s->next)
-    if (s->socket > max)
-      max = s->socket;
-
-  h->n = max + 1;
-#endif
-
-#ifdef USE_POLL
-  --(h->n);
-#endif
-
   return 1;
 }
 
 int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
 {
-#ifdef USE_SELECT
-  esocket_handler_t *h = s->handler;
-#endif
-
   esocket_update_state (s, SOCKSTATE_CLOSED);
   s->socket = fd;
   esocket_update_state (s, sockstate);
 
-  /* reset timeout */
-  s->tovalid = 0;
-
-#ifdef USE_SELECT
-  /* recalculate fd upperlimit for select */
-  /* FIXME could be optimized */
-  h->n = 0;
-  for (s = h->sockets; s; s = s->next)
-    if (s->socket > h->n)
-      h->n = s->socket;
-  h->n += 1;
-#endif
-
   return 1;
-}
-
-/************************************************************************
-**
-**                             TIMERS
-**
-************************************************************************/
-int esocket_settimeout (esocket_t * s, unsigned long timeout)
-{
-  unsigned long long key;
-  esocket_handler_t *h = s->handler;
-
-  if (!timeout) {
-    if (s->tovalid)
-      esocket_deltimeout (s);
-    return 0;
-  }
-#ifdef USE_IOCP
-  if (s->state == SOCKSTATE_CLOSING)
-    return 0;
-
-  if (s->state == SOCKSTATE_CONNECTING) {
-    s->count = timeout / IOCP_CONNECT_INTERVAL;
-    timeout = IOCP_CONNECT_INTERVAL;
-  }
-#endif
-
-  /* if timer is valid already and the new time is later than the old, just set the reset time... 
-   * it will be handled when the timer expires 
-   */
-  if (s->tovalid) {
-    gettimeofday (&s->reset, NULL);
-    s->reset.tv_sec += timeout / 1000;
-    s->reset.tv_usec += ((timeout * 1000) % 1000000);
-    if (s->reset.tv_usec > 1000000) {
-      s->reset.tv_sec++;
-      s->reset.tv_usec -= 1000000;
-    }
-
-    /* new time is later than the old */
-    if (timercmp (&s->reset, &s->to, >)) {
-      s->resetvalid = 1;
-
-      return 0;
-    } else {
-      esocket_deltimeout (s);
-    }
-    s->to = s->reset;
-  } else
-    gettimeofday (&s->to, NULL);
-
-  /* determine key */
-  key = (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + timeout;
-
-  /* create timeout */
-  s->to.tv_sec += timeout / 1000;
-  s->to.tv_usec += ((timeout * 1000) % 1000000);
-  if (s->to.tv_usec > 1000000) {
-    s->to.tv_sec++;
-    s->to.tv_usec -= 1000000;
-  }
-  s->tovalid = 1;
-
-  /* insert into rbt */
-  s->rbt.data = key;
-  insertNode (&h->root, &s->rbt);
-
-  h->timercnt++;
-
-  return 0;
-}
-
-int esocket_deltimeout (esocket_t * s)
-{
-  if (!s->tovalid)
-    return 0;
-
-  deleteNode (&s->handler->root, &s->rbt);
-
-  s->resetvalid = 0;
-  s->tovalid = 0;
-  s->handler->timercnt--;
-
-  return 0;
-}
-
-int esocket_checktimers (esocket_handler_t * h)
-{
-  esocket_t *s;
-  rbt_t *rbt;
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
-  /* handle timers */
-  while ((rbt = smallestNode (&h->root))) {
-    s = (esocket_t *) rbt;
-
-    ASSERT (s->tovalid);
-
-    if (!timercmp ((&s->to), (&now), <))
-      return 0;
-
-    if (s->resetvalid) {
-      unsigned long long key = (s->reset.tv_sec * 1000LL) + (s->reset.tv_usec / 1000LL);
-
-      s->to = s->reset;
-      s->resetvalid = 0;
-
-      deleteNode (&h->root, rbt);
-
-      s->rbt.data = key;
-      insertNode (&h->root, rbt);
-      continue;
-    }
-
-    s->tovalid = 0;
-    deleteNode (&h->root, rbt);
-    h->timercnt--;
-
-#ifdef USE_IOCP
-    /* connect polling */
-    if (s->count) {
-      if (esocket_check_connect (s) < 0) {
-	unsigned long long key;
-
-	if (s->state != SOCKSTATE_CONNECTING)
-	  continue;
-
-	key = (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + IOCP_CONNECT_INTERVAL;
-
-	/* create timeout */
-	s->to = now;
-	s->to.tv_sec += IOCP_CONNECT_INTERVAL / 1000;
-	s->to.tv_usec += ((IOCP_CONNECT_INTERVAL * 1000) % 1000000);
-	if (s->to.tv_usec > 1000000) {
-	  s->to.tv_sec++;
-	  s->to.tv_usec -= 1000000;
-	}
-	s->tovalid = 1;
-
-	/* insert into rbt */
-	s->rbt.data = key;
-	insertNode (&h->root, &s->rbt);
-
-	h->timercnt++;
-	s->count--;
-	continue;
-      }
-      s->count = 0;
-      continue;
-    }
-    /* never give timeouts to closing sockets. */
-    if (s->state == SOCKSTATE_CLOSING) {
-      esocket_update_state (s, SOCKSTATE_CLOSED);
-      esocket_remove_socket (s);
-      continue;
-    }
-#endif
-
-    errno = 0;
-    h->types[s->type].timeout (s);
-  }
-  return 0;
 }
 
 /************************************************************************
@@ -1518,9 +1001,7 @@ int esocket_recv (esocket_t * s, buffer_t * buf)
 
   ret = recv (s->socket, buf->e, bf_unused (buf), 0);
   if (ret < 0) {
-#ifdef USE_WINDOWS
     SYNC_ERRORS (s);
-#endif
     return ret;
   }
 
@@ -1532,9 +1013,6 @@ int esocket_recv (esocket_t * s, buffer_t * buf)
 
 int esocket_send (esocket_t * s, buffer_t * buf, unsigned long offset)
 {
-#ifndef USE_IOCP
-  return send (s->socket, buf->s + offset, bf_used (buf) - offset, 0);
-#else
   WSABUF wsabuf;
   int ret;
   unsigned int len, p, l, written;
@@ -1585,6 +1063,7 @@ int esocket_send (esocket_t * s, buffer_t * buf, unsigned long offset)
 	case WSA_IO_PENDING:
 	  break;
 	case WSAENOBUFS:
+	case WSAEWOULDBLOCK:
 	  bf_free (buf);
 	  IOCTX_FREE (ctxt);
 
@@ -1623,16 +1102,8 @@ int esocket_send (esocket_t * s, buffer_t * buf, unsigned long offset)
 leave:
   errno = EAGAIN;
   return -1;
-#endif
 }
 
-
-#ifndef USE_IOCP
-int esocket_accept (esocket_t * s, struct sockaddr *addr, int *addrlen)
-{
-  return accept (s->socket, addr, addrlen);
-}
-#else
 
 SOCKET esocket_accept (esocket_t * s, struct sockaddr * addr, int *addrlen)
 {
@@ -1666,13 +1137,9 @@ SOCKET esocket_accept (esocket_t * s, struct sockaddr * addr, int *addrlen)
 
   return socket;
 }
-#endif
 
 int esocket_listen (esocket_t * s, int num, int family, int type, int protocol)
 {
-#ifndef USE_IOCP
-  return listen (s->socket, num);
-#else
   int ret, i;
 
   /*
@@ -1714,424 +1181,14 @@ int esocket_listen (esocket_t * s, int num, int family, int type, int protocol)
     es_iocp_accept (s, family, type, protocol);
 
   return 0;
-#endif
 }
 
 
-#ifdef USE_SELECT
-/************************************************************************
-**
-**                             SELECT
-**
-************************************************************************/
-int esocket_select (esocket_handler_t * h, struct timeval *to)
-{
-  int num;
-  esocket_t *s;
-
-#ifdef USE_PTHREADDNS
-  struct addrinfo *res;
-#endif
-
-  fd_set input, output, error;
-  fd_set *i, *o, *e;
-
-  /* prepare fdsets */
-  if (h->ni) {
-    memcpy (&input, &h->input, sizeof (fd_set));
-    i = &input;
-  } else
-    i = NULL;
-
-  if (h->no) {
-    memcpy (&output, &h->output, sizeof (fd_set));
-    o = &output;
-  } else
-    o = NULL;
-
-  if (h->ne) {
-    memcpy (&error, &h->error, sizeof (fd_set));
-    e = &error;
-  } else
-    e = NULL;
-
-  /* do select */
-  num = select (h->n, i, o, e, to);
-
-  /* handle sockets */
-  /* could be optimized. s should not be reset to h->sockets after each try BUT */
-  /* best to keep resetting to h->sockets this allows any socket to be deleted from the callbacks */
-  s = h->sockets;
-  while (num > 0) {
-    if (s->socket >= 0) {
-      if (i && FD_ISSET (s->socket, i)) {
-	FD_CLR (s->socket, i);
-	if (esocket_hasevent (s, ESOCKET_EVENT_IN))
-	  h->types[s->type].input (s);
-	num--;
-	s = h->sockets;
-	continue;
-      }
-      if (o && FD_ISSET (s->socket, o)) {
-	DPRINTF ("output event! ");
-	FD_CLR (s->socket, o);
-	switch (s->state) {
-	  case SOCKSTATE_CONNECTED:
-	    DPRINTF ("Connected and writable\n");
-	    if (esocket_hasevent (s, ESOCKET_EVENT_OUT))
-	      h->types[s->type].output (s);
-	    break;
-	  case SOCKSTATE_CONNECTING:
-	    {
-	      int err, len;
-
-	      len = sizeof (s->error);
-	      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-	      ASSERT (!err);
-
-	      DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
-
-	      esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	      if (s->error) {
-		if (h->types[s->type].error)
-		  h->types[s->type].error (s);
-	      } else {
-		if (h->types[s->type].output)
-		  h->types[s->type].output (s);
-	      }
-	    }
-	    break;
-	  default:
-	    ASSERT (0);
-	}
-	num--;
-	s = h->sockets;
-	continue;
-      }
-      if (e && FD_ISSET (s->socket, e)) {
-	int err;
-	unsigned int len;
-
-	len = sizeof (s->error);
-	err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-	ASSERT (!err);
-
-	FD_CLR (s->socket, e);
-	if ((h->types[s->type].error)
-	    && esocket_hasevent (s, ESOCKET_EVENT_ERR))
-	  h->types[s->type].error (s);
-	num--;
-	s = h->sockets;
-	continue;
-      }
-    }
-    s = s->next;
-    if (!s) {
-      DPRINTF (" All sockets tried, num still %d\n", num);
-    };
-  }
-
-#ifdef USE_PTHREADDNS
-  /* dns stuff */
-  while ((s = dns_retrieve (h->dns, &res))) {
-    if (esocket_connect_ai (s, res, s->error) < 0)
-      freeaddrinfo (res);
-  }
-#endif
-
-  /* timer stuff */
-  if (h->timercnt) {
-    esocket_checktimers (h);
-  }
-
-  /* clear freelist */
-  while (freelist) {
-    s = freelist;
-    freelist = s->next;
-    if (s->addr) {
-      freeaddrinfo (s->addr);
-      s->addr = NULL;
-    }
-    free (s);
-  }
-  return 0;
-}
-#endif
-
-#ifdef USE_POLL
-/************************************************************************
-**
-**                             POLL()
-**
-************************************************************************/
-
-int esocket_select (esocket_handler_t * h, struct timeval *to)
-{
-  int i, n;
-  struct pollfd *pfd, *pfdi;
-  esocket_t *s, **l, **li;
-
-#ifdef USE_PTHREADDNS
-  struct addrinfo *res;
-#endif
-
-  pfd = malloc ((sizeof (struct pollfd) * h->n) + (sizeof (esocket_t *) * h->n));
-  if (!pfd)
-    return -1;
-  l = (esocket_t **) (((char *) pfd) + (sizeof (struct pollfd) * h->n));
-
-  s = h->sockets;
-  for (i = 0, pfdi = pfd, li = l; i < h->n; ++i, ++pfdi, ++li) {
-    pfdi->fd = s->socket;
-    pfdi->events = s->events;
-    pfdi->revents = 0;
-    *li = s;
-    s = s->next;
-  };
-
-  n = poll (pfd, h->n, to->tv_sec * 1000 + to->tv_usec / 1000);
-  if (n < 0) {
-    perror ("esocket_select: poll:");
-    goto leave;
-  }
-  if (!n)
-    goto leave;
-
-  /* h->n will grow when we accept users... */
-  n = h->n;
-  for (i = 0, pfdi = pfd, li = l; i < n; ++i, ++pfdi, ++li) {
-    if (!pfdi->revents)
-      continue;
-
-    s = *li;
-
-    if (s->state == SOCKSTATE_FREED)
-      continue;
-
-    if (pfdi->revents & (POLLERR | POLLHUP | POLLNVAL)) {
-      int err;
-      unsigned int len;
-
-      len = sizeof (s->error);
-      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-      ASSERT (!err);
-
-      if (h->types[s->type].error)
-	h->types[s->type].error (s);
-      if (s->state == SOCKSTATE_FREED)
-	continue;
-      if (s->socket < 0)
-	continue;
-    }
-    if (pfdi->revents & POLLIN) {
-      if (h->types[s->type].input)
-	h->types[s->type].input (s);
-      if (s->state == SOCKSTATE_FREED)
-	continue;
-      if (s->socket < 0)
-	continue;
-    }
-    if (pfdi->revents & POLLOUT) {
-      switch (s->state) {
-	case SOCKSTATE_CONNECTED:
-	  if (h->types[s->type].output)
-	    h->types[s->type].output (s);
-	  break;
-	case SOCKSTATE_CONNECTING:
-	  {
-	    int err;
-	    unsigned int len;
-
-	    len = sizeof (s->error);
-	    err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-	    ASSERT (!err);
-	    esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	    if (s->error) {
-	      if (h->types[s->type].error)
-		h->types[s->type].error (s);
-	    } else {
-	      if (h->types[s->type].output)
-		h->types[s->type].output (s);
-	    }
-	  }
-	  break;
-	case SOCKSTATE_FREED:
-	default:
-	  DPRINTF ("POLLOUT while socket in state %d\n", s->state);
-	  ASSERT (0);
-      }
-      if (s->state == SOCKSTATE_FREED)
-	continue;
-      if (s->socket < 0)
-	continue;
-    }
-  }
-
-leave:
-  free (pfd);
-
-#ifdef USE_PTHREADDNS
-  /* dns stuff */
-  while ((s = dns_retrieve (h->dns, &res))) {
-    if (esocket_connect_ai (s, res, s->error) < 0)
-      freeaddrinfo (res);
-  }
-#endif
-
-  /* timer stuff */
-  if (h->timercnt)
-    esocket_checktimers (h);
-
-  /* clear freelist */
-  while (freelist) {
-    s = freelist;
-    freelist = s->next;
-    if (s->addr) {
-      freeaddrinfo (s->addr);
-      s->addr = NULL;
-    }
-    free (s);
-  }
-  return 0;
-}
-#endif
-
-#ifdef USE_EPOLL
-/************************************************************************
-**
-**                             EPOLL
-**
-************************************************************************/
-
-int esocket_select (esocket_handler_t * h, struct timeval *to)
-{
-  int num, i;
-  uint32_t activity;
-  esocket_t *s;
-  struct epoll_event events[ESOCKET_ASK_FDS];
-
-#ifdef USE_PTHREADDNS
-  struct addrinfo *res;
-#endif
-
-  num = epoll_wait (h->epfd, events, ESOCKET_ASK_FDS, to->tv_sec * 1000 + to->tv_usec / 1000);
-  if (num < 0) {
-    perror ("ESocket: epoll_wait: ");
-    return -1;
-  }
-
-  for (i = 0; i < num; i++) {
-    activity = events[i].events;
-    s = events[i].data.ptr;
-    if (s->state == SOCKSTATE_FREED)
-      continue;
-
-    if (activity & EPOLLHUP) {
-      int err;
-      unsigned int len;
-
-      len = sizeof (s->error);
-      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-      ASSERT (!err);
-
-      if (h->types[s->type].error)
-	h->types[s->type].error (s);
-
-      ASSERT (s->state == SOCKSTATE_FREED);
-      continue;
-    }
-    if (activity & EPOLLERR) {
-      int err;
-      unsigned int len;
-
-      len = sizeof (s->error);
-      err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-      ASSERT (!err);
-
-      if (h->types[s->type].error)
-	h->types[s->type].error (s);
-      if (s->state == SOCKSTATE_FREED)
-	continue;
-      if (s->socket < 0)
-	continue;
-    }
-    if (activity & EPOLLIN) {
-      if (h->types[s->type].input)
-	h->types[s->type].input (s);
-      if (s->state == SOCKSTATE_FREED)
-	continue;
-      if (s->socket < 0)
-	continue;
-    }
-    if (activity & EPOLLOUT) {
-      switch (s->state) {
-	case SOCKSTATE_CONNECTED:
-	  if (h->types[s->type].output)
-	    h->types[s->type].output (s);
-	  break;
-	case SOCKSTATE_CONNECTING:
-	  {
-	    int err;
-	    unsigned int len;
-
-	    len = sizeof (s->error);
-	    err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
-	    ASSERT (!err);
-	    esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	    if (s->error) {
-	      if (h->types[s->type].error)
-		h->types[s->type].error (s);
-	    } else {
-	      if (h->types[s->type].output)
-		h->types[s->type].output (s);
-	    }
-	  }
-	  break;
-	case SOCKSTATE_FREED:
-	default:
-	  ASSERT (0);
-      }
-      if (s->state == SOCKSTATE_FREED)
-	continue;
-      if (s->socket < 0)
-	continue;
-    }
-  }
-
-#ifdef USE_PTHREADDNS
-  /* dns stuff */
-  while ((s = dns_retrieve (h->dns, &res))) {
-    if (esocket_connect_ai (s, res, s->error) < 0)
-      freeaddrinfo (res);
-  }
-#endif
-
-  /* timer stuff */
-  if (h->timercnt)
-    esocket_checktimers (h);
-
-  /* clear freelist */
-  while (freelist) {
-    s = freelist;
-    freelist = s->next;
-    if (s->addr) {
-      freeaddrinfo (s->addr);
-      s->addr = NULL;
-    }
-    free (s);
-  }
-
-  return 0;
-}
-#endif
-
-#ifdef USE_IOCP
 /************************************************************************
 **
 **                             IOCP
 **
 ************************************************************************/
-
 
 /*
  * process a write completion.
@@ -2304,8 +1361,7 @@ int esocket_select (esocket_handler_t * h, struct timeval *to)
 
 leave:
   /* timer stuff */
-  if (h->timercnt)
-    esocket_checktimers (h);
+  etimer_checktimers ();
 
   /* clear freelist */
   while (freelist) {
@@ -2320,5 +1376,3 @@ leave:
 
   return 0;
 }
-
-#endif

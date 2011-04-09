@@ -18,6 +18,7 @@
  */
 
 #include "esocket.h"
+#include "etimer.h"
 
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
@@ -68,13 +69,7 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
   }
   memset (h->types, 0, sizeof (esocket_type_t) * numtypes);
   h->numtypes = numtypes;
-
-  /* default timeout 1 hour ie, no timeout */
-  h->toval.tv_sec = 3600;
-
   h->epfd = epoll_create (ESOCKET_MAX_FDS);
-
-  initRoot (&h->root);
 
 #ifdef USE_PTHREADDNS
   h->dns = dns_init ();
@@ -85,7 +80,7 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
 
 int esocket_add_type (esocket_handler_t * h, unsigned int events,
 		      input_handler_t input, output_handler_t output,
-		      error_handler_t error, timeout_handler_t timeout)
+		      error_handler_t error)
 {
   if (h->curtypes == h->numtypes)
     return -1;
@@ -94,7 +89,6 @@ int esocket_add_type (esocket_handler_t * h, unsigned int events,
   h->types[h->curtypes].input = input;
   h->types[h->curtypes].output = output;
   h->types[h->curtypes].error = error;
-  h->types[h->curtypes].timeout = timeout;
 
   h->types[h->curtypes].default_events = events;
 
@@ -258,7 +252,6 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   socket->state = SOCKSTATE_INIT;
   socket->addr = NULL;
   socket->events = 0;
-  socket->tovalid = 0;
 
   socket->prev = NULL;
   socket->next = h->sockets;
@@ -302,7 +295,6 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   s->context = context;
   s->handler = h;
   s->state = SOCKSTATE_INIT;
-  s->tovalid = 0;
   s->events = 0;
   s->addr = NULL;
 
@@ -328,9 +320,6 @@ int esocket_close (esocket_t * s)
   //FIXME shutdown (s->socket, SHUT_RDWR);
   close (s->socket);
   s->socket = INVALID_SOCKET;
-
-  if (s->tovalid)
-    esocket_deltimeout (s);
 
   return 0;
 }
@@ -445,9 +434,6 @@ int esocket_remove_socket (esocket_t * s)
     s->socket = INVALID_SOCKET;
   }
 
-  if (s->tovalid)
-    esocket_deltimeout (s);
-
   /* remove from list */
   if (s->next)
     s->next->prev = s->prev;
@@ -472,125 +458,7 @@ int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
   s->socket = fd;
   esocket_update_state (s, sockstate);
 
-  /* reset timeout */
-  s->tovalid = 0;
-
   return 1;
-}
-
-/************************************************************************
-**
-**                             TIMERS
-**
-************************************************************************/
-int esocket_settimeout (esocket_t * s, unsigned long timeout)
-{
-  unsigned long long key;
-  esocket_handler_t *h = s->handler;
-
-  if (!timeout) {
-    if (s->tovalid)
-      esocket_deltimeout (s);
-    return 0;
-  }
-
-  /* if timer is valid already and the new time is later than the old, just set the reset time... 
-   * it will be handled when the timer expires 
-   */
-  if (s->tovalid) {
-    gettimeofday (&s->reset, NULL);
-    s->reset.tv_sec += timeout / 1000;
-    s->reset.tv_usec += ((timeout * 1000) % 1000000);
-    if (s->reset.tv_usec > 1000000) {
-      s->reset.tv_sec++;
-      s->reset.tv_usec -= 1000000;
-    }
-
-    /* new time is later than the old */
-    if (timercmp (&s->reset, &s->to, >)) {
-      s->resetvalid = 1;
-
-      return 0;
-    } else {
-      esocket_deltimeout (s);
-    }
-    s->to = s->reset;
-  } else
-    gettimeofday (&s->to, NULL);
-
-  /* determine key */
-  key = (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + timeout;
-
-  /* create timeout */
-  s->to.tv_sec += timeout / 1000;
-  s->to.tv_usec += ((timeout * 1000) % 1000000);
-  if (s->to.tv_usec > 1000000) {
-    s->to.tv_sec++;
-    s->to.tv_usec -= 1000000;
-  }
-  s->tovalid = 1;
-
-  /* insert into rbt */
-  s->rbt.data = key;
-  insertNode (&h->root, &s->rbt);
-
-  h->timercnt++;
-
-  return 0;
-}
-
-int esocket_deltimeout (esocket_t * s)
-{
-  if (!s->tovalid)
-    return 0;
-
-  deleteNode (&s->handler->root, &s->rbt);
-
-  s->resetvalid = 0;
-  s->tovalid = 0;
-  s->handler->timercnt--;
-
-  return 0;
-}
-
-int esocket_checktimers (esocket_handler_t * h)
-{
-  esocket_t *s;
-  rbt_t *rbt;
-  struct timeval now;
-
-  gettimeofday (&now, NULL);
-
-  /* handle timers */
-  while ((rbt = smallestNode (&h->root))) {
-    s = (esocket_t *) rbt;
-
-    ASSERT (s->tovalid);
-
-    if (!timercmp ((&s->to), (&now), <))
-      return 0;
-
-    if (s->resetvalid) {
-      unsigned long long key = (s->reset.tv_sec * 1000LL) + (s->reset.tv_usec / 1000LL);
-
-      s->to = s->reset;
-      s->resetvalid = 0;
-
-      deleteNode (&h->root, rbt);
-
-      s->rbt.data = key;
-      insertNode (&h->root, rbt);
-      continue;
-    }
-
-    s->tovalid = 0;
-    deleteNode (&h->root, rbt);
-    h->timercnt--;
-
-    errno = 0;
-    h->types[s->type].timeout (s);
-  }
-  return 0;
 }
 
 /************************************************************************
@@ -746,8 +614,7 @@ int esocket_select (esocket_handler_t * h, struct timeval *to)
 #endif
 
   /* timer stuff */
-  if (h->timercnt)
-    esocket_checktimers (h);
+  etimer_checktimers ();
 
   /* clear freelist */
   while (freelist) {

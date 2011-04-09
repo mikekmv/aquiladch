@@ -131,7 +131,7 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
     goto leave;
 
   u->state = PROTO_STATE_SENDLOCK;
-  server_settimeout (u->parent, PROTO_TIMEOUT_SENDLOCK);
+  etimer_set (&u->timer, PROTO_TIMEOUT_SENDLOCK);
 
 leave:
   bf_free (output);
@@ -226,7 +226,7 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 #endif
 		 "|");
 
-      server_settimeout (u->parent, PROTO_TIMEOUT_SENDLOCK);
+      etimer_set (&u->timer, PROTO_TIMEOUT_SENDLOCK);
       retval = server_write (u->parent, output);
       break;
     case TOKEN_KEY:
@@ -251,7 +251,7 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 	  goto broken_key;
 
 	u->state = PROTO_STATE_WAITNICK;
-	server_settimeout (u->parent, PROTO_TIMEOUT_WAITNICK);
+	etimer_set (&u->timer, PROTO_TIMEOUT_WAITNICK);
 
 	break;
       broken_key:
@@ -345,7 +345,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 
 	bf_strcat (output, "$GetPass|");
 	u->state = PROTO_STATE_WAITPASS;
-	server_settimeout (u->parent, PROTO_TIMEOUT_WAITPASS);
+	etimer_set (&u->timer, PROTO_TIMEOUT_WAITPASS);
 	retval = server_write (u->parent, output);
 	break;
       } else {
@@ -491,7 +491,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
     BF_VERIFY (output);
     retval = server_write (u->parent, output);
     u->state = PROTO_STATE_HELLO;
-    server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
+    etimer_set (&u->timer, PROTO_TIMEOUT_HELLO);
 
     /* DPRINTF (" - User %s greeted.\n", u->nick); */
   }
@@ -587,7 +587,7 @@ int proto_nmdc_state_waitpass (user_t * u, token_t * tkn)
 			       ("Your account priviliges will not be awarded until you set a password. Use !passwd or !pwgen.")));
 
     u->state = PROTO_STATE_HELLO;
-    server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
+    etimer_set (&u->timer, PROTO_TIMEOUT_HELLO);
 
     retval = server_write (u->parent, output);
 
@@ -635,7 +635,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 
   if (tkn->type == TOKEN_GETNICKLIST) {
     u->flags |= NMDC_FLAG_DELAYEDNICKLIST;
-    server_settimeout (u->parent, PROTO_TIMEOUT_HELLO);
+    etimer_set (&u->timer, PROTO_TIMEOUT_HELLO);
     return 0;
   }
 
@@ -759,7 +759,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 	     u->active ? "active" : "passive");
 
     u->state = PROTO_STATE_ONLINE;
-    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+    etimer_set (&u->timer, PROTO_TIMEOUT_ONLINE);
     time (&u->joinstamp);
 
     /* add user to nicklist cache, if the user existed, just update him. */
@@ -1834,7 +1834,7 @@ int proto_nmdc_state_online (user_t * u, token_t * tkn, buffer_t * b)
   }
 
   if (u && (u->state != PROTO_STATE_DISCONNECTED))
-    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+    etimer_set (&u->timer, PROTO_TIMEOUT_ONLINE);
 
   bf_free (output);
 
@@ -1862,7 +1862,7 @@ int proto_nmdc_handle_token (user_t * u, buffer_t * b)
   /* parse token. if it is unknown just reset the timeout and leave */
   if (token_parse (&tkn, b->s) == TOKEN_UNIDENTIFIED) {
     if (u->state == PROTO_STATE_ONLINE)
-      server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+      etimer_set (&u->timer, PROTO_TIMEOUT_ONLINE);
     return 0;
   }
 
@@ -2266,7 +2266,7 @@ void proto_nmdc_flush_cache ()
 
 	if (bf_used (b))
 	  if (server_write (u->parent, b) > 0)
-	    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+	    etimer_set (&u->timer, PROTO_TIMEOUT_ONLINE);
 
 	bf_free (b);
       } else {
@@ -2297,7 +2297,7 @@ void proto_nmdc_flush_cache ()
 #endif
 	if (bf_used (b))
 	  if (server_write (u->parent, b) > 0)
-	    server_settimeout (u->parent, PROTO_TIMEOUT_ONLINE);
+	    etimer_set (&u->timer, PROTO_TIMEOUT_ONLINE);
       }
       /* write out researches to recent clients */
       if (ars || (u->active && prs)) {

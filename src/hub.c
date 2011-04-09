@@ -71,17 +71,19 @@ hub_statistics_t hubstats;
 
 int server_disconnect_user (client_t *, char *);
 int server_handle_output (esocket_t * es);
+int server_handle_timeout (client_t * cl);
 
-
-/* only reset timeouts if we aren't already in a buffering state */
-int server_settimeout (client_t * cl, unsigned long timeout)
+int server_isbuffering (client_t * cl)
 {
-  if (!cl)
-    return 0;
+  return cl->outgoing.count != 0;
+}
 
-  if (!cl->outgoing.count)
-    return esocket_settimeout (cl->es, timeout);
-  return 0;
+__inline__ int server_settimer (client_t * cl, unsigned long timeout)
+{
+  if (!cl->timer && timeout)
+    cl->timer = etimer_alloc ((etimer_handler_t *) server_handle_timeout, (void *) cl);
+
+  return timeout ? etimer_set (cl->timer, timeout) : etimer_cancel (cl->timer);
 }
 
 /*
@@ -256,8 +258,6 @@ int accept_new_user (esocket_t * s)
       return -1;
     }
 
-    esocket_settimeout (cl->es, PROTO_TIMEOUT_INIT);
-
     DPRINTF (" Accepted %s user from %s\n", cl->proto->name, inet_ntoa (client_address.sin_addr));
 
     /* initiate connection */
@@ -282,8 +282,10 @@ error:
     if (es) {
       if (l)
 	esocket_send (es, bf_buffer (buffer), 0);
-      esocket_settimeout (es, 1000);
+      /* FIXME esocket_settimeout (es, 1000); */
       esocket_remove_socket (es);
+    } else {
+      close (r);
     }
   }
 #endif
@@ -338,7 +340,7 @@ int server_write (client_t * cl, buffer_t * b)
       if ((cl->state == HUB_STATE_BUFFERING)
 	  && ((cl->outgoing.size - cl->offset) >= (config.BufferSoftLimit + cl->credit))) {
 	cl->state = HUB_STATE_OVERFLOW;
-	esocket_settimeout (s, config.TimeoutOverflow);
+	server_settimer (cl, config.TimeoutOverflow);
       }
     }
 
@@ -401,10 +403,10 @@ int server_write (client_t * cl, buffer_t * b)
     if (cl->state == HUB_STATE_NORMAL) {
       if ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit)) {
 	cl->state = HUB_STATE_BUFFERING;
-	esocket_settimeout (s, config.TimeoutBuffering);
+	server_settimer (cl, config.TimeoutBuffering);
       } else {
 	cl->state = HUB_STATE_OVERFLOW;
-	esocket_settimeout (s, config.TimeoutOverflow);
+	server_settimer (cl, config.TimeoutOverflow);
       }
     }
     BUF_DPRINTF (" %p Starting to buffer... %lu (credit %lu)\n", cl->user, cl->outgoing.size,
@@ -427,6 +429,12 @@ int server_disconnect_user (client_t * cl, char *reason)
 
   /* first disconnect on protocol level: parting messages can be written */
   cl->proto->user_disconnect (cl->user, reason);
+
+  /* cancel the timer */
+  if (cl->timer) {
+    etimer_free (cl->timer);
+    cl->timer = NULL;
+  }
 
   /* close the real socket */
   if (cl->es) {
@@ -538,7 +546,7 @@ int server_handle_output (esocket_t * es)
   if (b) {
     if ((cl->state == HUB_STATE_OVERFLOW)
 	&& ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit))) {
-      esocket_settimeout (cl->es, config.TimeoutBuffering);
+      server_settimer (cl, config.TimeoutBuffering);
       cl->state = HUB_STATE_BUFFERING;
     }
 
@@ -555,7 +563,7 @@ int server_handle_output (esocket_t * es)
   ASSERT (!cl->outgoing.count);
 
   esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
-  esocket_settimeout (cl->es, PROTO_TIMEOUT_ONLINE);
+  server_settimer (cl, 0);
   buffering--;
   cl->state = HUB_STATE_NORMAL;
 
@@ -608,22 +616,16 @@ int server_handle_input (esocket_t * s)
   return 0;
 }
 
-int server_timeout (esocket_t * s)
+int server_handle_timeout (client_t * cl)
 {
-  client_t *cl = (client_t *) ((uintptr_t) s->context);
+  esocket_t *s = cl->es;
 
   ASSERT (s->state != SOCKSTATE_FREED);
   if (s->state == SOCKSTATE_FREED)
     return 0;
 
-  /* if the client is online and has no data buffered, ignore the timeout -- this avoids disconnection in an empty hub */
-  if ((cl->user->state == PROTO_STATE_ONLINE) && !cl->outgoing.size) {
-    esocket_settimeout (s, PROTO_TIMEOUT_ONLINE);
-    return 0;
-  }
-
-  DPRINTF ("Timeout user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl, __ ("Timeout"));
+  DPRINTF ("Buffering timeout user %s : %d\n", cl->user->nick, cl->user->state);
+  return server_disconnect_user (cl, __ ("Buffering Timeout"));
 }
 
 int server_error (esocket_t * s)
@@ -655,13 +657,9 @@ int server_add_port (esocket_handler_t * h, proto_t * proto, unsigned long addre
 
 int server_setup (esocket_handler_t * h)
 {
-  es_type_listen = esocket_add_type (h, ESOCKET_EVENT_IN, accept_new_user, NULL, NULL, NULL);
+  es_type_listen = esocket_add_type (h, ESOCKET_EVENT_IN, accept_new_user, NULL, NULL);
   es_type_server =
-    esocket_add_type (h, ESOCKET_EVENT_IN, server_handle_input, server_handle_output, server_error,
-		      server_timeout);
-
-  /* set default timeout */
-  h->toval.tv_sec = 1200;
+    esocket_add_type (h, ESOCKET_EVENT_IN, server_handle_input, server_handle_output, server_error);
 
   iplist_init (&lastlist);
 

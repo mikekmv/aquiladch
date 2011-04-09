@@ -30,6 +30,10 @@
 
 extern int ndelay;
 
+#ifdef USE_IOCP
+extern unsigned long iocpFragments;
+#endif
+
 config_t config;
 
 int core_config_init ()
@@ -125,6 +129,9 @@ int core_config_init ()
 
   config_register ("hub.ndelay", CFG_ELEM_UINT, &ndelay, _("This turns on or off the ndelay setting."));
 
+#ifdef USE_IOCP
+  config_register ("socket.fragments", CFG_ELEM_ULONG, &iocpFragments, _("Maximum number of outstanding data buffers per user."));
+#endif
   /* *INDENT-ON* */
 
   return 0;

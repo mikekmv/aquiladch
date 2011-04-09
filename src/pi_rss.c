@@ -18,6 +18,7 @@
  */
 
 #include "esocket.h"
+#include "etimer.h"
 
 #include <unistd.h>
 #include <string.h>
@@ -90,6 +91,7 @@ typedef struct rss_feed {
 
   /* used during retrieval */
   esocket_t *es;
+  etimer_t timer;
   buffer_t *recvd;
 
   /* state information: what to do after retrieval */
@@ -106,12 +108,14 @@ unsigned long rss_silent;
 
 rss_feed_t feedlist;
 
+int pi_rss_handle_timeout (rss_feed_t * feed);
+
 unsigned char *rss_html_filter (unsigned char *s)
 {
   int intag = 0;
   unsigned char *d, *c;
 
-  d = malloc (strlen (s) * 6);
+  d = malloc (strlen (s) * 6 + 1);
   if (!d)
     return NULL;
 
@@ -411,6 +415,8 @@ rss_feed_t *rss_feed_add (unsigned char *name, unsigned char *url)
   if (!feed)
     return NULL;
   memset (feed, 0, sizeof (rss_feed_t));
+
+  etimer_init (&feed->timer, (etimer_handler_t *) pi_rss_handle_timeout, feed);
 
   feed->elems.next = &feed->elems;
   feed->elems.prev = &feed->elems;
@@ -762,6 +768,7 @@ int pi_rss_finish (rss_feed_t * feed)
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
+  etimer_cancel (&feed->timer);
   stamp = feed->stamp;
   feed->stamp = now.tv_sec;
 
@@ -919,7 +926,8 @@ int pi_rss_retrieve (rss_feed_t * feed, buffer_t * output)
   }
 
   /* set timeout */
-  esocket_settimeout (feed->es, PI_RSS_CONNECT_TIMEOUT);
+  etimer_init (&feed->timer, (etimer_handler_t *) pi_rss_handle_timeout, feed);
+  etimer_set (&feed->timer, PI_RSS_CONNECT_TIMEOUT);
 
   DPRINTF ("RSS: started update of %s http://%s:%d/%s\n", feed->name, feed->address, feed->port,
 	   feed->path);
@@ -948,6 +956,8 @@ int pi_rss_handle_input (esocket_t * s)
 	esocket_close (feed->es);
 	esocket_remove_socket (feed->es);
 	feed->es = NULL;
+	etimer_cancel (&feed->timer);
+
 	/* retry for error. */
 	feed->stamp = now.tv_sec - feed->interval + PI_RSS_ERROR_RETRY;
 
@@ -967,7 +977,7 @@ int pi_rss_handle_input (esocket_t * s)
   } while (n > 0);
 
   /* set timeout */
-  esocket_settimeout (feed->es, PI_RSS_CONNECT_TIMEOUT);
+  etimer_set (&feed->timer, PI_RSS_CONNECT_TIMEOUT);
 
   return 0;
 succes:
@@ -1003,7 +1013,7 @@ int pi_rss_handle_output (esocket_t * s)
 
   bf_free (buf);
 
-  esocket_settimeout (feed->es, PI_RSS_CONNECT_TIMEOUT);
+  etimer_set (&feed->timer, PI_RSS_CONNECT_TIMEOUT);
 
   return 0;
 leave:
@@ -1017,6 +1027,7 @@ leave:
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
+  etimer_cancel (&feed->timer);
 
   /* retry for error. */
   feed->stamp = now.tv_sec - feed->interval + PI_RSS_ERROR_RETRY;
@@ -1040,6 +1051,7 @@ int pi_rss_handle_error (esocket_t * s)
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
+  etimer_cancel (&feed->timer);
 
   /* retry for error. */
   feed->stamp = now.tv_sec - feed->interval + PI_RSS_ERROR_RETRY;
@@ -1047,15 +1059,13 @@ int pi_rss_handle_error (esocket_t * s)
   return 0;
 };
 
-int pi_rss_handle_timeout (esocket_t * s)
+int pi_rss_handle_timeout (rss_feed_t * feed)
 {
-  rss_feed_t *feed = (rss_feed_t *) s->context;
-
-  if (s->state == SOCKSTATE_FREED)
+  if (feed->es->state == SOCKSTATE_FREED)
     return 0;
 
-  if (s->state == SOCKSTATE_RESOLVING) {
-    esocket_settimeout (feed->es, PI_RSS_CONNECT_TIMEOUT);
+  if (feed->es->state == SOCKSTATE_RESOLVING) {
+    etimer_set (&feed->timer, PI_RSS_CONNECT_TIMEOUT);
     return 0;
   }
 
@@ -1497,7 +1507,7 @@ int pi_rss_setup (esocket_handler_t * h)
   pi_rss_handler = h;
   pi_rss_es_type =
     esocket_add_type (h, ESOCKET_EVENT_IN, pi_rss_handle_input, pi_rss_handle_output,
-		      pi_rss_handle_error, pi_rss_handle_timeout);
+		      pi_rss_handle_error);
 
   plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *) pi_rss_handle_update);
 

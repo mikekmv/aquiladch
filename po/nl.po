@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-08 18:28+0200\n"
+"POT-Creation-Date: 2007-04-09 15:52+0200\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -1237,27 +1237,27 @@ msgstr "Denk voor u een HubINFO vraagt en spam niet.\n"
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Gebruikerslijst gewijgerd. Maximum 1 reload per %ds."
 
-#: src/nmdc_interface.c:936
+#: src/nmdc_interface.c:943
 #, c-format
 msgid "Rate Probation Violation (Last: %s)."
 msgstr "Proefperiode snelheidsovertreding (Laatste %s)."
 
-#: src/nmdc_interface.c:940
+#: src/nmdc_interface.c:947
 #, c-format
 msgid "Rate Violation (Last: %s)."
 msgstr "Snelheidsovertreding (Laatste: %s)."
 
-#: src/nmdc_interface.c:959
+#: src/nmdc_interface.c:966
 #, c-format
 msgid "Flood detected: %s (%s) was banned: %.*s (Last violation: %s)\n"
 msgstr ""
 "Flood gedetecteerd: %s (%s) werd geband: %.*s (Laatste overtreding: %s)\n"
 
-#: src/nmdc_interface.c:982 src/nmdc_interface.c:1012
+#: src/nmdc_interface.c:989 src/nmdc_interface.c:1019
 msgid "WARNING: "
 msgstr "WAARSCHUWING:"
 
-#: src/nmdc_interface.c:1159
+#: src/nmdc_interface.c:1178
 msgid ""
 "Period of chat messages. This controls how often a user can send a chat "
 "message. Keep this low."
@@ -1265,7 +1265,7 @@ msgstr ""
 "Periode van chat berichten. Dit controleert hoe dikwijls een user een chat "
 "bericht mag sturen. Hou dit laag."
 
-#: src/nmdc_interface.c:1162
+#: src/nmdc_interface.c:1181
 msgid ""
 "Burst of chat messages. This controls how many chat messages a user can "
 "'save up'. Keep this low."
@@ -1273,7 +1273,7 @@ msgstr ""
 "Krediet van chat berichten. Dit controleert hoe veel chat berichten kunnen "
 "worden opgespaard. Hou dit laag."
 
-#: src/nmdc_interface.c:1165
+#: src/nmdc_interface.c:1184
 msgid ""
 "Period of searches. This controls how often an active user can search. Keep "
 "this reasonable."
@@ -1281,7 +1281,7 @@ msgstr ""
 "Periode van zoekverzoeken. Dit controleert hoe vaak een actieve gebruiker "
 "kan zoeken. Hou dit redelijk."
 
-#: src/nmdc_interface.c:1168
+#: src/nmdc_interface.c:1187
 msgid ""
 "Burst of searches. This controls how many searches an active user can 'save "
 "up'. Keep this low."
@@ -1289,7 +1289,7 @@ msgstr ""
 "Krediet van zoekverzoeken. Dit controleert hoe veel zoekverzoeken kunnen "
 "worden opgespaard door actieve gebruikers. Hou dit laag."
 
-#: src/nmdc_interface.c:1171
+#: src/nmdc_interface.c:1190
 msgid ""
 "Period of searches. This controls how often a passive user can search. Keep "
 "this reasonable."
@@ -1297,7 +1297,7 @@ msgstr ""
 "Periode van zoekverzoeken. Dit controleert hoe vaak een passieve gebruiker "
 "kan zoeken. Hou dit redelijk."
 
-#: src/nmdc_interface.c:1174
+#: src/nmdc_interface.c:1193
 msgid ""
 "Burst of searches. This controls how many searches a passive user can 'save "
 "up'. Keep this low."
@@ -1305,7 +1305,7 @@ msgstr ""
 "Krediet van zoekverzoeken. Dit controleert hoe veel zoekverzoeken kunnen "
 "worden opgespaard door passieve gebruikers. Hou dit laag."
 
-#: src/nmdc_interface.c:1177
+#: src/nmdc_interface.c:1196
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send to everyone. Keep this very high."
@@ -1313,7 +1313,7 @@ msgstr ""
 "Periode van MyINFO berichten. Dit controleert hoe vaak een gebruiker een "
 "MyINFO kan sturen. Hou dit hoog."
 
-#: src/nmdc_interface.c:1180
+#: src/nmdc_interface.c:1199
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (everyone). Keep this at 1."
@@ -1321,7 +1321,7 @@ msgstr ""
 "Krediet van MyINFO berichten. Dit controleert hoe veel MyINFOs kunnen worden "
 "opgespaard. Hou dit op 1."
 
-#: src/nmdc_interface.c:1183
+#: src/nmdc_interface.c:1202
 msgid ""
 "Period of MyINFO messages. This controls how often a user can send a MyINFO "
 "message that is send on to the ops only. Keep this very high."
@@ -1329,7 +1329,7 @@ msgstr ""
 "Periode van MyINFO berichten. Dit controleert hoe vaak een gebruiker een "
 "MyINFO kan sturen die enkel naar ops worden gestuurd. Hou dit hoog."
 
-#: src/nmdc_interface.c:1186
+#: src/nmdc_interface.c:1205
 msgid ""
 "Burst of MyINFO messages. This controls how many MyINFO messages a user can "
 "'save up' (OPs messages only). Keep this at 1."
@@ -1337,7 +1337,7 @@ msgstr ""
 "Krediet van MyINFO berichten. Dit controleert hoe veel MyINFOs voor ops "
 "kunnen worden opgespaard. Hou dit op 1."
 
-#: src/nmdc_interface.c:1189
+#: src/nmdc_interface.c:1208
 msgid ""
 "Period of nicklist requests. This controls how often a user can refresh his "
 "userlist. Keep this high."
@@ -1345,7 +1345,7 @@ msgstr ""
 "Periode van nicklijst verzoeken. Dit controleert hoe vaak een gebruiker een "
 "nieuwe nick lijst kan vragen. Hou dit hoog."
 
-#: src/nmdc_interface.c:1192
+#: src/nmdc_interface.c:1211
 msgid ""
 "Burst of nicklist requests. This controls how many userlist refreshes a user "
 "can 'save up'. Keep this at 1."
@@ -1353,7 +1353,7 @@ msgstr ""
 "Krediet van nick lijst verzoeken. Dit controleert hoe veel nicklijst "
 "verzoeken een  gebruiker kan opsparen. Hou dit op 1"
 
-#: src/nmdc_interface.c:1195
+#: src/nmdc_interface.c:1214
 msgid ""
 "Period of getinfo requests. This controls how often a user can request info "
 "on a user. Keep this low."
@@ -1361,7 +1361,7 @@ msgstr ""
 "Periode van GetINFO verzoeken. Dit controleert hoe vaak een gebruiker een "
 "GetINFO kan sturen. Hou dit laag."
 
-#: src/nmdc_interface.c:1198
+#: src/nmdc_interface.c:1217
 msgid ""
 "Burst of getinfo requests. This controls how many getinfo requests a user "
 "can 'save up'."
@@ -1369,143 +1369,143 @@ msgstr ""
 "Krediet van GetINFO verzoeken. Dit controleert hoe veel GetINFOs een "
 "gebruiker  kan opsparen. Hou dit op 1."
 
-#: src/nmdc_interface.c:1201
+#: src/nmdc_interface.c:1220
 msgid ""
 "Period of downloads. This controls how often a user can initiate a download. "
 "Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1204
+#: src/nmdc_interface.c:1223
 msgid ""
 "Burst of downloads. This controls how many downloads a user can 'save up'. "
 "Keep this reasonable."
 msgstr ""
 
-#: src/nmdc_interface.c:1207
+#: src/nmdc_interface.c:1226
 msgid ""
 "Period of connects. This controls how often the connect counter is "
 "refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1210
+#: src/nmdc_interface.c:1229
 msgid ""
 "Burst of connects. This controls how many new user connects can be saved up "
 "in idle time. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1213
+#: src/nmdc_interface.c:1232
 msgid ""
 "Refill of connects. This controls how many new user connects are added each "
 "time the counter resets. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1217
+#: src/nmdc_interface.c:1236
 msgid ""
 "Period of passive search results. This controls how often the incoming "
 "passive search results counter is refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1220
+#: src/nmdc_interface.c:1239
 msgid ""
 "Burst of passive search results. This controls how many incoming passive "
 "search results can be saved up in idle time. Keep this equal to the search "
 "period."
 msgstr ""
 
-#: src/nmdc_interface.c:1223
+#: src/nmdc_interface.c:1242
 msgid ""
 "Refill of passive search results. This controls how many incoming passive "
 "search results are added each time the counter resets. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1227
+#: src/nmdc_interface.c:1246
 msgid ""
 "Period of passive search results. This controls how often the outgoing "
 "passive search results counter is refreshed. Keep this low."
 msgstr ""
 
-#: src/nmdc_interface.c:1230
+#: src/nmdc_interface.c:1249
 msgid ""
 "Burst of passive search results. This controls how many outgoing passive "
 "search results can be saved up in idle time. Keep this reasonably high."
 msgstr ""
 
-#: src/nmdc_interface.c:1233
+#: src/nmdc_interface.c:1252
 msgid ""
 "Refill of passive search results. This controls how many outgoing passive "
 "search results are added each time the counter resets. Keep this reasonably "
 "high."
 msgstr ""
 
-#: src/nmdc_interface.c:1237
+#: src/nmdc_interface.c:1256
 msgid ""
 "Period of user warnings. This controls how often a warning is send to user "
 "that overstep limits."
 msgstr ""
 
-#: src/nmdc_interface.c:1240
+#: src/nmdc_interface.c:1259
 msgid ""
 "Refill of user warnings. This controls how many warning a user gets within "
 "the period."
 msgstr ""
 
-#: src/nmdc_interface.c:1243
+#: src/nmdc_interface.c:1262
 msgid ""
 "Burst of user warnings. This controls how many warnings a user that overstep "
 "limits can save up."
 msgstr ""
 
-#: src/nmdc_interface.c:1247
+#: src/nmdc_interface.c:1266
 msgid ""
 "Period of user violations. This controls how often a warning is send to user "
 "that overstep limits."
 msgstr ""
 
-#: src/nmdc_interface.c:1250
+#: src/nmdc_interface.c:1269
 msgid ""
 "Refill of user violations. This controls how many warning a user gets within "
 "the period."
 msgstr ""
 
-#: src/nmdc_interface.c:1253
+#: src/nmdc_interface.c:1272
 msgid ""
 "Burst of user violations. This controls how many violations a user that "
 "overstep limits can save up."
 msgstr ""
 
-#: src/nmdc_interface.c:1329
+#: src/nmdc_interface.c:1348
 msgid "Allow multiple users from the same IP address."
 msgstr ""
 
-#: src/nmdc_interface.c:1331
+#: src/nmdc_interface.c:1350
 msgid "Maximum length of a chat message."
 msgstr ""
 
-#: src/nmdc_interface.c:1333
+#: src/nmdc_interface.c:1352
 msgid "Maximum length of a search message."
 msgstr ""
 
-#: src/nmdc_interface.c:1335
+#: src/nmdc_interface.c:1354
 msgid "Maximum length of a search result"
 msgstr ""
 
-#: src/nmdc_interface.c:1338
+#: src/nmdc_interface.c:1357
 msgid "Minimum time before a re-search is considered valid."
 msgstr ""
 
-#: src/nmdc_interface.c:1340
+#: src/nmdc_interface.c:1359
 msgid "Period during which a search is considered a re-search."
 msgstr ""
 
-#: src/nmdc_interface.c:1342
+#: src/nmdc_interface.c:1361
 msgid "Maximum number of searches cached."
 msgstr ""
 
-#: src/nmdc_interface.c:1345
+#: src/nmdc_interface.c:1364
 msgid "This message is send to all banned users when they try to join."
 msgstr ""
 
-#: src/nmdc_interface.c:1349
+#: src/nmdc_interface.c:1368
 msgid ""
 "These are the characters allowed in a nick. An empty string means all "
 "characters. Does NOT support utf-8 character."
@@ -1988,73 +1988,73 @@ msgstr ""
 msgid "Lists available chatrooms."
 msgstr ""
 
-#: src/pi_hublist.c:123
+#: src/pi_hublist.c:127
 msgid "No hublists configured\n"
 msgstr ""
 
-#: src/pi_hublist.c:153
+#: src/pi_hublist.c:157
 #, c-format
 msgid "Hublist update ERROR: %s: socket: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:163 src/pi_hublist.c:166
+#: src/pi_hublist.c:167 src/pi_hublist.c:170
 #, c-format
 msgid "Hublist update ERROR: %s: connect: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:199
+#: src/pi_hublist.c:205
 #, c-format
 msgid "Hublist update ERROR: %s: read: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:211
+#: src/pi_hublist.c:217
 #, c-format
 msgid "Hublist update ERROR: %s: getsockname: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:231
+#: src/pi_hublist.c:237
 #, c-format
 msgid "Hublist update ERROR: %s: illegal input %.*s\n"
 msgstr ""
 
-#: src/pi_hublist.c:300
+#: src/pi_hublist.c:306
 #, c-format
 msgid "Hublist update ERROR: %s: send: %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:308
+#: src/pi_hublist.c:314
 #, c-format
 msgid "Registered at hublist %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:345
+#: src/pi_hublist.c:352
 #, c-format
 msgid "Hublist update ERROR: %s: %s.\n"
 msgstr ""
 
-#: src/pi_hublist.c:375
+#: src/pi_hublist.c:383
 #, c-format
 msgid "Hublist update ERROR: %s: Timed out.\n"
 msgstr ""
 
-#: src/pi_hublist.c:403
+#: src/pi_hublist.c:411
 msgid "Errors during hublist update:\n"
 msgstr ""
 
-#: src/pi_hublist.c:452
+#: src/pi_hublist.c:459
 msgid "list of hublist addresses."
 msgstr ""
 
-#: src/pi_hublist.c:454
+#: src/pi_hublist.c:461
 msgid "Interval of hublist updates."
 msgstr ""
 
-#: src/pi_hublist.c:456
+#: src/pi_hublist.c:463
 msgid ""
 "Do not report errors when hublist registration fails (Use with caution!)."
 msgstr ""
 
-#: src/pi_hublist.c:458
+#: src/pi_hublist.c:465
 msgid "Register at hublists."
 msgstr ""
 
@@ -2071,29 +2071,29 @@ msgstr ""
 msgid "Not a valid IP address.\n"
 msgstr ""
 
-#: src/pi_lua.c:1614 src/pi_lua.c:1795 src/pi_lua.c:2338
+#: src/pi_lua.c:1614 src/pi_lua.c:1867 src/pi_lua.c:2413
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr ""
 
-#: src/pi_lua.c:1826
+#: src/pi_lua.c:1898
 msgid "No such LUA function."
 msgstr ""
 
-#: src/pi_lua.c:1834
+#: src/pi_lua.c:1906
 msgid "Command failed to register."
 msgstr ""
 
-#: src/pi_lua.c:1842
+#: src/pi_lua.c:1914
 msgid "Could not allocate memory."
 msgstr ""
 
-#: src/pi_lua.c:2110 src/pi_lua.c:2135
+#: src/pi_lua.c:2185 src/pi_lua.c:2210
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr ""
 
-#: src/pi_lua.c:2235
+#: src/pi_lua.c:2310
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -2101,57 +2101,57 @@ msgid ""
 "Scripts count/peak: %d/%d"
 msgstr ""
 
-#: src/pi_lua.c:2239
+#: src/pi_lua.c:2314
 msgid ""
 "\n"
 "No LUA scripts running.\n"
 msgstr ""
 
-#: src/pi_lua.c:2243
+#: src/pi_lua.c:2318
 msgid ""
 "\n"
 "Running LUA scripts:\n"
 msgstr ""
 
-#: src/pi_lua.c:2258 src/pi_lua.c:2276
+#: src/pi_lua.c:2333 src/pi_lua.c:2351
 #, c-format
 msgid "Usage: %s <script>"
 msgstr ""
 
-#: src/pi_lua.c:2263
+#: src/pi_lua.c:2338
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2265
+#: src/pi_lua.c:2340
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr ""
 
-#: src/pi_lua.c:2281
+#: src/pi_lua.c:2356
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2283
+#: src/pi_lua.c:2358
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr ""
 
-#: src/pi_lua.c:2413
+#: src/pi_lua.c:2488
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr ""
 
-#: src/pi_lua.c:2498
+#: src/pi_lua.c:2573
 msgid "Show lua stats."
 msgstr ""
 
-#: src/pi_lua.c:2499
+#: src/pi_lua.c:2574
 msgid "Load a lua script."
 msgstr ""
 
-#: src/pi_lua.c:2500
+#: src/pi_lua.c:2575
 msgid "Remove a lua script."
 msgstr ""
 
@@ -2616,34 +2616,34 @@ msgstr ""
 msgid "List iplogs."
 msgstr ""
 
-#: src/hub.c:201
+#: src/hub.c:203
 #, c-format
 msgid "<%s> Don't reconnect so fast.|"
 msgstr ""
 
-#: src/hub.c:211 src/hub.c:222 src/hub.c:237 src/hub.c:249
+#: src/hub.c:213 src/hub.c:224 src/hub.c:239 src/hub.c:251
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:364 src/hub.c:505
+#: src/hub.c:366 src/hub.c:513
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:600
+#: src/hub.c:608
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:626
-msgid "Timeout"
+#: src/hub.c:628
+msgid "Buffering Timeout"
 msgstr ""
 
-#: src/hub.c:643
+#: src/hub.c:645
 #, c-format
 msgid "Socket error %d."
 msgstr ""
 
-#: src/hub.c:645
+#: src/hub.c:647
 #, c-format
 msgid "Socket errno %d."
 msgstr ""
@@ -2783,166 +2783,170 @@ msgid ""
 "asearch checks)."
 msgstr ""
 
-#: src/core_config.c:80
+#: src/core_config.c:84
 msgid "Port on which the hub will listen."
 msgstr ""
 
-#: src/core_config.c:81
+#: src/core_config.c:85
 msgid "IP on which the hub will listen, set to 0.0.0.0 for all."
 msgstr ""
 
-#: src/core_config.c:82
+#: src/core_config.c:86
 msgid "Extra NMDC ports to listen on."
 msgstr ""
 
-#: src/core_config.c:83
+#: src/core_config.c:87
 msgid "A hostname (or IP address) where your machine will be reachable."
 msgstr ""
 
-#: src/core_config.c:84
+#: src/core_config.c:88
 msgid "Name of the hub"
 msgstr ""
 
-#: src/core_config.c:85
+#: src/core_config.c:89
 msgid "Description of the hub."
 msgstr ""
 
-#: src/core_config.c:86
+#: src/core_config.c:90
 msgid "Owner of the hub."
 msgstr ""
 
-#: src/core_config.c:87
+#: src/core_config.c:91
 msgid "Name of the Hub Security bot."
 msgstr ""
 
-#: src/core_config.c:88
+#: src/core_config.c:92
 msgid "Description of the Hub Security bot."
 msgstr ""
 
-#: src/core_config.c:90
+#: src/core_config.c:94
 msgid "Maximum Length of the users description field."
 msgstr ""
 
-#: src/core_config.c:91
+#: src/core_config.c:95
 msgid "Maximum length of the users tag field."
 msgstr ""
 
-#: src/core_config.c:92
+#: src/core_config.c:96
 msgid "Maximum length of the users speed field."
 msgstr ""
 
-#: src/core_config.c:93
+#: src/core_config.c:97
 msgid "Maximum length of the users email address field."
 msgstr ""
 
-#: src/core_config.c:94
+#: src/core_config.c:98
 msgid "Maximum length of the users sharesize field."
 msgstr ""
 
-#: src/core_config.c:95
+#: src/core_config.c:99
 msgid ""
 "Kick the user if the tag is too long. If this is not set, the tag will be "
 "hidden."
 msgstr ""
 
-#: src/core_config.c:97
+#: src/core_config.c:101
 msgid "Redirection target."
 msgstr ""
 
-#: src/core_config.c:98
+#: src/core_config.c:102
 msgid "Redirection target in case of kick or ban."
 msgstr ""
 
-#: src/core_config.c:99
+#: src/core_config.c:103
 msgid "Length of automatic temporary ban after a kick."
 msgstr ""
 
-#: src/core_config.c:101
+#: src/core_config.c:105
 msgid "Maximum number of retries a user is allowed for his password."
 msgstr ""
 
-#: src/core_config.c:102
+#: src/core_config.c:106
 msgid "Length of automatic ban on too many retries (in seconds)."
 msgstr ""
 
-#: src/core_config.c:104
+#: src/core_config.c:108
 msgid ""
 "Users can only reconnect after this period (in seconds). This is counted "
 "from the previous login time, not logout."
 msgstr ""
 
-#: src/core_config.c:105
+#: src/core_config.c:109
 msgid ""
 "IPs that are used in a CTM exploit attack are hard banned for this time (in "
 "seconds)."
 msgstr ""
 
-#: src/core_config.c:107
+#: src/core_config.c:111
 msgid ""
 "Users that go offline for shorter than this period do not appear to go "
 "offline. On rejoing they will get their rate counters back."
 msgstr ""
 
-#: src/core_config.c:109
+#: src/core_config.c:113
 msgid "The hub sends all error messages here."
 msgstr ""
 
-#: src/core_config.c:111
+#: src/core_config.c:115
 msgid ""
 "If a user has more data buffered than this setting, he has limited time to "
 "read it all."
 msgstr ""
 
-#: src/core_config.c:112
+#: src/core_config.c:116
 msgid ""
 "If a user has more data buffered than this setting, no more will be allowed."
 msgstr ""
 
-#: src/core_config.c:113
+#: src/core_config.c:117
 msgid ""
 "If the hub is buffering more than this setting, no more will be allowed."
 msgstr ""
 
-#: src/core_config.c:115
+#: src/core_config.c:119
 msgid ""
 "If the hub start buffering for a user, after this many milliseconds, the "
 "user will be disconnected."
 msgstr ""
 
-#: src/core_config.c:116
+#: src/core_config.c:120
 msgid ""
 "If the hub start buffering for a user and the amount exceed hub."
 "BufferSoftLimit, he wil be disconnected after this many milliseconds."
 msgstr ""
 
-#: src/core_config.c:118
+#: src/core_config.c:122
 msgid ""
 "If a user violates the rate controls too much, he will be banned for this "
 "amount of time."
 msgstr ""
 
-#: src/core_config.c:119
+#: src/core_config.c:123
 msgid ""
 "If the user violatest the rate controls too much within this period after "
 "joining, he will be hardbanned permanently."
 msgstr ""
 
-#: src/core_config.c:121
+#: src/core_config.c:125
 msgid "These are the rights of an unregistered user."
 msgstr ""
 
-#: src/core_config.c:123
+#: src/core_config.c:127
 msgid ""
 "This is the minimum time before an IP address is allowed to reconnect to the "
 "hub. NEVER TURN THIS OFF."
 msgstr ""
 
-#: src/core_config.c:124
+#: src/core_config.c:128
 msgid "This is the number of IP address to remember."
 msgstr ""
 
-#: src/core_config.c:126
+#: src/core_config.c:130
 msgid "This turns on or off the ndelay setting."
+msgstr ""
+
+#: src/core_config.c:133
+msgid "Maximum number of outstanding data buffers per user."
 msgstr ""
 
 #~ msgid "None"

@@ -43,6 +43,7 @@
 #include "plugin_int.h"
 #include "builtincmd.h"
 #include "commands.h"
+#include "etimer.h"
 
 #include "nmdc.h"
 
@@ -333,6 +334,7 @@ int main (int argc, char **argv)
 
   /* initialize the global configuration */
   gettime ();
+  etimer_start ();
 
   config_init ();
   accounts_init ();
@@ -384,8 +386,6 @@ int main (int argc, char **argv)
 
   /* setup socket handler */
   h = esocket_create_handler (5);
-  h->toval.tv_sec = 60;
-  h->toval.tv_usec = 0;
 
   /* setup server */
   server_setup (h);

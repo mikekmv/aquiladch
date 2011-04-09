@@ -131,6 +131,8 @@ int proto_nmdc_user_raw_all (buffer_t * message);
 
 int proto_nmdc_warn (struct timeval *now, unsigned char *message, ...);
 
+unsigned long proto_nmdc_handle_timeout (user_t * user);
+
 /******************************************************************************\
 **                                                                            **
 **                            PROTOCOL DEFINITION                             **
@@ -170,7 +172,6 @@ proto_t nmdc_proto = {
 	name:			"NMDC"
 };
 /* *INDENT-ON* */
-
 
 /******************************************************************************\
 **                                                                            **
@@ -688,6 +689,9 @@ user_t *proto_nmdc_user_alloc (void *priv)
   user->rate_warnings.tokens = rates.warnings.burst;
   user->rate_violations.tokens = rates.violations.burst;
 
+  /* init timer */
+  etimer_init (&user->timer, (etimer_handler_t *) proto_nmdc_handle_timeout, user);
+
   /* add user to the list... */
   user->next = userlist;
   if (user->next)
@@ -754,6 +758,9 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
   } else {
     plugin_send_event (u->plugin_priv, PLUGIN_EVENT_DISCONNECT, bf_buffer (reason));
   }
+
+  /* cancel the protocol timers */
+  etimer_cancel (&u->timer);
 
   /* if user was online, clear out all stale data */
   if (u->state == PROTO_STATE_ONLINE) {
@@ -1065,6 +1072,20 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 
 /******************************************************************************\
 **                                                                            **
+**                                timerout handling                           **
+**                                                                            **
+\******************************************************************************/
+
+unsigned long proto_nmdc_handle_timeout (user_t * user)
+{
+  if ((user->state == PROTO_STATE_ONLINE) && !server_isbuffering (user->parent))
+    return etimer_set (&user->timer, PROTO_TIMEOUT_ONLINE);
+
+  return server_disconnect_user (user->parent, "Protocol Timeout");
+}
+
+/******************************************************************************\
+**                                                                            **
 **                                Nicklist char handling                      **
 **                                                                            **
 \******************************************************************************/
@@ -1088,10 +1109,8 @@ void nmdc_nickchar_rebuild ()
 unsigned long nmdc_event_config (plugin_user_t * user, void *dummy, unsigned long event,
 				 config_element_t * elem)
 {
-  if (elem == cfg_nickchars) {
+  if (elem == cfg_nickchars)
     nmdc_nickchar_rebuild ();
-    return PLUGIN_RETVAL_CONTINUE;
-  }
 
   return PLUGIN_RETVAL_CONTINUE;
 }

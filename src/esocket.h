@@ -89,6 +89,7 @@
 
 #ifdef USE_IOCP
 #  include <winsock2.h>
+#  include "etimer.h"
 #else 
 #  include <sys/socket.h>
 #  include <netdb.h>
@@ -199,13 +200,11 @@ struct esocket {
   unsigned int type;
   uint32_t events;
 
-  unsigned int tovalid, resetvalid;
-  struct timeval to, reset;
   struct esockethandler *handler;
-  
+
 #ifdef USE_IOCP
   /* connect polling */
-  unsigned int count;
+  etimer_t     timer;
   /* accept context */
   esocket_ioctx_t *ctxt;
   /* LPFN_ACCEPTEX fnAcceptEx; */
@@ -224,8 +223,6 @@ struct esocket {
 typedef int (input_handler_t) (esocket_t * s);
 typedef int (output_handler_t) (esocket_t * s);
 typedef int (error_handler_t) (esocket_t * s);
-typedef int (timeout_handler_t) (esocket_t * s);
-
 
 /* socket types */
 typedef struct esockettypes {
@@ -233,7 +230,6 @@ typedef struct esockettypes {
   input_handler_t *input;
   output_handler_t *output;
   error_handler_t *error;
-  timeout_handler_t *timeout;
   uint32_t default_events;
 } esocket_type_t;
 
@@ -243,8 +239,6 @@ typedef struct esockethandler {
   unsigned int numtypes, curtypes;
 
   esocket_t *sockets;
-  rbt_t *root;
-  unsigned long timercnt;
 
 #ifdef USE_SELECT
   fd_set input;
@@ -266,15 +260,13 @@ typedef struct esockethandler {
   dns_t *dns;
 #endif
   int n;
-
-  struct timeval toval;
 } esocket_handler_t;
 
 /* function prototypes */
 extern esocket_handler_t *esocket_create_handler (unsigned int numtypes);
 extern int esocket_add_type (esocket_handler_t * h, unsigned int events,
 				      input_handler_t input, output_handler_t output,
-				      error_handler_t error, timeout_handler_t timeout);
+				      error_handler_t error);
 extern esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
 			       int protocol, uintptr_t context);
 extern esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
@@ -289,8 +281,6 @@ extern int esocket_connect (esocket_t * s, char *address, unsigned int port);
 extern int esocket_select (esocket_handler_t * h, struct timeval *to);
 extern int esocket_update (esocket_t * s, int fd, unsigned int state);
 extern int esocket_update_state (esocket_t * s, unsigned int newstate);
-extern int esocket_settimeout (esocket_t * s, unsigned long timeout);
-extern int esocket_deltimeout (esocket_t * s);
 
 extern int esocket_setevents (esocket_t * s, unsigned int events);
 extern int esocket_addevents (esocket_t * s, unsigned int events);

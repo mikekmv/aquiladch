@@ -141,7 +141,7 @@ STACKTRACEFILES = stacktrace.c
 
 NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
 
-NETWORK_SOURCES = $(NETWORKAPI_FILES) buffer.c rbt.c
+NETWORK_SOURCES = $(NETWORKAPI_FILES) etimer.c buffer.c rbt.c
 
 bin_PROGRAMS = aquila
 aquila_SOURCES = $(NETWORK_SOURCES) \

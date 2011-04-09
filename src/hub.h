@@ -31,6 +31,7 @@
 #include "proto.h"
 #include "stringlist.h"
 #include "banlist.h"
+#include "etimer.h"
 
 /* local timeouts */
 
@@ -57,6 +58,7 @@ typedef struct client {
   string_list_t outgoing;
   unsigned long offset, credit;
   unsigned int state;
+  etimer_t	*timer;
 
   user_t *user;
 } client_t;
@@ -73,7 +75,7 @@ extern int server_setup (esocket_handler_t *);
 extern int server_disconnect_user (client_t *, char *);
 extern int server_write (client_t *, buffer_t *);
 extern int server_write_credit (client_t *, buffer_t *);
-extern int server_settimeout (client_t * cl, unsigned long timeout);
 extern int server_add_port (esocket_handler_t * h, proto_t * proto,  unsigned long address, int port);
+extern int server_isbuffering (client_t *);
 
 #endif /* _HUB_H_ */

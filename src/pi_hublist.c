@@ -19,6 +19,7 @@
  */
 
 #include "esocket.h"
+#include "etimer.h"
 
 #include <unistd.h>
 #include <string.h>
@@ -54,6 +55,7 @@
 typedef struct pi_hublist_ctx {
   unsigned char *address;
   unsigned long flags;
+  etimer_t timer;
 } pi_hublist_ctx_t;
 
 unsigned char *pi_hublist_lists;
@@ -66,6 +68,8 @@ unsigned int pi_hublist_es_type;
 esocket_handler_t *pi_hublist_handler;
 
 extern long users_total;
+
+int pi_hublist_handle_timeout (esocket_t * s);
 
 static int escape_string (buffer_t * output)
 {
@@ -172,7 +176,9 @@ int pi_hublist_update (buffer_t * output, unsigned long flags)
       esocket_remove_socket (s);
       continue;
     };
-    esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
+
+    etimer_init (&ctx->timer, (etimer_handler_t *) pi_hublist_handle_timeout, s);
+    etimer_set (&ctx->timer, PI_HUBLIST_TIMEOUT);
   };
 
   free (lists);
@@ -319,6 +325,7 @@ leave:
 
   free (ctx->address);
   free (ctx);
+  etimer_cancel (&ctx->timer);
   esocket_close (s);
   esocket_remove_socket (s);
 
@@ -335,7 +342,7 @@ int pi_hublist_handle_error (esocket_t * s)
 
   /* we are connected, just wait for input */
   if (!s->error) {
-    esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
+    etimer_set (&ctx->timer, PI_HUBLIST_TIMEOUT);
     return 0;
   }
 
@@ -347,6 +354,7 @@ int pi_hublist_handle_error (esocket_t * s)
     plugin_report (buf);
   DPRINTF ("pi_hublist: error: %.*s", (int) bf_used (buf), buf->s);
 
+  etimer_cancel (&ctx->timer);
   free (ctx->address);
   free (ctx);
   esocket_close (s);
@@ -366,7 +374,7 @@ int pi_hublist_handle_timeout (esocket_t * s)
     return 0;
 
   if (s->state == SOCKSTATE_RESOLVING) {
-    esocket_settimeout (s, PI_HUBLIST_TIMEOUT);
+    etimer_set (&ctx->timer, PI_HUBLIST_TIMEOUT);
     return 0;
   }
 
@@ -427,8 +435,7 @@ unsigned long pi_hublist_handler_hublist (plugin_user_t * user, buffer_t * outpu
 int pi_hublist_setup (esocket_handler_t * h)
 {
   pi_hublist_es_type =
-    esocket_add_type (h, ESOCKET_EVENT_IN, pi_hublist_handle_input, NULL, pi_hublist_handle_error,
-		      pi_hublist_handle_timeout);
+    esocket_add_type (h, ESOCKET_EVENT_IN, pi_hublist_handle_input, NULL, pi_hublist_handle_error);
 
   plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH,
 		  (plugin_event_handler_t *) pi_hublist_handle_update);

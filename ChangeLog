@@ -1,6 +1,14 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta32+:
+0.1.11-pre1-beta34:
+	LUA: added real timer support.
+	Removed esocket.c base file.
+	Fixed bug in accept_user if esocket cannot be created in error case.
+	Split off timers from esocket_iocp.c
+	removed unnecessary code from esocket_iocp.c
+	IOCP: added IOCP_COMPLETION_FRAGMENTS as variable.
+	Added sv.po
+	Split off timers from esocket.
 	BUILDSYS: fixed problems with decision cascade.
 	STATS: fix help message.
 	BUILTIN: fix !userinfo for offline users.
@@ -148,6 +156,7 @@ This is the Aquila Changelog.
 	Fix build on linux.
 	Native Windows support.
 
+0.1.10:
 0.1.10-pre4:
 	banlist will list both IP and nick for dual bans (Req FleetCommand).
 	Send login password message in PM. Has disadvantages for some clients.

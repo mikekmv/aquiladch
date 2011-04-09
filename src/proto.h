@@ -33,6 +33,7 @@
 #include "config.h"
 #include "leakybucket.h"
 #include "tth.h"
+#include "etimer.h"
 
 #define PROTO_STATE_INIT         0	/* initial creation state */
 #define PROTO_STATE_SENDLOCK     1	/* waiting for user $Key */
@@ -77,6 +78,8 @@ typedef struct user {
   unsigned int op;
   unsigned int flags;
   unsigned long long rights;
+
+  etimer_t	timer;
 
   /* user data */
   unsigned char lock[LOCKLENGTH];

@@ -1728,6 +1728,85 @@ void pi_lua_purgebots (lua_context_t * ctx)
 }
 
 /******************************************************************************************
+ *  LUA Functions Custom Timer Handling
+ */
+
+typedef struct pi_lua_timer_context {
+  etimer_t timer;
+
+  unsigned long interval;
+  int funcref;
+  int dataref;
+  lua_State *lua;
+} pi_lua_timer_context_t;
+
+unsigned long pi_lua_handle_timeout (pi_lua_timer_context_t * ctx)
+{
+  lua_State *lua = ctx->lua;
+  int retval = 0, result;
+
+  lua_rawgeti (lua, LUA_REGISTRYINDEX, ctx->funcref);
+  lua_rawgeti (lua, LUA_REGISTRYINDEX, ctx->dataref);
+  result = lua_pcall (lua, 1, 1, 0);
+  if (result) {
+    lua_error (lua);
+  } else {
+    /* retrieve return value */
+    retval = lua_toboolean (lua, -1);
+    lua_remove (lua, -1);
+  }
+
+  if (retval) {
+    /* restart the timer */
+    etimer_set (&ctx->timer, ctx->interval);
+  } else {
+    /* destroy the timer */
+    luaL_unref (lua, LUA_REGISTRYINDEX, ctx->funcref);
+    luaL_unref (lua, LUA_REGISTRYINDEX, ctx->dataref);
+    free (ctx);
+  }
+
+  return 0;
+}
+
+int pi_lua_timeradd (lua_State * lua)
+{
+  unsigned long interval;
+  pi_lua_timer_context_t *ctx;
+  int n;
+
+  n = lua_gettop (lua);
+  if (n != 3) {
+    lua_pushstring (lua, "incorrect argument count");
+    lua_error (lua);		/* does not return */
+  }
+
+  interval = luaL_checknumber (lua, 1);
+  luaL_argcheck (lua, lua_isfunction (lua, 2), 2, "function expected");
+  /* no check for arg 3 since this can be anything the user wants. */
+
+  ctx = malloc (sizeof (pi_lua_timer_context_t));
+  if (!ctx) {
+    lua_pushstring (lua, strerror (errno));
+    lua_error (lua);
+  }
+  memset (ctx, 0, sizeof (pi_lua_timer_context_t));
+  ctx->lua = lua;
+  ctx->interval = interval;
+
+  lua_pushvalue (lua, 2);
+  ctx->funcref = luaL_ref (lua, LUA_REGISTRYINDEX);
+
+  lua_pushvalue (lua, 3);
+  ctx->dataref = luaL_ref (lua, LUA_REGISTRYINDEX);
+
+  etimer_init (&ctx->timer, (etimer_handler_t *) pi_lua_handle_timeout, ctx);
+  etimer_set (&ctx->timer, interval);
+
+  return 0;
+}
+
+/******************************************************************************************
  *  LUA Functions Custom Command Handling
  */
 
@@ -1758,19 +1837,12 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
 
   /* specify function to call */
   /* lua 5.1 
-     lua_getfield (ctx->lua, LUA_GLOBALSINDEX, command);
+     lua_getfield (ctx->lua, LUA_GLOBALSINDEX, ctx->name);
    */
 
   /* lua 5.0 */
   lua_pushstring (ctx->lua, ctx->name);
   lua_gettable (ctx->lua, LUA_GLOBALSINDEX);
-
-  /* push arguments 
-     lua_pushstring (ctx->lua, user->nick);
-     for (i = 1; i < argc; i++)
-     lua_pushstring (ctx->lua, argv[i]);
-   */
-
 
   /* push nick argument */
   lua_pushstring (ctx->lua, user->nick);
@@ -2019,6 +2091,9 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   /* config functions */
   {"SetConfig", pi_lua_setconfig,},
   {"GetConfig", pi_lua_getconfig,},
+
+  /* timer functions */
+  {"Timer", pi_lua_timeradd,},
 
   /* returns hub version */
   {"getHubVersion", pi_lua_hubversion,},
