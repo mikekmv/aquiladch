@@ -458,7 +458,7 @@ unsigned long pi_user_event_load (plugin_user_t * user, void *dummy, unsigned lo
   if (arg) {
     banlist_client_clear (&clientbanlist);
     banlist_client_load (&clientbanlist, arg);
-    banlist_load (&sourcelist, arg);
+    banlist_load (&sourcelist, xml_node_find (arg, "SourceList"));
   } else {
     banlist_client_clear (&clientbanlist);
     banlist_client_load_old (&clientbanlist, ClientBanFileName);

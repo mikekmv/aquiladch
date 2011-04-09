@@ -270,7 +270,6 @@ int ioctx_flush (esocket_t * s)
   return 0;
 }
 
-
 /* send error up */
 unsigned int es_iocp_error (esocket_t * s)
 {
@@ -711,7 +710,9 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 
       break;
     case SOCKSTATE_CLOSED:
+    case SOCKSTATE_CLOSING:
     case SOCKSTATE_ERROR:
+    default:
       /* nothing to remove */
       break;
   }
@@ -777,12 +778,16 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 #endif
 
       break;
+    case SOCKSTATE_CLOSING:
+      break;
+
     case SOCKSTATE_CLOSED:
 #ifdef USE_IOCP
       ioctx_flush (s);
       break;
 #endif
     case SOCKSTATE_ERROR:
+    default:
       /* nothing to add */
       break;
   }
@@ -985,6 +990,18 @@ remove:
 
 unsigned int esocket_close (esocket_t * s)
 {
+#ifdef USE_IOCP
+  if (s->state == SOCKSTATE_CLOSING)
+    return 0;
+
+  if (s->fragments) {
+    esocket_update_state (s, SOCKSTATE_CLOSING);
+    return 0;
+  }
+#endif
+  if (s->state == SOCKSTATE_CLOSED)
+    return 0;
+
   esocket_update_state (s, SOCKSTATE_CLOSED);
   //FIXME shutdown (s->socket, SHUT_RDWR);
   close (s->socket);
@@ -1236,8 +1253,23 @@ unsigned int esocket_remove_socket (esocket_t * s)
 
   h = s->handler;
 
+#ifdef USE_IOCP
+  if (s->state == SOCKSTATE_CLOSING)
+    return 0;
+
+  if (s->fragments) {
+    esocket_update_state (s, SOCKSTATE_CLOSING);
+    return 0;
+  }
+#endif
+
   if (s->state != SOCKSTATE_CLOSED)
     esocket_update_state (s, SOCKSTATE_CLOSED);
+
+  if (s->socket != INVALID_SOCKET) {
+    close (s->socket);
+    s->socket = INVALID_SOCKET;
+  }
 
   if (s->tovalid)
     esocket_deltimeout (s);
@@ -1324,6 +1356,9 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
     return 0;
   }
 #ifdef USE_IOCP
+  if (s->state == SOCKSTATE_CLOSING)
+    return 0;
+
   if (s->state == SOCKSTATE_CONNECTING) {
     s->count = timeout / IOCP_CONNECT_INTERVAL;
     timeout = IOCP_CONNECT_INTERVAL;
@@ -1455,6 +1490,12 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
       s->count = 0;
       continue;
     }
+    /* never give timeouts to closing sockets. */
+    if (s->state == SOCKSTATE_CLOSING) {
+      esocket_update_state (s, SOCKSTATE_CLOSED);
+      esocket_remove_socket (s);
+      continue;
+    }
 #endif
 
     errno = 0;
@@ -1472,6 +1513,11 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
 int esocket_recv (esocket_t * s, buffer_t * buf)
 {
   int ret;
+
+  if (s->state != SOCKSTATE_CONNECTED) {
+    errno = ENOENT;
+    return -1;
+  }
 
   ret = recv (s->socket, buf->e, bf_unused (buf), 0);
   if (ret < 0) {
@@ -1496,6 +1542,11 @@ int esocket_send (esocket_t * s, buffer_t * buf, unsigned long offset)
   int ret;
   unsigned int len, p, l, written;
   esocket_ioctx_t *ctxt;
+
+  if (s->state != SOCKSTATE_CONNECTED) {
+    errno = ENOENT;
+    return -1;
+  }
 
   if (s->fragments >= IOCP_COMPLETION_FRAGMENTS)
     goto leave;
@@ -2124,6 +2175,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     ctxt = (esocket_ioctx_t *) ol;
     /* this is a completion for a closed socket */
     ASSERT (ctxt);
+
     if (!ctxt->es) {
       if (ctxt->iotype == ESIO_WRITE) {
 	bf_free (ctxt->buffer);
@@ -2135,6 +2187,25 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
     }
     ASSERT (s == ctxt->es);
 
+    /* this is a completion for a socket with outstanding writes */
+    if (s->state == SOCKSTATE_CLOSING) {
+      if (ctxt->iotype == ESIO_WRITE) {
+	bf_free (ctxt->buffer);
+	OUTSTANDINGBYTES_DEC (ctxt->length);
+	s->fragments--;
+      };
+      OUTSTANDING_DEC;
+      ioctx_free (ctxt);
+      free (ctxt);
+
+      if (!s->fragments) {
+	esocket_update_state (s, SOCKSTATE_CLOSED);
+	esocket_remove_socket (s);
+      }
+      continue;
+    }
+
+    /* normal socket operation */
     if (s->state == SOCKSTATE_FREED)
       goto cont;
     if (s->socket == INVALID_SOCKET)
@@ -2168,7 +2239,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	  if (h->types[s->type].input)
 	    h->types[s->type].input (s);
 
-	  if (s->state == SOCKSTATE_FREED)
+	  if ((s->state == SOCKSTATE_FREED) || (s->state == SOCKSTATE_CLOSING))
 	    goto cont;
 	  if (s->socket == INVALID_SOCKET)
 	    goto cont;

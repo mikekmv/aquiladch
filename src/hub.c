@@ -130,7 +130,8 @@ esocket_t *setup_incoming_socket (proto_t * proto, esocket_handler_t * h, unsign
 
 int accept_new_user (esocket_t * s)
 {
-  int l;
+  int l = 0;
+  char buffer[1024];
 
 #ifndef USE_WINDOWS
   int r, yes = 1;
@@ -145,7 +146,8 @@ int accept_new_user (esocket_t * s)
   for (;;)
 #endif
   {
-    memset (&client_address, 0, l = sizeof (client_address));
+    l = sizeof (client_address);
+    memset (&client_address, 0, l);
     r = esocket_accept (s, (struct sockaddr *) &client_address, &l);
 
     if (r == INVALID_SOCKET) {
@@ -154,6 +156,8 @@ int accept_new_user (esocket_t * s)
       perror ("accept:");
       return -1;
     }
+    l = 0;
+
 #ifndef USE_WINDOWS
     if (ndelay) {
       if (setsockopt (r, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof (yes)) < 0) {
@@ -195,35 +199,31 @@ int accept_new_user (esocket_t * s)
     /* check last connection list */
     if (iplist_interval) {
       if (iplist_find (&lastlist, client_address.sin_addr.s_addr)) {
-	int l;
-	char buffer[1024];
-
 	l = snprintf (buffer, sizeof (buffer), __ ("<%s> Don't reconnect so fast.|"), HUBSOFT_NAME);
-	write (r, buffer, l);
-	shutdown (r, SHUT_RDWR);
-	close (r);
-	return -1;
+	goto error;
       }
       iplist_add (&lastlist, client_address.sin_addr.s_addr);
     }
 
     /* check available memory */
     if (buf_mem > config.BufferTotalLimit) {
-      int l;
-      char buffer[1024];
-
       l =
 	snprintf (buffer, sizeof (buffer),
 		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
-      write (r, buffer, l);
-      shutdown (r, SHUT_RDWR);
-      close (r);
+      goto error;
 
       return -1;
     }
 
     /* client */
     cl = malloc (sizeof (client_t));
+    if (!cl) {
+      l =
+	snprintf (buffer, sizeof (buffer),
+		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
+
+      goto error;
+    }
     memset (cl, 0, sizeof (client_t));
 
     /* create new context */
@@ -233,19 +233,11 @@ int accept_new_user (esocket_t * s)
 
     /* user connection refused. */
     if (!cl->user) {
-      int l;
-      char buffer[1024];
-
       l =
 	snprintf (buffer, sizeof (buffer),
 		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
 
-      write (r, buffer, l);
-      shutdown (r, SHUT_RDWR);
-      close (r);
-
-      free (cl);
-      return -1;
+      goto error;
     }
 
     /* init some fields */
@@ -254,20 +246,11 @@ int accept_new_user (esocket_t * s)
       esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED, (uintptr_t) cl);
 
     if (!cl->es) {
-      int l;
-      char buffer[1024];
-
       l =
 	snprintf (buffer, sizeof (buffer),
 		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
 
-      write (r, buffer, l);
-      shutdown (r, SHUT_RDWR);
-      close (r);
-
-      cl->proto->user_free (cl->user);
-      free (cl);
-      return -1;
+      goto error;
     }
     esocket_settimeout (cl->es, PROTO_TIMEOUT_INIT);
 
@@ -278,6 +261,36 @@ int accept_new_user (esocket_t * s)
   }
 
   return 0;
+
+error:
+#ifndef USE_WINDOWS
+  /* if message, write it out */
+  if (l)
+    write (r, buffer, l);
+
+  /* shut the socket down */
+  shutdown (r, SHUT_RDWR);
+  close (r);
+#else
+  {
+    esocket_t *es = esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED, 0);
+
+    if (l)
+      esocket_send (es, bf_buffer (buffer), 0);
+    esocket_settimeout (es, 1000);
+    esocket_remove_socket (es);
+  }
+#endif
+
+  /* free any memory allocated */
+  if (!cl)
+    return -1;
+
+  if (cl->user)
+    cl->proto->user_free (cl->user);
+  free (cl);
+
+  return -1;
 }
 
 int server_write_credit (client_t * cl, buffer_t * b)

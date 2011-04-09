@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-27 03:18+0200\n"
+"POT-Creation-Date: 2007-03-28 21:27+0200\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -2151,7 +2151,7 @@ msgstr ""
 msgid "Remove a lua script."
 msgstr ""
 
-#: src/pi_trigger.c:860
+#: src/pi_trigger.c:863
 #, c-format
 msgid ""
 "Usage: %s <name> <type> <arg>\n"
@@ -2165,73 +2165,73 @@ msgid ""
 "   arg: depends on type\n"
 msgstr ""
 
-#: src/pi_trigger.c:871
+#: src/pi_trigger.c:874
 #, c-format
 msgid "Triggername %s is too long. Max %d characters\n"
 msgstr ""
 
-#: src/pi_trigger.c:877
+#: src/pi_trigger.c:880
 #, c-format
 msgid "Triggername %s already exists."
 msgstr ""
 
-#: src/pi_trigger.c:888
+#: src/pi_trigger.c:891
 #, c-format
 msgid "Unknown trigger type %s."
 msgstr ""
 
-#: src/pi_trigger.c:894
+#: src/pi_trigger.c:897
 #, c-format
 msgid "Trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:896
+#: src/pi_trigger.c:899
 #, c-format
 msgid "Trigger %s creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:907
+#: src/pi_trigger.c:910
 #, c-format
 msgid ""
 "Usage: %s <name>\n"
 "   name: name of the trigger\n"
 msgstr ""
 
-#: src/pi_trigger.c:913 src/pi_trigger.c:952 src/pi_trigger.c:1043
+#: src/pi_trigger.c:916 src/pi_trigger.c:955 src/pi_trigger.c:1046
 #, c-format
 msgid "Triggername %s doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:918
+#: src/pi_trigger.c:921
 #, c-format
 msgid "Trigger %s deleted."
 msgstr ""
 
-#: src/pi_trigger.c:927
+#: src/pi_trigger.c:930
 #, c-format
 msgid "Trigger %s dumps file %s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:931
+#: src/pi_trigger.c:934
 #, c-format
 msgid "Trigger %s dumps text %.*s (Hits %ld)\n"
 msgstr ""
 
-#: src/pi_trigger.c:981
+#: src/pi_trigger.c:984
 #, c-format
 msgid "Unknown trigger rule type %s."
 msgstr ""
 
-#: src/pi_trigger.c:1006
+#: src/pi_trigger.c:1009
 #, c-format
 msgid "Rule for trigger %s created successfully."
 msgstr ""
 
-#: src/pi_trigger.c:1008
+#: src/pi_trigger.c:1011
 msgid "Rule creation failed."
 msgstr ""
 
-#: src/pi_trigger.c:1015
+#: src/pi_trigger.c:1018
 #, c-format
 msgid ""
 "Usage: %s <name> <type> [<arg> [<help>]] [<pm>] [<broadcast>] [rights "
@@ -2253,7 +2253,7 @@ msgid ""
 "   rights: rights required to activate rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1037
+#: src/pi_trigger.c:1040
 #, c-format
 msgid ""
 "Usage: %s <name> <id>\n"
@@ -2261,48 +2261,48 @@ msgid ""
 "   id  : ID of the rule\n"
 msgstr ""
 
-#: src/pi_trigger.c:1050
+#: src/pi_trigger.c:1053
 #, c-format
 msgid "Trigger %s Rule ID %lu doesn't exist."
 msgstr ""
 
-#: src/pi_trigger.c:1055
+#: src/pi_trigger.c:1058
 #, c-format
 msgid "Trigger %s Rule ID %lu deleted."
 msgstr ""
 
-#: src/pi_trigger.c:1063
+#: src/pi_trigger.c:1066
 #, c-format
 msgid "  Rule %lu type "
 msgstr ""
 
-#: src/pi_trigger.c:1103
+#: src/pi_trigger.c:1106
 #, c-format
 msgid "Cannot find trigger %s\n"
 msgstr ""
 
-#: src/pi_trigger.c:1110
+#: src/pi_trigger.c:1113
 #, c-format
 msgid "Cannot find trigger %s rule ID %u\n"
 msgstr ""
 
-#: src/pi_trigger.c:1182
+#: src/pi_trigger.c:1185
 msgid "Add a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1183
+#: src/pi_trigger.c:1186
 msgid "List triggers."
 msgstr ""
 
-#: src/pi_trigger.c:1185
+#: src/pi_trigger.c:1188
 msgid "Delete a trigger."
 msgstr ""
 
-#: src/pi_trigger.c:1187
+#: src/pi_trigger.c:1190
 msgid "Add a rule."
 msgstr ""
 
-#: src/pi_trigger.c:1188
+#: src/pi_trigger.c:1191
 msgid "Delete a rule."
 msgstr ""
 
@@ -2612,34 +2612,34 @@ msgstr ""
 msgid "List iplogs."
 msgstr ""
 
-#: src/hub.c:201
+#: src/hub.c:202
 #, c-format
 msgid "<%s> Don't reconnect so fast.|"
 msgstr ""
 
-#: src/hub.c:217 src/hub.c:241 src/hub.c:262
+#: src/hub.c:212 src/hub.c:223 src/hub.c:238 src/hub.c:251
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:345 src/hub.c:485
+#: src/hub.c:358 src/hub.c:498
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:576
+#: src/hub.c:589
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:598
+#: src/hub.c:611
 msgid "Timeout"
 msgstr ""
 
-#: src/hub.c:610
+#: src/hub.c:623
 #, c-format
 msgid "Socket error %d."
 msgstr ""
 
-#: src/hub.c:612
+#: src/hub.c:625
 #, c-format
 msgid "Socket errno %d."
 msgstr ""

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta27]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta28]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -433,11 +433,14 @@ fi
 
 if test "${PLUGIN_LUA}" != "" ;
 then
-
+	# set the custom include paths
 	save_CPPFLAGS="$CPPFLAGS"
 	CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
 	AC_CHECK_HEADERS([lua.h lualib.h])
-	CPPFLAGS="$save_CPPFLAGS"
+
+	# now also set the custom lib paths
+	save_LIBS="$LIBS"
+	LIBS="$LIBS $LUA_LIBS"
 
 	AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
 	AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
@@ -447,6 +450,11 @@ then
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
              [unset LUA_LIBS],
              [$LUA_LIBS $lua_extra_libs])
+
+	# restore the vars.
+	CPPFLAGS="$save_CPPFLAGS"
+	LIBS="$save_LIBS"
+
 	if test "$LUA_LIBS" != ""
 	then
 		# check for version 5.0.x

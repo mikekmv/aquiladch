@@ -131,13 +131,16 @@
 #define ESOCKET_ASK_FDS 	2048
 #endif
 
-#define SOCKSTATE_INIT		0
-#define SOCKSTATE_RESOLVING	1
-#define SOCKSTATE_CONNECTING	2
-#define SOCKSTATE_CONNECTED	3
-#define SOCKSTATE_CLOSED	4
-#define SOCKSTATE_ERROR		5
-#define SOCKSTATE_FREED		6
+typedef enum {
+ SOCKSTATE_INIT = 0,
+ SOCKSTATE_RESOLVING,
+ SOCKSTATE_CONNECTING,
+ SOCKSTATE_CONNECTED,
+ SOCKSTATE_CLOSING,
+ SOCKSTATE_CLOSED,
+ SOCKSTATE_ERROR,
+ SOCKSTATE_FREED
+} esocket_state_t;
 
 #ifndef USE_EPOLL
 
@@ -211,7 +214,7 @@ struct esocket {
   int socket;
   struct addrinfo *addr;
 #endif
-  unsigned int state;
+  esocket_state_t state;
   unsigned int error;
   uintptr_t context;
   unsigned int type;

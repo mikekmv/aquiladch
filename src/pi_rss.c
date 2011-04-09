@@ -670,6 +670,7 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
     plugin_user_sayto (NULL, target, msg, 0);
 
   bf_free (output);
+  xml_free (base);
 
   return 0;
 }

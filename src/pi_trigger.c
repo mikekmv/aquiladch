@@ -452,7 +452,10 @@ trigger_rule_t *trigger_rule_create (trigger_t * t, unsigned long type, unsigned
     case TRIGGER_RULE_COMMAND:
       ASSERT (arg);
       rule->arg = strdup (arg);
-      command_register (rule->arg, &pi_trigger_command, cap, rule->help);
+      if (!command_register (rule->arg, &pi_trigger_command, cap, rule->help)) {
+	free (rule);
+	return NULL;
+      }
       list = &ruleListCommand;
       break;
     case TRIGGER_RULE_TIMER:

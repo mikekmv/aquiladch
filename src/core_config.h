@@ -43,7 +43,7 @@ typedef struct {
   unsigned int DropOnTagTooLong;
 
   /* user specific settings */
-  unsigned long DefaultRights;
+  unsigned long long DefaultRights;
   unsigned long defaultKickPeriod;
 
   /* more settings */
