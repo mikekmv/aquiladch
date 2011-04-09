@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta31]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta32]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -226,7 +226,6 @@ AC_ARG_ENABLE(epoll,
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-epoll);;
 	esac],
 	[ALLOW_EPOLL=-DALLOW_EPOLL])
-AC_SUBST(ALLOW_EPOLL)
 
 #
 ## Allow falback to poll. Poll is slow, but less limited than select.
@@ -239,7 +238,6 @@ AC_ARG_ENABLE(poll,
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-poll);;
 	esac],
 	[ALLOW_POLL=-DALLOW_POLL])
-AC_SUBST(ALLOW_POLL)
 
 #
 ## Allow IOCP. this is the prefered method for cygwin.
@@ -252,7 +250,6 @@ AC_ARG_ENABLE(iocp,
 	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-iocp);;
 	esac],
 	[ALLOW_IOCP=-DALLOW_IOCP])
-AC_SUBST(ALLOW_IOCP)
 
 # disabled on any platform except win32
 if test "${buildtarget}" = "win32"
@@ -280,10 +277,12 @@ then
   				AC_DEFINE([HAVE_CREATEIOCOMPLETIONPORT], [1], [CreateIoCompletion port is defined and usable.])
   			 	CYGWIN_CFLAGS="$CYGWIN_CFLAGS -D__USE_W32_SOCKETS"
   			 	CYGWIN_LDFLAGS="$CYGWIN_LDFLAGS -lwsock32 -lws2_32"
+  			 	ac_cv_func_createiocompletionport=yes
   			],
   			[
   				AC_MSG_RESULT([no]) 
   				unset ALLOW_IOCP
+  			 	ac_cv_func_createiocompletionport=no
   			]
   		)
 		CFLAGS="$save_CFLAGS"
@@ -621,6 +620,75 @@ then
 	AC_CHECK_FUNCS([poll])
 fi
 
+#
+## Do socket system selection
+#
+eval "ALLOW_SELECT=1"
+
+if test x$ALLOW_EPOLL != x
+then
+	# we need:
+	#   sys/epoll.h
+	#   working epoll_wait
+	#   linux/eventpoll.h
+	if test x$ac_cv_header_sys_epoll_h$ac_cv_func_epoll_wait$ac_cv_header_linux_eventpoll_h = xyesyesyes
+	then
+		eval "USE_EPOLL=1"
+	fi
+else
+	if test x$ALLOW_POLL != x -a x$ac_cv_header_sys_poll_h$ac_cv_func_poll = xyesyes
+	then
+		eval "USE_POLL=1"
+	else
+		if test x$ac_cv_func_select = xyes
+		then
+			eval "USE_SELECT=1"
+		fi
+	fi
+fi
+
+if test "$buildtarget" = "win32"
+then
+	if test x$ALLOW_IOCP != x
+	then
+		if test x$ac_cv_header_windows_h$ac_cv_func_createiocompletionport = xyesyes
+		then
+			eval "USE_IOCP=1"
+		fi
+	else
+		echo "ERROR: you are building for Windows but your system does not support IOCP."
+	fi
+	# whatever we do, don't use these on Windows.
+	unset ALLOW_POLL
+	unset ALLOW_EPOLL
+	unset ALLOW_SELECT
+	unset USE_SELECT
+	unset USE_POLL
+	unset USE_EPOLL
+else
+	if test x$USE_EPOLL$USE_POLL$USE_SELECT = x
+	then
+		echo "ERROR: your system does not support any of the basic IO systems Aquila requires."
+	fi
+	unset ALLOW_IOCP
+fi
+
+AC_SUBST(ALLOW_EPOLL)
+AC_SUBST(ALLOW_POLL)
+AC_SUBST(ALLOW_IOCP)
+AC_SUBST(ALLOW_SELECT)
+
+AC_SUBST(USE_EPOLL)
+AC_SUBST(USE_POLL)
+AC_SUBST(USE_SELECT)
+AC_SUBST(USE_IOCP)
+
+AM_CONDITIONAL(EPOLL,  test x$USE_EPOLL  != x)
+AM_CONDITIONAL(POLL,   test x$USE_POLL   != x)
+AM_CONDITIONAL(SELECT, test x$USE_SELECT != x)
+AM_CONDITIONAL(IOCP,   test x$USE_IOCP   != x)
+
+
 ##################################################################################################
 #
 #
@@ -672,68 +740,21 @@ echo "                            Aquila configuration"
 
 echo    "   HOST                                             " $host
 
-echo
-echo    " I/O options"
-echo -n "   EPOLL Support (Linux only)                        "
-if test "${ALLOW_EPOLL}" != ""
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
+AQ_REPORT_SECTION([I/O options])
+AQ_IOSYS_REPORT([EPOLL],  [EPOLL Support (Linux only)])
+AQ_IOSYS_REPORT([POLL],   [POLL Support])
+AQ_IOSYS_REPORT([SELECT], [SELECT Support])
+AQ_IOSYS_REPORT([IOCP],   [IOCP Support (Windows/Cygwin only)])
 
-echo -n "   POLL Support                                      "
-if test "${ALLOW_POLL}" != ""
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
+AQ_REPORT_SECTION([Hub options])
 
-echo -n "   IOCP Support (Cygwin only)                        "
-if test "${ALLOW_IOCP}" != ""
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
+AQ_OPTION_REPORT([x$GEOIP != x],[GeoIP Support])
+AQ_OPTION_REPORT([x$ZLINE != x],[ZLine/ZPipe Support])
+AQ_OPTION_REPORT([x$USE_NLS != x],[NLS Support])
+AQ_OPTION_REPORT([x$ac_cv_lib_pthread_pthread_create = xyes],[Posix Threads Async Resolver])
 
-echo
-echo    " Hub options:"
-echo -n "   GeoIP Support                                     "
-if test "${GEOIP}" != ""
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
+AQ_REPORT_SECTION([Plugins])
 
-echo -n "   ZLine/ZPipe Support                               "
-if test "${ZLINE}" != ""
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
-
-echo -n "   NLS Support                                       "
-if test "${USE_NLS}" = "yes"
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
-
-echo -n "   Posix Threads Async Resolver                      "
-if test "$ac_cv_lib_pthread_pthread_create" = "yes"
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
-
-echo
-echo    " Plugins:"
 AQ_PLUGIN_REPORT([chatlog])
 AQ_PLUGIN_REPORT([chatroom])
 AQ_PLUGIN_REPORT([configlock])
@@ -746,38 +767,11 @@ AQ_PLUGIN_REPORT([statistics])
 AQ_PLUGIN_REPORT([trigger])
 AQ_PLUGIN_REPORT([user])
 
-echo
-echo    " These should be disabled for a normal build:"
-echo -n "   DEBUG Support                                     "
-if test x$debug = xtrue
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
+AQ_REPORT_SECTION([These should be disabled for a normal build])
 
-echo -n "   Profiler                                          "
-if test "${profiler}" = "true"
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
-
-echo -n "   Test coverage                                     "
-if test "${testcoverage}" = "true"
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
-
-echo -n "   Compile with runtime profiler optimization        "
-if test "${useprofile}" = "true"
-then
-	echo "ENABLED"
-else
-	echo "DISABLED"
-fi
+AQ_OPTION_REPORT([x$debug = xtrue],[DEBUG Support])
+AQ_OPTION_REPORT([x$profiler = xtrue],[Profiler Support])
+AQ_OPTION_REPORT([x$testcoverage = xtrue],[Test Coverage])
+AQ_OPTION_REPORT([x$useprofile = xtrue],[Compile with runtime profiler optimization])
 
 echo "-------------------------------------------------------------------------------"

@@ -17,6 +17,45 @@
  *  
  */
 
+/*
+ *  esocket statemachine
+ *
+ *   SOCKSTATE_INIT:
+ *	sockets are created in this state.
+ *	all calls are valid.
+ *
+ *   SOCKSTATE_RESOLVING:
+ *	result from a call to esocket_connect
+ *	no default events registered.
+ *	
+ *   SOCKSTATE_CONNECTING
+ *	result from a call to esocket_connect after succesful resolving
+ *	output event registered by default.
+ *
+ *   SOCKSTATE_CONNECTED,
+ *	socket is connected and active. (also used for active listening sockets).
+ *	default events as selecting in the are assigned type.
+ *
+ *   SOCKSTATE_CLOSING,
+ *	socket is closing. (only used on IOCP)
+ *	you should no longer access this socket in anyway.
+ *	it should not generate events or timeouts.
+ *
+ *   SOCKSTATE_CLOSED,
+ *	you should no longer access this socket in anyway.
+ *	it should not generate events or timeouts.
+ *
+ *   SOCKSTATE_ERROR,
+ *	error occured on the socket. close it.
+ *	you should no longer access this socket in anyway.
+ *	it should not generate events or timeouts.
+ *
+ *   SOCKSTATE_FREED      
+ *	socket is in freelist.
+ *	you should no longer access this socket in anyway.
+ *	it should not generate events or timeouts.
+ *
+ */
 
 #ifndef _ESOCKET_H_
 #define _ESOCKET_H_
@@ -30,66 +69,6 @@
 #undef HAVE_SYS_SOCKET_H
 #undef HAVE_NETINET_IN_H
 #undef HAVE_SYS_POLL_H
-#endif
-
-
-#undef USE_EPOLL
-#undef USE_POLL
-#undef USE_SELECT
-#undef USE_IOCP
-
-/*
- * Decide if we want to use epoll.
- *   We checked for: sys/epoll.h header, linux/eventpoll.h (we don't need this
- *     but if this isn't there, the kernel does not have epoll support) and 
- *     epoll_wait in the libc
- */
-#ifdef ALLOW_EPOLL
-# ifdef HAVE_SYS_EPOLL_H
-#  ifdef HAVE_EPOLL_WAIT
-#    ifdef HAVE_LINUX_EVENTPOLL_H
-#      define USE_EPOLL 1
-#    endif
-#  endif
-# endif
-#endif
-
-/*
- * Decide if we want to use poll().
- */
-
-#ifndef USE_EPOLL
-#  ifdef ALLOW_POLL
-#    define USE_POLL 1
-#  endif
-#endif
-
-/*
- * Fallback to select(). Warn if not possible.
- */
-
-#ifndef USE_EPOLL
-#  ifndef USE_POLL
-#    ifndef HAVE_SELECT
-#      warning "You are missing epoll, poll and select. This code will not work."
-#      define USE_SELECT 1
-#    endif
-#  endif
-#endif
-
-/*
- * decide if we want to use IOCP
- */
-#ifdef USE_WINDOWS
-#  ifdef ALLOW_IOCP
-#    ifdef HAVE_WINDOWS_H
-#      ifdef HAVE_CREATEIOCOMPLETIONPORT
-#        define USE_IOCP 1
-#        undef USE_POLL
-#        undef USE_SELECT
-#      endif
-#    endif
-#  endif
 #endif
 
 #include <sys/types.h>

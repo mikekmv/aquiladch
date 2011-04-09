@@ -41,6 +41,7 @@ dtinstall: install
 
 aquila-${VERSION}-win32.tgz: src/aquila.exe tools/aqpasswd.exe
 	mkdir -p windist
+	cp README LICENSE Changelog windist
 	cp src/aquila.exe windist
 	cp tools/aqpasswd.exe windist
 	tar -C windist -zcvf aquila-${VERSION}-win32.tgz .

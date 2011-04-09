@@ -67,3 +67,40 @@ AC_DEFUN([AQ_PLUGIN_REPORT],
 	fi
 ])
 
+AC_DEFUN([AQ_IOSYS_REPORT],
+[
+	l=`echo -n "   $2                                                                             " | cut -c 1-53`
+	
+	echo -n "$l"
+	if test x$ALLOW_$1 != x
+	then
+		if test x$USE_$1 != x
+		then
+			echo "ENABLED"
+		else
+			echo "POSSIBLE"
+		fi
+	else
+		echo "DISABLED"
+	fi
+])
+
+AC_DEFUN([AQ_OPTION_REPORT],
+[
+	l=`echo -n "   $2                                                                             " | cut -c 1-53`
+	
+	echo -n "$l"
+	if test $1
+	then
+		echo "ENABLED"
+	else
+		echo "DISABLED"
+	fi
+	
+])
+
+AC_DEFUN([AQ_REPORT_SECTION], 
+[ 
+	echo
+	echo " $1:"
+])

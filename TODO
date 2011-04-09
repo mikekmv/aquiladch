@@ -1,10 +1,6 @@
 
 Develstatus:
 	- maintain group order. cosmetic fix. (ffrag)
-	- remove those damned cache.* timings. all 1.
-	- pi_rss...
-	- implement delayed close on windows.
-	- LUA 5.1
 	- move AcceptEx to handler. Add ConnectEx and the other one.
 	- <FleetCommand> plus, !iplog could accept ips too, not just nicks.. or, even better: ip patterns :)
 	- <FleetCommand> another request: when !unban nick both unbans ip and nick, it should report not just "nick bah unbanned" but it should let you know that the whole ban (ip and nick too) is removed

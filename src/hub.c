@@ -118,6 +118,7 @@ esocket_t *setup_incoming_socket (proto_t * proto, esocket_handler_t * h, unsign
   /* start listening on the port */
   esocket_listen (es, 10, AF_INET, SOCK_STREAM, 0);
 
+  esocket_update_state (es, SOCKSTATE_CONNECTED);
   esocket_setevents (es, ESOCKET_EVENT_IN);
 
   DPRINTF ("Listening for clients on port %d\n", port);
@@ -250,7 +251,7 @@ int accept_new_user (esocket_t * s)
       goto error;
     }
 
-    /* this can fail in case of IOCP... it will call server_handle_error */
+    /* this can fail in case of IOCP... it will call server_handle_error and free everything */
     if (esocket_update_state (cl->es, SOCKSTATE_CONNECTED) < 0) {
       return -1;
     }
@@ -434,6 +435,7 @@ int server_disconnect_user (client_t * cl, char *reason)
     cl->es = NULL;
   }
 
+  /* remove buffered outgoing data from total count */
   if (cl->outgoing.count) {
     STRINGLIST_VERIFY (&cl->outgoing);
     buf_mem -= cl->outgoing.size;
@@ -566,13 +568,17 @@ int server_handle_input (esocket_t * s)
   buffer_t *b;
   int n, first;
 
+  ASSERT (cl->es == s);
+
   /* read available data */
   first = 1;
   for (;;) {
     /* alloc new buffer and read data in it. break loop if no data available */
     b = bf_alloc (HUB_INPUTBUFFER_SIZE);
+    if (!b)
+      return -1;
 
-    n = recv (cl->es->socket, b->s, HUB_INPUTBUFFER_SIZE, 0);
+    n = recv (s->socket, b->s, HUB_INPUTBUFFER_SIZE, 0);
     if (n <= 0)
       break;
 

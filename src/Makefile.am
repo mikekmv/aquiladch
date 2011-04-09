@@ -104,24 +104,49 @@ PLUGIN_CFLAGS = @PLUGIN_CHATLOG@ \
 		@PLUGIN_USER@
 
 PLUGIN_LIBS =	@LUALIB@
+
+if EPOLL
+NETWORKAPI_CFLAGS = -DUSE_EPOLL
+NETWORKAPI_FILES  = esocket_epoll.c
+endif
+if POLL
+NETWORKAPI_CFLAGS = -DUSE_POLL
+NETWORKAPI_FILES  = esocket_poll.c
+endif
+if SELECT
+NETWORKAPI_CFLAGS = -DUSE_SELECT
+NETWORKAPI_FILES  = esocket_select.c
+endif
+if IOCP
+NETWORKAPI_CFLAGS = -DUSE_IOCP
+NETWORKAPI_FILES  = esocket_iocp.c
+endif
 		
 # end plugins
 
 DEFS = @DEFS@ $(LOCALE_DEFS) $(WINDOWS_DEFS)
 
-AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GEOIP@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS) $(PLUGIN_CFLAGS)
+AM_CFLAGS=$(DEBUG_CFLAGS) $(NETWORKAPI_CFLAGS) @ZLINE@ @GEOIP@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS) $(PLUGIN_CFLAGS)
 
-EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h sys_windows.h flags.h aquila.rc
+EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h \
+	     nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h \
+	     defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h \
+	     esocket.h nmdc.h proto.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c \
+	     nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h \
+	     sys_windows.h flags.h aquila.rc \
+	     esocket_epoll.c esocket_poll.c esocket_select.c esocket_iocp.c
+
 DISTCLEANFILES = .indent
 STACKTRACEFILES = stacktrace.c
 
 NMDC_SOURCES = nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c nmdc_utils.c nmdc.c nmdc_interface.c
 
+NETWORK_SOURCES = $(NETWORKAPI_FILES) buffer.c rbt.c
+
 bin_PROGRAMS = aquila
-aquila_SOURCES = buffer.c \
-		 esocket.c \
+aquila_SOURCES = $(NETWORK_SOURCES) \
 		 stringlist.c \
-		 rbt.c utils.c \
+		 utils.c \
 		 hash.c \
 		 dllist.c \
 		 leakybucket.c \

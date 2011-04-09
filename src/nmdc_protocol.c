@@ -85,6 +85,21 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
   struct timeval tnow;
   banlist_entry_t *ban;
 
+  if (tkn) {
+    /* we should not get anything, but we just ignore anything except a MyNick token */
+    if (tkn->type != TOKEN_MYNICK)
+      return 0;
+
+    /* this should not happen. this mean the hub is under attack. we are without mercy. */
+    banlist_add (&hardbanlist, HubSec->nick, "", u->ipaddress, 0xFFFFFFFF,
+		 bf_buffer (__
+			    ("Your IP has been used to attack this hub. This means one of the other hubs you are in is being exploited.")),
+		 now.tv_sec + config.CTMBantime);
+    server_disconnect_user (u->parent, _("CTM Exploit."));
+    nmdc_stats.mynick++;
+    return -1;
+  }
+
   timersub (&now, &boottime, &tnow);
 
   output = bf_alloc (2048);
@@ -1841,7 +1856,7 @@ int proto_nmdc_handle_token (user_t * u, buffer_t * b)
     if (u->state != PROTO_STATE_INIT)
       return 0;
 
-    return proto_nmdc_state_init (u, &tkn);
+    return proto_nmdc_state_init (u, NULL);
   }
 
   /* parse token. if it is unknown just reset the timeout and leave */

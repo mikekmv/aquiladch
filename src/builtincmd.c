@@ -1408,7 +1408,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
       in.s_addr = account->lastip;
       bf_printf (output, _(", last login %s from %s"), ctime (&account->lastlogin), inet_ntoa (in));
 #ifdef GEOIP
-      cc = GeoIP_id_by_ipnum (gi, htonl (target->ipaddress));
+      cc = GeoIP_id_by_ipnum (gi, htonl (account->lastip));
       bf_printf (output, " (%s)", GeoIP_country_code[cc]);
 #endif
       bf_printf (output, "\n");

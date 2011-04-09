@@ -852,7 +852,7 @@ int pi_statistics_init ()
   command_register ("statbuffer", &pi_statistics_handler_statbuffer, CAP_CONFIG,
 		    _("Show buffer stats."));
   command_register ("statcache", &pi_statistics_handler_statcache, 0, _("Show cache stats."));
-  command_register ("statbw", &pi_statistics_handler_statbw, 0, _("Show cache stats."));
+  command_register ("statbw", &pi_statistics_handler_statbw, 0, _("Show bandwidth stats."));
   command_register ("statcpu", &pi_statistics_handler_statcpu, 0, _("Show cpu usage stats."));
   command_register ("statnmdc", &pi_statistics_handler_statnmdc, 0,
 		    _("Show nmdc protocol stats. Experts only."));

@@ -1062,14 +1062,9 @@ unsigned long plugin_del_user (plugin_private_t ** priv)
 
 /******************************* INIT *******************************************/
 
-int plugin_config_save (buffer_t * output)
+int plugin_config_xml (xml_node_t * node)
 {
-  FILE *fp;
   int retval = 0;
-  xml_node_t *node;
-
-  /* start tree */
-  node = xml_node_add (NULL, HUBSOFT_NAME);
 
   /* add configvalues */
   retval = cap_save (node);
@@ -1077,6 +1072,17 @@ int plugin_config_save (buffer_t * output)
   retval = accounts_save (node);
   retval = banlist_save (&hardbanlist, xml_node_add (node, "HardBanList"));
   retval = banlist_save (&softbanlist, xml_node_add (node, "SoftBanList"));
+
+  plugin_send_event (NULL, PLUGIN_EVENT_SAVE, node);
+
+  return retval;
+}
+
+int plugin_config_save (buffer_t * output)
+{
+  FILE *fp;
+  int retval = 0;
+  xml_node_t *node;
 
   /* write to file */
   fp = fopen (HUBSOFT_NAME ".xml", "w+");
@@ -1086,15 +1092,18 @@ int plugin_config_save (buffer_t * output)
     goto leave;
   }
 
-  plugin_send_event (NULL, PLUGIN_EVENT_SAVE, node);
+  /* start tree */
+  node = xml_node_add (NULL, HUBSOFT_NAME);
+
+  retval = plugin_config_xml (node);
 
   xml_write (fp, node);
   fclose (fp);
 
-leave:
   /* clear tree */
   xml_free (node);
 
+leave:
   //return 0;
 
   retval = config_save_old (ConfigFile);

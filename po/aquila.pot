@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-31 17:50+0200\n"
+"POT-Creation-Date: 2007-04-08 13:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -948,219 +948,219 @@ msgstr ""
 msgid "Command not found: %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:101
-#, c-format
-msgid "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
-msgstr ""
-
-#: src/nmdc_protocol.c:106 src/nmdc_protocol.c:370
-#, c-format
-msgid "<%s> Do not reconnect too fast, time remaining: %s|"
-msgstr ""
-
-#: src/nmdc_protocol.c:245
-msgid "Protocol violation: Bad key."
-msgstr ""
-
-#: src/nmdc_protocol.c:256
+#: src/nmdc_protocol.c:96 src/nmdc_protocol.c:271
 msgid ""
 "Your IP has been used to attack this hub. This means one of the other hubs "
 "you are in is being exploited."
 msgstr ""
 
-#: src/nmdc_protocol.c:258
+#: src/nmdc_protocol.c:98 src/nmdc_protocol.c:273
 msgid "CTM Exploit."
 msgstr ""
 
-#: src/nmdc_protocol.c:298 src/nmdc_protocol.c:360
+#: src/nmdc_protocol.c:116
+#, c-format
+msgid "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
+msgstr ""
+
+#: src/nmdc_protocol.c:121 src/nmdc_protocol.c:385
+#, c-format
+msgid "<%s> Do not reconnect too fast, time remaining: %s|"
+msgstr ""
+
+#: src/nmdc_protocol.c:260
+msgid "Protocol violation: Bad key."
+msgstr ""
+
+#: src/nmdc_protocol.c:313 src/nmdc_protocol.c:375
 msgid "Nickname refused due to unacceptable characters."
 msgstr ""
 
-#: src/nmdc_protocol.c:315 src/nmdc_protocol.c:385 src/nmdc_protocol.c:638
+#: src/nmdc_protocol.c:330 src/nmdc_protocol.c:400 src/nmdc_protocol.c:653
 msgid "Your nickname is already in use."
 msgstr ""
 
-#: src/nmdc_protocol.c:342
+#: src/nmdc_protocol.c:357
 msgid "Your account priviliges will not be awarded until you set a password."
 msgstr ""
 
-#: src/nmdc_protocol.c:393 src/nmdc_protocol.c:541 src/nmdc_protocol.c:646
+#: src/nmdc_protocol.c:408 src/nmdc_protocol.c:556 src/nmdc_protocol.c:661
 msgid "Another instance of you is connecting, bye!"
 msgstr ""
 
-#: src/nmdc_protocol.c:395 src/nmdc_protocol.c:543 src/nmdc_protocol.c:648
+#: src/nmdc_protocol.c:410 src/nmdc_protocol.c:558 src/nmdc_protocol.c:663
 msgid "Reconnecting."
 msgstr ""
 
-#: src/nmdc_protocol.c:406
+#: src/nmdc_protocol.c:421
 msgid ""
 "Cloning is not allowed. Another user is already logged in from this IP "
 "address."
 msgstr ""
 
-#: src/nmdc_protocol.c:414
+#: src/nmdc_protocol.c:429
 msgid "Do not reconnect too fast."
 msgstr ""
 
-#: src/nmdc_protocol.c:428 src/nmdc_protocol.c:452 src/nmdc_protocol.c:589
+#: src/nmdc_protocol.c:443 src/nmdc_protocol.c:467 src/nmdc_protocol.c:604
 #, c-format
 msgid "<%s> You have been banned by %s because: "
 msgstr ""
 
-#: src/nmdc_protocol.c:432 src/nmdc_protocol.c:456 src/nmdc_protocol.c:593
+#: src/nmdc_protocol.c:447 src/nmdc_protocol.c:471 src/nmdc_protocol.c:608
 #, c-format
 msgid "<%s> Time remaining %s|"
 msgstr ""
 
-#: src/nmdc_protocol.c:439 src/nmdc_protocol.c:463 src/nmdc_protocol.c:600
+#: src/nmdc_protocol.c:454 src/nmdc_protocol.c:478 src/nmdc_protocol.c:615
 msgid "Banned."
 msgstr ""
 
-#: src/nmdc_protocol.c:516 src/nmdc_protocol.c:519
+#: src/nmdc_protocol.c:531 src/nmdc_protocol.c:534
 msgid "Bad password."
 msgstr ""
 
-#: src/nmdc_protocol.c:525
+#: src/nmdc_protocol.c:540
 msgid "Password retry overflow."
 msgstr ""
 
-#: src/nmdc_protocol.c:572
+#: src/nmdc_protocol.c:587
 msgid ""
 "Your account priviliges will not be awarded until you set a password. Use !"
 "passwd or !pwgen."
 msgstr ""
 
-#: src/nmdc_protocol.c:666 src/nmdc_protocol.c:922
+#: src/nmdc_protocol.c:681 src/nmdc_protocol.c:937
 msgid "WARNING: You should use a client that uses tags!"
 msgstr ""
 
-#: src/nmdc_protocol.c:672 src/nmdc_protocol.c:931
+#: src/nmdc_protocol.c:687 src/nmdc_protocol.c:946
 msgid "This hub requires tags, please upgrade to a client that supports them."
 msgstr ""
 
-#: src/nmdc_protocol.c:681
+#: src/nmdc_protocol.c:696
 msgid "Your login was refused, your MyINFO seems corrupt."
 msgstr ""
 
-#: src/nmdc_protocol.c:705 src/nmdc_protocol.c:792
+#: src/nmdc_protocol.c:720 src/nmdc_protocol.c:807
 msgid "Your login was refused."
 msgstr ""
 
-#: src/nmdc_protocol.c:817
+#: src/nmdc_protocol.c:832
 msgid "You are not allowed to chat."
 msgstr ""
 
-#: src/nmdc_protocol.c:823
+#: src/nmdc_protocol.c:838
 msgid "Think before you talk and don't spam."
 msgstr ""
 
-#: src/nmdc_protocol.c:831
+#: src/nmdc_protocol.c:846
 msgid "Your chat message was too long."
 msgstr ""
 
-#: src/nmdc_protocol.c:940
+#: src/nmdc_protocol.c:955
 msgid "Broken MyINFO, get lost."
 msgstr ""
 
-#: src/nmdc_protocol.c:955
+#: src/nmdc_protocol.c:970
 msgid "Sorry, you no longer satisfy the necessary requirements for this hub."
 msgstr ""
 
-#: src/nmdc_protocol.c:1040
+#: src/nmdc_protocol.c:1055
 #, c-format
 msgid "Active searches are limited to %u every %u seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1043
+#: src/nmdc_protocol.c:1058
 #, c-format
 msgid "Passive searches are limited to %u every %u seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1053
+#: src/nmdc_protocol.c:1068
 msgid "Your search message is too long."
 msgstr ""
 
-#: src/nmdc_protocol.c:1070
+#: src/nmdc_protocol.c:1085
 msgid "You claim to be active. Passive search DENIED."
 msgstr ""
 
-#: src/nmdc_protocol.c:1086
+#: src/nmdc_protocol.c:1101
 msgid "You claim to be passive. Active search DENIED."
 msgstr ""
 
-#: src/nmdc_protocol.c:1105
+#: src/nmdc_protocol.c:1120
 #, c-format
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1122
+#: src/nmdc_protocol.c:1137
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1304 src/nmdc_protocol.c:1383
+#: src/nmdc_protocol.c:1319 src/nmdc_protocol.c:1398
 msgid "You are not allowed to download."
 msgstr ""
 
-#: src/nmdc_protocol.c:1331 src/nmdc_protocol.c:1423
+#: src/nmdc_protocol.c:1346 src/nmdc_protocol.c:1438
 #, c-format
 msgid "You cannot download from %s."
 msgstr ""
 
-#: src/nmdc_protocol.c:1352
+#: src/nmdc_protocol.c:1367
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1454
+#: src/nmdc_protocol.c:1469
 msgid "You are not allowed to send private messages."
 msgstr ""
 
-#: src/nmdc_protocol.c:1463
+#: src/nmdc_protocol.c:1478
 msgid "Don't send private messages so fast."
 msgstr ""
 
-#: src/nmdc_protocol.c:1493
+#: src/nmdc_protocol.c:1508
 msgid "Bad From: nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1495
+#: src/nmdc_protocol.c:1510
 msgid "Attempted PM faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1514
+#: src/nmdc_protocol.c:1529
 msgid "Bad display nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1516
+#: src/nmdc_protocol.c:1531
 msgid "Attempted display nick faking"
 msgstr ""
 
-#: src/nmdc_protocol.c:1530
+#: src/nmdc_protocol.c:1545
 msgid "Sorry, you can only send private messages to operators."
 msgstr ""
 
-#: src/nmdc_protocol.c:1563
+#: src/nmdc_protocol.c:1578
 msgid "You are not allowed to redirect users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1643 src/nmdc_protocol.c:1701
+#: src/nmdc_protocol.c:1658 src/nmdc_protocol.c:1716
 msgid "Redirect refused.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1672
+#: src/nmdc_protocol.c:1687
 msgid "You are not allowed to kick users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1696
+#: src/nmdc_protocol.c:1711
 msgid "You were kicked."
 msgstr ""
 
-#: src/nmdc_protocol.c:1722
+#: src/nmdc_protocol.c:1737
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1788
+#: src/nmdc_protocol.c:1803
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr ""
@@ -1470,13 +1470,13 @@ msgstr ""
 msgid "%s %s by %s Message: %.*s\n"
 msgstr ""
 
-#: src/plugin.c:1084 src/plugin.c:1102 src/plugin.c:1106 src/plugin.c:1111
-#: src/plugin.c:1115
+#: src/plugin.c:1090 src/plugin.c:1111 src/plugin.c:1115 src/plugin.c:1120
+#: src/plugin.c:1124
 #, c-format
 msgid "Error saving configuration to %s: %s\n"
 msgstr ""
 
-#: src/plugin.c:1131
+#: src/plugin.c:1140
 #, c-format
 msgid "Error loading configuration from %s: %s\n"
 msgstr ""
@@ -1736,8 +1736,12 @@ msgstr ""
 msgid "Show buffer stats."
 msgstr ""
 
-#: src/pi_statistics.c:854 src/pi_statistics.c:855
+#: src/pi_statistics.c:854
 msgid "Show cache stats."
+msgstr ""
+
+#: src/pi_statistics.c:855
+msgid "Show bandwidth stats."
 msgstr ""
 
 #: src/pi_statistics.c:856
@@ -2510,34 +2514,34 @@ msgstr ""
 msgid "List iplogs."
 msgstr ""
 
-#: src/hub.c:200
+#: src/hub.c:201
 #, c-format
 msgid "<%s> Don't reconnect so fast.|"
 msgstr ""
 
-#: src/hub.c:210 src/hub.c:221 src/hub.c:236 src/hub.c:248
+#: src/hub.c:211 src/hub.c:222 src/hub.c:237 src/hub.c:249
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:363 src/hub.c:503
+#: src/hub.c:364 src/hub.c:505
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:594
+#: src/hub.c:600
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:620
+#: src/hub.c:626
 msgid "Timeout"
 msgstr ""
 
-#: src/hub.c:637
+#: src/hub.c:643
 #, c-format
 msgid "Socket error %d."
 msgstr ""
 
-#: src/hub.c:639
+#: src/hub.c:645
 #, c-format
 msgid "Socket errno %d."
 msgstr ""
