@@ -69,6 +69,8 @@ esocket_handler_t *pi_hublist_handler;
 
 extern long users_total;
 
+plugin_t *pi_hublist;
+
 int pi_hublist_handle_timeout (esocket_t * s);
 
 static int escape_string (buffer_t * output)
@@ -448,6 +450,8 @@ int pi_hublist_setup (esocket_handler_t * h)
 int pi_hublist_init ()
 {
   pi_hublist_es_type = -1;
+
+  pi_hublist = plugin_register ("hublist");
 
   gettimeofday (&pi_hublist_savetime, NULL);
 

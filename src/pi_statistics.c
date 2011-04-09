@@ -92,6 +92,10 @@ struct mallinfo memoryinfo;
 
 /************************* CPU FUNCTIONS ******************************************/
 
+unsigned long totalms;
+unsigned long sysms;
+unsigned long userms;
+
 #ifndef USE_WINDOWS
 typedef struct procstat {
   struct rusage ps;
@@ -105,10 +109,6 @@ unsigned int current[PROCSTAT_LEVELS];
 
 buffer_t *cpuinfo = NULL;
 unsigned int cpucount = 0;
-
-unsigned long totalms;
-unsigned long sysms;
-unsigned long userms;
 
 
 void cpu_parse ()

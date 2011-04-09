@@ -1,5 +1,15 @@
 This is the Aquila Changelog.
 
+0.1.11-pre1-beta39:
+	Fixed compiling pi_statistics.c on windows.
+	Import LastIP correctly.
+	Fixed a bunch of string termination bugs.
+	HUB: improve read error handling.
+	RRD: fix include searchpath (Reported FleetCommand).
+	RDD: fix crash in error printing.
+	Added lastip to AccountFind
+	LUA: fixed AccountFind rights printing. (Reported FleetCommand)
+
 0.1.11-pre1-beta38:
 	RRD: Fix problem with DS parsing.
 	RRD: improved error reporting.

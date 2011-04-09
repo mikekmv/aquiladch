@@ -1375,6 +1375,7 @@ int pi_lua_account_find (lua_State * lua)
 {
   account_t *acc;
   buffer_t *b;
+  struct in_addr ia;
 
   unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
 
@@ -1387,7 +1388,7 @@ int pi_lua_account_find (lua_State * lua)
   PUSH_TABLE_ENTRY (lua, "nick", acc->nick);
 
   b = bf_alloc (10240);
-  flags_print ((Capabilities + CAP_PRINT_OFFSET), b, acc->rights);
+  flags_print ((Capabilities + CAP_PRINT_OFFSET), b, acc->rights | acc->classp->rights);
   PUSH_TABLE_ENTRY (lua, "rights", b->s);
   bf_free (b);
 
@@ -1395,6 +1396,8 @@ int pi_lua_account_find (lua_State * lua)
   PUSH_TABLE_ENTRY (lua, "op", acc->op);
   PUSH_TABLE_ENTRY_NUMBER (lua, "registered", acc->regged);
   PUSH_TABLE_ENTRY_NUMBER (lua, "lastlogin", acc->lastlogin);
+  ia.s_addr = acc->lastip;
+  PUSH_TABLE_ENTRY (lua, "lastip", inet_ntoa (ia));
 
   return 1;
 leave:

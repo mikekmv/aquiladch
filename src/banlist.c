@@ -95,7 +95,8 @@ banlist_entry_t *banlist_add (banlist_t * list, unsigned char *op, unsigned char
   b->op[NICKLENGTH - 1] = 0;
   b->ip = ip & netmask;
   b->netmask = netmask;
-  b->message = bf_copy (reason, 0);
+  b->message = bf_copy (reason, 1);
+  *b->message->e = 0;
   b->expire = expire;
 
   /* mask netmask as used */

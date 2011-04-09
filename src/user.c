@@ -269,7 +269,7 @@ unsigned int accounts_load (xml_node_t * base)
       if (!xml_child_get (node, "LastLogin", XML_TYPE_ULONG, &lastlogin))
 	continue;
       /* optional for now */
-      if (!xml_child_get (node, "LastIP", XML_TYPE_ULONG, &lastip))
+      if (!xml_child_get (node, "LastIP", XML_TYPE_IP, &lastip))
 	lastip = 0;
 
       t = account_type_find (group);

@@ -294,7 +294,8 @@ xml_node_t *xml_node_add_value (xml_node_t * parent, char *name, xml_type_t type
 
   if (bf_size (buf) > bf_used (buf)) {
     t = buf;
-    buf = bf_copy (buf, 0);
+    buf = bf_copy (buf, 1);
+    *buf->e = 0;
     bf_free (t);
   }
 
@@ -620,9 +621,10 @@ restart:
   /* if it wasn't a tree element and it wasn't a single tag, 
      we need to create the data node now */
   if (!node) {
-    buffer_t *buf = bf_alloc (c - value);
+    buffer_t *buf = bf_alloc (c - value + 1);
 
     xml_unescape (buf, value);
+    *buf->e = 0;
 
     node = xml_node_add_value (*parent, name, XML_TYPE_STRING, buf->s);
 

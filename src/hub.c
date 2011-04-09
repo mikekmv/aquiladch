@@ -236,6 +236,13 @@ int server_handle_input (esocket_t * s)
   }
 
   if ((n <= 0) && first) {
+#ifdef USE_WINDOWS
+    if (WSAGetLastError () == WSAEWOULDBLOCK)
+      return 0;
+#else
+    if (errno == EAGAIN)
+      return 0;
+#endif
     server_disconnect_user (cl, __ ("Error on read."));
     return -1;
   }

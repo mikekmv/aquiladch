@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta38]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta39]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -476,7 +476,10 @@ fi
 
 if test "${PLUGIN_RRD}" != "";
 then
+	save_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS $RRD_INCLUDES"
 	AC_CHECK_HEADERS([rrd.h], [], [AQ_PLUGIN_DISABLE([PLUGIN_RRD], [rrd])])
+	CPPFLAGS="$save_CPPFLAGS"
 fi
 
 if test "${PLUGIN_LUA}" != "" ;

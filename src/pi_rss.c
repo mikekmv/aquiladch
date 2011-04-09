@@ -106,6 +106,8 @@ unsigned long maxitemlength;
 unsigned long maxentryage;
 unsigned long rss_silent;
 
+plugin_t *pi_rss;
+
 rss_feed_t feedlist;
 
 int pi_rss_handle_timeout (rss_feed_t * feed);
@@ -1525,6 +1527,9 @@ int pi_rss_setup (esocket_handler_t * h)
 
 int pi_rss_init (esocket_handler_t * h)
 {
+
+  pi_rss = plugin_register ("rss");
+
   pi_rss_es_type = UINT_MAX;
 
   feedlist.next = &feedlist;

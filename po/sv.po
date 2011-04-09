@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.11-pre1-beta32\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-13 21:30+0200\n"
+"POT-Creation-Date: 2007-04-16 23:50+0200\n"
 "PO-Revision-Date: 2007-03-12 00:24+0100\n"
 "Last-Translator: en_dator <endator@gmail.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -2117,74 +2117,74 @@ msgstr "Ta bort ett chattrum."
 msgid "Lists available chatrooms."
 msgstr "Lista tillgängliga chattrum."
 
-#: src/pi_hublist.c:127
+#: src/pi_hublist.c:129
 msgid "No hublists configured\n"
 msgstr "Inga hubblistor konfigurerade\n"
 
-#: src/pi_hublist.c:157
+#: src/pi_hublist.c:159
 #, c-format
 msgid "Hublist update ERROR: %s: socket: %s\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: socket: %s\n"
 
-#: src/pi_hublist.c:167 src/pi_hublist.c:170
+#: src/pi_hublist.c:169 src/pi_hublist.c:172
 #, c-format
 msgid "Hublist update ERROR: %s: connect: %s\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: connect: %s\n"
 
-#: src/pi_hublist.c:205
+#: src/pi_hublist.c:207
 #, c-format
 msgid "Hublist update ERROR: %s: read: %s\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: read: %s\n"
 
-#: src/pi_hublist.c:217
+#: src/pi_hublist.c:219
 #, c-format
 msgid "Hublist update ERROR: %s: getsockname: %s\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: getsockname: %s\n"
 
-#: src/pi_hublist.c:237
+#: src/pi_hublist.c:239
 #, c-format
 msgid "Hublist update ERROR: %s: illegal input %.*s\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: illegal input %.*s\n"
 
-#: src/pi_hublist.c:306
+#: src/pi_hublist.c:308
 #, c-format
 msgid "Hublist update ERROR: %s: send: %s\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: send: %s\n"
 
-#: src/pi_hublist.c:314
+#: src/pi_hublist.c:316
 #, c-format
 msgid "Registered at hublist %s\n"
 msgstr "Registrerad på hublista %s\n"
 
-#: src/pi_hublist.c:352
+#: src/pi_hublist.c:354
 #, c-format
 msgid "Hublist update ERROR: %s: %s.\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: %s.\n"
 
-#: src/pi_hublist.c:383
+#: src/pi_hublist.c:385
 #, c-format
 msgid "Hublist update ERROR: %s: Timed out.\n"
 msgstr "Fel vid uppdatering av hublista ERROR: %s: Timed out.\n"
 
-#: src/pi_hublist.c:411
+#: src/pi_hublist.c:413
 msgid "Errors during hublist update:\n"
 msgstr "Fel vid uppdatering av hublista:\n"
 
-#: src/pi_hublist.c:459
+#: src/pi_hublist.c:463
 msgid "list of hublist addresses."
 msgstr "lista över hublistadresser."
 
-#: src/pi_hublist.c:461
+#: src/pi_hublist.c:465
 msgid "Interval of hublist updates."
 msgstr "Tidsintervall för uppdatering av hublistor."
 
-#: src/pi_hublist.c:463
+#: src/pi_hublist.c:467
 msgid ""
 "Do not report errors when hublist registration fails (Use with caution!)."
 msgstr ""
 "Rapportera inte fel vid uppdatering av hublistor (Används med försiktighet!)."
 
-#: src/pi_hublist.c:465
+#: src/pi_hublist.c:469
 msgid "Register at hublists."
 msgstr "Registrerar på hubblistor."
 
@@ -2201,34 +2201,34 @@ msgstr ""
 msgid "Not a valid IP address.\n"
 msgstr "Inte en giltig IP adress.\n"
 
-#: src/pi_lua.c:1616 src/pi_lua.c:1931 src/pi_lua.c:2479
+#: src/pi_lua.c:1619 src/pi_lua.c:1934 src/pi_lua.c:2482
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr "LUA ERROR ('%s'): %s\n"
 
-#: src/pi_lua.c:1765
+#: src/pi_lua.c:1768
 #, fuzzy, c-format
 msgid "LUA ERROR (Timer): %s\n"
 msgstr "LUA ERROR ('%s'): %s\n"
 
-#: src/pi_lua.c:1962
+#: src/pi_lua.c:1965
 msgid "No such LUA function."
 msgstr "Den LUA funktionen finns inte."
 
-#: src/pi_lua.c:1970
+#: src/pi_lua.c:1973
 msgid "Command failed to register."
 msgstr "Kommandot kunde inte registreras."
 
-#: src/pi_lua.c:1978
+#: src/pi_lua.c:1981
 msgid "Could not allocate memory."
 msgstr "Kunde inte allokera minne."
 
-#: src/pi_lua.c:2249 src/pi_lua.c:2275
+#: src/pi_lua.c:2252 src/pi_lua.c:2278
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr "LUA fel: %s\n"
 
-#: src/pi_lua.c:2378
+#: src/pi_lua.c:2381
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -2239,7 +2239,7 @@ msgstr ""
 "Version: %s\n"
 "Antal skript nu/max: %d/%d"
 
-#: src/pi_lua.c:2382
+#: src/pi_lua.c:2385
 msgid ""
 "\n"
 "No LUA scripts running.\n"
@@ -2247,7 +2247,7 @@ msgstr ""
 "\n"
 "Inga LUA skript körs.\n"
 
-#: src/pi_lua.c:2386
+#: src/pi_lua.c:2389
 msgid ""
 "\n"
 "Running LUA scripts:\n"
@@ -2255,45 +2255,45 @@ msgstr ""
 "\n"
 "Kör följande LUA skript:\n"
 
-#: src/pi_lua.c:2399 src/pi_lua.c:2417
+#: src/pi_lua.c:2402 src/pi_lua.c:2420
 #, c-format
 msgid "Usage: %s <script>"
 msgstr "Användning: %s <script>"
 
-#: src/pi_lua.c:2404
+#: src/pi_lua.c:2407
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr "Luaskript '%s' är laddat.\n"
 
-#: src/pi_lua.c:2406
+#: src/pi_lua.c:2409
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr "Luaskript '%s' kunde inte laddas.\n"
 
-#: src/pi_lua.c:2422
+#: src/pi_lua.c:2425
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr "Luaskript '%s' urladdat.\n"
 
-#: src/pi_lua.c:2424
+#: src/pi_lua.c:2427
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr "Luaskript '%s' hittas inte.\n"
 
-#: src/pi_lua.c:2554
+#: src/pi_lua.c:2557
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr "LUA: Fel när %s sparades"
 
-#: src/pi_lua.c:2642
+#: src/pi_lua.c:2645
 msgid "Show lua stats."
 msgstr "Visa LUA statistik."
 
-#: src/pi_lua.c:2643
+#: src/pi_lua.c:2646
 msgid "Load a lua script."
 msgstr "Ladda ett luaskript."
 
-#: src/pi_lua.c:2644
+#: src/pi_lua.c:2647
 msgid "Remove a lua script."
 msgstr "Ta bort ett luaskript."
 
@@ -2838,30 +2838,30 @@ msgstr ""
 "\n"
 "Buffrande klienter:\n"
 
-#: src/hub.c:144 src/hub.c:572
+#: src/hub.c:144 src/hub.c:579
 msgid "Connection closed."
 msgstr "Anslutning stängd."
 
-#: src/hub.c:239
+#: src/hub.c:246
 msgid "Error on read."
 msgstr "Fel vid läsning."
 
-#: src/hub.c:266
+#: src/hub.c:273
 #, c-format
 msgid "Socket error %d."
 msgstr "Socketfel %d."
 
-#: src/hub.c:268
+#: src/hub.c:275
 #, c-format
 msgid "Socket errno %d."
 msgstr "Socketfel nummer %d."
 
-#: src/hub.c:347
+#: src/hub.c:354
 #, c-format
 msgid "<%s> Don't reconnect so fast.|"
 msgstr "<%s> Återanslut inte så fort.|"
 
-#: src/hub.c:357 src/hub.c:366 src/hub.c:381 src/hub.c:393
+#: src/hub.c:364 src/hub.c:373 src/hub.c:388 src/hub.c:400
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""

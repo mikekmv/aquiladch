@@ -34,6 +34,8 @@ typedef struct rrd_ctxt {
 rrd_ctxt_t rrdlist;
 unsigned long rrd_silent;
 
+plugin_t *pi_rrd;
+
 /*****************************************************************************/
 
 int pi_rrd_update (rrd_ctxt_t * rrd)
@@ -91,7 +93,7 @@ int pi_rrd_update (rrd_ctxt_t * rrd)
   retval = rrd_update (argc, argv);
   if (retval < 0) {
     errno = 0;
-    plugin_perror ("RRD %s update failed: %s!", rrd_get_error ());
+    plugin_perror ("RRD %s update failed: %s!", rrd->name, rrd_get_error ());
   }
 
   bf_free (u);
@@ -491,6 +493,8 @@ unsigned long pi_rrd_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
 
 int pi_rrd_init ()
 {
+  pi_rrd = plugin_register ("rrd");
+
   /* *INDENT-OFF* */
   command_register ("rrdcreate", &pi_rrd_handler_rrdcreate, CAP_CONFIG, _("Create an RRD file for statistics gathering"));
   command_register ("rrdlist",   &pi_rrd_handler_rrdlist,   CAP_CONFIG, _("Show the RRD file generated."));
