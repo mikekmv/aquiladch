@@ -758,6 +758,7 @@ int pi_rss_finish (rss_feed_t * feed)
     default:
       e = strstr (c, "\r\n");
       *e = 0;
+      errno = 0;
       plugin_perror ("RSS fetch failed: %s\n", c);
 
       bf_free (buf);

@@ -1427,8 +1427,12 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
     /* connect polling */
     if (s->count) {
       if (esocket_check_connect (s) < 0) {
-	unsigned long long key =
-	  (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + IOCP_CONNECT_INTERVAL;
+	unsigned long long key;
+
+	if (s->state != SOCKSTATE_CONNECTING)
+	  continue;
+
+	key = (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + IOCP_CONNECT_INTERVAL;
 
 	/* create timeout */
 	s->to = now;
@@ -1453,6 +1457,7 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
     }
 #endif
 
+    errno = 0;
     h->types[s->type].timeout (s);
   }
   return 0;

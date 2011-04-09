@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta23:
+0.1.11-pre1-beta24:
+	RSS: reset errno before reporting html return code.
+	ESOCKET: always reset errno before reporting a timeout.
+	ESOCKET: in windows: check if socket is still connecting before 
+		resetting connect timeout. (Thanks r4zz0r)
 	ESOCKET: in windows: first delete node, then reinsert... (reported en_dator)
 	!userinfo now prints actual rights.
 	LUA: Added AccountRights and GroupRights functions.
