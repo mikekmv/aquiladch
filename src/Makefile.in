@@ -373,7 +373,7 @@ EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h co
 	     defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h \
 	     esocket.h nmdc.h proto.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c \
 	     nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h \
-	     sys_windows.h flags.h aquila.rc \
+	     sys_windows.h flags.h aquila.rc etimer.h \
 	     esocket_epoll.c esocket_poll.c esocket_select.c esocket_iocp.c
 
 DISTCLEANFILES = .indent
