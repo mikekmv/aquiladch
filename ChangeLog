@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta25:
+0.1.11-pre1-beta26:
+	GeoIP support added in !userinfo
+	Replaced email with a working one.
+	LUA: added Lua 5.1.x support.
 	USER: added lastip support (Req: ffrag)
 	NMDC: added CTM exploit ban.
 	RSS: added rss.silent to hide error messages.
@@ -558,7 +561,7 @@ This is the Aquila Changelog.
 	to owner group.
 
 0.1.6:
-	Enabled drop command. It was implemented, but registered.
+	Enabled drop command. It was implemented, but not registered.
 	Fixed a few bugs in the poll() implementation. It should now
 	work.
 

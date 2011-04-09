@@ -109,7 +109,7 @@ PLUGIN_LIBS =	@LUALIB@
 
 DEFS = @DEFS@ $(LOCALE_DEFS) $(WINDOWS_DEFS)
 
-AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS) $(PLUGIN_CFLAGS)
+AM_CFLAGS=$(DEBUG_CFLAGS) @ZLINE@ @GEOIP@ @GCC_CFLAGS@ @ALLOW_EPOLL@ @ALLOW_POLL@ @ALLOW_IOCP@ @CYGWIN_CFLAGS@ $(DNS_FLAGS) $(PLUGIN_CFLAGS)
 
 EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h config.h hashlist.h nmdc_token.h stringlist.h core_config.h hashlist_func.h nmdc_utils.h user.h buffer.h defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h esocket.h nmdc.h proto.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h sys_windows.h flags.h aquila.rc
 DISTCLEANFILES = .indent
@@ -147,7 +147,7 @@ aquila_SOURCES = buffer.c \
 		 $(GETADDRINFO_SOURCES) \
 		 $(DNS_FILES)
 
-aquila_LDADD = @ZLIB@ @CYGWIN_LDFLAGS@ @LIBINTL@ $(PLUGIN_LIBS) $(WINDOWS_OBJS)
+aquila_LDADD = @ZLIB@ @GEOIPLIB@ @CYGWIN_LDFLAGS@ @LIBINTL@ $(PLUGIN_LIBS) $(WINDOWS_OBJS)
 
 indent: .indent
 

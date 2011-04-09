@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta25]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta26]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -190,6 +190,19 @@ AC_ARG_ENABLE(pthreaddns,
 	[pthreaddns=true])
 
 #
+## Add geoip argument
+#
+AC_ARG_ENABLE(geoip,
+	AC_HELP_STRING([--enable-geoip],[Turn on GeoIP support (default ON)]),
+	[case "$enableval" in
+	  yes|true) GEOIP=-DGEOIP ;;
+	  no|false) unset GEOIP ;;
+	  *)   AC_MSG_ERROR(bad value ${enableval} for --enable-geoip);;
+	esac],
+	[GEOIP=-DGEOIP])
+AC_SUBST(GEOIP)
+
+#
 ## Add zline argument
 #
 AC_ARG_ENABLE(zline,
@@ -355,6 +368,17 @@ AM_CONDITIONAL(USE_WINDOWS, test "$ALLOW_IOCP" != "")
 AC_CHECK_LIB(crypt, crypt)
 
 #
+## GeoIP library
+#
+if test "${GEOIP}" = "" ;
+then
+	unset GEOIP;
+else
+	AC_CHECK_LIB([GeoIP], [GeoIP_new], [GEOIPLIB=-lGeoIP], [unset GEOIP])
+fi
+AC_SUBST(GEOIPLIB)
+
+#
 ## ZLib library for ZLINE/ZPIPE support
 #
 if test "${ZLINE}" = "" ;
@@ -397,6 +421,11 @@ then
 	AC_CHECK_HEADERS([sys/poll.h])
 fi
 
+if test "${GEOIP}" != "";
+then
+	AC_CHECK_HEADERS([GeoIP.h])
+fi
+
 if test "${ZLINE}" != "";
 then
 	AC_CHECK_HEADERS([zlib.h], [], [unset ZLINE])
@@ -420,6 +449,7 @@ then
              [$LUA_LIBS $lua_extra_libs])
 	if test "$LUA_LIBS" != ""
 	then
+		# check for version 5.0.x
 		AC_MSG_CHECKING([for liblua version 5.0.x])
 		save_CPPFLAGS="$CPPFLAGS"
 		save_LIBS="$LIBS"
@@ -441,11 +471,54 @@ then
 			}
 
 			]])],
-        	      [AC_MSG_RESULT([yes])],
-	              [AC_MSG_RESULT([no])
-        	       unset LUA_LIBS])
+        	      [
+        	      	AC_MSG_RESULT([yes])
+        	      	eval "LUAVERSION=50"
+        	      ],
+	              [AC_MSG_RESULT([no])]
+	              )
 		CPPFLAGS="$save_CPPFLAGS"
 		LIBS="$save_LIBS"
+
+		# if not found, test for 5.1.x
+		if test x$LUAVERSION = x
+		then
+			AC_MSG_CHECKING([for liblua version 5.1.x])
+			save_CPPFLAGS="$CPPFLAGS"
+			save_LIBS="$LIBS"
+			CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+			LIBS="$LIBS $LUA_LIBS"
+			AC_RUN_IFELSE([AC_LANG_SOURCE([[
+	
+				#include <lua.h>
+				#include <stdlib.h>
+				#include <string.h>
+				#include <stdio.h>
+	
+				int main()
+				{
+				    printf("(found %s)... ", LUA_VERSION);
+				    if(strstr (LUA_VERSION, "5.1"))
+				        exit(EXIT_SUCCESS);
+				    exit(EXIT_FAILURE);
+				}
+	
+				]])],
+        		      [
+        		      	AC_MSG_RESULT([yes])
+        	      		eval "LUAVERSION=51"
+        	      	      ],
+		              [AC_MSG_RESULT([no])]
+		              )
+			CPPFLAGS="$save_CPPFLAGS"
+			LIBS="$save_LIBS"
+		fi
+
+		# no lua found...
+		if test x$LUAVERSION = x
+		then
+			unset LUA_LIBS
+		fi
 	fi
 fi
 
@@ -453,6 +526,7 @@ LUALIB=${LUA_LIBS}
 AC_SUBST(LUALIB)
 AC_SUBST(LUA_INCLUDES)
 AM_CONDITIONAL(LUA, test "${LUALIB}" != "" )
+AC_DEFINE_UNQUOTED(LUAVERSION,	$LUAVERSION,	[LUA version detected.])
 
 if test "${LUALIB}" = ""
 then
@@ -615,6 +689,14 @@ fi
 
 echo
 echo    " Hub options:"
+echo -n "   GeoIP Support                                     "
+if test "${GEOIP}" != ""
+then
+	echo "ENABLED"
+else
+	echo "DISABLED"
+fi
+
 echo -n "   ZLine/ZPipe Support                               "
 if test "${ZLINE}" != ""
 then

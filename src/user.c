@@ -1,5 +1,5 @@
 /*                                                                                                                                    
- *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
+ *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -233,7 +233,7 @@ unsigned int accounts_load (xml_node_t * base)
   xml_node_t *node;
   unsigned char *name = NULL, *passwd = NULL, *group = NULL, *op = NULL;
   unsigned long long rights;
-  unsigned long regdate, lastlogin, lastip;
+  unsigned long regdate, lastlogin, lastip = 0;
   account_type_t *t;
   account_t *a;
 
@@ -269,7 +269,8 @@ unsigned int accounts_load (xml_node_t * base)
       if (!xml_child_get (node, "LastLogin", XML_TYPE_ULONG, &lastlogin))
 	continue;
       /* optional for now */
-      xml_child_get (node, "LastIP", XML_TYPE_ULONG, &lastip);
+      if (!xml_child_get (node, "LastIP", XML_TYPE_ULONG, &lastip))
+	lastip = 0;
 
       t = account_type_find (group);
       if (!t)

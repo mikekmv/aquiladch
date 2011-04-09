@@ -1,5 +1,5 @@
 /*
- *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)    
+ *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)    
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -2038,7 +2038,10 @@ int pi_lua_register_functions (lua_State * l)
 
 /***************************************************************************************/
 
-/******************************************************************************************
+#if LUAVERSION == 50
+/* This is only necessary for LUA 5.0.x */
+
+/*
  * Lua libraries that we are going to load.
  */
 static const luaL_reg lualibs[] = {
@@ -2068,6 +2071,7 @@ static void openlualibs (lua_State * l)
     lua_settop (l, 0);
   }
 }
+#endif
 
 /******************************************************************************************
  *  LUA script handling utilities
@@ -2089,8 +2093,13 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
     pi_lua_close (name);
 
   /* load script */
+#if LUAVERSION == 50
   l = lua_open ();
   openlualibs (l);		/* Load Lua libraries */
+#elif LUAVERSION == 51
+  l = luaL_newstate ();
+  luaL_openlibs (l);
+#endif
   pi_lua_register_functions (l);	/* register lua commands */
 
   /* load the file */

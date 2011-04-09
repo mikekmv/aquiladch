@@ -1,5 +1,5 @@
 /*                                                                                                                                    
- *  (C) Copyright 2006 Johan Verrept (Johan.Verrept@advalvas.be)                                                                      
+ *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -52,6 +52,11 @@
 
 #ifdef USE_WINDOWS
 #  include "sys_windows.h"
+#endif
+
+#ifdef GEOIP
+#include <GeoIP.h>
+GeoIP *gi;
 #endif
 
 unsigned int MinPwdLength;
@@ -1372,6 +1377,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   account_t *account = NULL;
   struct in_addr in;
   plugin_user_t *target;
+  const char *loc;
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <nick>"), argv[0]);
@@ -1400,10 +1406,11 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
     }
     if (account->lastlogin) {
       in.s_addr = account->lastip;
-      bf_printf (output, _(", last login %s  from %s\n"), ctime (&account->lastlogin),
-		 inet_ntoa (in));
-      if (output->e[-2] == '\n')
-	output->e[-2] = '.';
+      bf_printf (output, _(", last login %s from %s"), ctime (&account->lastlogin), inet_ntoa (in));
+#ifdef GEOIP
+      bf_printf (output, " (%s)", GeoIP_country_code_by_ipnum (gi, htonl (account->lastlogin)));
+#endif
+      bf_printf (output, "\n");
     } else {
       bf_printf (output, _(", never logged in.\n"));
     }
@@ -1431,6 +1438,15 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
 #endif
     bf_printf (output, _("IP: %s Hubs: (%u, %u, %u), Slots %u\n"), inet_ntoa (in), target->hubs[0],
 	       target->hubs[1], target->hubs[2], target->slots);
+#ifdef GEOIP
+    loc = GeoIP_country_code_by_ipnum (gi, htonl (target->ipaddress));
+    if (loc) {
+      bf_printf (output, _("IP location %s (%s)\n"),
+		 GeoIP_country_name_by_ipnum (gi, htonl (target->ipaddress)), loc);
+    } else {
+      bf_printf (output, _("IP location unknown\n"));
+    }
+#endif
   };
 
   return 0;
@@ -2052,6 +2068,11 @@ int builtincmd_init ()
   plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *)handler_autosave);
 
   /* *INDENT-ON* */
+
+#ifdef GEOIP
+  gi = GeoIP_new (GEOIP_MEMORY_CACHE);
+  //gi = GeoIP_new (GEOIP_STANDARD);
+#endif
 
   return 0;
 }
