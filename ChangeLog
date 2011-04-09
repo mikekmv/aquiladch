@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta22:
+0.1.11-pre1-beta23:
+	ESOCKET: in windows: first delete node, then reinsert... (reported en_dator)
+	!userinfo now prints actual rights.
+	LUA: Added AccountRights and GroupRights functions.
+	RSS: Added target display in !rsslist
 	RSS: Added !rsstarget, send messages to users or groups.
 	RSS: handle timeouts better.
 	RSS: fix atom feeds

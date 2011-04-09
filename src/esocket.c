@@ -1418,6 +1418,11 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
       insertNode (&h->root, rbt);
       continue;
     }
+
+    s->tovalid = 0;
+    deleteNode (&h->root, rbt);
+    h->timercnt--;
+
 #ifdef USE_IOCP
     /* connect polling */
     if (s->count) {
@@ -1447,10 +1452,6 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
       continue;
     }
 #endif
-
-    s->tovalid = 0;
-    deleteNode (&h->root, rbt);
-    h->timercnt--;
 
     h->types[s->type].timeout (s);
   }

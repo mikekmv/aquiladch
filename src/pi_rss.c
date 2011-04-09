@@ -1151,6 +1151,13 @@ unsigned long pi_rss_handler_rsslist (plugin_user_t * user, buffer_t * output, v
       } else {
 	bf_printf (output, "  %s\n", feed->title);
       }
+      if (feed->user) {
+	bf_printf (output, "  Target user: %s\n", feed->user);
+      } else if (feed->rights) {
+	bf_printf (output, "  Target rights: ");
+	flags_print (Capabilities + CAP_PRINT_OFFSET, output, feed->rights);
+	bf_printf (output, "\n");
+      }
       if (feed->port != 80) {
 	bf_printf (output, "  Link: http://%s:%u/%s\n", feed->address, feed->port, feed->path);
       } else {
@@ -1209,8 +1216,8 @@ unsigned long pi_rss_handler_rsstarget (plugin_user_t * user, buffer_t * output,
   rss_feed_t *feed;
   unsigned long long ncap = 0;
 
-  if (argc < 2) {
-    bf_printf (output, "Usage: %s <feed> user <target> | right <rights>\n"
+  if (argc < 3) {
+    bf_printf (output, "Usage: %s <feed> user <target> &#124; right <rights> &#124; main\n"
 	       "  user <target>: send feed output to user\n"
 	       "  right <rights>: send feed output to all user with <rights>\n", argv[0]);
     return 0;
@@ -1231,8 +1238,12 @@ unsigned long pi_rss_handler_rsstarget (plugin_user_t * user, buffer_t * output,
     flags_parse (Capabilities, output, argc, argv, 3, &feed->rights, &ncap);
     bf_printf (output, "Sending output from feed %s to all users with rights ", feed->name);
     flags_print (Capabilities + CAP_PRINT_OFFSET, output, feed->rights);
+    bf_printf (output, "\n");
+  } else if (!strcmp (argv[2], "main")) {
+    feed->user = NULL;
+    feed->rights = 0;
   } else {
-    return pi_rss_handler_rsstarget (NULL, output, NULL, 0, argv);
+    return pi_rss_handler_rsstarget (user, output, dummy, 1, argv);
   }
 
   return 0;

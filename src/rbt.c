@@ -315,7 +315,9 @@ void deleteNode (rbt_t ** root, rbt_t * z)
 void initRoot (rbt_t ** root)
 {
   *root = NIL;
-} rbt_t *smallestNode (rbt_t ** root)
+}
+
+rbt_t *smallestNode (rbt_t ** root)
 {
   rbt_t *n;
 

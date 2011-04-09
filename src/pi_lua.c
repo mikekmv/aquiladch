@@ -1400,6 +1400,30 @@ leave:
   return 1;
 }
 
+int pi_lua_account_setrights (lua_State * lua)
+{
+  account_t *acc;
+  unsigned long retval = 0;
+  unsigned long long caps = 0, ncaps = 0;
+
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
+
+  acc = account_find (nick);
+  if (!acc)
+    goto leave;
+
+  parserights (rights, &caps, &ncaps);
+
+  acc->rights |= caps;
+  acc->rights &= ~ncaps;
+
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
+}
+
 int pi_lua_account_lastlogin (lua_State * lua)
 {
   account_t *acc;
@@ -1437,6 +1461,31 @@ leave:
   lua_pushboolean (lua, retval);
   return 1;
 }
+
+int pi_lua_group_setrights (lua_State * lua)
+{
+  account_type_t *grp;
+  unsigned long retval = 0;
+  unsigned long long caps = 0, ncaps = 0;
+
+  unsigned char *group = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *rights = (unsigned char *) luaL_checkstring (lua, 2);
+
+  grp = account_type_find (group);
+  if (!grp)
+    goto leave;
+
+  parserights (rights, &caps, &ncaps);
+
+  grp->rights |= caps;
+  grp->rights &= ~ncaps;
+
+  retval = 1;
+leave:
+  lua_pushboolean (lua, retval);
+  return 1;
+}
+
 
 int pi_lua_group_inuse (lua_State * lua)
 {
@@ -1944,6 +1993,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   /* account management */
   {"GroupCreate", pi_lua_group_create,},
   {"GroupInUse", pi_lua_group_inuse,},
+  {"GroupRights", pi_lua_group_setrights,},
   {"GroupDelete", pi_lua_group_inuse,},
   {"GroupFind", pi_lua_group_find,},
   {"AccountCreate", pi_lua_account_create,},
@@ -1951,6 +2001,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"AccountPasswd", pi_lua_account_passwd,},
   {"AccountPwGen", pi_lua_account_pwgen,},
   {"AccountFind", pi_lua_account_find,},
+  {"AccountRights", pi_lua_account_setrights,},
   {"AccountLastLogin", pi_lua_account_lastlogin,},
 
   /* hubinfo stat related info */

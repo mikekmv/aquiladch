@@ -1388,7 +1388,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   if ((account = account_find (argv[1]))) {
     bf_printf (output, _("Group %s, Rights: "), account->classp->name);
     flags_print ((Capabilities + CAP_PRINT_OFFSET), output,
-		 account->rights | account->classp->rights);
+		 target ? target->rights : account->rights | account->classp->rights);
     bf_strcat (output, "\n");
     if (!account->passwd[0])
       bf_printf (output, _("Users password is NOT set.\n"));
