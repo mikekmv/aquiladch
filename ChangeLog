@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta30:
+0.1.11-pre1-beta31:
+	HUB: prevent error and timeout callbacks on freed sockets.
+	RSS: escape usage of |s in feeds.
+	HUB: simplifying return path. remove update_state from main
+		socket_add call.
 	TRIGGER: react corretly on return value of command_register 
 		(Reported en_dator)
 	ESOCKET: fix return values of es_iocp_* functions

@@ -240,8 +240,7 @@ int accept_new_user (esocket_t * s)
 
     /* init some fields */
     cl->user->ipaddress = client_address.sin_addr.s_addr;
-    cl->es =
-      esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED, (uintptr_t) cl);
+    cl->es = esocket_add_socket (s->handler, es_type_server, r, (uintptr_t) cl);
 
     if (!cl->es) {
       l =
@@ -250,6 +249,12 @@ int accept_new_user (esocket_t * s)
 
       goto error;
     }
+
+    /* this can fail in case of IOCP... it will call server_handle_error */
+    if (esocket_update_state (cl->es, SOCKSTATE_CONNECTED) < 0) {
+      return -1;
+    }
+
     esocket_settimeout (cl->es, PROTO_TIMEOUT_INIT);
 
     DPRINTF (" Accepted %s user from %s\n", cl->proto->name, inet_ntoa (client_address.sin_addr));
@@ -271,12 +276,14 @@ error:
   close (r);
 #else
   {
-    esocket_t *es = esocket_add_socket (s->handler, es_type_server, r, SOCKSTATE_CONNECTED, 0);
+    esocket_t *es = esocket_add_socket (s->handler, es_type_server, r, 0);
 
-    if (l)
-      esocket_send (es, bf_buffer (buffer), 0);
-    esocket_settimeout (es, 1000);
-    esocket_remove_socket (es);
+    if (es) {
+      if (l)
+	esocket_send (es, bf_buffer (buffer), 0);
+      esocket_settimeout (es, 1000);
+      esocket_remove_socket (es);
+    }
   }
 #endif
 
@@ -599,6 +606,10 @@ int server_timeout (esocket_t * s)
 {
   client_t *cl = (client_t *) ((uintptr_t) s->context);
 
+  ASSERT (s->state != SOCKSTATE_FREED);
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
+
   /* if the client is online and has no data buffered, ignore the timeout -- this avoids disconnection in an empty hub */
   if ((cl->user->state == PROTO_STATE_ONLINE) && !cl->outgoing.size) {
     esocket_settimeout (s, PROTO_TIMEOUT_ONLINE);
@@ -614,6 +625,11 @@ int server_error (esocket_t * s)
   char buffer[256];
 
   client_t *cl = (client_t *) ((uintptr_t) s->context);
+
+  ASSERT (s->state != SOCKSTATE_FREED);
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
+
 
   DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
 

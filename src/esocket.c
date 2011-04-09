@@ -810,8 +810,7 @@ int esocket_update_state (esocket_t * s, unsigned int newstate)
   return 0;
 }
 
-esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
-			       unsigned int state, uintptr_t context)
+esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, uintptr_t context)
 {
   esocket_t *socket;
 
@@ -864,9 +863,6 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
   USERS_INC;
 #endif
 
-  if (esocket_update_state (socket, state) < 0)
-    goto remove;
-
 #ifdef USE_SELECT
   if (h->n <= s)
     h->n = s + 1;
@@ -878,12 +874,14 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
 
   return socket;
 
+#ifdef USE_IOCP
 remove:
   h->sockets = socket->next;
   if (h->sockets)
     h->sockets->prev = NULL;
   free (socket);
   return NULL;
+#endif
 }
 
 esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
@@ -1146,7 +1144,6 @@ int esocket_check_connect (esocket_t * s)
     }
     return -1;
   }
-
 
   len = sizeof (s->error);
   err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, (void *) &s->error, &len);

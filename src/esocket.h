@@ -299,7 +299,7 @@ extern int esocket_add_type (esocket_handler_t * h, unsigned int events,
 extern esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
 			       int protocol, uintptr_t context);
 extern esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
-				      unsigned int state, uintptr_t context);
+                                      uintptr_t context);
 extern int esocket_close (esocket_t * s);
 extern int esocket_remove_socket (esocket_t * s);
 
@@ -309,6 +309,7 @@ extern int esocket_connect (esocket_t * s, char *address, unsigned int port);
 
 extern int esocket_select (esocket_handler_t * h, struct timeval *to);
 extern int esocket_update (esocket_t * s, int fd, unsigned int state);
+extern int esocket_update_state (esocket_t * s, unsigned int newstate);
 extern int esocket_settimeout (esocket_t * s, unsigned long timeout);
 extern int esocket_deltimeout (esocket_t * s);
 

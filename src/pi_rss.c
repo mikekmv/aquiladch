@@ -111,7 +111,9 @@ unsigned char *rss_html_filter (unsigned char *s)
   int intag = 0;
   unsigned char *d, *c;
 
-  d = strdup (s);
+  d = malloc (strlen (s) * 6);
+  if (!d)
+    return NULL;
 
   for (c = d; *s; s++) {
     switch (*s) {
@@ -121,12 +123,23 @@ unsigned char *rss_html_filter (unsigned char *s)
       case '>':
 	intag = 0;
 	break;
+      case '|':
+	if (!intag) {
+	  memcpy (c, "&#134;", 6);
+	  c += 6;
+	}
+	break;
       default:
 	if (!intag)
 	  *c++ = *s;
     }
   }
   *c = 0;
+
+  /* shorten string */
+  c = d;
+  d = strdup (c);
+  free (c);
 
   return d;
 }
