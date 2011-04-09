@@ -60,7 +60,7 @@ am__aquila_SOURCES_DIST = buffer.c esocket.c stringlist.c rbt.c \
 	xml.c nmdc_token.c nmdc_protocol.c nmdc_nicklistcache.c \
 	nmdc_utils.c nmdc.c nmdc_interface.c pi_chatlog.c \
 	pi_chatroom.c pi_configlock.c pi_hublist.c pi_iplog.c pi_lua.c \
-	pi_statbot.c pi_statistics.c pi_trigger.c pi_user.c \
+	pi_rss.c pi_statbot.c pi_statistics.c pi_trigger.c pi_user.c \
 	banlistclient.c stacktrace.c getaddrinfo.c dns.c
 am__objects_1 = nmdc_token.$(OBJEXT) nmdc_protocol.$(OBJEXT) \
 	nmdc_nicklistcache.$(OBJEXT) nmdc_utils.$(OBJEXT) \
@@ -71,19 +71,20 @@ am__objects_1 = nmdc_token.$(OBJEXT) nmdc_protocol.$(OBJEXT) \
 @PLUGIN_HUBLIST_TRUE@am__objects_5 = pi_hublist.$(OBJEXT)
 @PLUGIN_IPLOG_TRUE@am__objects_6 = pi_iplog.$(OBJEXT)
 @PLUGIN_LUA_TRUE@am__objects_7 = pi_lua.$(OBJEXT)
-@PLUGIN_STATBOT_TRUE@am__objects_8 = pi_statbot.$(OBJEXT)
-@PLUGIN_STATISTICS_TRUE@am__objects_9 = pi_statistics.$(OBJEXT)
-@PLUGIN_TRIGGER_TRUE@am__objects_10 = pi_trigger.$(OBJEXT)
-@PLUGIN_USER_TRUE@am__objects_11 = pi_user.$(OBJEXT) \
+@PLUGIN_RSS_TRUE@am__objects_8 = pi_rss.$(OBJEXT)
+@PLUGIN_STATBOT_TRUE@am__objects_9 = pi_statbot.$(OBJEXT)
+@PLUGIN_STATISTICS_TRUE@am__objects_10 = pi_statistics.$(OBJEXT)
+@PLUGIN_TRIGGER_TRUE@am__objects_11 = pi_trigger.$(OBJEXT)
+@PLUGIN_USER_TRUE@am__objects_12 = pi_user.$(OBJEXT) \
 @PLUGIN_USER_TRUE@	banlistclient.$(OBJEXT)
-am__objects_12 = $(am__objects_2) $(am__objects_3) $(am__objects_4) \
+am__objects_13 = $(am__objects_2) $(am__objects_3) $(am__objects_4) \
 	$(am__objects_5) $(am__objects_6) $(am__objects_7) \
 	$(am__objects_8) $(am__objects_9) $(am__objects_10) \
-	$(am__objects_11)
-@DEBUG_TRUE@am__objects_13 = stacktrace.$(OBJEXT)
-@GETADDRINFO_TRUE@@USE_WINDOWS_FALSE@am__objects_14 =  \
+	$(am__objects_11) $(am__objects_12)
+@DEBUG_TRUE@am__objects_14 = stacktrace.$(OBJEXT)
+@GETADDRINFO_TRUE@@USE_WINDOWS_FALSE@am__objects_15 =  \
 @GETADDRINFO_TRUE@@USE_WINDOWS_FALSE@	getaddrinfo.$(OBJEXT)
-@USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@am__objects_15 =  \
+@USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@am__objects_16 =  \
 @USE_PTHREADDNS_TRUE@@USE_WINDOWS_FALSE@	dns.$(OBJEXT)
 am_aquila_OBJECTS = buffer.$(OBJEXT) esocket.$(OBJEXT) \
 	stringlist.$(OBJEXT) rbt.$(OBJEXT) utils.$(OBJEXT) \
@@ -93,8 +94,8 @@ am_aquila_OBJECTS = buffer.$(OBJEXT) esocket.$(OBJEXT) \
 	plugin.$(OBJEXT) commands.$(OBJEXT) builtincmd.$(OBJEXT) \
 	flags.$(OBJEXT) cap.$(OBJEXT) main.$(OBJEXT) tth.$(OBJEXT) \
 	aqtime.$(OBJEXT) iplist.$(OBJEXT) xml.$(OBJEXT) \
-	$(am__objects_1) $(am__objects_12) $(am__objects_13) \
-	$(am__objects_14) $(am__objects_15)
+	$(am__objects_1) $(am__objects_13) $(am__objects_14) \
+	$(am__objects_15) $(am__objects_16)
 aquila_OBJECTS = $(am_aquila_OBJECTS)
 am__DEPENDENCIES_1 =
 @USE_WINDOWS_TRUE@am__DEPENDENCIES_2 = aquila.res
@@ -202,6 +203,9 @@ PLUGIN_IPLOG_TRUE = @PLUGIN_IPLOG_TRUE@
 PLUGIN_LUA = @PLUGIN_LUA@
 PLUGIN_LUA_FALSE = @PLUGIN_LUA_FALSE@
 PLUGIN_LUA_TRUE = @PLUGIN_LUA_TRUE@
+PLUGIN_RSS = @PLUGIN_RSS@
+PLUGIN_RSS_FALSE = @PLUGIN_RSS_FALSE@
+PLUGIN_RSS_TRUE = @PLUGIN_RSS_TRUE@
 PLUGIN_STATBOT = @PLUGIN_STATBOT@
 PLUGIN_STATBOT_FALSE = @PLUGIN_STATBOT_FALSE@
 PLUGIN_STATBOT_TRUE = @PLUGIN_STATBOT_TRUE@
@@ -303,6 +307,7 @@ LOCALE_DEFS = -DLOCALEDIR=\"$(localedir)\"
 @PLUGIN_LUA_TRUE@LUA_SOURCES = pi_lua.c
 @PLUGIN_LUA_TRUE@LUA_LIBS = 
 @PLUGIN_STATBOT_TRUE@STATBOT_SOURCES = pi_statbot.c
+@PLUGIN_RSS_TRUE@RSS_SOURCES = pi_rss.c
 @PLUGIN_STATISTICS_TRUE@STATISTICS_SOURCES = pi_statistics.c
 @PLUGIN_TRIGGER_TRUE@TRIGGER_SOURCES = pi_trigger.c
 @PLUGIN_USER_TRUE@USER_SOURCES = pi_user.c banlistclient.c
@@ -312,6 +317,7 @@ PLUGIN_SOURCES = $(CHATLOG_SOURCES) \
 		$(HUBLIST_SOURCES) \
 		$(IPLOG_SOURCES) \
 		$(LUA_SOURCES) \
+		$(RSS_SOURCES) \
 		$(STATBOT_SOURCES) \
 		$(STATISTICS_SOURCES) \
 		$(TRIGGER_SOURCES) \
@@ -323,6 +329,7 @@ PLUGIN_CFLAGS = @PLUGIN_CHATLOG@ \
 		@PLUGIN_HUBLIST@ \
 		@PLUGIN_IPLOG@ \
 		@PLUGIN_LUA@ @LUA_INCLUDES@ \
+		@PLUGIN_RSS@ \
 		@PLUGIN_STATBOT@ \
 		@PLUGIN_STATISTICS@ \
 		@PLUGIN_TRIGGER@ \
@@ -462,6 +469,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_hublist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_iplog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_lua.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_rss.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_statbot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_statistics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pi_trigger.Po@am__quote@

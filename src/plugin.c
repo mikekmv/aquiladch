@@ -75,7 +75,8 @@ int plugin_perror (unsigned char *format, ...)
   bf_vprintf (b, format, ap);
   va_end (ap);
 
-  bf_printf (b, ": %s", strerror (errno));
+  if (errno)
+    bf_printf (b, ": %s", strerror (errno));
 
   retval = plugin_report (b);
 

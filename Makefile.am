@@ -2,7 +2,7 @@
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 
-EXTRA_DIST = config.rpath TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README.windows README.getaddrinfo README doc/aquila-manual.txt config.h.in depcomp install-sh missing ABOUT-NLS
+EXTRA_DIST = config.rpath TODO ChangeLog LICENSE AUTHORS COPYING INSTALL README.windows README.getaddrinfo README doc/aquila-manual.txt config.h.in depcomp install-sh missing ABOUT-NLS contrib/aquila.png contrib/aquila.ico
 SUBDIRS = po src tools
 
 ACLOCAL_AMFLAGS = -I m4

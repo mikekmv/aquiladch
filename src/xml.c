@@ -84,6 +84,18 @@ unsigned char *xml_unescape (buffer_t * target, unsigned char *src)
 	    bf_strncat (target, "&", 1);
 	    src += 3;
 	    break;
+	  case '#':
+	    {
+	      unsigned char c[2], *e;
+
+	      c[0] = atoi (src + 1);
+	      c[1] = 0;
+	      e = strchr (src, ';');
+	      if (e)
+		src = e;
+	      bf_strncat (target, c, 1);
+	    }
+	    break;
 	}
 	break;
       default:
@@ -165,57 +177,63 @@ xml_node_t *xml_node_add (xml_node_t * parent, char *name)
 xml_node_t *xml_node_add_value (xml_node_t * parent, char *name, xml_type_t type, void *value)
 {
   xml_node_t *node = xml_node_add (parent, name);
-  buffer_t *buf;
+  buffer_t *buf, *t;
 
   if (!node)
     return NULL;
 
-  buf = bf_alloc (1024);
+  buf = bf_alloc (10240);
 
   switch (type) {
     case XML_TYPE_PTR:
-      bf_printf (buf, "%p", value);
+      bf_printf_resize (buf, "%p", value);
       break;
     case XML_TYPE_LONG:
-      bf_printf (buf, "%ld", *((long *) value));
+      bf_printf_resize (buf, "%ld", *((long *) value));
       break;
     case XML_TYPE_ULONG:
     case XML_TYPE_MEMSIZE:
-      bf_printf (buf, "%lu", *((unsigned long *) value));
+      bf_printf_resize (buf, "%lu", *((unsigned long *) value));
       break;
     case XML_TYPE_BYTESIZE:
     case XML_TYPE_ULONGLONG:
 #ifndef USE_WINDOWS
-      bf_printf (buf, "%llu", *((unsigned long long *) value));
+      bf_printf_resize (buf, "%llu", *((unsigned long long *) value));
 #else
-      bf_printf (buf, "%I64u", *((unsigned long long *) value));
+      bf_printf_resize (buf, "%I64u", *((unsigned long long *) value));
 #endif
       break;
     case XML_TYPE_CAP:
       flags_print ((Capabilities + CAP_PRINT_OFFSET), buf, *((unsigned long long *) value));
       break;
     case XML_TYPE_INT:
-      bf_printf (buf, "%d", *((int *) value));
+      bf_printf_resize (buf, "%d", *((int *) value));
       break;
     case XML_TYPE_UINT:
-      bf_printf (buf, "%u", *((unsigned int *) value));
+      bf_printf_resize (buf, "%u", *((unsigned int *) value));
       break;
     case XML_TYPE_DOUBLE:
-      bf_printf (buf, "%lf", *((double *) value));
+      bf_printf_resize (buf, "%lf", *((double *) value));
       break;
     case XML_TYPE_STRING:
-      bf_printf (buf, "%s", value ? ((unsigned char *) value) : (unsigned char *) "(NULL)");
+      bf_printf_resize (buf, "%s", value ? ((unsigned char *) value) : (unsigned char *) "(NULL)");
       break;
     case XML_TYPE_IP:
       {
 	struct in_addr ia;
 
 	ia.s_addr = *((unsigned long *) value);
-	bf_printf (buf, "%s", inet_ntoa (ia));
+	bf_printf_resize (buf, "%s", inet_ntoa (ia));
       }
       break;
     default:
-      bf_printf (buf, _("!Unknown Type!\n"));
+      bf_printf_resize (buf, _("!Unknown Type!\n"));
+  }
+
+  if (bf_size (buf) > bf_used (buf)) {
+    t = buf;
+    buf = bf_copy (buf, 0);
+    bf_free (t);
   }
 
   node->value = strdup (buf->s);

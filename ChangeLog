@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta18:
+0.1.11-pre1-beta19:
+	esocket: fixed division by zero error in IOCP code.
+	esocket: succesful connections are now reported
+		to output callback.
+	Add RSS plugin.
 	Fix timer rules - obey rights setting.
 	Fixed custom rights mask.
 	Cosmetic fix in xml saving.

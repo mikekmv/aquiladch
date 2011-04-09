@@ -121,7 +121,7 @@ unsigned long outstandingbytes = 0;
 unsigned long outstandingbytes_peak = 0;
 unsigned long outstandingbytes_max = ULONG_MAX;
 
-#define USERS_UPDATE	{ outstandingbytes_peruser = outstandingbytes_max / iocp_users; if (outstandingbytes_peruser < IOCP_COMPLETION_SIZE_MIN) outstandingbytes_peruser = IOCP_COMPLETION_SIZE_MIN; if (outstandingbytes_peruser> IOCP_COMPLETION_SIZE_MAX) outstandingbytes_peruser = IOCP_COMPLETION_SIZE_MAX; }
+#define USERS_UPDATE	{ if (iocp_users) outstandingbytes_peruser = outstandingbytes_max / iocp_users; if (outstandingbytes_peruser < IOCP_COMPLETION_SIZE_MIN) outstandingbytes_peruser = IOCP_COMPLETION_SIZE_MIN; if (outstandingbytes_peruser> IOCP_COMPLETION_SIZE_MAX) outstandingbytes_peruser = IOCP_COMPLETION_SIZE_MAX; }
 #define USERS_INC	{ iocp_users++; USERS_UPDATE; }
 #define USERS_DEC	{ iocp_users--; USERS_UPDATE; }
 
@@ -1685,8 +1685,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	      DPRINTF ("Connecting and %s!\n", s->error ? "error" : "connected");
 
 	      esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	      if (h->types[s->type].error)
-		h->types[s->type].error (s);
+	      if (s->error) {
+		if (h->types[s->type].error)
+		  h->types[s->type].error (s);
+	      } else {
+		if (h->types[s->type].output)
+		  h->types[s->type].output (s);
+	      }
 	    }
 	    break;
 	  default:
@@ -1834,8 +1839,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	    err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
 	    ASSERT (!err);
 	    esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	    if (h->types[s->type].error)
-	      h->types[s->type].error (s);
+	    if (s->error) {
+	      if (h->types[s->type].error)
+		h->types[s->type].error (s);
+	    } else {
+	      if (h->types[s->type].output)
+		h->types[s->type].output (s);
+	    }
 	  }
 	  break;
 	case SOCKSTATE_FREED:
@@ -1961,8 +1971,13 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 	    err = getsockopt (s->socket, SOL_SOCKET, SO_ERROR, &s->error, &len);
 	    ASSERT (!err);
 	    esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
-	    if (h->types[s->type].error)
-	      h->types[s->type].error (s);
+	    if (s->error) {
+	      if (h->types[s->type].error)
+		h->types[s->type].error (s);
+	    } else {
+	      if (h->types[s->type].output)
+		h->types[s->type].output (s);
+	    }
 	  }
 	  break;
 	case SOCKSTATE_FREED:

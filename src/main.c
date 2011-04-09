@@ -370,6 +370,9 @@ int main (int argc, char **argv)
 #ifdef PLUGIN_CONFIGLOCK
   pi_configlock_init ();
 #endif
+#ifdef PLUGIN_RSS
+  pi_rss_init ();
+#endif
 
   plugin_config_load (NULL);
 
@@ -380,7 +383,7 @@ int main (int argc, char **argv)
   srandom (boottime.tv_sec ^ boottime.tv_usec);
 
   /* setup socket handler */
-  h = esocket_create_handler (4);
+  h = esocket_create_handler (5);
   h->toval.tv_sec = 60;
   h->toval.tv_usec = 0;
 
@@ -390,6 +393,9 @@ int main (int argc, char **argv)
   command_setup ();
 #ifdef PLUGIN_HUBLIST
   pi_hublist_setup (h);
+#endif
+#ifdef PLUGIN_RSS
+  pi_rss_setup (h);
 #endif
 
 #ifdef PLUGIN_LUA
