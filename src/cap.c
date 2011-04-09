@@ -57,6 +57,7 @@ flag_t Capabilities[CAP_CUSTOM_MAX + 1] = {
 	{"sourceverify",CAP_SOURCEVERIFY,_("Users with this right are only allowed into the hub if their source IP is listed for their nick in the userrestict list.")},
 	{"redirect",    CAP_REDIRECT,    _("Users with this right are allowed to redirect users.")},
 	{"locallan",    CAP_LOCALLAN,    _("Users with this right are allowed to use locallan ips (and avoid ctm and asearch checks).")},
+	{"hidden",      CAP_HIDDEN,	 _("Users with this right do not show up in the userlist.")},
 	{0, 0, 0},
 };
 

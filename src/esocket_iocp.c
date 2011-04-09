@@ -69,6 +69,7 @@ esocket_t *freelist = NULL;
  *  the MIN was chosen at 2 tcp packets per fragment for throughput reasons. should support more than 10k users at 1Gb
  */
 
+unsigned long iocpSendBuffer = 0;
 unsigned long iocpFragments = 2;
 
 #define IOCP_COMPLETION_FRAGMENTS iocpFragments
@@ -574,7 +575,7 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s, 
   if (s == -1)
     return socket;
 
-  {
+  if (!iocpSendBuffer) {
     int len = 0;
 
     /* there is no sensible error handling we can do here. so we don't do any. */
@@ -649,7 +650,7 @@ esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, i
   if (fd == -1)
     return s;
 
-  {
+  if (!iocpSendBuffer) {
     int len = 0;
 
     if (setsockopt (fd, SOL_SOCKET, SO_SNDBUF, (char *) &len, sizeof (len)))
@@ -1033,9 +1034,10 @@ int esocket_send (esocket_t * s, buffer_t * buf, unsigned long offset)
   if (!len)
     return 0;
 
-  while (len && (s->outstanding < IOCP_COMPLETION_SIZE_MAX)
+  while (len && (s->outstanding < outstandingbytes_peruser)
 	 && (s->fragments < IOCP_COMPLETION_FRAGMENTS)) {
-    l = (len > p) ? p : len;
+    //l = (len > p) ? p : len;
+    l = len;
     wsabuf.buf = buf->s + offset;
     wsabuf.len = l;
 

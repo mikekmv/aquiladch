@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta35:
+0.1.11-pre1-beta36:
+	Fix crash with timer set after user freed.
+	Added support for hidden users.
+	LUA: fixed crash in SetConfig (Reported en_dator)
+	Don't forget to delete commands if load failed. (Reported curse)
 	Added missing etimer.h to dist.
 	LUA: added real timer support.
 	Removed esocket.c base file.

@@ -1385,6 +1385,12 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   }
 
   target = plugin_user_find (argv[1]);
+
+  /* first check for hidden users: only the owner gets to see them */
+  if (target && (target->rights & CAP_HIDDEN) && (!(user->rights & CAP_OWNER)))
+    target = NULL;
+
+  /* do output */
   if (!target) {
     bf_printf (output, _("User %s not found."), argv[1]);
   } else {

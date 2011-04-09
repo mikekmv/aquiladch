@@ -236,7 +236,7 @@ int pi_lua_getconfig (lua_State * lua)
 
 int pi_lua_setconfig (lua_State * lua)
 {
-  config_element_t *elem;
+  config_element_t *elem = NULL;
 
   unsigned char *name = (unsigned char *) luaL_checkstring (lua, 1);
   unsigned char *value = (unsigned char *) luaL_checkstring (lua, 2);
@@ -1836,13 +1836,16 @@ unsigned long handler_luacommand (plugin_user_t * user, buffer_t * output, void 
   lua_settop (ctx->lua, 0);
 
   /* specify function to call */
-  /* lua 5.1 
-     lua_getfield (ctx->lua, LUA_GLOBALSINDEX, ctx->name);
-   */
+#if LUAVERSION == 51
+  /* lua 5.1 */
+  lua_getfield (ctx->lua, LUA_GLOBALSINDEX, ctx->name);
+#endif
 
+#if LUAVERSION == 50
   /* lua 5.0 */
   lua_pushstring (ctx->lua, ctx->name);
   lua_gettable (ctx->lua, LUA_GLOBALSINDEX);
+#endif
 
   /* push nick argument */
   lua_pushstring (ctx->lua, user->nick);
@@ -2186,6 +2189,7 @@ unsigned int pi_lua_load (buffer_t * output, unsigned char *name)
 
     goto error;
   }
+
   /* alloc and init context */
   ctx = malloc (sizeof (lua_context_t));
   ctx->l = l;
@@ -2242,6 +2246,7 @@ late_error:
   ctx->next->prev = ctx->prev;
   ctx->prev->next = ctx->next;
   pi_lua_purgebots (ctx);
+  pi_lua_cmdclean (l);
   free (ctx->name);
   free (ctx);
   lua_ctx_cnt--;
@@ -2327,8 +2332,6 @@ unsigned long handler_luastat (plugin_user_t * user, buffer_t * output, void *pr
 unsigned long handler_luaload (plugin_user_t * user, buffer_t * output, void *priv,
 			       unsigned int argc, unsigned char **argv)
 {
-
-
   if (argc != 2) {
     bf_printf (output, _("Usage: %s <script>"), argv[0]);
     return 0;

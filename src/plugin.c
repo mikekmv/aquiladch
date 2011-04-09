@@ -962,7 +962,7 @@ int plugin_unregister (plugin_t * plugin)
 
 unsigned long plugin_user_event (plugin_user_t * user, unsigned long event, void *token)
 {
-  return plugin_send_event (((plugin_private_t *) user->private), event, token);
+  return plugin_send_event (user ? ((plugin_private_t *) user->private) : NULL, event, token);
 }
 
 unsigned long plugin_send_event (plugin_private_t * priv, unsigned long event, void *token)

@@ -32,6 +32,7 @@ extern int ndelay;
 
 #ifdef USE_IOCP
 extern unsigned long iocpFragments;
+extern unsigned long iocpSendBuffer;
 #endif
 
 config_t config;
@@ -131,6 +132,7 @@ int core_config_init ()
 
 #ifdef USE_IOCP
   config_register ("socket.fragments", CFG_ELEM_ULONG, &iocpFragments, _("Maximum number of outstanding data buffers per user."));
+  config_register ("socket.sendbuffer", CFG_ELEM_ULONG, &iocpSendBuffer, _("Set this to 0 to enable the send buffer."));
 #endif
   /* *INDENT-ON* */
 

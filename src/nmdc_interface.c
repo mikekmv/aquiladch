@@ -291,6 +291,8 @@ user_t *proto_nmdc_user_addrobot (unsigned char *nick, unsigned char *descriptio
 
 void proto_nmdc_user_freelist_add (user_t * user)
 {
+  ASSERT (!user->timer.tovalid);
+
   user->next = freelist;
   user->prev = NULL;
   freelist = user;
@@ -306,6 +308,8 @@ void proto_nmdc_user_freelist_clear ()
     freelist = freelist->next;
 
     NICKLISTCACHE_VERIFY;
+
+    ASSERT (!o->timer.tovalid);
 
     if (o->tthlist)
       free (o->tthlist);
@@ -330,6 +334,9 @@ void proto_nmdc_user_freelist_clear ()
 
 void proto_nmdc_user_cachelist_add (user_t * user)
 {
+
+  ASSERT (!user->timer.tovalid);
+
   user->next = cachelist;
   if (user->next) {
     user->next->prev = user;
@@ -707,6 +714,8 @@ user_t *proto_nmdc_user_alloc (void *priv)
 
 int proto_nmdc_user_free (user_t * user)
 {
+  ASSERT (!user->timer.tovalid);
+
   /* remove from the current user list */
   if (user->next)
     user->next->prev = user->prev;
@@ -788,18 +797,21 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
     /* mark user offline so the verifies don't fail. */
     u->state = PROTO_STATE_DISCONNECTED;
 
-    /* kicked users do not go on the cachehashlist */
-    if (u->flags & NMDC_FLAG_WASKICKED) {
-      nicklistcache_deluser (u);
-      buf = bf_alloc (8 + NICKLENGTH);
-      bf_strcat (buf, "$Quit ");
-      bf_strcat (buf, u->nick);
-      cache_queue (cache.myinfo, NULL, buf);
-      cache_queue (cache.myinfoupdateop, NULL, buf);
-      bf_free (buf);
-    } else {
-      hash_adduser (&cachehashlist, u);
-      u->flags |= NMDC_FLAG_WASONLINE;
+    /* do neither for hidden users */
+    if (!(u->rights & CAP_HIDDEN)) {
+      /* kicked users do not go on the cachehashlist */
+      if (u->flags & NMDC_FLAG_WASKICKED) {
+	nicklistcache_deluser (u);
+	buf = bf_alloc (8 + NICKLENGTH);
+	bf_strcat (buf, "$Quit ");
+	bf_strcat (buf, u->nick);
+	cache_queue (cache.myinfo, NULL, buf);
+	cache_queue (cache.myinfoupdateop, NULL, buf);
+	bf_free (buf);
+      } else {
+	hash_adduser (&cachehashlist, u);
+	u->flags |= NMDC_FLAG_WASONLINE;
+      }
     }
   } else {
     /* if the returned user has same nick, but different user pointer, this is legal */

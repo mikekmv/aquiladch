@@ -489,9 +489,10 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 
     /* success! */
     BF_VERIFY (output);
-    retval = server_write (u->parent, output);
     u->state = PROTO_STATE_HELLO;
     etimer_set (&u->timer, PROTO_TIMEOUT_HELLO);
+
+    retval = server_write (u->parent, output);
 
     /* DPRINTF (" - User %s greeted.\n", u->nick); */
   }
@@ -639,11 +640,13 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     return 0;
   }
 
-  if (tkn->type != TOKEN_MYINFO) {
+  if (tkn->type != TOKEN_MYINFO)
     return 0;
-  }
 
   output = bf_alloc (2048);
+  if (!output)
+    return 0;
+
   output->s[0] = '\0';
 
   do {
@@ -707,7 +710,8 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       /* this is a different user, don't reuse his data, but since he has the same nick, we gotta
        * delete him from the cachelist or the hub will send a #Quit or that nick.
        */
-      proto_nmdc_user_cachelist_invalidate (existing_user);
+      if (!(u->rights & CAP_HIDDEN))
+	proto_nmdc_user_cachelist_invalidate (existing_user);
       existing_user = NULL;
     }
 
@@ -749,8 +753,9 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
       if (existing_user->flags & PROTO_FLAG_ZOMBIE)
 	u->flags |= PROTO_FLAG_ZOMBIE;
 
-      /* queue the old userentry for deletion */
-      proto_nmdc_user_cachelist_invalidate (existing_user);
+      /* queue the old userentry for deletion, unless current user is hidden */
+      if (!(u->rights & CAP_HIDDEN))
+	proto_nmdc_user_cachelist_invalidate (existing_user);
 
       nmdc_stats.logincached++;
     }
@@ -762,32 +767,39 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     etimer_set (&u->timer, PROTO_TIMEOUT_ONLINE);
     time (&u->joinstamp);
 
-    /* add user to nicklist cache, if the user existed, just update him. */
-    if (existing_user) {
-      nicklistcache_updateuser (existing_user, u);
-      u->flags |= (existing_user->flags & NMDC_FLAG_CACHED);
-    } else {
-      nicklistcache_adduser (u);
+    /* not applicable for hidden users */
+    if (!(u->rights & CAP_HIDDEN)) {
+      /* add user to nicklist cache, if the user existed, just update him. */
+      if (existing_user) {
+	nicklistcache_updateuser (existing_user, u);
+	u->flags |= (existing_user->flags & NMDC_FLAG_CACHED);
+      } else {
+	nicklistcache_adduser (u);
+      }
     }
 
     /* from now on, user is reachable */
     hash_adduser (&hashlist, u);
 
-    /* send it to the users */
-    if ((!existing_user) || (existing_user->share != u->share)) {
-      cache_queue (cache.myinfo, u, u->MyINFO);
-    };
 
-    /* ops get the full tag immediately */
-    cache_queue (cache.myinfoupdateop, u, b);
+    /* not applicable for hidden users */
+    if (!(u->rights & CAP_HIDDEN)) {
+      /* send it to the users */
+      if ((!existing_user) || (existing_user->share != u->share)) {
+	cache_queue (cache.myinfo, u, u->MyINFO);
+      };
+
+      /* ops get the full tag immediately */
+      cache_queue (cache.myinfoupdateop, u, b);
+
+      /* if this new user is an OP send an updated OpList */
+      if (u->op)
+	nicklistcache_sendoplist (u);
+    }
 
     /* send user his IP address, if supported */
     if (u->supports & NMDC_SUPPORTS_UserIP2)
       proto_nmdc_user_userip2 (u);
-
-    /* if this new user is an OP send an updated OpList */
-    if (u->op)
-      nicklistcache_sendoplist (u);
 
     /* send the nicklist if it was requested before the MyINFO arrived 
      * if not, credit user with 1 getnicklist token.
@@ -978,8 +990,13 @@ int proto_nmdc_state_online_myinfo (user_t * u, token_t * tkn, buffer_t * output
     u->MyINFO = new;
 
     /* update the tag */
-    nicklistcache_updatemyinfo (old, new);
+    if (!(u->rights & CAP_HIDDEN))
+      nicklistcache_updatemyinfo (old, new);
     bf_free (old);
+
+    /* rest of the processing is not applicable to hidden users. */
+    if (u->rights & CAP_HIDDEN)
+      break;
 
     /* ops get the full tag immediately */
     if (get_token (&rates.myinfoop, &u->rate_myinfoop, now.tv_sec)) {

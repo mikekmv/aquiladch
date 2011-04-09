@@ -41,6 +41,8 @@ void nicklistcache_verify ()
   for (u = userlist; u; u = u->next) {
     if ((u->state != PROTO_STATE_ONLINE) && (u->state != PROTO_STATE_VIRTUAL))
       continue;
+    if (u->rights & CAP_HIDDEN)
+      continue;
     le += strlen (u->nick) + 2;
     lei += bf_used (u->MyINFO) + 1;
     if (u->op)
@@ -49,6 +51,8 @@ void nicklistcache_verify ()
 
   for (u = cachelist; u; u = u->next) {
     if (!u->joinstamp)
+      continue;
+    if (u->rights & CAP_HIDDEN)
       continue;
     le += strlen (u->nick) + 2;
     lei += bf_used (u->MyINFO) + 1;
@@ -64,6 +68,9 @@ void nicklistcache_verify ()
 int nicklistcache_adduser (user_t * u)
 {
   unsigned long l;
+
+  if (u->rights & CAP_HIDDEN)
+    return 0;
 
   l = strlen (u->nick) + 2;
   cache.length_estimate += l;
@@ -105,6 +112,9 @@ int nicklistcache_adduser (user_t * u)
 
 int nicklistcache_updateuser (user_t * old, user_t * new)
 {
+  if (new->rights & CAP_HIDDEN)
+    return 0;
+
   if (old->op != new->op) {
     unsigned long l = strlen (new->nick) + 2;
 
@@ -149,6 +159,9 @@ int nicklistcache_deluser (user_t * u)
   unsigned long l;
 
   if (!(u->flags & NMDC_FLAG_CACHED))
+    return 0;
+
+  if (u->rights & CAP_HIDDEN)
     return 0;
 
   l = (bf_used (u->MyINFO) + 1);
@@ -229,6 +242,8 @@ int nicklistcache_rebuild (struct timeval now)
   o += sprintf (o, "$OpList ");
   for (t = userlist; t; t = t->next) {
     if ((t->state != PROTO_STATE_ONLINE) && (t->state != PROTO_STATE_VIRTUAL))
+      continue;
+    if (t->rights & CAP_HIDDEN)
       continue;
     bf_strncat (cache.infolist, t->MyINFO->s, bf_used (t->MyINFO));
     bf_strcat (cache.infolist, "|");
