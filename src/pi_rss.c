@@ -139,6 +139,8 @@ buffer_t *rss_item_printf (rss_feed_t * feed, xml_node_t * elem)
   unsigned char *clean;
 
   buf = bf_alloc (1024);
+  if (!buf)
+    return NULL;
 
   if (feed->includes.next != &feed->includes) {
     for (item = feed->includes.next; item != &feed->includes; item = item->next) {
@@ -181,6 +183,8 @@ buffer_t *rss_item_atom_printf (rss_feed_t * feed, xml_node_t * elem)
   unsigned char *clean;
 
   buf = bf_alloc (1024);
+  if (!buf)
+    return NULL;
 
   if (feed->includes.next != &feed->includes) {
     for (item = feed->includes.next; item != &feed->includes; item = item->next) {
@@ -265,9 +269,12 @@ rss_element_t *rss_item_add (rss_feed_t * feed, xml_node_t * node)
   hash = SuperFastHash (buf->s, bf_used (buf));
 
   if (rss_elem_find (&feed->elems, hash))
-    return NULL;
+    goto error;
 
   elem = malloc (sizeof (rss_element_t));
+  if (!elem)
+    goto error;
+
   elem->hash = hash;
   elem->entry = buf;
   elem->stamp = now.tv_sec;
@@ -278,6 +285,10 @@ rss_element_t *rss_item_add (rss_feed_t * feed, xml_node_t * node)
   elem->prev->next = elem;
 
   return elem;
+
+error:
+  bf_free (buf);
+  return NULL;
 }
 
 rss_element_t *rss_item_atom_add (rss_feed_t * feed, xml_node_t * node)
@@ -290,9 +301,12 @@ rss_element_t *rss_item_atom_add (rss_feed_t * feed, xml_node_t * node)
   hash = SuperFastHash (buf->s, bf_used (buf));
 
   if (rss_elem_find (&feed->elems, hash))
-    return NULL;
+    goto error;
 
   elem = malloc (sizeof (rss_element_t));
+  if (!elem)
+    goto error;
+
   elem->hash = hash;
   elem->entry = buf;
   elem->stamp = now.tv_sec;
@@ -303,6 +317,10 @@ rss_element_t *rss_item_atom_add (rss_feed_t * feed, xml_node_t * node)
   elem->prev->next = elem;
 
   return elem;
+
+error:
+  bf_free (buf);
+  return NULL;
 }
 
 
@@ -351,6 +369,9 @@ rss_element_t *rss_include_add (rss_feed_t * feed, unsigned char *include)
     return NULL;
 
   elem = malloc (sizeof (rss_element_t));
+  if (!elem)
+    return NULL;
+
   elem->hash = hash;
   elem->entry = bf_alloc (l + 1);
   if (!elem->entry) {
@@ -682,6 +703,9 @@ int pi_rss_report (rss_feed_t * feed, unsigned long stamp)
   plugin_user_t *tgt, *prev;
   buffer_t *output = bf_alloc (1024);
 
+  if (!output)
+    return NULL;
+
   bf_printf (output, "\n%s", feed->title);
   if (feed->description)
     bf_printf (output, " - %s", feed->description);
@@ -881,6 +905,8 @@ int pi_rss_handle_input (esocket_t * s)
   /* read data */
   do {
     buf = bf_alloc (PI_RSS_INPUT_BUFFERSIZE);
+    if (!buf)
+      return -1;
     n = esocket_recv (s, buf);
     if (n < 0) {
       bf_free (buf);

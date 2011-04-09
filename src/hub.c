@@ -126,8 +126,6 @@ esocket_t *setup_incoming_socket (proto_t * proto, esocket_handler_t * h, unsign
 }
 
 
-/* int accept_new_user (int lsock, int *top, fd_set *set) {*/
-
 int accept_new_user (esocket_t * s)
 {
   int l = 0;
@@ -228,8 +226,8 @@ int accept_new_user (esocket_t * s)
 
     /* create new context */
     cl->proto = (proto_t *) s->context;
-    cl->user = cl->proto->user_alloc (cl);
     cl->state = HUB_STATE_NORMAL;
+    cl->user = cl->proto->user_alloc (cl);
 
     /* user connection refused. */
     if (!cl->user) {

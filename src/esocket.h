@@ -293,28 +293,28 @@ typedef struct esockethandler {
 
 /* function prototypes */
 extern esocket_handler_t *esocket_create_handler (unsigned int numtypes);
-extern unsigned int esocket_add_type (esocket_handler_t * h, unsigned int events,
+extern int esocket_add_type (esocket_handler_t * h, unsigned int events,
 				      input_handler_t input, output_handler_t output,
 				      error_handler_t error, timeout_handler_t timeout);
 extern esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
 			       int protocol, uintptr_t context);
 extern esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
 				      unsigned int state, uintptr_t context);
-extern unsigned int esocket_close (esocket_t * s);
-extern unsigned int esocket_remove_socket (esocket_t * s);
+extern int esocket_close (esocket_t * s);
+extern int esocket_remove_socket (esocket_t * s);
 
 extern int esocket_bind (esocket_t * s, unsigned long address, unsigned int port);
 
 extern int esocket_connect (esocket_t * s, char *address, unsigned int port);
 
-extern unsigned int esocket_select (esocket_handler_t * h, struct timeval *to);
-extern unsigned int esocket_update (esocket_t * s, int fd, unsigned int state);
-extern unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout);
-extern unsigned int esocket_deltimeout (esocket_t * s);
+extern int esocket_select (esocket_handler_t * h, struct timeval *to);
+extern int esocket_update (esocket_t * s, int fd, unsigned int state);
+extern int esocket_settimeout (esocket_t * s, unsigned long timeout);
+extern int esocket_deltimeout (esocket_t * s);
 
-extern unsigned int esocket_setevents (esocket_t * s, unsigned int events);
-extern unsigned int esocket_addevents (esocket_t * s, unsigned int events);
-extern unsigned int esocket_clearevents (esocket_t * s, unsigned int events);
+extern int esocket_setevents (esocket_t * s, unsigned int events);
+extern int esocket_addevents (esocket_t * s, unsigned int events);
+extern int esocket_clearevents (esocket_t * s, unsigned int events);
 
 #ifndef USE_IOCP
 extern int esocket_accept (esocket_t *s, struct sockaddr *addr, int *addrlen);

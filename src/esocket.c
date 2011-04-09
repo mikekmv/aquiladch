@@ -345,12 +345,11 @@ unsigned int es_iocp_recv (esocket_t * s)
       es_iocp_error (s);
       return ret;
     }
-
   }
 
   OUTSTANDING_INC;
 
-  return ret;
+  return 0;
 }
 
 unsigned int es_iocp_accept (esocket_t * s, int family, int type, int protocol)
@@ -455,10 +454,9 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
   return h;
 }
 
-unsigned int
-esocket_add_type (esocket_handler_t * h, unsigned int events,
-		  input_handler_t input, output_handler_t output,
-		  error_handler_t error, timeout_handler_t timeout)
+int esocket_add_type (esocket_handler_t * h, unsigned int events,
+		      input_handler_t input, output_handler_t output,
+		      error_handler_t error, timeout_handler_t timeout)
 {
   if (h->curtypes == h->numtypes)
     return -1;
@@ -479,7 +477,7 @@ esocket_add_type (esocket_handler_t * h, unsigned int events,
  * Socket functions
  */
 
-unsigned int esocket_setevents (esocket_t * s, unsigned int events)
+int esocket_setevents (esocket_t * s, unsigned int events)
 {
 #ifdef USE_EPOLL
   esocket_handler_t *h = s->handler;
@@ -536,14 +534,15 @@ unsigned int esocket_setevents (esocket_t * s, unsigned int events)
 
 #ifdef USE_IOCP
   if ((!(s->events & ESOCKET_EVENT_IN)) && (events & ESOCKET_EVENT_IN) && (!s->protinfo))
-    es_iocp_recv (s);
+    if (es_iocp_recv (s) < 0)
+      return -1;
   s->events = events;
 #endif
 
   return 0;
 }
 
-unsigned int esocket_addevents (esocket_t * s, unsigned int events)
+int esocket_addevents (esocket_t * s, unsigned int events)
 {
 #ifdef USE_EPOLL
   esocket_handler_t *h = s->handler;
@@ -587,14 +586,15 @@ unsigned int esocket_addevents (esocket_t * s, unsigned int events)
 
 #ifdef USE_IOCP
   if ((!(s->events & ESOCKET_EVENT_IN)) && (events & ESOCKET_EVENT_IN) && (!s->protinfo))
-    es_iocp_recv (s);
+    if (es_iocp_recv (s) < 0)
+      return -1;
   s->events |= events;
 #endif
 
   return 0;
 }
 
-unsigned int esocket_clearevents (esocket_t * s, unsigned int events)
+int esocket_clearevents (esocket_t * s, unsigned int events)
 {
 #ifdef USE_EPOLL
   esocket_handler_t *h = s->handler;
@@ -644,7 +644,7 @@ unsigned int esocket_clearevents (esocket_t * s, unsigned int events)
 }
 
 
-unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
+int esocket_update_state (esocket_t * s, unsigned int newstate)
 {
 #ifdef USE_EPOLL
   uint32_t events = 0;
@@ -772,7 +772,8 @@ unsigned int esocket_update_state (esocket_t * s, unsigned int newstate)
 #ifdef USE_IOCP
       if ((!(s->events & ESOCKET_EVENT_IN))
 	  && (h->types[s->type].default_events & ESOCKET_EVENT_IN) && (!s->protinfo))
-	es_iocp_recv (s);
+	if (es_iocp_recv (s) < 0)
+	  return -1;
 
       s->events |= h->types[s->type].default_events;
 #endif
@@ -863,7 +864,8 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
   USERS_INC;
 #endif
 
-  esocket_update_state (socket, state);
+  if (esocket_update_state (socket, state) < 0)
+    goto remove;
 
 #ifdef USE_SELECT
   if (h->n <= s)
@@ -876,14 +878,12 @@ esocket_t *esocket_add_socket (esocket_handler_t * h, unsigned int type, int s,
 
   return socket;
 
-#ifdef USE_IOCP
 remove:
   h->sockets = socket->next;
   if (h->sockets)
     h->sockets->prev = NULL;
   free (socket);
   return NULL;
-#endif
 }
 
 esocket_t *esocket_new (esocket_handler_t * h, unsigned int etype, int domain, int type,
@@ -988,7 +988,7 @@ remove:
 #endif
 }
 
-unsigned int esocket_close (esocket_t * s)
+int esocket_close (esocket_t * s)
 {
 #ifdef USE_IOCP
   if (s->state == SOCKSTATE_CLOSING)
@@ -1239,7 +1239,7 @@ int esocket_connect (esocket_t *s, char *address, unsigned int port) {
 
 #endif
 */
-unsigned int esocket_remove_socket (esocket_t * s)
+int esocket_remove_socket (esocket_t * s)
 {
 #ifdef USE_SELECT
   int max;
@@ -1314,7 +1314,7 @@ unsigned int esocket_remove_socket (esocket_t * s)
   return 1;
 }
 
-unsigned int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
+int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
 {
 #ifdef USE_SELECT
   esocket_handler_t *h = s->handler;
@@ -1345,7 +1345,7 @@ unsigned int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
 **                             TIMERS
 **
 ************************************************************************/
-unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
+int esocket_settimeout (esocket_t * s, unsigned long timeout)
 {
   unsigned long long key;
   esocket_handler_t *h = s->handler;
@@ -1410,7 +1410,7 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
   return 0;
 }
 
-unsigned int esocket_deltimeout (esocket_t * s)
+int esocket_deltimeout (esocket_t * s)
 {
   if (!s->tovalid)
     return 0;
@@ -1424,7 +1424,7 @@ unsigned int esocket_deltimeout (esocket_t * s)
   return 0;
 }
 
-unsigned int esocket_checktimers (esocket_handler_t * h)
+int esocket_checktimers (esocket_handler_t * h)
 {
   esocket_t *s;
   rbt_t *rbt;
@@ -1727,7 +1727,7 @@ int esocket_listen (esocket_t * s, int num, int family, int type, int protocol)
 **                             SELECT
 **
 ************************************************************************/
-unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
+int esocket_select (esocket_handler_t * h, struct timeval *to)
 {
   int num;
   esocket_t *s;
@@ -1868,7 +1868,7 @@ unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
 **
 ************************************************************************/
 
-unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
+int esocket_select (esocket_handler_t * h, struct timeval *to)
 {
   int i, n;
   struct pollfd *pfd, *pfdi;
@@ -2006,7 +2006,7 @@ leave:
 **
 ************************************************************************/
 
-unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
+int esocket_select (esocket_handler_t * h, struct timeval *to)
 {
   int num, i;
   uint32_t activity;
@@ -2150,7 +2150,7 @@ unsigned int es_iocp_send (esocket_t * s, esocket_ioctx_t * ctxt)
 }
 
 
-unsigned int esocket_select (esocket_handler_t * h, struct timeval *to)
+int esocket_select (esocket_handler_t * h, struct timeval *to)
 {
   esocket_t *s;
   esocket_ioctx_t *ctxt;

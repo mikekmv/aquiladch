@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-28 21:27+0200\n"
+"POT-Creation-Date: 2007-03-30 22:25+0200\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -2447,14 +2447,14 @@ msgstr ""
 msgid "Client \"%s\" not found in banlist\n"
 msgstr ""
 
-#: src/pi_user.c:495
+#: src/pi_user.c:496
 #, c-format
 msgid ""
 "WARNING: resourcelimit for this process allows a absolute maximum of %lu "
 "users, currently %lu are configured.\n"
 msgstr ""
 
-#: src/pi_user.c:506
+#: src/pi_user.c:507
 #, c-format
 msgid ""
 "WARNING: You are using an Aquila version based on select(). This limits the "
@@ -2462,133 +2462,133 @@ msgid ""
 "your hub.\n"
 msgstr ""
 
-#: src/pi_user.c:514
+#: src/pi_user.c:515
 msgid ""
 "WARNING: You are using an Aquila version based on poll(). This limits the "
 "performance of your hub with larger sizes. Please consider moving to kernel "
 "version 2.6 and a recent glibc.\n"
 msgstr ""
 
-#: src/pi_user.c:521
+#: src/pi_user.c:522
 msgid ""
 "WARNING: userlimit.registered equals userlimit.op. userlimit.registered "
 "includes the ops (since they are registered too): setting them equal means "
 "that you only allow OPs, but not normal registered users.\n"
 msgstr ""
 
-#: src/pi_user.c:555
+#: src/pi_user.c:556
 msgid "Maximum number of users (set to 0 to ignore)."
 msgstr ""
 
-#: src/pi_user.c:556
+#: src/pi_user.c:557
 msgid "Maximum unregistered users."
 msgstr ""
 
-#: src/pi_user.c:557
+#: src/pi_user.c:558
 msgid "Maximum registered users."
 msgstr ""
 
-#: src/pi_user.c:558
+#: src/pi_user.c:559
 msgid "Reserve place for this many ops in the registered users."
 msgstr ""
 
-#: src/pi_user.c:562
+#: src/pi_user.c:563
 msgid "Minimum share requirement for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:563
+#: src/pi_user.c:564
 msgid "Minimum share requirement for registered users."
 msgstr ""
 
-#: src/pi_user.c:564
+#: src/pi_user.c:565
 msgid "Minimum share requirement for OPS"
 msgstr ""
 
-#: src/pi_user.c:566
+#: src/pi_user.c:567
 msgid "Minimum hubs for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:567
+#: src/pi_user.c:568
 msgid "Maximum hubs for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:568
+#: src/pi_user.c:569
 msgid "Minimum slots for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:569
+#: src/pi_user.c:570
 msgid "Maximum slots for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:570
+#: src/pi_user.c:571
 msgid "Minimum hubs/slot ratio for unregistered users."
 msgstr ""
 
-#: src/pi_user.c:572
+#: src/pi_user.c:573
 msgid "Minimum hubs for registered users."
 msgstr ""
 
-#: src/pi_user.c:573
+#: src/pi_user.c:574
 msgid "Maximum hubs for registered users."
 msgstr ""
 
-#: src/pi_user.c:574
+#: src/pi_user.c:575
 msgid "Minimum slots for registered users."
 msgstr ""
 
-#: src/pi_user.c:575
+#: src/pi_user.c:576
 msgid "Maximum slots for registered users."
 msgstr ""
 
-#: src/pi_user.c:576
+#: src/pi_user.c:577
 msgid "Minimum hubs/slot ratio for registered users."
 msgstr ""
 
-#: src/pi_user.c:578
+#: src/pi_user.c:579
 msgid "Minimum hubs for Operators."
 msgstr ""
 
-#: src/pi_user.c:579
+#: src/pi_user.c:580
 msgid "Maximum hubs for Operators."
 msgstr ""
 
-#: src/pi_user.c:580
+#: src/pi_user.c:581
 msgid "Minimum slots for Operators."
 msgstr ""
 
-#: src/pi_user.c:581
+#: src/pi_user.c:582
 msgid "Maximum slots for Operators."
 msgstr ""
 
-#: src/pi_user.c:582
+#: src/pi_user.c:583
 msgid "Minimum hubs/slot ratio for Operators."
 msgstr ""
 
-#: src/pi_user.c:593
+#: src/pi_user.c:594
 msgid "Show logged in user counts."
 msgstr ""
 
-#: src/pi_user.c:595
+#: src/pi_user.c:596
 msgid "Ban a client."
 msgstr ""
 
-#: src/pi_user.c:596
+#: src/pi_user.c:597
 msgid "List client bans."
 msgstr ""
 
-#: src/pi_user.c:597
+#: src/pi_user.c:598
 msgid "Unban a client."
 msgstr ""
 
-#: src/pi_user.c:599
+#: src/pi_user.c:600
 msgid "Add a source IP restriction for a user."
 msgstr ""
 
-#: src/pi_user.c:600
+#: src/pi_user.c:601
 msgid "Remove a source IP restriction for a user."
 msgstr ""
 
-#: src/pi_user.c:601
+#: src/pi_user.c:602
 msgid "Show source IP restrictions for a user."
 msgstr ""
 
@@ -2612,34 +2612,34 @@ msgstr ""
 msgid "List iplogs."
 msgstr ""
 
-#: src/hub.c:202
+#: src/hub.c:200
 #, c-format
 msgid "<%s> Don't reconnect so fast.|"
 msgstr ""
 
-#: src/hub.c:212 src/hub.c:223 src/hub.c:238 src/hub.c:251
+#: src/hub.c:210 src/hub.c:221 src/hub.c:236 src/hub.c:249
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:358 src/hub.c:498
+#: src/hub.c:356 src/hub.c:496
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:589
+#: src/hub.c:587
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:611
+#: src/hub.c:609
 msgid "Timeout"
 msgstr ""
 
-#: src/hub.c:623
+#: src/hub.c:621
 #, c-format
 msgid "Socket error %d."
 msgstr ""
 
-#: src/hub.c:625
+#: src/hub.c:623
 #, c-format
 msgid "Socket errno %d."
 msgstr ""

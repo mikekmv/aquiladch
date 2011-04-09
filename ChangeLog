@@ -1,6 +1,10 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta28:
+0.1.11-pre1-beta29:
+	ESOCKET: improve error handling. Should fix crash in accept_new_user
+		(Reported en_dator)
+	RSS: more memleaks fixed.
+	configure fix the libs in the tests.
 	USER: load in ip source list (reported en_dator).
 	TRIGGER: detect when command creation fails. (Reported SlimBlue)
 	Windows: add delayed close so all remaining data is written out,

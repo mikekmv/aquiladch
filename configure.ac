@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta28]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta29]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -443,8 +443,11 @@ then
 	LIBS="$LIBS $LUA_LIBS"
 
 	AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
+	LIBS="$save_LIBS $LUA_LIBS $lua_extra_libs"
 	AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
+	LIBS="$save_LIBS $LUA_LIBS $lua_extra_libs"
 	AC_CHECK_LIB([lua$with_lua_suffix], [luaL_checklstring], [lua_extra_libs="$lua_extra_libs" ], [lua_extra_libs="-llualib$with_lua_suffix $lua_extra_libs"])
+	LIBS="$save_LIBS $LUA_LIBS $lua_extra_libs"
 	AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_call],
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
@@ -462,7 +465,7 @@ then
 		save_CPPFLAGS="$CPPFLAGS"
 		save_LIBS="$LIBS"
 		CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
-		LIBS="$LIBS $LUA_LIBS"
+		LIBS="$LUA_LIBS $LIBS"
 		AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
 			#include <lua.h>
@@ -495,7 +498,7 @@ then
 			save_CPPFLAGS="$CPPFLAGS"
 			save_LIBS="$LIBS"
 			CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
-			LIBS="$LIBS $LUA_LIBS"
+			LIBS="$LUA_LIBS $LIBS"
 			AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	
 				#include <lua.h>
