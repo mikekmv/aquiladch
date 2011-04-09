@@ -105,6 +105,61 @@ unsigned char *xml_unescape (buffer_t * target, unsigned char *src)
   return 0;
 }
 
+xml_attr_t *xml_attr_add (xml_node_t * node, unsigned char *name, unsigned char *value)
+{
+  xml_attr_t *attr;
+
+  attr = malloc (sizeof (xml_attr_t));
+  if (!attr)
+    return NULL;
+
+  memset (attr, 0, sizeof (xml_attr_t));
+  attr->name = strdup (name);
+  attr->value = strdup (value);
+
+  attr->next = &node->attr;
+  attr->prev = node->attr.prev;
+  attr->next->prev = attr;
+  attr->prev->next = attr;
+
+  return attr;
+}
+
+xml_attr_t *xml_attr_find (xml_node_t * node, char *name)
+{
+  xml_attr_t *attr;
+
+  for (attr = node->attr.next; attr != &node->attr; attr = attr->next)
+    if (!strcmp (name, attr->name))
+      return attr;
+
+  return NULL;
+}
+
+void xml_attr_del (xml_attr_t * attr)
+{
+  attr->next->prev = attr->prev;
+  attr->prev->next = attr->next;
+  free (attr->name);
+  free (attr->value);
+  free (attr);
+}
+
+xml_attr_t *xml_node_attr_get (xml_node_t * node, unsigned char *name, unsigned char **value)
+{
+  xml_attr_t *attr = xml_attr_find (node, name);
+
+  if (!attr)
+    return NULL;
+
+  if (*value)
+    free (*value);
+  *value = strdup (attr->value);
+
+  return attr;
+}
+
+
 unsigned int xml_free (xml_node_t * tree)
 {
   xml_node_t *next;
@@ -121,6 +176,10 @@ unsigned int xml_free (xml_node_t * tree)
 
     /* kill children */
     xml_free (tree->children);
+
+    /* free the attributes */
+    while (tree->attr.next != &tree->attr)
+      xml_attr_del (tree->attr.next);
 
     /* free node memory */
     if (tree->flags & XML_FLAG_FREEVALUE)
@@ -158,6 +217,9 @@ xml_node_t *xml_node_add (xml_node_t * parent, char *name)
   node->name = strdup (name);
   node->flags |= XML_FLAG_FREENAME;
   node->parent = parent;
+
+  node->attr.next = &node->attr;
+  node->attr.prev = &node->attr;
 
   if (parent && parent->children) {
     node->next = parent->children;
@@ -369,6 +431,61 @@ xml_node_t *xml_child_get (xml_node_t * parent, char *name, xml_type_t type, voi
   return xml_node_get (child, type, value);
 }
 
+
+int xml_import_attr (xml_node_t * node, unsigned char *attr)
+{
+  unsigned int cont = 1;
+  unsigned char *c, *e, *v;
+
+  c = attr;
+
+  while (cont) {
+    /* skip any whitespace */
+    while (*c && isspace (*c))
+      c++;
+    if (!*c)
+      break;
+    e = c;
+
+    /* find end of attribute */
+    while (*e && !isspace (*e))
+      e++;
+
+    /* mark end of attribute */
+    if (!*e)
+      cont = 0;
+    *e = '\0';
+
+    /* find = */
+    v = c;
+    while ((v < e) && (*v != '='))
+      v++;
+
+    /* must be there. */
+    if (v == e)
+      goto fail;
+
+    /* replace = with 0 to seperate name and value */
+    *v++ = '\0';
+
+    /* detect and remove start and end " or ' */
+    if ((*v == '"') || (*v = '\'')) {
+      v++;
+      *(e - 1) = 0;
+    }
+
+    /* create the node. */
+    xml_attr_add (node, c, v);
+
+    c = ++e;
+  }
+
+  return 0;
+
+fail:
+  return -1;
+}
+
 unsigned char *xml_import_element (xml_node_t ** parent, unsigned char *c, unsigned char *end)
 {
   xml_node_t *node = NULL;
@@ -412,10 +529,15 @@ restart:
     c++;
   if (c == end)
     return NULL;
-  *c++ = 0;
 
   /* store attribute location */
-  attr = c;
+  if ((*c != '>') && *c) {
+    /* +1 so we skip the \0 we add below */
+    attr = c + 1;
+  } else
+    attr = NULL;
+
+  *c++ = 0;
   *e = 0;
 
   /* single tag element, no contents */
@@ -426,7 +548,9 @@ restart:
     /* create node */
     node = xml_node_add (*parent, name);
 
-    /* FIXME add attr */
+    /* parse attr */
+    if (attr)
+      xml_import_attr (node, attr);
 
     /* remove trailing whitespace */
     e++;
@@ -453,8 +577,9 @@ restart:
     if (*(c + 1) != '!') {
       /* subnode */
       node = xml_node_add (*parent, name);
+      if (attr)
+	xml_import_attr (node, attr);
       while ((*c == '<') && (*(c + 1) != '/')) {
-	/* FIXME add attr */
 	c = xml_import_element (&node, c, end);
 	if (!c || (c == end))
 	  goto leave;
@@ -502,7 +627,9 @@ restart:
     node = xml_node_add_value (*parent, name, XML_TYPE_STRING, buf->s);
 
     bf_free (buf);
-    /* FIXME add attr */
+
+    if (attr)
+      xml_import_attr (node, attr);
   }
 
   /* skip to end of tag and any trailing whitespace */

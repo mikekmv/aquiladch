@@ -40,12 +40,7 @@ void *dns_thread (void *arg)
 
   LOCK;
   for (;;) {
-    pthread_cond_wait (&dns->cond, &dns->mutex);
-
-    if (dns->tasklist.next == &dns->tasklist)
-      continue;
-
-    for (;;) {
+    for (; dns->tasklist.next != &dns->tasklist;) {
       /* dequeue all outstanding requests */
       list.next = dns->tasklist.next;
       list.prev = dns->tasklist.prev;
@@ -65,18 +60,16 @@ void *dns_thread (void *arg)
 	getaddrinfo (req->node, NULL, NULL, &req->addr);
 
 	/* lock and queue answer */
-	LOCK req->next = &dns->resultlist;
-
+	LOCK;
+	req->next = &dns->resultlist;
 	req->prev = dns->resultlist.prev;
 	req->next->prev = req;
 	req->prev->next = req;
-      UNLOCK}
-
+	UNLOCK;
+      }
       LOCK;
-      /* if no new request have been queued, break out */
-      if (dns->tasklist.next == &dns->tasklist)
-	break;
     }
+    pthread_cond_wait (&dns->cond, &dns->mutex);
   }
   UNLOCK;
 }

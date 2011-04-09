@@ -61,6 +61,11 @@ extern xml_node_t *xml_node_add (xml_node_t *parent, char *name);
 extern xml_node_t *xml_node_add_value (xml_node_t *parent, char *name, xml_type_t type, void *);
 extern xml_node_t *xml_parent (xml_node_t *parent);
 
+extern xml_attr_t *xml_attr_add (xml_node_t * node, unsigned char *name, unsigned char *value);
+extern xml_attr_t *xml_attr_find (xml_node_t * node, char *name);
+extern void xml_attr_del (xml_attr_t * attr);
+extern xml_attr_t *xml_node_attr_get (xml_node_t * node, unsigned char *name, unsigned char **value);
+
 extern xml_node_t *xml_node_find (xml_node_t *parent, char *name);
 extern xml_node_t *xml_node_find_next (xml_node_t *sibling, char *name);
 extern xml_node_t *xml_next (xml_node_t *sibling);

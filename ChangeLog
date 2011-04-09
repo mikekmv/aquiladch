@@ -1,6 +1,11 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta20:
+0.1.11-pre1-beta21:
+	RSS: handle timeouts better.
+	RSS: fix atom feeds
+	DNS: fix problem when request made before thread started.
+	XML: add attribute parsing.
+	RSS: Clear feedlist before load.
 	Fixed handling of WSAEWOULDBLOCK
 	Added IOCP connect polling internal to esocket
 	Attempt to fix feeds on windows.

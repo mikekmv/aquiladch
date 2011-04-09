@@ -164,6 +164,70 @@ buffer_t *rss_item_printf (rss_feed_t * feed, xml_node_t * elem)
   return buf;
 }
 
+buffer_t *rss_item_atom_printf (rss_feed_t * feed, xml_node_t * elem)
+{
+  rss_element_t *item;
+  xml_attr_t *attr;
+  xml_node_t *node;
+  buffer_t *buf;
+  unsigned char *clean;
+
+  buf = bf_alloc (1024);
+
+  if (feed->includes.next != &feed->includes) {
+    for (item = feed->includes.next; item != &feed->includes; item = item->next) {
+      node = xml_node_find (elem, item->entry->s);
+      if (!node)
+	continue;
+      if (!strcmp (node->name, "link")) {
+	attr = xml_attr_find (node, "href");
+	clean = rss_html_filter (attr->value);
+	if (strlen (clean) > maxitemlength) {
+	  buf = bf_printf_resize (buf, "%.*s...\n", maxitemlength, clean);
+	} else {
+	  buf = bf_printf_resize (buf, "%.*s\n", maxitemlength, clean);
+	}
+	free (clean);
+      } else {
+	if (!node->value)
+	  continue;
+	clean = rss_html_filter (node->value);
+	if (strlen (clean) > maxitemlength) {
+	  buf = bf_printf_resize (buf, "%.*s...\n", maxitemlength, clean);
+	} else {
+	  buf = bf_printf_resize (buf, "%.*s\n", maxitemlength, clean);
+	}
+	free (clean);
+      }
+    }
+  } else {
+    for (node = elem->children; node; node = xml_next (node)) {
+      if (!strcmp (node->name, "link")) {
+	attr = xml_attr_find (node, "href");
+	clean = rss_html_filter (attr->value);
+	if (strlen (clean) > maxitemlength) {
+	  buf = bf_printf_resize (buf, "%.*s...\n", maxitemlength, clean);
+	} else {
+	  buf = bf_printf_resize (buf, "%.*s\n", maxitemlength, clean);
+	}
+	free (clean);
+      } else {
+	if (!node->value)
+	  continue;
+	clean = rss_html_filter (node->value);
+	if (strlen (clean) > maxitemlength) {
+	  buf = bf_printf_resize (buf, "%.*s...\n", maxitemlength, clean);
+	} else {
+	  buf = bf_printf_resize (buf, "%.*s\n", maxitemlength, clean);
+	}
+	free (clean);
+      };
+    };
+  }
+
+  return buf;
+}
+
 rss_element_t *rss_elem_find (rss_element_t * list, unsigned long hash)
 {
   rss_element_t *elem;
@@ -207,6 +271,32 @@ rss_element_t *rss_item_add (rss_feed_t * feed, xml_node_t * node)
 
   return elem;
 }
+
+rss_element_t *rss_item_atom_add (rss_feed_t * feed, xml_node_t * node)
+{
+  unsigned long hash;
+  buffer_t *buf;
+  rss_element_t *elem;
+
+  buf = rss_item_atom_printf (feed, node);
+  hash = SuperFastHash (buf->s, bf_used (buf));
+
+  if (rss_elem_find (&feed->elems, hash))
+    return NULL;
+
+  elem = malloc (sizeof (rss_element_t));
+  elem->hash = hash;
+  elem->entry = buf;
+  elem->stamp = now.tv_sec;
+
+  elem->next = &feed->elems;
+  elem->prev = feed->elems.prev;
+  elem->next->prev = elem;
+  elem->prev->next = elem;
+
+  return elem;
+}
+
 
 unsigned int rss_item_timeout (rss_feed_t * feed, unsigned long timeout)
 {
@@ -284,7 +374,7 @@ rss_feed_t *rss_feed_add (unsigned char *name, unsigned char *url)
   feed->elems.prev = &feed->elems;
   feed->includes.next = &feed->includes;
   feed->includes.prev = &feed->includes;
-  feed->stamp = now.tv_sec;
+  feed->stamp = 0;
 
   feed->name = strdup (name);
 
@@ -408,7 +498,7 @@ int rss_feed_parse (rss_feed_t * feed, buffer_t * b)
 
     node = xml_node_find (base, "entry");
     do {
-      rss_item_add (feed, node);
+      rss_item_atom_add (feed, node);
       node = xml_node_find_next (node, "entry");
     } while (node);
   } else {
@@ -520,6 +610,8 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
       node = xml_node_find_next (node, "item");
     } while (node);
   } else if (!strcmp (base->name, "feed")) {
+    xml_attr_t *attr;
+
     /*
      * Atom based feed!
      *
@@ -530,19 +622,30 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
     elem = xml_node_find (base, "title");
     output = bf_printf_resize (output, " Title: %s\n", elem->value);
     feed->title = strdup (elem->value);
+    elem = xml_node_find (base, "link");
+    attr = xml_attr_find (elem, "href");
+    if (attr)
+      output = bf_printf_resize (output, " Link: %s\n", attr->value);
 
     /* print a sample entry */
+    output = bf_printf_resize (output, "\n Example node:\n");
     node = xml_node_find (base, "entry");
     if (node->children) {
       for (elem = node->children; elem; elem = xml_next (elem)) {
-	if (!elem->value)
+	if (!elem->value) {
+	  if (!strcmp (elem->name, "link")) {
+	    attr = xml_attr_find (elem, "href");
+	    if (attr)
+	      output = bf_printf_resize (output, "%s: %s\n", elem->name, attr->value);
+	  }
 	  continue;
+	}
 	output = bf_printf_resize (output, "%s: %s\n", elem->name, elem->value);
       }
     }
     /* do the actual parsing */
     do {
-      rss_item_add (feed, node);
+      rss_item_atom_add (feed, node);
       node = xml_node_find_next (node, "entry");
     } while (node);
   } else {
@@ -569,7 +672,8 @@ int pi_rss_report (rss_feed_t * feed, unsigned long stamp)
   bf_printf (output, "\n%s", feed->title);
   if (feed->description)
     bf_printf (output, " - %s", feed->description);
-  bf_printf (output, "\n\n");
+  /* add a extra space to it so the hub doesn't delete the last line. */
+  bf_printf (output, "\n \n");
 
   if (rss_item_list (feed, output, stamp))
     plugin_user_say (NULL, output);
@@ -592,6 +696,10 @@ int pi_rss_finish (rss_feed_t * feed)
   feed->es = NULL;
   stamp = feed->stamp;
   feed->stamp = now.tv_sec;
+
+  /* if this is the first finish, don't print everything. */
+  if (!stamp)
+    stamp = now.tv_sec;
 
   /* update the deadline if necessary */
   if (rss_deadline > (feed->stamp + feed->interval))
@@ -844,6 +952,30 @@ int pi_rss_handle_error (esocket_t * s)
   return 0;
 };
 
+int pi_rss_handle_timeout (esocket_t * s)
+{
+  rss_feed_t *feed = (rss_feed_t *) s->context;
+
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
+
+  if (s->state == SOCKSTATE_RESOLVING) {
+    esocket_settimeout (feed->es, PI_RSS_CONNECT_TIMEOUT);
+    return 0;
+  }
+
+
+  plugin_perror ("RSS timeout (%s)", feed->name);
+  esocket_close (feed->es);
+  esocket_remove_socket (feed->es);
+  feed->es = NULL;
+
+  /* retry for error. */
+  feed->stamp = now.tv_sec - feed->interval + PI_RSS_ERROR_RETRY;
+
+  return 0;
+};
+
 unsigned long pi_rss_handler_rss (plugin_user_t * user, buffer_t * output, void *dummy,
 				  unsigned int argc, unsigned char **argv)
 {
@@ -981,29 +1113,38 @@ unsigned long pi_rss_handler_rsslist (plugin_user_t * user, buffer_t * output, v
   rss_feed_t *feed;
   rss_element_t *elem;
 
-  /* show all included tags for all feeds. */
-  for (feed = feedlist.next; feed != &feedlist; feed = feed->next) {
-    bf_printf (output, "Feed: %s (Updated %s)\n", feed->name, time_print (feed->interval));
-    if (feed->description) {
-      bf_printf (output, "  %s - %s\n", feed->title,
-		 feed->description ? feed->description : (unsigned char *) "No desciption.");
-    } else {
-      bf_printf (output, "  %s\n", feed->title);
-    }
-    if (feed->lastmodified)
-      bf_printf (output, "  Last modified: %s\n", feed->lastmodified);
-    if (feed->es) {
-      bf_printf (output, "  Next update: Running...\n");
-    } else {
-      bf_printf (output, "  Next update: %s\n",
-		 time_print (feed->stamp + feed->interval - now.tv_sec));
-    }
-    if (feed->includes.next != &feed->includes) {
-      bf_printf (output, " Includes: ");
-      for (elem = feed->includes.next; elem != &feed->includes; elem = elem->next) {
-	bf_printf (output, "  %.*s", bf_used (elem->entry), elem->entry->s);
+  if (feedlist.next == &feedlist) {
+    bf_printf (output, "No feeds configured\n");
+  } else {
+    /* show all included tags for all feeds. */
+    for (feed = feedlist.next; feed != &feedlist; feed = feed->next) {
+      bf_printf (output, "Feed: %s (Updated %s)\n", feed->name, time_print (feed->interval));
+      if (feed->description) {
+	bf_printf (output, "  %s - %s\n", feed->title,
+		   feed->description ? feed->description : (unsigned char *) "No desciption.");
+      } else {
+	bf_printf (output, "  %s\n", feed->title);
       }
-      bf_printf (output, "\n");
+      if (feed->port != 80) {
+	bf_printf (output, "  Link: http://%s:%u/%s\n", feed->address, feed->port, feed->path);
+      } else {
+	bf_printf (output, "  Link: http://%s/%s\n", feed->address, feed->path);
+      }
+      if (feed->lastmodified)
+	bf_printf (output, "  Last modified: %s\n", feed->lastmodified);
+      if (feed->es) {
+	bf_printf (output, "  Next update: Running...\n");
+      } else {
+	bf_printf (output, "  Next update: %s\n",
+		   time_print (feed->stamp + feed->interval - now.tv_sec));
+      }
+      if (feed->includes.next != &feed->includes) {
+	bf_printf (output, " Includes: ");
+	for (elem = feed->includes.next; elem != &feed->includes; elem = elem->next) {
+	  bf_printf (output, "  %.*s", bf_used (elem->entry), elem->entry->s);
+	}
+	bf_printf (output, "\n");
+      }
     }
   }
 
@@ -1101,6 +1242,9 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
   if (!node)
     return 0;
 
+  for (feed = feedlist.next; feed != &feedlist; feed = feedlist.next)
+    rss_feed_del (feed);
+
   node = xml_node_find (node, "RSS");
   if (!node)
     return 0;
@@ -1184,7 +1328,7 @@ int pi_rss_setup (esocket_handler_t * h)
   pi_rss_handler = h;
   pi_rss_es_type =
     esocket_add_type (h, ESOCKET_EVENT_IN, pi_rss_handle_input, pi_rss_handle_output,
-		      pi_rss_handle_error, pi_rss_handle_error);
+		      pi_rss_handle_error, pi_rss_handle_timeout);
 
   plugin_request (NULL, PLUGIN_EVENT_CACHEFLUSH, (plugin_event_handler_t *) pi_rss_handle_update);
 
