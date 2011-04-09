@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.11-pre1-beta32\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-10 21:38+0200\n"
+"POT-Creation-Date: 2007-04-11 00:27+0200\n"
 "PO-Revision-Date: 2007-03-12 00:24+0100\n"
 "Last-Translator: en_dator <endator@gmail.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -2152,29 +2152,34 @@ msgstr ""
 msgid "Not a valid IP address.\n"
 msgstr "Inte en giltig IP adress.\n"
 
-#: src/pi_lua.c:1614 src/pi_lua.c:1870 src/pi_lua.c:2416
+#: src/pi_lua.c:1614 src/pi_lua.c:1886 src/pi_lua.c:2432
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr "LUA ERROR ('%s'): %s\n"
 
-#: src/pi_lua.c:1901
+#: src/pi_lua.c:1759
+#, fuzzy, c-format
+msgid "LUA ERROR (Timer): %s\n"
+msgstr "LUA ERROR ('%s'): %s\n"
+
+#: src/pi_lua.c:1917
 msgid "No such LUA function."
 msgstr "Den LUA funktionen finns inte."
 
-#: src/pi_lua.c:1909
+#: src/pi_lua.c:1925
 msgid "Command failed to register."
 msgstr "Kommandot kunde inte registreras."
 
-#: src/pi_lua.c:1917
+#: src/pi_lua.c:1933
 msgid "Could not allocate memory."
 msgstr "Kunde inte allokera minne."
 
-#: src/pi_lua.c:2188 src/pi_lua.c:2214
+#: src/pi_lua.c:2204 src/pi_lua.c:2230
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr "LUA fel: %s\n"
 
-#: src/pi_lua.c:2315
+#: src/pi_lua.c:2331
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -2185,7 +2190,7 @@ msgstr ""
 "Version: %s\n"
 "Antal skript nu/max: %d/%d"
 
-#: src/pi_lua.c:2319
+#: src/pi_lua.c:2335
 msgid ""
 "\n"
 "No LUA scripts running.\n"
@@ -2193,7 +2198,7 @@ msgstr ""
 "\n"
 "Inga LUA skript körs.\n"
 
-#: src/pi_lua.c:2323
+#: src/pi_lua.c:2339
 msgid ""
 "\n"
 "Running LUA scripts:\n"
@@ -2201,45 +2206,45 @@ msgstr ""
 "\n"
 "Kör följande LUA skript:\n"
 
-#: src/pi_lua.c:2336 src/pi_lua.c:2354
+#: src/pi_lua.c:2352 src/pi_lua.c:2370
 #, c-format
 msgid "Usage: %s <script>"
 msgstr "Användning: %s <script>"
 
-#: src/pi_lua.c:2341
+#: src/pi_lua.c:2357
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr "Luaskript '%s' är laddat.\n"
 
-#: src/pi_lua.c:2343
+#: src/pi_lua.c:2359
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr "Luaskript '%s' kunde inte laddas.\n"
 
-#: src/pi_lua.c:2359
+#: src/pi_lua.c:2375
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr "Luaskript '%s' urladdat.\n"
 
-#: src/pi_lua.c:2361
+#: src/pi_lua.c:2377
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr "Luaskript '%s' hittas inte.\n"
 
-#: src/pi_lua.c:2491
+#: src/pi_lua.c:2507
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr "LUA: Fel när %s sparades"
 
-#: src/pi_lua.c:2576
+#: src/pi_lua.c:2592
 msgid "Show lua stats."
 msgstr "Visa LUA statistik."
 
-#: src/pi_lua.c:2577
+#: src/pi_lua.c:2593
 msgid "Load a lua script."
 msgstr "Ladda ett luaskript."
 
-#: src/pi_lua.c:2578
+#: src/pi_lua.c:2594
 msgid "Remove a lua script."
 msgstr "Ta bort ett luaskript."
 
@@ -2755,32 +2760,32 @@ msgstr "Lista lagrade IP nummer."
 msgid "<%s> Don't reconnect so fast.|"
 msgstr "<%s> Återanslut inte så fort.|"
 
-#: src/hub.c:213 src/hub.c:224 src/hub.c:239 src/hub.c:251
+#: src/hub.c:213 src/hub.c:222 src/hub.c:237 src/hub.c:249
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:366 src/hub.c:513
+#: src/hub.c:370 src/hub.c:517
 msgid "Connection closed."
 msgstr "Anslutning stängd."
 
-#: src/hub.c:608
+#: src/hub.c:612
 msgid "Error on read."
 msgstr "Fel vid läsning."
 
-#: src/hub.c:628
+#: src/hub.c:632
 #, fuzzy
 msgid "Buffering Timeout"
 msgstr ""
 "\n"
 "Buffrande klienter:\n"
 
-#: src/hub.c:645
+#: src/hub.c:652
 #, c-format
 msgid "Socket error %d."
 msgstr "Socketfel %d."
 
-#: src/hub.c:647
+#: src/hub.c:654
 #, c-format
 msgid "Socket errno %d."
 msgstr "Socketfel nummer %d."

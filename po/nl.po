@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-10 21:38+0200\n"
+"POT-Creation-Date: 2007-04-11 00:27+0200\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -2071,29 +2071,34 @@ msgstr ""
 msgid "Not a valid IP address.\n"
 msgstr ""
 
-#: src/pi_lua.c:1614 src/pi_lua.c:1870 src/pi_lua.c:2416
+#: src/pi_lua.c:1614 src/pi_lua.c:1886 src/pi_lua.c:2432
 #, c-format
 msgid "LUA ERROR ('%s'): %s\n"
 msgstr ""
 
-#: src/pi_lua.c:1901
-msgid "No such LUA function."
-msgstr ""
-
-#: src/pi_lua.c:1909
-msgid "Command failed to register."
+#: src/pi_lua.c:1759
+#, c-format
+msgid "LUA ERROR (Timer): %s\n"
 msgstr ""
 
 #: src/pi_lua.c:1917
+msgid "No such LUA function."
+msgstr ""
+
+#: src/pi_lua.c:1925
+msgid "Command failed to register."
+msgstr ""
+
+#: src/pi_lua.c:1933
 msgid "Could not allocate memory."
 msgstr ""
 
-#: src/pi_lua.c:2188 src/pi_lua.c:2214
+#: src/pi_lua.c:2204 src/pi_lua.c:2230
 #, c-format
 msgid "LUA ERROR: %s\n"
 msgstr ""
 
-#: src/pi_lua.c:2315
+#: src/pi_lua.c:2331
 #, c-format
 msgid ""
 "Lua stats\n"
@@ -2101,57 +2106,57 @@ msgid ""
 "Scripts count/peak: %d/%d"
 msgstr ""
 
-#: src/pi_lua.c:2319
+#: src/pi_lua.c:2335
 msgid ""
 "\n"
 "No LUA scripts running.\n"
 msgstr ""
 
-#: src/pi_lua.c:2323
+#: src/pi_lua.c:2339
 msgid ""
 "\n"
 "Running LUA scripts:\n"
 msgstr ""
 
-#: src/pi_lua.c:2336 src/pi_lua.c:2354
+#: src/pi_lua.c:2352 src/pi_lua.c:2370
 #, c-format
 msgid "Usage: %s <script>"
 msgstr ""
 
-#: src/pi_lua.c:2341
+#: src/pi_lua.c:2357
 #, c-format
 msgid "Lua script '%s' loaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2343
+#: src/pi_lua.c:2359
 #, c-format
 msgid "Lua script '%s' failed to load.\n"
 msgstr ""
 
-#: src/pi_lua.c:2359
+#: src/pi_lua.c:2375
 #, c-format
 msgid "Lua script '%s' unloaded.\n"
 msgstr ""
 
-#: src/pi_lua.c:2361
+#: src/pi_lua.c:2377
 #, c-format
 msgid "Lua script '%s' not found.\n"
 msgstr ""
 
-#: src/pi_lua.c:2491
+#: src/pi_lua.c:2507
 #, c-format
 msgid "LUA: ERROR saving %s"
 msgstr ""
 
-#: src/pi_lua.c:2576
+#: src/pi_lua.c:2592
 msgid "Show lua stats."
 msgstr ""
 
-#: src/pi_lua.c:2577
+#: src/pi_lua.c:2593
 msgid "Load a lua script."
 msgstr ""
 
-#: src/pi_lua.c:2578
+#: src/pi_lua.c:2594
 msgid "Remove a lua script."
 msgstr ""
 
@@ -2621,29 +2626,29 @@ msgstr ""
 msgid "<%s> Don't reconnect so fast.|"
 msgstr ""
 
-#: src/hub.c:213 src/hub.c:224 src/hub.c:239 src/hub.c:251
+#: src/hub.c:213 src/hub.c:222 src/hub.c:237 src/hub.c:249
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
 msgstr ""
 
-#: src/hub.c:366 src/hub.c:513
+#: src/hub.c:370 src/hub.c:517
 msgid "Connection closed."
 msgstr ""
 
-#: src/hub.c:608
+#: src/hub.c:612
 msgid "Error on read."
 msgstr ""
 
-#: src/hub.c:628
+#: src/hub.c:632
 msgid "Buffering Timeout"
 msgstr ""
 
-#: src/hub.c:645
+#: src/hub.c:652
 #, c-format
 msgid "Socket error %d."
 msgstr ""
 
-#: src/hub.c:647
+#: src/hub.c:654
 #, c-format
 msgid "Socket errno %d."
 msgstr ""

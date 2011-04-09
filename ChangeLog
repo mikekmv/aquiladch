@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta36:
+0.1.11-pre1-beta37:
+	LUA: fix timer error handling (reported en_dator)
+	HUB: Use real buffer in closing socket.
+	IOCP: Fix delayed close in esocket_iocp.c
 	Fix crash with timer set after user freed.
 	Added support for hidden users.
 	LUA: fixed crash in SetConfig (Reported en_dator)

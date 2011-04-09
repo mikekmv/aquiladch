@@ -1,4 +1,4 @@
-/*                                                                                                                                    
+/*
  *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -212,8 +212,6 @@ int accept_new_user (esocket_t * s)
 	snprintf (buffer, sizeof (buffer),
 		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
       goto error;
-
-      return -1;
     }
 
     /* client */
@@ -254,9 +252,8 @@ int accept_new_user (esocket_t * s)
     }
 
     /* this can fail in case of IOCP... it will call server_handle_error and free everything */
-    if (esocket_update_state (cl->es, SOCKSTATE_CONNECTED) < 0) {
+    if (esocket_update_state (cl->es, SOCKSTATE_CONNECTED) < 0)
       return -1;
-    }
 
     DPRINTF (" Accepted %s user from %s\n", cl->proto->name, inet_ntoa (client_address.sin_addr));
 
@@ -280,9 +277,15 @@ error:
     esocket_t *es = esocket_add_socket (s->handler, es_type_server, r, 0);
 
     if (es) {
-      if (l)
-	esocket_send (es, bf_buffer (buffer), 0);
-      /* FIXME esocket_settimeout (es, 1000); */
+      buffer_t *buf = bf_alloc (l);
+
+      if (buf) {
+	bf_memcpy (buf, buffer, l);
+	es->state = SOCKSTATE_CONNECTED;
+	if (l)
+	  esocket_send (es, buf, 0);
+	bf_free (buf);
+      }
       esocket_remove_socket (es);
     } else {
       close (r);
@@ -296,6 +299,7 @@ error:
 
   if (cl->user)
     cl->proto->user_free (cl->user);
+
   free (cl);
 
   return -1;
@@ -633,6 +637,9 @@ int server_error (esocket_t * s)
   char buffer[256];
 
   client_t *cl = (client_t *) ((uintptr_t) s->context);
+
+  if (!cl)
+    return 0;
 
   ASSERT (s->state != SOCKSTATE_FREED);
   if (s->state == SOCKSTATE_FREED)

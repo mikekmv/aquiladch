@@ -85,7 +85,8 @@ unsigned long iocpFragments = 2;
 /* 
  *   connect polling interval
  */
-#define IOCP_CONNECT_INTERVAL  250
+#define IOCP_CONNECT_INTERVAL	250
+#define IOCP_CLOSE_DEADLINE  	1000
 
 /*
  * memory autotuning 
@@ -125,6 +126,13 @@ unsigned long iocp_users = 0;
 unsigned long outstandingbytes_peruser = IOCP_COMPLETION_SIZE_MAX;
 
 unsigned char fake_buf;
+
+int esocket_hard_close (esocket_t * s);
+
+int esocket_timeout_close (esocket_t * s)
+{
+  return esocket_hard_close (s);
+}
 
 unsigned int translate_error (unsigned int winerror)
 {
@@ -530,6 +538,9 @@ int esocket_update_state (esocket_t * s, unsigned int newstate)
 
       break;
     case SOCKSTATE_CLOSING:
+      etimer_cancel (&s->timer);
+      etimer_init (&s->timer, (etimer_handler_t *) esocket_timeout_close, s);
+      etimer_set (&s->timer, IOCP_CLOSE_DEADLINE);
       break;
 
     case SOCKSTATE_CLOSED:
@@ -925,24 +936,9 @@ int esocket_connect (esocket_t *s, char *address, unsigned int port) {
 #endif
 */
 
-int esocket_remove_socket (esocket_t * s)
+int esocket_hard_close (esocket_t * s)
 {
-  esocket_handler_t *h;
-
-  if (!s)
-    return 0;
-
-  ASSERT (s->state != SOCKSTATE_FREED);
-
-  h = s->handler;
-
-  if (s->state == SOCKSTATE_CLOSING)
-    return 0;
-
-  if (s->fragments) {
-    esocket_update_state (s, SOCKSTATE_CLOSING);
-    return 0;
-  }
+  etimer_cancel (&s->timer);
 
   if (s->state != SOCKSTATE_CLOSED)
     esocket_update_state (s, SOCKSTATE_CLOSED);
@@ -964,7 +960,7 @@ int esocket_remove_socket (esocket_t * s)
   if (s->prev) {
     s->prev->next = s->next;
   } else {
-    h->sockets = s->next;
+    s->handler->sockets = s->next;
   };
 
   /* put in freelist */
@@ -974,6 +970,25 @@ int esocket_remove_socket (esocket_t * s)
   s->state = SOCKSTATE_FREED;
 
   return 1;
+
+}
+
+int esocket_remove_socket (esocket_t * s)
+{
+  if (!s)
+    return 0;
+
+  ASSERT (s->state != SOCKSTATE_FREED);
+
+  if (s->state == SOCKSTATE_CLOSING)
+    return 0;
+
+  if (s->fragments) {
+    esocket_update_state (s, SOCKSTATE_CLOSING);
+    return 0;
+  }
+
+  return esocket_hard_close (s);
 }
 
 int esocket_update (esocket_t * s, int fd, unsigned int sockstate)
@@ -1254,10 +1269,9 @@ int esocket_select (esocket_handler_t * h, struct timeval *to)
       ioctx_free (ctxt);
       free (ctxt);
 
-      if (!s->fragments) {
-	esocket_update_state (s, SOCKSTATE_CLOSED);
-	esocket_remove_socket (s);
-      }
+      if (!s->fragments)
+	esocket_hard_close (s);
+
       continue;
     }
 

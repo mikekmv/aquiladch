@@ -1749,7 +1749,23 @@ unsigned long pi_lua_handle_timeout (pi_lua_timer_context_t * ctx)
   lua_rawgeti (lua, LUA_REGISTRYINDEX, ctx->dataref);
   result = lua_pcall (lua, 1, 1, 0);
   if (result) {
-    lua_error (lua);
+    unsigned char *error = (unsigned char *) luaL_checkstring (ctx->lua, 1);
+    buffer_t *buf;
+
+    DPRINTF ("LUA ERROR: %s\n", error);
+
+    /* report error */
+    buf = bf_alloc (32 + strlen (error));
+    bf_printf (buf, _("LUA ERROR (Timer): %s\n"), error);
+    plugin_report (buf);
+    bf_free (buf);
+
+    /* delete timer */
+    luaL_unref (lua, LUA_REGISTRYINDEX, ctx->funcref);
+    luaL_unref (lua, LUA_REGISTRYINDEX, ctx->dataref);
+    free (ctx);
+
+    return 0;
   } else {
     /* retrieve return value */
     retval = lua_toboolean (lua, -1);
