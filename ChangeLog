@@ -1,5 +1,8 @@
 This is the Aquila Changelog.
 
+0.1.11-pre2-beta2p1
+	Patch for building and running on OpenBSD
+
 0.1.11-pre2-beta2 (unoffical):
 	Fixed Aquila.xml permission when using the installation script and daemontools
 	Updated the Finnish translation
