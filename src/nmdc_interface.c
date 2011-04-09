@@ -87,8 +87,6 @@ unsigned char *nickchars;
 unsigned char nickchar_map[256];
 unsigned char nmdc_forbiddenchars[256];
 
-unsigned int notimeout = 0;
-
 config_element_t *cfg_nickchars;
 
 leaky_bucket_t rate_warnings;
@@ -609,9 +607,6 @@ int proto_nmdc_user_raw (user_t * target, buffer_t * message)
   if (target->state == PROTO_STATE_DISCONNECTED)
     return EINVAL;
 
-  if (target->state == PROTO_STATE_VIRTUAL)
-    return 0;
-
   buf = bf_copy (message, 0);
 
   cache_queue (((nmdc_user_t *) target->pdata)->privatemessages, target, buf);
@@ -1053,11 +1048,6 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 {
   buffer_t *b;
 
-  if (!buffers) {
-    etimer_set (&user->timer, PROTO_TIMEOUT_ONLINE);
-    return 0;
-  }
-
   if (bf_size (*buffers) > MAX_TOKEN_SIZE) {
     bf_free (*buffers);
     *buffers = NULL;
@@ -1102,15 +1092,8 @@ int proto_nmdc_handle_input (user_t * user, buffer_t ** buffers)
 
 unsigned long proto_nmdc_handle_timeout (user_t * user)
 {
-  if (user->state == PROTO_STATE_ONLINE) {
-    /* online users never time out. */
-    if (notimeout)
-      return 0;
-
-    /* reset the timer if the user is not buffering */
-    if (!server_isbuffering (user->parent))
-      return etimer_set (&user->timer, PROTO_TIMEOUT_ONLINE);
-  }
+  if ((user->state == PROTO_STATE_ONLINE) && !server_isbuffering (user->parent))
+    return etimer_set (&user->timer, PROTO_TIMEOUT_ONLINE);
 
   return server_disconnect_user (user->parent, "Protocol Timeout");
 }
@@ -1394,9 +1377,6 @@ int proto_nmdc_init ()
   config_register ("nmdc.defaultbanmessage", CFG_ELEM_STRING, &defaultbanmessage,
 		   _("This message is send to all banned users when they try to join."));
 
-  config_register ("nmdc.notimeoutonline", CFG_ELEM_UINT, &notimeout,
-		   _("Online users never get timed out."));
-
   cfg_nickchars = config_register ("nmdc.nickchars", CFG_ELEM_STRING, &nickchars,
 				   _
 				   ("These are the characters allowed in a nick. An empty string means all characters. Does NOT support utf-8 character."));
@@ -1480,31 +1460,6 @@ int proto_nmdc_init ()
   stats_register ("nmdc.cache_psearch",		VAL_ELEM_ULONG, &nmdc_stats.cache_psearch, "total bytes send in passive searches");
   stats_register ("nmdc.cache_messages",	VAL_ELEM_ULONG, &nmdc_stats.cache_messages,"total bytes send in user message");
   stats_register ("nmdc.cache_results",		VAL_ELEM_ULONG, &nmdc_stats.cache_results, "total byte send in search results");
-
-  stats_register ("nicklistcache_nicklist_length",  VAL_ELEM_ULONG, &cache.nicklist_length,  "current length of nicklist.");
-  stats_register ("nicklistcache_oplist_length",    VAL_ELEM_ULONG, &cache.oplist_length,    "current length of oplist.");
-  stats_register ("nicklistcache_infolist_length",  VAL_ELEM_ULONG, &cache.infolist_length,  "current length of infolist.");
-  stats_register ("nicklistcache_hellolist_length", VAL_ELEM_ULONG, &cache.hellolist_length, "current length of hellolist.");
-
-  stats_register ("nicklistcache_infolistzline_length", VAL_ELEM_ULONG, &cache.infolistzline_length, "current length of infolistzline.");
-  stats_register ("nicklistcache_nicklistzline_length", VAL_ELEM_ULONG, &cache.nicklistzline_length, "current length of nicklistzline.");
-  stats_register ("nicklistcache_infolistzpipe_length", VAL_ELEM_ULONG, &cache.infolistzpipe_length, "current length of infolistzpipe.");
-  stats_register ("nicklistcache_nicklistzpipe_length", VAL_ELEM_ULONG, &cache.nicklistzpipe_length, "current length of nicklistzpipe.");
-  
-  stats_register ("nicklistcache_infolistupdate_length", VAL_ELEM_ULONG, &cache.infolistupdate_length, "current length of infolist update.");
-
-  stats_register ("nicklistcache_nicklist_count",  VAL_ELEM_ULONG, &cache.nicklist_count,  "current count of nicklist.");
-  stats_register ("nicklistcache_oplist_count",    VAL_ELEM_ULONG, &cache.oplist_count,    "current count of oplist.");
-  stats_register ("nicklistcache_infolist_count",  VAL_ELEM_ULONG, &cache.infolist_count,  "current count of infolist.");
-  stats_register ("nicklistcache_hellolist_count", VAL_ELEM_ULONG, &cache.hellolist_count, "current count of hellolist.");
-
-  stats_register ("nicklistcache_infolistzline_count", VAL_ELEM_ULONG, &cache.infolistzline_count, "current count of infolistzline.");
-  stats_register ("nicklistcache_nicklistzline_count", VAL_ELEM_ULONG, &cache.nicklistzline_count, "current count of nicklistzline.");
-  stats_register ("nicklistcache_infolistzpipe_count", VAL_ELEM_ULONG, &cache.infolistzpipe_count, "current count of infolistzpipe.");
-  stats_register ("nicklistcache_nicklistzpipe_count", VAL_ELEM_ULONG, &cache.nicklistzpipe_count, "current count of nicklistzpipe.");
-  
-  stats_register ("nicklistcache_infolistupdate_bytes", VAL_ELEM_ULONG, &cache.infolistupdate_bytes, "current bytes send in infolist updates.");
-
   /* *INDENT-ON* */
 
   return 0;

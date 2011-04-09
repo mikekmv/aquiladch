@@ -10,7 +10,7 @@ DEFAULT_GROUP="aquila"
 DEFAULT_SHELL="/bin/false"
 DEFAULT_HOME="/home/${DEFAULT_USER}"
 
-CONFIGFILES="accounts.conf chatroom.conf clientbanlist.conf hardban.conf hub.conf softban.conf restrict.conf lua.conf trigger.conf lua.conf aquila.pid Aquila.xml"
+CONFIGFILES="accounts.conf chatroom.conf clientbanlist.conf hardban.conf hub.conf softban.conf restrict.conf lua.conf trigger.conf lua.conf aquila.pid"
 
 unset USER
 unset GROUP

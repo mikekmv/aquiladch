@@ -168,6 +168,33 @@ unsigned int banlist_client_load (banlist_client_t * list, xml_node_t * node)
   return 0;
 }
 
+unsigned int banlist_client_save_old (banlist_client_t * list, unsigned char *file)
+{
+  FILE *fp;
+  uint32_t i;
+  unsigned long l;
+  banlist_client_entry_t *e, *lst;
+
+  fp = fopen (file, "w+");
+  if (!fp) {
+    return errno;
+  }
+
+  dlhashlist_foreach (list, i) {
+    lst = dllist_bucket (list, i);
+    dllist_foreach (lst, e) {
+      l = bf_used (e->message);
+      fwrite (e->client, sizeof (e->client), 1, fp);
+      fwrite (&e->minVersion, sizeof (e->minVersion), 1, fp);
+      fwrite (&e->maxVersion, sizeof (e->maxVersion), 1, fp);
+      fwrite (&l, sizeof (l), 1, fp);
+      fwrite (e->message->s, 1, l, fp);
+    }
+  }
+  fclose (fp);
+  return 0;
+}
+
 unsigned int banlist_client_load_old (banlist_client_t * list, unsigned char *file)
 {
   FILE *fp;

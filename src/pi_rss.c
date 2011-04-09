@@ -606,15 +606,15 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
      */
     node = xml_node_find (base, "channel");
     elem = xml_node_find (node, "title");
-    output = bf_printf_resize (output, _(" Title: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Title: %s\n", elem->value);
     feed->title = strdup (elem->value);
     elem = xml_node_find (node, "link");
-    output = bf_printf_resize (output, _(" Link: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Link: %s\n", elem->value);
     elem = xml_node_find (node, "description");
-    output = bf_printf_resize (output, _(" Description: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Description: %s\n", elem->value);
 
     /* print a sample entry */
-    output = bf_printf_resize (output, _("\n Example node:\n"));
+    output = bf_printf_resize (output, "\n Example node:\n");
     node = xml_node_find (node, "item");
     if (node->children) {
       for (elem = node->children; elem; elem = xml_next (elem)) {
@@ -640,15 +640,15 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
      */
     node = xml_node_find (base, "channel");
     elem = xml_node_find (node, "title");
-    output = bf_printf_resize (output, _(" Title: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Title: %s\n", elem->value);
     feed->title = strdup (elem->value);
     elem = xml_node_find (node, "link");
-    output = bf_printf_resize (output, _(" Link: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Link: %s\n", elem->value);
     elem = xml_node_find (node, "description");
-    output = bf_printf_resize (output, _(" Description: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Description: %s\n", elem->value);
 
     /* print a sample entry */
-    output = bf_printf_resize (output, _("\n Example node:\n"));
+    output = bf_printf_resize (output, "\n Example node:\n");
     node = xml_node_find (base, "item");
     if (node->children) {
       for (elem = node->children; elem; elem = xml_next (elem)) {
@@ -673,15 +673,15 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
      *    contain title, link, summary and/or content
      */
     elem = xml_node_find (base, "title");
-    output = bf_printf_resize (output, _(" Title: %s\n"), elem->value);
+    output = bf_printf_resize (output, " Title: %s\n", elem->value);
     feed->title = strdup (elem->value);
     elem = xml_node_find (base, "link");
     attr = xml_attr_find (elem, "href");
     if (attr)
-      output = bf_printf_resize (output, _(" Link: %s\n"), attr->value);
+      output = bf_printf_resize (output, " Link: %s\n", attr->value);
 
     /* print a sample entry */
-    output = bf_printf_resize (output, _("\n Example node:\n"));
+    output = bf_printf_resize (output, "\n Example node:\n");
     node = xml_node_find (base, "entry");
     if (node->children) {
       for (elem = node->children; elem; elem = xml_next (elem)) {
@@ -703,7 +703,7 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
     } while (node);
   } else {
     /* unknown format */
-    output = bf_printf_resize (output, _("Unknown format.\n"));
+    output = bf_printf_resize (output, "Unknown format.\n");
   }
 
   //rss_item_timeout (&feed->elems, now.tv_sec - maxentryage)
@@ -812,7 +812,7 @@ int pi_rss_finish (rss_feed_t * feed)
       DPRINTF ("RSS: Feed %s got 301 Moved Permanently: %s\n", feed->name, c);
 
       errno = 0;
-      plugin_perror (_("RSS fetch failed, destination moved permanently: %s"), c);
+      plugin_perror ("RSS fetch failed, destination moved permanently: %s", c);
       goto leave;
 
       /* not changed */
@@ -826,7 +826,7 @@ int pi_rss_finish (rss_feed_t * feed)
       *e = 0;
       errno = 0;
       if (!rss_silent)
-	plugin_perror (_("RSS fetch failed: %s"), c);
+	plugin_perror ("RSS fetch failed: %s", c);
 
       goto leave;
   }
@@ -859,13 +859,13 @@ int pi_rss_finish (rss_feed_t * feed)
   switch (feed->state) {
     case PI_RSS_STATE_UPDATE:
       if (rss_feed_parse (feed, buf) < 0)
-	plugin_perror (_("RSS: %s is not a valid RSS feed.\n"), feed->name);
+	plugin_perror ("RSS: %s is not a valid RSS feed.\n", feed->name);
       if (!feed->target)
 	pi_rss_report (feed, stamp);
       break;
     case PI_RSS_STATE_EVAL:
       if (rss_feed_describe (feed, feed->target, buf) < 0)
-	plugin_perror (_("RSS: %s is not a valid RSS feed.\n"), feed->name);
+	plugin_perror ("RSS: %s is not a valid RSS feed.\n", feed->name);
       break;
   }
 
@@ -896,7 +896,7 @@ int pi_rss_retrieve (rss_feed_t * feed, buffer_t * output)
     esocket_new (pi_rss_handler, pi_rss_es_type, AF_INET, SOCK_STREAM, 0, (uintptr_t) feed);
   if (!feed->es) {
     if (output)
-      bf_printf (output, _("Unable to create socket.\n"));
+      bf_printf (output, "Unable to create socket.\n");
     return -1;
   }
 
@@ -954,7 +954,7 @@ int pi_rss_handle_input (esocket_t * s)
 
       if (errno != EAGAIN) {
 	if (!rss_silent)
-	  plugin_perror (_("RSS read (%s)"), feed->name);
+	  plugin_perror ("RSS read (%s)", feed->name);
 	esocket_close (feed->es);
 	esocket_remove_socket (feed->es);
 	feed->es = NULL;
@@ -1024,7 +1024,7 @@ leave:
     bf_free (buf);
 
   if (!rss_silent)
-    plugin_perror (_("RSS output (%s)"), feed->name);
+    plugin_perror ("RSS output (%s)", feed->name);
 
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
@@ -1049,7 +1049,7 @@ int pi_rss_handle_error (esocket_t * s)
     return 0;
 
   if (!rss_silent)
-    plugin_perror (_("RSS error (%s)"), feed->name);
+    plugin_perror ("RSS error (%s)", feed->name);
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
@@ -1072,7 +1072,7 @@ int pi_rss_handle_timeout (rss_feed_t * feed)
   }
 
   if (!rss_silent)
-    plugin_perror (_("RSS timeout (%s)"), feed->name);
+    plugin_perror ("RSS timeout (%s)", feed->name);
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
@@ -1089,13 +1089,13 @@ unsigned long pi_rss_handler_rss (plugin_user_t * user, buffer_t * output, void 
   rss_feed_t *feed = NULL;
 
   if (argc < 2) {
-    bf_printf (output, _("Usage: %s <feed>\n"), argv[0]);
-    bf_printf (output, _(" Available feeds:\n"));
+    bf_printf (output, "Usage: %s <feed>\n", argv[0]);
+    bf_printf (output, " Available feeds:\n");
     for (feed = feedlist.next; feed != &feedlist; feed = feed->next) {
       bf_printf (output, "   %s (", feed->name);
       if (feed->description) {
 	bf_printf (output, "%s - %s", feed->title,
-		   feed->description ? feed->description : (unsigned char *) _("No description."));
+		   feed->description ? feed->description : (unsigned char *) "No desciption.");
       } else {
 	bf_printf (output, "%s", feed->title);
       }
@@ -1106,7 +1106,7 @@ unsigned long pi_rss_handler_rss (plugin_user_t * user, buffer_t * output, void 
 
   feed = rss_feed_find (argv[1]);
   if (!feed) {
-    bf_printf (output, _("Feed %s not found\n"), argv[1]);
+    bf_printf (output, "Feed %s not found\n", argv[1]);
     return -1;
   }
 
@@ -1127,27 +1127,27 @@ unsigned long pi_rss_handler_rssadd (plugin_user_t * user, buffer_t * output, vo
   rss_feed_t *feed;
 
   if (argc < 3) {
-    bf_printf (output, _("Usage: %s <name> <interval> <url>\n"), argv[0]);
+    bf_printf (output, "Usage: %s <name> <interval> <url>\n", argv[0]);
     return 0;
   }
 
   /* first check interval spec */
   interval = time_parse (argv[2]);
   if (!interval) {
-    bf_printf (output, _("Feed interval invalid: %s\n"), argv[2]);
+    bf_printf (output, "Feed interval invalid: %s\n", argv[2]);
     return 0;
   }
 
   feed = rss_feed_find (argv[1]);
   if (feed) {
-    bf_printf (output, _("Feed %s already exists.\n"), argv[1]);
+    bf_printf (output, "Feed %s already exists.\n", argv[1]);
     return 0;
   }
 
   /* create feed */
   feed = rss_feed_add (argv[1], argv[3]);
   if (!feed) {
-    bf_printf (output, _("Feed creation failed.\n"), argv[1]);
+    bf_printf (output, "Feed creation failed.\n", argv[1]);
     return -1;
   }
 
@@ -1168,13 +1168,13 @@ unsigned long pi_rss_handler_rssselect (plugin_user_t * user, buffer_t * output,
   rss_feed_t *feed;
 
   if (argc < 3) {
-    bf_printf (output, _("Usage: %s <name> <fields>\n"), argv[0]);
+    bf_printf (output, "Usage: %s <name> <fields>\n", argv[0]);
     return 0;
   }
 
   feed = rss_feed_find (argv[1]);
   if (!feed) {
-    bf_printf (output, _("Feed %s not found\n"), argv[1]);
+    bf_printf (output, "Feed %s not found\n", argv[1]);
     return -1;
   }
 
@@ -1182,18 +1182,18 @@ unsigned long pi_rss_handler_rssselect (plugin_user_t * user, buffer_t * output,
   e = strdup (argv[2]);
   t = strtok (e, ", ");
   while (t) {
-    bf_printf (output, _(" Adding %s\n"), t);
+    bf_printf (output, " Adding %s\n", t);
     rss_include_add (feed, t);
     t = strtok (NULL, ", ");
   }
   free (e);
 
   if (feed->es) {
-    bf_printf (output, _(" Feed is active and will be updated later.\n"));
+    bf_printf (output, " Feed is active and will be updated later.\n");
     return -1;
   }
 
-  bf_printf (output, _(" Updating feed now...\n"));
+  bf_printf (output, " Updating feed now...\n");
   feed->state = PI_RSS_STATE_UPDATE;
   feed->target = user;
 
@@ -1221,39 +1221,39 @@ unsigned long pi_rss_handler_rsslist (plugin_user_t * user, buffer_t * output, v
   rss_element_t *elem;
 
   if (feedlist.next == &feedlist) {
-    bf_printf (output, _("No feeds configured\n"));
+    bf_printf (output, "No feeds configured\n");
   } else {
     /* show all included tags for all feeds. */
     for (feed = feedlist.next; feed != &feedlist; feed = feed->next) {
-      bf_printf (output, _("Feed: %s (Updated %s)\n"), feed->name, time_print (feed->interval));
+      bf_printf (output, "Feed: %s (Updated %s)\n", feed->name, time_print (feed->interval));
       if (feed->description) {
 	bf_printf (output, "  %s - %s\n", feed->title,
-		   feed->description ? feed->description : (unsigned char *) _("No description."));
+		   feed->description ? feed->description : (unsigned char *) "No desciption.");
       } else {
 	bf_printf (output, "  %s\n", feed->title);
       }
       if (feed->user) {
-	bf_printf (output, _("  Target user: %s\n"), feed->user);
+	bf_printf (output, "  Target user: %s\n", feed->user);
       } else if (feed->rights) {
-	bf_printf (output, _("  Target rights: "));
+	bf_printf (output, "  Target rights: ");
 	flags_print (Capabilities + CAP_PRINT_OFFSET, output, feed->rights);
 	bf_printf (output, "\n");
       }
       if (feed->port != 80) {
-	bf_printf (output, _("  Link: http://%s:%u/%s\n"), feed->address, feed->port, feed->path);
+	bf_printf (output, "  Link: http://%s:%u/%s\n", feed->address, feed->port, feed->path);
       } else {
-	bf_printf (output, _("  Link: http://%s/%s\n"), feed->address, feed->path);
+	bf_printf (output, "  Link: http://%s/%s\n", feed->address, feed->path);
       }
       if (feed->lastmodified)
-	bf_printf (output, _("  Last modified: %s\n"), feed->lastmodified);
+	bf_printf (output, "  Last modified: %s\n", feed->lastmodified);
       if (feed->es) {
-	bf_printf (output, _("  Next update: Running...\n"));
+	bf_printf (output, "  Next update: Running...\n");
       } else {
-	bf_printf (output, _("  Next update: %s\n"),
+	bf_printf (output, "  Next update: %s\n",
 		   time_print (feed->stamp + feed->interval - now.tv_sec));
       }
       if (feed->includes.next != &feed->includes) {
-	bf_printf (output, _(" Includes: "));
+	bf_printf (output, " Includes: ");
 	for (elem = feed->includes.next; elem != &feed->includes; elem = elem->next) {
 	  bf_printf (output, "  %.*s", bf_used (elem->entry), elem->entry->s);
 	}
@@ -1271,7 +1271,7 @@ unsigned long pi_rss_handler_rssdel (plugin_user_t * user, buffer_t * output, vo
   rss_feed_t *feed;
 
   if (argc < 2) {
-    bf_printf (output, _("Usage: %s <feed>\n"), argv[0]);
+    bf_printf (output, "Usage: %s <feed>\n", argv[0]);
     return 0;
   }
 
@@ -1280,12 +1280,12 @@ unsigned long pi_rss_handler_rssdel (plugin_user_t * user, buffer_t * output, vo
     return 0;
 
   if (feed->es) {
-    bf_printf (output, _("Feed is being updated. please retry in a few moments.\n"));
+    bf_printf (output, "Feed is being updated. please retry in a few moments.\n");
     return 0;
   }
   rss_feed_del (feed);
 
-  bf_printf (output, _("Feed %s deleted\n"), argv[1]);
+  bf_printf (output, "Feed %s deleted\n", argv[1]);
 
   return 0;
 }
@@ -1298,10 +1298,9 @@ unsigned long pi_rss_handler_rsstarget (plugin_user_t * user, buffer_t * output,
   unsigned long long ncap = 0;
 
   if (argc < 3) {
-    bf_printf (output, _("Usage: %s <feed> user <target> &#124; rights <rights> &#124; main\n"
-			 "  user <target>: send feed output to user\n"
-			 "  right <rights>: send feed output to all user with <rights>\n"),
-	       argv[0]);
+    bf_printf (output, "Usage: %s <feed> user <target> &#124; right <rights> &#124; main\n"
+	       "  user <target>: send feed output to user\n"
+	       "  right <rights>: send feed output to all user with <rights>\n", argv[0]);
     return 0;
   }
 
@@ -1314,11 +1313,11 @@ unsigned long pi_rss_handler_rsstarget (plugin_user_t * user, buffer_t * output,
   if (!strcmp (argv[2], "user")) {
     feed->user = strdup (argv[3]);
     feed->rights = 0;
-    bf_printf (output, _("Sending output from feed %s to %s\n"), feed->name, feed->user);
+    bf_printf (output, "Sending output from feed %s to %s\n", feed->name, feed->user);
   } else if (!strcmp (argv[2], "rights")) {
     feed->user = NULL;
     flags_parse (Capabilities, output, argc, argv, 3, &feed->rights, &ncap);
-    bf_printf (output, _("Sending output from feed %s to all users with rights "), feed->name);
+    bf_printf (output, "Sending output from feed %s to all users with rights ", feed->name);
     flags_print (Capabilities + CAP_PRINT_OFFSET, output, feed->rights);
     bf_printf (output, "\n");
   } else if (!strcmp (argv[2], "main")) {
@@ -1337,7 +1336,7 @@ unsigned long pi_rss_handler_rssforce (plugin_user_t * user, buffer_t * output, 
   rss_feed_t *feed;
 
   if (argc < 2) {
-    bf_printf (output, _("Usage: %s <feed>\n"), argv[0]);
+    bf_printf (output, "Usage: %s <feed>\n", argv[0]);
     return 0;
   }
 
@@ -1346,12 +1345,12 @@ unsigned long pi_rss_handler_rssforce (plugin_user_t * user, buffer_t * output, 
     return 0;
 
   if (feed->es) {
-    bf_printf (output, _("Feed is being updated. please retry in a few moments.\n"));
+    bf_printf (output, "Feed is being updated. please retry in a few moments.\n");
     return 0;
   }
   pi_rss_retrieve (feed, output);
 
-  bf_printf (output, _("Feed %s update started.\n"), argv[1]);
+  bf_printf (output, "Feed %s update started.\n", argv[1]);
 
   return 0;
 }

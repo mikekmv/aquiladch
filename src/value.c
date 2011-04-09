@@ -203,6 +203,80 @@ int value_load (value_collection_t * collection, xml_node_t * node)
   return 0;
 }
 
+int value_save_old (value_collection_t * collection, unsigned char *filename)
+{
+  FILE *fp;
+  value_element_t *elem;
+
+  fp = fopen (filename, "w+");
+  if (!fp)
+    return errno;
+
+  for (elem = collection->value_sorted.onext; elem != &collection->value_sorted; elem = elem->onext) {
+    switch (elem->type) {
+      case VAL_ELEM_PTR:
+	fprintf (fp, "%s %p\n", elem->name, *elem->val.v_ptr);
+	break;
+      case VAL_ELEM_LONG:
+	fprintf (fp, "%s %ld\n", elem->name, *elem->val.v_long);
+	break;
+      case VAL_ELEM_ULONG:
+      case VAL_ELEM_MEMSIZE:
+	fprintf (fp, "%s %lu\n", elem->name, *elem->val.v_ulong);
+	break;
+      case VAL_ELEM_CAP:
+#ifndef USE_WINDOWS
+	fprintf (fp, "%s %Lu\n", elem->name, *elem->val.v_ulonglong & ~CAP_CUSTOM_MASK);
+#else
+	fprintf (fp, "%s %I64u\n", elem->name, *elem->val.v_ulonglong & ~CAP_CUSTOM_MASK);
+#endif
+	break;
+      case VAL_ELEM_BYTESIZE:
+      case VAL_ELEM_ULONGLONG:
+#ifndef USE_WINDOWS
+	fprintf (fp, "%s %Lu\n", elem->name, *elem->val.v_ulonglong);
+#else
+	fprintf (fp, "%s %I64u\n", elem->name, *elem->val.v_ulonglong);
+#endif
+	break;
+      case VAL_ELEM_INT:
+	fprintf (fp, "%s %d\n", elem->name, *elem->val.v_int);
+	break;
+      case VAL_ELEM_UINT:
+	fprintf (fp, "%s %u\n", elem->name, *elem->val.v_int);
+	break;
+      case VAL_ELEM_DOUBLE:
+	fprintf (fp, "%s %lf\n", elem->name, *elem->val.v_double);
+	break;
+      case VAL_ELEM_STRING:
+	{
+	  unsigned char *out = string_escape (*elem->val.v_string);
+
+	  fprintf (fp, "%s \"%s\"\n", elem->name, out ? out : (unsigned char *) "");
+	  if (out)
+	    free (out);
+	}
+	break;
+      case VAL_ELEM_IP:
+	{
+#ifdef HAVE_INET_NTOA
+	  struct in_addr ia;
+
+	  ia.s_addr = *elem->val.v_ip;
+	  fprintf (fp, "%s %s\n", elem->name, inet_ntoa (ia));
+#else
+#warning "inet_ntoa not support. Support for VAL_ELEM_IP disabled."
+#endif
+	  break;
+	}
+      default:
+	fprintf (fp, "%s !Unknown Type!\n", elem->name);
+    }
+  }
+  fclose (fp);
+
+  return 0;
+}
 
 int value_load_old (value_collection_t * collection, unsigned char *filename)
 {

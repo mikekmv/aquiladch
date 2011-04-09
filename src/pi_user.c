@@ -447,6 +447,9 @@ unsigned long pi_user_event_save (plugin_user_t * user, void *dummy, unsigned lo
   banlist_client_save (&clientbanlist, node);
   banlist_save (&sourcelist, xml_node_add (node, "SourceList"));
 
+  banlist_client_save_old (&clientbanlist, ClientBanFileName);
+  banlist_save_old (&sourcelist, PI_USER_RESTRICTFILE);
+
   return PLUGIN_RETVAL_CONTINUE;
 }
 

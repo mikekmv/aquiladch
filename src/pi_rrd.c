@@ -93,7 +93,7 @@ int pi_rrd_update (rrd_ctxt_t * rrd)
   retval = rrd_update (argc, argv);
   if (retval < 0) {
     errno = 0;
-    plugin_perror (_("RRD %s update failed: %s!"), rrd->name, rrd_get_error ());
+    plugin_perror ("RRD %s update failed: %s!", rrd->name, rrd_get_error ());
   }
 
   bf_free (u);
@@ -166,7 +166,7 @@ rrd_ctxt_datapoint_t *pi_rrd_datapoint_create (buffer_t * output, rrd_ctxt_datap
     elem = stats_find (name);
     if (!elem) {
       if (output)
-	bf_printf (output, _("Statistic %s not found.\n"), name);
+	bf_printf (output, "Statistic %s not found.\n", name);
       return NULL;
     }
   }
@@ -359,25 +359,25 @@ unsigned long pi_rrd_handler_rrdcreate (plugin_user_t * user, buffer_t * output,
 
 
   if (argc < 4) {
-    bf_printf (output, _("Usage: %s <name> <filename> <period>\n"
-			 "          [DS:ds-name:DST:dst arguments]\n"
-			 "          [RRA:CF:cf arguments]\n"
-			 " <name>: name of the rrd entry\n"
-			 " <filename>: filename to save data in\n"
-			 " <period>: how often to sample data (suggestion: 300s)\n"
-			 "  for the other arguments please consult the rrdtool manual\n"), argv[0]);
+    bf_printf (output, "Usage: %s <name> <filename> <period>\n"
+	       "          [DS:ds-name:DST:dst arguments]\n"
+	       "          [RRA:CF:cf arguments]\n"
+	       " <name>: name of the rrd entry\n"
+	       " <filename>: filename to save data in\n"
+	       " <period>: how often to sample data (suggestion: 300s)\n"
+	       "  for the other arguments please consult the rrdtool manual\n", argv[0]);
     return 0;
   }
 
   rrd = pi_rrd_find (argv[1]);
   if (rrd) {
-    bf_printf (output, _("RRD %s already exists."), argv[1]);
+    bf_printf (output, "RRD %s already exists.", argv[1]);
     return 0;
   }
 
   period = time_parse (argv[3]);
   if (!period) {
-    bf_printf (output, _("%s: %s is not a valid time string\n"), argv[0], argv[3]);
+    bf_printf (output, "%s: %s is not a valid time string\n", argv[0], argv[3]);
     return 0;
   }
 
@@ -396,7 +396,7 @@ unsigned long pi_rrd_handler_rrdcreate (plugin_user_t * user, buffer_t * output,
       if (s)
 	e = strchr (s + 1, ':');
       if (!s || !e) {
-	bf_printf (output, _("DS entry has bad format: %s\n"), ds);
+	bf_printf (output, "DS entry has bad format: %s\n", ds);
 	free (ds);
 	goto error;
       }
@@ -422,11 +422,11 @@ unsigned long pi_rrd_handler_rrdcreate (plugin_user_t * user, buffer_t * output,
   }
 
   if (pi_rrd_start (rrd)) {
-    bf_printf (output, _("RRD create FAILED: %s\n"), rrd_get_error ());
+    bf_printf (output, "RRD create FAILED: %s\n", rrd_get_error ());
     goto error;
   }
 
-  bf_printf (output, _("RRD %s created.\n"), rrd->name);
+  bf_printf (output, "RDD %s created.\n", rrd->name);
 
   return 0;
 
@@ -445,8 +445,7 @@ unsigned long pi_rrd_handler_rrdlist (plugin_user_t * user, buffer_t * output, v
 
   bf_printf (output, "\n");
   for (rrd = rrdlist.next; rrd != &rrdlist; rrd = rrd->next) {
-    bf_printf (output, _("RRD %s filename: %s period: %lu\n"), rrd->name, rrd->filename,
-	       rrd->period);
+    bf_printf (output, "RRD %s filename: %s period: %lu\n", rrd->name, rrd->filename, rrd->period);
     for (dp = rrd->points.next; dp != &rrd->points; dp = dp->next)
       bf_printf (output, "  %s (%s)\n", dp->spec, dp->elem->name);
     for (dp = rrd->rras.next; dp != &rrd->rras; dp = dp->next)
@@ -463,18 +462,18 @@ unsigned long pi_rrd_handler_rrddelete (plugin_user_t * user, buffer_t * output,
   rrd_ctxt_t *rrd;
 
   if (argc < 2) {
-    bf_printf (output, _("Usage: %s <name>\n"), argv[0]);
+    bf_printf (output, "Usage: %s <name>\n", argv[0]);
     return 0;
   }
 
   rrd = pi_rrd_find (argv[1]);
   if (!rrd) {
-    bf_printf (output, _("RRD %s not found.\n"), argv[1]);
+    bf_printf (output, "RRD %s not found.\n", argv[1]);
     return 0;
   }
 
   pi_rrd_delete (rrd);
-  bf_printf (output, _("RRD %s deleted.\n"), argv[1]);
+  bf_printf (output, "RRD %s deleted.\n", argv[1]);
 
   return 0;
 }

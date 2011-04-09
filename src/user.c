@@ -416,6 +416,42 @@ unsigned int accounts_load_old (const unsigned char *filename)
 }
 
 
+unsigned int accounts_save_old (const unsigned char *filename)
+{
+  FILE *fp;
+  account_type_t *t;
+  account_t *a;
+  unsigned char nopasswd[2];
+
+  nopasswd[0] = 1;
+  nopasswd[1] = 0;
+  fp = fopen (filename, "w+");
+  if (!fp)
+    return errno;
+
+#ifndef USE_WINDOWS
+  for (t = accountTypes; t; t = t->next)
+    fprintf (fp, "T %s %llu %d\n", t->name, t->rights & ~CAP_CUSTOM_MASK, t->id);
+
+  for (a = accounts; a; a = a->next)
+    fprintf (fp, "A %s %s %llu %d %lu %s %lu %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd,
+	     a->rights & ~CAP_CUSTOM_MASK, a->class, a->id,
+	     a->op[0] ? a->op : (unsigned char *) HUBSOFT_NAME, a->regged ? a->regged : time (NULL),
+	     a->lastlogin);
+#else
+  for (t = accountTypes; t; t = t->next)
+    fprintf (fp, "T %s %I64u %d\n", t->name, t->rights & ~CAP_CUSTOM_MASK, t->id);
+
+  for (a = accounts; a; a = a->next)
+    fprintf (fp, "A %s %s %I64u %d %lu %s %lu %lu\n", a->nick, a->passwd[0] ? a->passwd : nopasswd,
+	     a->rights & ~CAP_CUSTOM_MASK, a->class, a->id,
+	     a->op[0] ? a->op : (unsigned char *) HUBSOFT_NAME, a->regged ? a->regged : time (NULL),
+	     a->lastlogin);
+#endif
+  fclose (fp);
+  return 0;
+}
+
 unsigned int accounts_init ()
 {
 

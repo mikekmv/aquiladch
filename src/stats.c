@@ -52,6 +52,11 @@ int stats_load (xml_node_t * node)
   return value_load (statvalues, node);
 }
 
+int stats_save_old (unsigned char *filename)
+{
+  return value_save_old (statvalues, filename);
+}
+
 int stats_load_old (unsigned char *filename)
 {
   return value_load_old (statvalues, filename);

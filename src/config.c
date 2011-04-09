@@ -52,6 +52,11 @@ int config_load (xml_node_t * node)
   return value_load (configvalues, node);
 }
 
+int config_save_old (unsigned char *filename)
+{
+  return value_save_old (configvalues, filename);
+}
+
 int config_load_old (unsigned char *filename)
 {
   return value_load_old (configvalues, filename);
