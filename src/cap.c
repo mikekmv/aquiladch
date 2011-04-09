@@ -32,8 +32,8 @@ flag_t Capabilities[CAP_CUSTOM_MAX + 1] = {
 	{"op",		CAP_OP,		_("Default OP capabilities: chat, search, pm, dl, share, key, kick, ban.")},
 	{"cheef",	CAP_CHEEF,	_("Default CHEEF capabilities: chat, search, pm, dl, share, key, kick, ban, user.")},
 	{"admin",	CAP_ADMIN,	_("Default ADMIN capabilities: chat, search, pm, dl, share, key, kick, ban, user, group, inherit, config.")},
-	{"owner",	CAP_OWNER,	_("Everything. All powerfull. Mostly, capable of hardbanning.")},
 
+	{"owner",	CAP_OWNER,	_("Everything. All powerfull. Mostly, capable of hardbanning.")},
 	{"chat", 	CAP_CHAT,	_("Allows the user to chat in main window.")},
 	{"search",	CAP_SEARCH,	_("Allows user to search the hub for files.")},
 	{"pmop",	CAP_PMOP,	_("Allows the user to send private messages to OPs only.")},

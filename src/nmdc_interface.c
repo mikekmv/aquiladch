@@ -44,6 +44,8 @@
 
 #include "defaults.h"
 
+#include "stats.h"
+
 /******************************************************************************\
 **                                                                            **
 **                            GLOBAL VARIABLES                                **
@@ -1396,6 +1398,69 @@ int proto_nmdc_init ()
   nmdc_forbiddenchars['\0'] = 0;
   nmdc_forbiddenchars['\n'] = 0;
   nmdc_forbiddenchars['\t'] = 0;
+
+  /* *INDENT-OFF* */
+  stats_register ("nmdc.cacherebuild",		VAL_ELEM_ULONG, &nmdc_stats.cacherebuild,  "rebuild of nick list cache.");
+  stats_register ("nmdc.userjoin",		VAL_ELEM_ULONG, &nmdc_stats.userjoin, 	   "all user joins.");
+  stats_register ("nmdc.userpart",		VAL_ELEM_ULONG, &nmdc_stats.userpart,      "all user parts.");
+  stats_register ("nmdc.userviolate",		VAL_ELEM_ULONG, &nmdc_stats.userviolate,   "all user that are kicked for rate violations.");
+  stats_register ("nmdc.banned",		VAL_ELEM_ULONG, &nmdc_stats.banned,        "all forcemoves  for banned users.");
+  stats_register ("nmdc.forcemove",		VAL_ELEM_ULONG, &nmdc_stats.forcemove,     "all forcemoves.");
+  stats_register ("nmdc.disconnect",		VAL_ELEM_ULONG, &nmdc_stats.disconnect,    "all drops/disconnects.");
+  stats_register ("nmdc.redirect",		VAL_ELEM_ULONG, &nmdc_stats.redirect,      "all redirects.");
+  stats_register ("nmdc.tokens",		VAL_ELEM_ULONG, &nmdc_stats.tokens, 	   "all tokens processed.");
+  stats_register ("nmdc.brokenkey",		VAL_ELEM_ULONG, &nmdc_stats.brokenkey,     "all users refused cuz of broken key.");
+  stats_register ("nmdc.badnick",		VAL_ELEM_ULONG, &nmdc_stats.badnick,       "all users refused cuz of illegal chars in nickname.");
+  stats_register ("nmdc.usednick",		VAL_ELEM_ULONG, &nmdc_stats.usednick,      "all users refused cuz of nickname already used.");
+  stats_register ("nmdc.mynick",		VAL_ELEM_ULONG, &nmdc_stats.mynick,        "all CTM exploit IPs that have been banned.");
+  stats_register ("nmdc.softban",		VAL_ELEM_ULONG, &nmdc_stats.softban,       "banned users that tried to log in.");
+  stats_register ("nmdc.nickban",		VAL_ELEM_ULONG, &nmdc_stats.nickban,       "users banned by nick.");
+  stats_register ("nmdc.badpasswd",		VAL_ELEM_ULONG, &nmdc_stats.badpasswd,     "bad password");
+  stats_register ("nmdc.notags",		VAL_ELEM_ULONG, &nmdc_stats.notags,        "refused users without tags");
+  stats_register ("nmdc.badmyinfo",		VAL_ELEM_ULONG, &nmdc_stats.badmyinfo,     "users that had corrupt MyINFOs");
+  stats_register ("nmdc.preloginevent",		VAL_ELEM_ULONG, &nmdc_stats.preloginevent, "user dropped by plugins before login.");
+  stats_register ("nmdc.loginevent",		VAL_ELEM_ULONG, &nmdc_stats.loginevent,    "users dropped by plugins after login.");
+  stats_register ("nmdc.logincached",		VAL_ELEM_ULONG, &nmdc_stats.logincached,   "users that rejoined within hub.delayedlogout");
+  stats_register ("nmdc.chatoverflow",		VAL_ELEM_ULONG, &nmdc_stats.chatoverflow,  "when a user oversteps his chat allowence");
+  stats_register ("nmdc.chatfakenick",		VAL_ELEM_ULONG, &nmdc_stats.chatfakenick,  "when a user fakes his source nick");
+  stats_register ("nmdc.chattoolong",		VAL_ELEM_ULONG, &nmdc_stats.chattoolong,   "chat messages that were dropped due to length");
+  stats_register ("nmdc.chatevent",		VAL_ELEM_ULONG, &nmdc_stats.chatevent,     "chat messages dropped by plugins");
+  stats_register ("nmdc.myinfooverflow",	VAL_ELEM_ULONG, &nmdc_stats.myinfooverflow,"user that oversteps myinfo rate");
+  stats_register ("nmdc.myinfoevent",		VAL_ELEM_ULONG, &nmdc_stats.myinfoevent,   "myinfo that is dropped by plugins");
+  stats_register ("nmdc.searchoverflow",	VAL_ELEM_ULONG, &nmdc_stats.searchoverflow,"user that oversteps the searchrate");
+  stats_register ("nmdc.searchcorrupt",		VAL_ELEM_ULONG, &nmdc_stats.searchcorrupt, "user send an invalid search messages");
+  stats_register ("nmdc.searchevent",		VAL_ELEM_ULONG, &nmdc_stats.searchevent,   "search dropped by plugin");
+  stats_register ("nmdc.searchtoolong",		VAL_ELEM_ULONG, &nmdc_stats.searchtoolong, "search message was too long");
+  stats_register ("nmdc.researchdrop",		VAL_ELEM_ULONG, &nmdc_stats.researchdrop,  "search message repeated within nmdc.researchinterval");
+  stats_register ("nmdc.researchmatch",		VAL_ELEM_ULONG, &nmdc_stats.researchmatch, "search message only send to part of the users.");
+  stats_register ("nmdc.searchtth",		VAL_ELEM_ULONG, &nmdc_stats.searchtth,     "TTH search");
+  stats_register ("nmdc.searchnormal",		VAL_ELEM_ULONG, &nmdc_stats.searchnormal,  "normal search");
+  stats_register ("nmdc.sroverflow",		VAL_ELEM_ULONG, &nmdc_stats.sroverflow,    "search result rate overstepped");
+  stats_register ("nmdc.srevent",		VAL_ELEM_ULONG, &nmdc_stats.srevent,       "search result droppped by plugin");
+  stats_register ("nmdc.srrobot",		VAL_ELEM_ULONG, &nmdc_stats.srrobot,       "search result send to virtual user (chatrooms, hubsec,...)");
+  stats_register ("nmdc.srtoolong",		VAL_ELEM_ULONG, &nmdc_stats.srtoolong,     "search result too long");
+  stats_register ("nmdc.srfakesource",		VAL_ELEM_ULONG, &nmdc_stats.srfakesource,  "search result had a faked source");
+  stats_register ("nmdc.srnodest",		VAL_ELEM_ULONG, &nmdc_stats.srnodest,      "search result for user that doesn't exist");
+  stats_register ("nmdc.ctmoverflow",		VAL_ELEM_ULONG, &nmdc_stats.ctmoverflow,   "ctm rate overstepped");
+  stats_register ("nmdc.ctmbadtarget",		VAL_ELEM_ULONG, &nmdc_stats.ctmbadtarget,  "ctm for user that doesn't exist");
+  stats_register ("nmdc.rctmoverflow",		VAL_ELEM_ULONG, &nmdc_stats.rctmoverflow,  "rctm rate overstepped");
+  stats_register ("nmdc.rctmbadtarget",		VAL_ELEM_ULONG, &nmdc_stats.rctmbadtarget, "rctm for user that doesn't exist");
+  stats_register ("nmdc.rctmbadsource",		VAL_ELEM_ULONG, &nmdc_stats.rctmbadsource, "rctm with fake source");
+  stats_register ("nmdc.pmoverflow",		VAL_ELEM_ULONG, &nmdc_stats.pmoverflow,    "privatemessage rate overstepped");
+  stats_register ("nmdc.pmoutevent",		VAL_ELEM_ULONG, &nmdc_stats.pmoutevent,    "outgoing pm dropped by plugin");
+  stats_register ("nmdc.pmbadtarget",		VAL_ELEM_ULONG, &nmdc_stats.pmbadtarget,   "pm for user that doesn't exist");
+  stats_register ("nmdc.pmbadsource",		VAL_ELEM_ULONG, &nmdc_stats.pmbadsource,   "pm with faked source");
+  stats_register ("nmdc.pminevent",		VAL_ELEM_ULONG, &nmdc_stats.pminevent,     "incoming pm dropped by plugin");
+  stats_register ("nmdc.botinfo",		VAL_ELEM_ULONG, &nmdc_stats.botinfo,       "botinfo requested");
+  stats_register ("nmdc.cache_quit",		VAL_ELEM_ULONG, &nmdc_stats.cache_quit,    "total bytes send in $Quit messages");
+  stats_register ("nmdc.cache_myinfo",		VAL_ELEM_ULONG, &nmdc_stats.cache_myinfo,  "total bytes send in login myinfos");
+  stats_register ("nmdc.cache_myinfoupdate",	VAL_ELEM_ULONG, &nmdc_stats.cache_myinfoupdate, "total bytes send in myinfo updates");
+  stats_register ("nmdc.cache_chat",		VAL_ELEM_ULONG, &nmdc_stats.cache_chat,    "total bytes send in chat messages");
+  stats_register ("nmdc.cache_asearch",		VAL_ELEM_ULONG, &nmdc_stats.cache_asearch, "total bytes send in active searches");
+  stats_register ("nmdc.cache_psearch",		VAL_ELEM_ULONG, &nmdc_stats.cache_psearch, "total bytes send in passive searches");
+  stats_register ("nmdc.cache_messages",	VAL_ELEM_ULONG, &nmdc_stats.cache_messages,"total bytes send in user message");
+  stats_register ("nmdc.cache_results",		VAL_ELEM_ULONG, &nmdc_stats.cache_results, "total byte send in search results");
+  /* *INDENT-ON* */
 
   return 0;
 }

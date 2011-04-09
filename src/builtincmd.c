@@ -1710,7 +1710,7 @@ unsigned long handler_bug (plugin_user_t * user, buffer_t * output, void *priv,
 /************************** config ******************************/
 
 #include "config.h"
-extern config_element_t config_sorted;
+extern value_collection_t *configvalues;
 
 int printconfig (buffer_t * buf, config_element_t * elem)
 {
@@ -1776,7 +1776,8 @@ unsigned long handler_configshow (plugin_user_t * user, buffer_t * output, void 
   config_element_t *elem;
 
   if (argc < 2) {
-    for (elem = config_sorted.onext; elem != &config_sorted; elem = elem->onext)
+    for (elem = configvalues->value_sorted.onext; elem != &configvalues->value_sorted;
+	 elem = elem->onext)
       printconfig (output, elem);
   } else {
     for (i = 1; i < argc; i++) {
@@ -1799,7 +1800,8 @@ unsigned long handler_confighelp (plugin_user_t * user, buffer_t * output, void 
   config_element_t *elem;
 
   if (argc < 2) {
-    for (elem = config_sorted.onext; elem != &config_sorted; elem = elem->onext) {
+    for (elem = configvalues->value_sorted.onext; elem != &configvalues->value_sorted;
+	 elem = elem->onext) {
       if (bf_unused (output) < (strlen (elem->name) + strlen (elem->help) + 4)) {
 	buffer_t *buf;
 
@@ -1945,6 +1947,70 @@ leave:
   return 0;
 }
 
+#include "stats.h"
+unsigned long handler_stats (plugin_user_t * user, buffer_t * output, void *priv,
+			     unsigned int argc, unsigned char **argv)
+{
+  unsigned int i;
+  stats_element_t *elem;
+
+  if (argc < 2) {
+    for (elem = statvalues->value_sorted.onext; elem != &statvalues->value_sorted;
+	 elem = elem->onext)
+      printconfig (output, elem);
+  } else {
+    for (i = 1; i < argc; i++) {
+      elem = stats_find (argv[i]);
+      if (!elem) {
+	bf_printf (output, _("Sorry, unknown configuration value %s\n"), argv[i]);
+	continue;
+      }
+      printconfig (output, elem);
+    }
+  };
+
+  return 0;
+}
+
+unsigned long handler_statshelp (plugin_user_t * user, buffer_t * output, void *priv,
+				 unsigned int argc, unsigned char **argv)
+{
+  unsigned int i;
+  config_element_t *elem;
+
+  if (argc < 2) {
+    for (elem = statvalues->value_sorted.onext; elem != &statvalues->value_sorted;
+	 elem = elem->onext) {
+      if (bf_unused (output) < (strlen (elem->name) + strlen (elem->help) + 4)) {
+	buffer_t *buf;
+
+	buf = bf_alloc (4000);
+	bf_append (&output, buf);
+	output = buf;
+      }
+      bf_printf (output, "%s: %s\n", elem->name, elem->help);
+    }
+  } else {
+    for (i = 1; i < argc; i++) {
+      elem = stats_find (argv[i]);
+      if (!elem) {
+	bf_printf (output, _("Sorry, unknown statistics value %s\n"), argv[i]);
+	continue;
+      }
+      if (bf_unused (output) < (strlen (elem->name) + strlen (elem->help) + 4)) {
+	buffer_t *buf;
+
+	buf = bf_alloc (4000);
+	bf_append (&output, buf);
+	output = buf;
+      }
+      bf_printf (output, "%s: %s\n", elem->name, elem->help);
+    }
+  };
+
+  return 0;
+}
+
 
 unsigned long handler_save (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
 			    unsigned char **argv)
@@ -2054,6 +2120,9 @@ int builtincmd_init ()
   command_register ("confighelp", &handler_confighelp, CAP_CONFIG,    _("Show configuration value help string."));
   command_register ("configset",  &handler_configset,  CAP_CONFIG,    _("Set configuration values."));
   command_register ("=",	      &handler_configset,  CAP_CONFIG,    _("Set configuration values."));
+
+  command_register ("stats",      &handler_stats,      CAP_CONFIG,    _("Show raw statistics."));
+  command_register ("statshelp",  &handler_statshelp,  CAP_CONFIG,    _("Show statistics help."));
 
   command_register ("load",       &handler_load,       CAP_CONFIG,    _("Reload all data from files. WARNING: All unsaved changes will be discarded."));
   command_register ("save",       &handler_save,       CAP_CONFIG,    _("Save all changes to file. WARNING: All previously saved settings will be lost!"));

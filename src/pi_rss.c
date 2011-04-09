@@ -1405,7 +1405,7 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
 
   node = xml_node_find (node, "RSS");
   if (!node)
-    return 0;
+    return PLUGIN_RETVAL_CONTINUE;
   for (node = node->children; node; node = xml_next (node)) {
     if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
       continue;
@@ -1457,7 +1457,7 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
   if (usr)
     free (usr);
 
-  return 0;
+  return PLUGIN_RETVAL_CONTINUE;
 }
 
 unsigned long pi_rss_handle_update (plugin_user_t * user, void *ctxt, unsigned long event,

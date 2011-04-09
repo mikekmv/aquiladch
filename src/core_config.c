@@ -27,6 +27,9 @@
 #include "cap.h"
 #include "proto.h"
 #include "iplist.h"
+#include "stats.h"
+
+#include "hub.h"
 
 extern int ndelay;
 
@@ -136,5 +139,51 @@ int core_config_init ()
 #endif
   /* *INDENT-ON* */
 
+  return 0;
+};
+
+extern unsigned long buf_mem;
+
+#ifdef USE_WINDOWS
+extern unsigned long outstanding;
+extern unsigned long outstanding_peak;
+extern unsigned long outstanding_max;
+extern unsigned long outstandingbytes;
+extern unsigned long outstandingbytes_peak;
+extern unsigned long outstandingbytes_max;
+extern unsigned long iocp_users;
+extern unsigned long outstandingbytes_peruser;
+
+#endif
+
+int core_stats_init ()
+{
+  stats_register ("hub.TotalBytesReceived", VAL_ELEM_ULONGLONG, &hubstats.TotalBytesReceived,
+		  _("Total bytes send by hub since startup."));
+  stats_register ("hub.TotalBytesSend", VAL_ELEM_ULONGLONG, &hubstats.TotalBytesSend,
+		  _("Total bytes send by hub since startup."));
+  stats_register ("hub.buffering", VAL_ELEM_ULONG, &buffering, _("Number of buffering users."));
+  stats_register ("hub.buffermemory", VAL_ELEM_ULONG, &buf_mem,
+		  _("Total of all data waiting to be written."));
+
+#ifdef USE_WINDOWS
+  stats_register ("iocp.outstanding", VAL_ELEM_ULONG, &outstanding,
+		  _("Number of outstanding buffers."));
+  stats_register ("iocp.outstanding_peak", VAL_ELEM_ULONG, &outstanding_peak,
+		  _("Peak number of outstanding buffers."));
+  stats_register ("iocp.outstanding_max", VAL_ELEM_ULONG, &outstanding_max,
+		  _("Absolute maximum of outstanding buffers allowed."));
+
+  stats_register ("iocp.outstandingbytes", VAL_ELEM_ULONG, &outstanding,
+		  _("Number of outstanding buffers."));
+  stats_register ("iocp.outstandingbytes_peak", VAL_ELEM_ULONG, &outstandingbytes_peak,
+		  _("Peak number of outstanding bytes."));
+  stats_register ("iocp.outstandingbytes_max", VAL_ELEM_ULONG, &outstandingbytes_max,
+		  _("Absolute maximum of outstanding bytes allowed."));
+
+  stats_register ("iocp_users", VAL_ELEM_ULONG, &iocp_users, _("Number of IOCP users."));
+  stats_register ("outstandingbytes_peruser", VAL_ELEM_ULONG, &outstandingbytes_peruser,
+		  _("Absolute maximum of outstanding bytes per user allowed."));
+#endif
   return 0;
 }

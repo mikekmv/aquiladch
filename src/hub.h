@@ -41,8 +41,8 @@
 #define HUB_STATE_CLOSED	4
 
 typedef struct hub_statitics {
-  unsigned long TotalBytesSend;
-  unsigned long TotalBytesReceived;
+  unsigned long long TotalBytesSend;
+  unsigned long long TotalBytesReceived;
 } hub_statistics_t;
 
 extern hub_statistics_t hubstats;

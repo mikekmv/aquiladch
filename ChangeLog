@@ -1,5 +1,18 @@
 This is the Aquila Changelog.
 
+0.1.11-pre1-beta38:
+	RRD: Fix problem with DS parsing.
+	RRD: improved error reporting.
+	HUB: don't free client_t of previous socket if setup fails.
+	NMDC: ignore empty $ValidateNick commands.
+	Fix preproc directive in main.c for PLUGIN_RRD
+	XML: improve parsing of <!-- --> comments.
+	RRD: added RRD module.
+	Make save/load event handlers always return PLUGIN_RETVAL_CONTINUE
+	Added generic statistics support.
+	LUA: cancel timers when closing script (reported en_dator).
+	HUB: rearranged order.
+
 0.1.11-pre1-beta37:
 	LUA: fix timer error handling (reported en_dator)
 	HUB: Use real buffer in closing socket.

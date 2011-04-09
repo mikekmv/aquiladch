@@ -86,7 +86,6 @@ int etimer_set (etimer_t * timer, unsigned long timeout)
 
 int etimer_cancel (etimer_t * timer)
 {
-  ASSERT (timer->handler);
 
   if (!timer->tovalid)
     return 0;
@@ -101,6 +100,7 @@ int etimer_cancel (etimer_t * timer)
 
 void etimer_init (etimer_t * timer, etimer_handler_t * handler, void *ctxt)
 {
+  ASSERT (handler);
   memset (timer, 0, sizeof (etimer_t));
   timer->handler = handler;
   timer->context = ctxt;

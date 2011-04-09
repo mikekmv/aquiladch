@@ -39,6 +39,7 @@
 #include "aqtime.h"
 #include "proto.h"
 #include "config.h"
+#include "stats.h"
 #include "user.h"
 #include "plugin_int.h"
 #include "builtincmd.h"
@@ -335,14 +336,17 @@ int main (int argc, char **argv)
   /* initialize the global configuration */
   gettime ();
   etimer_start ();
-
   config_init ();
+  stats_init ();
   accounts_init ();
   plugin_init ();
   command_init ();
   builtincmd_init ();
   server_init ();
   nmdc_init ();
+
+  /* register boottime stat */
+  stats_register ("boottime", VAL_ELEM_ULONG, &boottime.tv_sec, "Hub boottime in unix time.");
 
   /* initialize the plugins */
 #ifdef PLUGIN_IPLOG
@@ -375,6 +379,9 @@ int main (int argc, char **argv)
 #ifdef PLUGIN_RSS
   pi_rss_init ();
 #endif
+#ifdef PLUGIN_RRD
+  pi_rrd_init (h);
+#endif
 
   plugin_config_load (NULL);
 
@@ -391,6 +398,7 @@ int main (int argc, char **argv)
   server_setup (h);
   nmdc_setup (h);
   command_setup ();
+
 #ifdef PLUGIN_HUBLIST
   pi_hublist_setup (h);
 #endif

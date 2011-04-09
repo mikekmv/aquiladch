@@ -600,6 +600,13 @@ int pi_user_init ()
   command_register ("userrestrict",     &pi_user_handler_userrestrict,     CAP_USER, _("Add a source IP restriction for a user."));
   command_register ("userunrestrict",   &pi_user_handler_userunrestrict,   CAP_USER, _("Remove a source IP restriction for a user."));
   command_register ("userrestrictlist", &pi_user_handler_userrestrictlist, CAP_USER, _("Show source IP restrictions for a user."));
+
+  stats_register ("user.total",            VAL_ELEM_ULONG, &users_total,               _("Total users in the hub"));
+  stats_register ("user.peak",             VAL_ELEM_ULONG, &users_peak,                _("User peak"));
+  stats_register ("user.dropped",          VAL_ELEM_ULONG, &users_dropped,             _("Users refused for slot/hub/ratio/user limits."));
+  stats_register ("user.unregistered",     VAL_ELEM_ULONG, &user_unregistered_current, _("Unregistered users."));
+  stats_register ("user.registered",       VAL_ELEM_ULONG, &user_registered_current,   _("Registered users."));
+  stats_register ("user.op",               VAL_ELEM_ULONG, &user_op_current,           _("Op users."));
  
   /* *INDENT-ON* */  
 

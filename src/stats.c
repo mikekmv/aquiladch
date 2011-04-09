@@ -17,32 +17,54 @@
  *  
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#include "stats.h"
 
-#include "defaults.h"
-#include "value.h"
+value_collection_t *statvalues;
 
-typedef enum { CFG_ELEM_PTR,
-  CFG_ELEM_LONG, CFG_ELEM_ULONG, CFG_ELEM_CAP, CFG_ELEM_ULONGLONG,
-  CFG_ELEM_INT, CFG_ELEM_UINT,
-  CFG_ELEM_DOUBLE,
-  CFG_ELEM_STRING,
-  CFG_ELEM_IP,
-  CFG_ELEM_MEMSIZE,
-  CFG_ELEM_BYTESIZE
-} config_type_t;
+stats_element_t *stats_register (unsigned char *name, value_type_t type, void *ptr,
+				 const unsigned char *help)
+{
+  return value_register (statvalues, name, type, ptr, help);
+}
 
-typedef value_value_t config_value_t;
-typedef value_element_t config_element_t;
+int stats_unregister (unsigned char *name)
+{
+  return value_unregister (statvalues, name);
+}
 
-extern int config_init ();
-extern config_element_t *config_register (unsigned char *name, config_type_t type, void *,
-					  const unsigned char *help);
-extern int config_unregister (unsigned char *name);
-extern config_element_t *config_find (unsigned char *name);
-extern void *config_retrieve (unsigned char *name);
-extern int config_save (xml_node_t *);
-extern int config_load (xml_node_t *);
+stats_element_t *stats_find (unsigned char *name)
+{
+  return value_find (statvalues, name);
+}
 
-#endif /* _CONFIG_H_ */
+void *stats_retrieve (unsigned char *name)
+{
+  return value_retrieve (statvalues, name);
+}
+
+int stats_save (xml_node_t * base)
+{
+  return value_save (statvalues, base);
+}
+
+int stats_load (xml_node_t * node)
+{
+  return value_load (statvalues, node);
+}
+
+int stats_save_old (unsigned char *filename)
+{
+  return value_save_old (statvalues, filename);
+}
+
+int stats_load_old (unsigned char *filename)
+{
+  return value_load_old (statvalues, filename);
+}
+
+int stats_init ()
+{
+  statvalues = value_create ("stats");
+
+  return 0;
+}

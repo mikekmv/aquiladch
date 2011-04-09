@@ -40,11 +40,15 @@
 #include "proto.h"
 #include "utils.h"
 #include "nmdc_protocol.h"
+#include "stats.h"
 
 #ifdef USE_WINDOWS
 #  include "sys_windows.h"
 #endif
 
+#ifndef ULLONG_MAX
+#   define ULLONG_MAX   18446744073709551615ULL
+#endif
 
 #define STATS_NUM_MEASUREMENTS 360
 #define STATS_NUM_LEVELS	 3
@@ -82,6 +86,9 @@ statistics_t stats;
 
 #define TV_TO_MSEC(tv) ((tv.tv_sec*1000)+(tv.tv_usec/1000))
 
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO) && !defined(USE_WINDOWS)
+struct mallinfo memoryinfo;
+#endif
 
 /************************* CPU FUNCTIONS ******************************************/
 
@@ -92,11 +99,16 @@ typedef struct procstat {
 } procstat_t;
 
 procstat_t procstat_boot;
+procstat_t procstat_now;
 procstat_t procstats[PROCSTAT_LEVELS][PROCSTAT_MEASUREMENTS + 1];
 unsigned int current[PROCSTAT_LEVELS];
 
 buffer_t *cpuinfo = NULL;
 unsigned int cpucount = 0;
+
+unsigned long totalms;
+unsigned long sysms;
+unsigned long userms;
 
 
 void cpu_parse ()
@@ -154,6 +166,7 @@ void cpu_init ()
   getrusage (RUSAGE_SELF, &(procstats[0][0].ps));
   gettimeofday (&(procstats[0][0].tv), NULL);
   procstat_boot = procstats[0][0];
+  procstat_now = procstats[0][0];
   procstats[2][0] = procstats[1][0] = procstats[0][0];
 
   cpu_parse ();
@@ -164,8 +177,9 @@ unsigned int cpu_measure ()
   int i;
 
   current[0]++;
-  getrusage (RUSAGE_SELF, &(procstats[0][current[0]].ps));
-  gettimeofday (&(procstats[0][current[0]].tv), NULL);
+  getrusage (RUSAGE_SELF, &procstat_now.ps);
+  gettimeofday (&(procstat_now.tv), NULL);
+  procstats[0][current[0]] = procstat_now;
   for (i = 0; (current[i] == (PROCSTAT_MEASUREMENTS)) && (i < PROCSTAT_LEVELS); i++) {
     if (i < (PROCSTAT_LEVELS - 1)) {
       current[i + 1]++;
@@ -174,6 +188,10 @@ unsigned int cpu_measure ()
     current[i] = 0;
     procstats[i][0] = procstats[i][PROCSTAT_MEASUREMENTS];
   }
+
+  totalms = TV_TO_MSEC (procstat_now.tv) - TV_TO_MSEC (procstat_boot.tv);
+  userms = TV_TO_MSEC (procstat_now.ps.ru_utime) - TV_TO_MSEC (procstat_boot.ps.ru_utime);
+  sysms = TV_TO_MSEC (procstat_now.ps.ru_stime) - TV_TO_MSEC (procstat_boot.ps.ru_stime);
 
   return 0;
 }
@@ -446,15 +464,16 @@ unsigned int bandwidth_measure ()
 
   /* preparing values */
   timersub (&now, &stats.oldstamp, &diff);
+
   if (hubstats.TotalBytesSend >= stats.oldcounters.TotalBytesSend) {
     out = hubstats.TotalBytesSend - stats.oldcounters.TotalBytesSend;
   } else {
-    out = ((ULONG_MAX - stats.oldcounters.TotalBytesSend) + 1 + hubstats.TotalBytesSend);
+    out = ((ULLONG_MAX - stats.oldcounters.TotalBytesSend) + 1 + hubstats.TotalBytesSend);
   }
   if (hubstats.TotalBytesReceived >= stats.oldcounters.TotalBytesReceived) {
     in = hubstats.TotalBytesReceived - stats.oldcounters.TotalBytesReceived;
   } else {
-    in = ((ULONG_MAX - stats.oldcounters.TotalBytesReceived) + 1 + hubstats.TotalBytesReceived);
+    in = ((ULLONG_MAX - stats.oldcounters.TotalBytesReceived) + 1 + hubstats.TotalBytesReceived);
   }
 
   /* creating new probe */
@@ -540,6 +559,9 @@ unsigned int bandwidth_printf (buffer_t * buf)
 unsigned long pi_statistics_event_cacheflush (plugin_user_t * user, void *dummy,
 					      unsigned long event, buffer_t * token)
 {
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO) && !defined(USE_WINDOWS)
+  memoryinfo = mallinfo ();
+#endif
   cpu_measure ();
   return bandwidth_measure ();
 }
@@ -846,6 +868,10 @@ int pi_statistics_init ()
   bandwidth_init ();
   cpu_init ();
 
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO) && !defined(USE_WINDOWS)
+  memoryinfo = mallinfo ();
+#endif
+
   plugin_stats = plugin_register ("stats");
   plugin_request (plugin_stats, PLUGIN_EVENT_CACHEFLUSH, &pi_statistics_event_cacheflush);
 
@@ -862,6 +888,29 @@ int pi_statistics_init ()
 
 #ifdef USE_WINDOWS
   command_register ("statiocp", &pi_statistics_handler_statiocp, 0, _("Show iocp usage stats."));
+#endif
+
+  stats_register ("cputime.real", VAL_ELEM_ULONG, &totalms, "real time elapsed since boot (in ms)");
+  stats_register ("cputime.user", VAL_ELEM_ULONG, &userms, "cpu time spend in userspace (in ms)");
+  stats_register ("cputime.system", VAL_ELEM_ULONG, &sysms,
+		  "cpu time spend in systemcalls (in ms)");
+
+#if defined(HAVE_MALLOC_H) && defined(HAVE_MALLINFO) && !defined(USE_WINDOWS)
+  stats_register ("memory.heap", VAL_ELEM_UINT, &memoryinfo.arena,
+		  _("This is the total size of memory allocated with sbrk by malloc (bytes)."));
+  stats_register ("memory.freechunks", VAL_ELEM_UINT, &memoryinfo.ordblks,
+		  _("This is the number of chunks not in use."));
+  stats_register ("memory.mmapchunks", VAL_ELEM_UINT, &memoryinfo.hblks,
+		  _("This is the total number of chunks allocated with mmap."));
+  stats_register ("memory.mmapbytes", VAL_ELEM_UINT, &memoryinfo.hblkhd,
+		  _("This is the total size of memory allocated with mmap (bytes)."));
+  stats_register ("memory.allocated", VAL_ELEM_UINT, &memoryinfo.uordblks,
+		  _("This is the total size of memory occupied by chunks handed out by malloc."));
+  stats_register ("memory.available", VAL_ELEM_UINT, &memoryinfo.fordblks,
+		  _("This is the total size of memory occupied by free (not in use) chunks."));
+  stats_register ("memory.keepcost", VAL_ELEM_UINT, &memoryinfo.keepcost,
+		  _
+		  ("This is the size of the top-most releasable chunk that normally borders the end of the heap."));
 #endif
 
   return 0;

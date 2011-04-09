@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta37]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta38]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -301,11 +301,45 @@ AQ_PLUGIN_OPTION([PLUGIN_CHATROOM],	[chatroom],	[ON])
 AQ_PLUGIN_OPTION([PLUGIN_CONFIGLOCK],	[configlock],	[OFF])
 AQ_PLUGIN_OPTION([PLUGIN_HUBLIST],	[hublist],	[ON])
 AQ_PLUGIN_OPTION([PLUGIN_IPLOG],	[iplog],	[ON])
+AQ_PLUGIN_OPTION([PLUGIN_RRD],		[rrd],		[OFF])
 AQ_PLUGIN_OPTION([PLUGIN_RSS],		[rss],		[ON])
 AQ_PLUGIN_OPTION([PLUGIN_STATBOT],	[statbot],	[ON])
 AQ_PLUGIN_OPTION([PLUGIN_STATISTICS],	[statistics],	[ON])
 AQ_PLUGIN_OPTION([PLUGIN_TRIGGER],	[trigger],	[ON])
 AQ_PLUGIN_OPTION([PLUGIN_USER],		[user],		[ON])
+
+#
+## RRD Support
+#
+AC_ARG_WITH([rrd-prefix],
+            [AS_HELP_STRING([--with-rrd-prefix=DIR],
+                            [RRD files are in DIR])])
+AC_ARG_WITH([rrd-includes],
+            [AS_HELP_STRING([--with-rrd-includes=DIR],
+                            [RRD include file is in DIR])])
+AC_ARG_WITH([rrd-libraries],
+            [AS_HELP_STRING([--with-rrd-libraries=DIR],
+                            [RRD library file is in DIR])])
+
+
+if test "x$with_rrd_prefix" = x; then
+    rrd_search_path="$PATH"
+else
+    rrd_search_path="$with_rrd_prefix/bin"
+fi
+
+if test "x$with_rrd_includes" != x; then
+    RRD_INCLUDES="-I$with_rrd_includes"
+elif test "x$with_rrd_prefix" != x; then
+    RRD_INCLUDES="-I$with_rrd_prefix/include"
+fi
+
+if test "x$with_rrd_libraries" != x; then
+    RRD_LIBS="-L$with_rrd_libraries"
+elif test "x$with_rrd_prefix" != x; then
+    RRD_LIBS="-L$with_rrd_prefix/lib"
+fi
+
 
 #
 ## LUA Support
@@ -392,10 +426,20 @@ if test "$buildtarget" != "win32"
 then
 	if test "$pthreaddns" = "true"
 	then
-		AC_CHECK_LIB(pthread, pthread_create)
+		AC_CHECK_LIB([pthread], [pthread_create])
 	fi
 fi
 AM_CONDITIONAL(USE_PTHREADDNS, test "$ac_cv_lib_pthread_pthread_create" = "yes")
+
+if test "$PLUGIN_RRD" != ""
+then
+	# set the custom include paths
+	save_LIBS="$LIBS"
+	LIBS="$LIBS $RRD_LIBS"
+	AC_CHECK_LIB([rrd], [rrd_create], [RRD_LIBS="$RRD_LIBS -lrrd"], [AQ_PLUGIN_DISABLE([PLUGIN_RRD], [rrd])])
+	LIBS=$save_LIBS
+fi
+AC_SUBST(RRD_LIBS)
 
 ##################################################################################################
 #
@@ -428,6 +472,11 @@ fi
 if test "${ZLINE}" != "";
 then
 	AC_CHECK_HEADERS([zlib.h], [], [unset ZLINE])
+fi
+
+if test "${PLUGIN_RRD}" != "";
+then
+	AC_CHECK_HEADERS([rrd.h], [], [AQ_PLUGIN_DISABLE([PLUGIN_RRD], [rrd])])
 fi
 
 if test "${PLUGIN_LUA}" != "" ;
@@ -775,6 +824,7 @@ AQ_PLUGIN_REPORT([configlock])
 AQ_PLUGIN_REPORT([hublist])
 AQ_PLUGIN_REPORT([iplog])
 AQ_PLUGIN_REPORT([lua])
+AQ_PLUGIN_REPORT([rrd])
 AQ_PLUGIN_REPORT([rss])
 AQ_PLUGIN_REPORT([statbot])
 AQ_PLUGIN_REPORT([statistics])

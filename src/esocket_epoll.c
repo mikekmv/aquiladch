@@ -79,8 +79,7 @@ esocket_handler_t *esocket_create_handler (unsigned int numtypes)
 }
 
 int esocket_add_type (esocket_handler_t * h, unsigned int events,
-		      input_handler_t input, output_handler_t output,
-		      error_handler_t error)
+		      input_handler_t input, output_handler_t output, error_handler_t error)
 {
   if (h->curtypes == h->numtypes)
     return -1;

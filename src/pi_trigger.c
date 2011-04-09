@@ -688,7 +688,7 @@ int trigger_load (xml_node_t * base)
   if (help)
     free (help);
 
-  return 0;
+  return PLUGIN_RETVAL_CONTINUE;
 }
 
 int trigger_save_old (unsigned char *file)
@@ -777,7 +777,7 @@ int trigger_load_old (unsigned char *file)
   fp = fopen (file, "r+");
   if (!fp) {
     plugin_perror ("ERROR: loading file %s", file);
-    return errno;
+    return PLUGIN_RETVAL_CONTINUE;
   }
 
   fgets (buffer, sizeof (buffer), fp);

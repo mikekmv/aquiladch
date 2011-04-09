@@ -70,12 +70,21 @@ unsigned int es_type_server, es_type_listen;
 hub_statistics_t hubstats;
 
 int server_disconnect_user (client_t *, char *);
-int server_handle_output (esocket_t * es);
-int server_handle_timeout (client_t * cl);
 
-int server_isbuffering (client_t * cl)
+/*****************************************************************************
+**                         INTERNAL HANDLERS                                **
+*****************************************************************************/
+
+int server_handle_timeout (client_t * cl)
 {
-  return cl->outgoing.count != 0;
+  esocket_t *s = cl->es;
+
+  ASSERT (s->state != SOCKSTATE_FREED);
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
+
+  DPRINTF ("Buffering timeout user %s : %d\n", cl->user->nick, cl->user->state);
+  return server_disconnect_user (cl, __ ("Buffering Timeout"));
 }
 
 __inline__ int server_settimer (client_t * cl, unsigned long timeout)
@@ -86,48 +95,183 @@ __inline__ int server_settimer (client_t * cl, unsigned long timeout)
   return timeout ? etimer_set (cl->timer, timeout) : etimer_cancel (cl->timer);
 }
 
-/*
- * GENERIC NETWORK FUNCTIONS
- */
-esocket_t *setup_incoming_socket (proto_t * proto, esocket_handler_t * h, unsigned int etype,
-				  unsigned long address, int port)
+
+/****************************** DATA SOCKETS *********************************/
+
+int server_handle_output (esocket_t * es)
 {
-  esocket_t *es;
+  client_t *cl = (client_t *) es->context;
+  buffer_t *b;
+  long w;
+  unsigned long t, l, o;
+  string_list_entry_t *e;
 
+  /* duplicate event */
+  if (!cl->outgoing.count)
+    return 0;
+
+  BUF_DPRINTF (" %p Writing output (%u, %lu)...", cl->user, cl->outgoing.count, cl->offset);
+  w = 0;
+  t = 0;
+  b = NULL;
+
+  buf_mem -= cl->outgoing.size;
+
+  /* write out as much data as possible */
+  o = cl->offset;
+  for (e = cl->outgoing.first; e; e = cl->outgoing.first) {
+    b = e->data;
+    /* skip buffers we wrote already */
+    while (b && (bf_used (b) < o)) {
+      o -= bf_used (b);
+      b = b->next;
+    }
+    ASSERT (b);
+    /* write out data in buffer chain */
+    for (; b; b = b->next) {
+      l = bf_used (b) - o;
+      w = esocket_send (es, b, o);
+      if (w < 0) {
+	switch (errno) {
+	  case EAGAIN:
+	  case ENOMEM:
+	    break;
+	  case EPIPE:
 #ifndef USE_WINDOWS
-  int yes = 1;
+	  case ECONNRESET:
 #endif
+	    buf_mem += cl->outgoing.size;
+	    server_disconnect_user (cl, __ ("Connection closed."));
+	    return -1;
+	  default:
+	    buf_mem += cl->outgoing.size;
+	    return -1;
+	}
+	w = 0;
+	break;
+      }
+      t += w;
+      cl->offset += w;
+      hubstats.TotalBytesSend += w;
+      if ((unsigned) w != l)
+	break;
+      o = 0;
+    }
+    if (b)
+      break;
 
-  es = esocket_new (h, etype, AF_INET, SOCK_STREAM, 0, (uintptr_t) proto);
-  if (!es) {
-    perror ("socket:");
-    return NULL;
+    /* prepare for next buffer */
+    cl->offset = 0;
+    string_list_del (&cl->outgoing, e);
   }
-#ifndef USE_WINDOWS
-  /* we make the socket reusable, so many ppl can connect here */
-  if (setsockopt (es->socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof (yes)) < 0) {
-    perror ("setsockopt (SO_REUSEADDR):");
-    esocket_remove_socket (es);
-    return NULL;
+  if (cl->credit) {
+    if (cl->credit > t) {
+      cl->credit -= t;
+    } else {
+      cl->credit = 0;
+    };
   }
-#endif
+  STRINGLIST_VERIFY (&cl->outgoing);
 
-  if (esocket_bind (es, address, port)) {
-    esocket_remove_socket (es);
-    return NULL;
+  /* still not all data written */
+  if (b) {
+    if ((cl->state == HUB_STATE_OVERFLOW)
+	&& ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit))) {
+      server_settimer (cl, config.TimeoutBuffering);
+      cl->state = HUB_STATE_BUFFERING;
+    }
+
+    buf_mem += cl->outgoing.size;
+
+    BUF_DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu, credit %lu)\n", t,
+		 cl->outgoing.count, cl->outgoing.size, cl->offset, cl->credit);
+    return 0;
   }
 
-  /* start listening on the port */
-  esocket_listen (es, 10, AF_INET, SOCK_STREAM, 0);
+  BUF_DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
 
-  esocket_update_state (es, SOCKSTATE_CONNECTED);
-  esocket_setevents (es, ESOCKET_EVENT_IN);
+  /* all data was written, we don't need the output event anymore */
+  ASSERT (!cl->outgoing.count);
 
-  DPRINTF ("Listening for clients on port %d\n", port);
+  esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
+  server_settimer (cl, 0);
+  buffering--;
+  cl->state = HUB_STATE_NORMAL;
 
-  return es;
+  return 0;
 }
 
+int server_handle_input (esocket_t * s)
+{
+  client_t *cl = (client_t *) s->context;
+  buffer_t *b;
+  int n, first;
+
+  ASSERT (cl->es == s);
+
+  /* read available data */
+  first = 1;
+  for (;;) {
+    /* alloc new buffer and read data in it. break loop if no data available */
+    b = bf_alloc (HUB_INPUTBUFFER_SIZE);
+    if (!b)
+      return -1;
+
+    n = recv (s->socket, b->s, HUB_INPUTBUFFER_SIZE, 0);
+    if (n <= 0)
+      break;
+
+    hubstats.TotalBytesReceived += n;
+    first = 0;
+    /* init buffer and store */
+    b->e = b->s + n;
+    bf_append (&cl->buffers, b);
+
+    if (n < HUB_INPUTBUFFER_SIZE)
+      break;
+  };
+  if (n <= 0) {
+    bf_free (b);
+    b = NULL;
+  }
+
+  if ((n <= 0) && first) {
+    server_disconnect_user (cl, __ ("Error on read."));
+    return -1;
+  }
+
+  gettime ();
+  if (cl->buffers)
+    cl->proto->handle_input (cl->user, &cl->buffers);
+
+  return 0;
+}
+
+int server_error (esocket_t * s)
+{
+  char buffer[256];
+  client_t *cl = (client_t *) ((uintptr_t) s->context);
+
+  if (!cl)
+    return 0;
+
+  ASSERT (s->state != SOCKSTATE_FREED);
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
+
+
+  DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
+
+  if (s->error) {
+    sprintf (buffer, __ ("Socket error %d."), s->error);
+  } else {
+    sprintf (buffer, __ ("Socket errno %d."), errno);
+  }
+
+  return server_disconnect_user (cl, buffer);
+}
+
+/**************************** LISTENING SOCKETS ******************************/
 
 int accept_new_user (esocket_t * s)
 {
@@ -259,6 +403,9 @@ int accept_new_user (esocket_t * s)
 
     /* initiate connection */
     cl->proto->handle_token (cl->user, NULL);
+
+    /* don't free this client if something goes wrong in the next loop! */
+    cl = NULL;
   }
 
   return 0;
@@ -303,6 +450,61 @@ error:
   free (cl);
 
   return -1;
+}
+
+/*****************************************************************************
+**                         INTERNAL UTILITIES                               **
+*****************************************************************************/
+
+/*
+ * GENERIC NETWORK FUNCTIONS
+ */
+esocket_t *setup_incoming_socket (proto_t * proto, esocket_handler_t * h, unsigned int etype,
+				  unsigned long address, int port)
+{
+  esocket_t *es;
+
+#ifndef USE_WINDOWS
+  int yes = 1;
+#endif
+
+  es = esocket_new (h, etype, AF_INET, SOCK_STREAM, 0, (uintptr_t) proto);
+  if (!es) {
+    perror ("socket:");
+    return NULL;
+  }
+#ifndef USE_WINDOWS
+  /* we make the socket reusable, so many ppl can connect here */
+  if (setsockopt (es->socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof (yes)) < 0) {
+    perror ("setsockopt (SO_REUSEADDR):");
+    esocket_remove_socket (es);
+    return NULL;
+  }
+#endif
+
+  if (esocket_bind (es, address, port)) {
+    esocket_remove_socket (es);
+    return NULL;
+  }
+
+  /* start listening on the port */
+  esocket_listen (es, 10, AF_INET, SOCK_STREAM, 0);
+
+  esocket_update_state (es, SOCKSTATE_CONNECTED);
+  esocket_setevents (es, ESOCKET_EVENT_IN);
+
+  DPRINTF ("Listening for clients on port %d\n", port);
+
+  return es;
+}
+
+/*****************************************************************************
+**                         EXPORTED FUNCTIONS                               **
+*****************************************************************************/
+
+int server_isbuffering (client_t * cl)
+{
+  return cl->outgoing.count != 0;
 }
 
 int server_write_credit (client_t * cl, buffer_t * b)
@@ -471,192 +673,6 @@ int server_disconnect_user (client_t * cl, char *reason)
   return 0;
 }
 
-int server_handle_output (esocket_t * es)
-{
-  client_t *cl = (client_t *) es->context;
-  buffer_t *b;
-  long w;
-  unsigned long l, o;
-  unsigned long t;
-  string_list_entry_t *e;
-
-  if (!cl->outgoing.count)
-    return 0;
-
-  BUF_DPRINTF (" %p Writing output (%u, %lu)...", cl->user, cl->outgoing.count, cl->offset);
-  w = 0;
-  t = 0;
-  b = NULL;
-
-  buf_mem -= cl->outgoing.size;
-
-  o = cl->offset;
-  /* write out as much data as possible */
-  for (e = cl->outgoing.first; e; e = cl->outgoing.first) {
-    b = e->data;
-    /* skip buffers we wrote already */
-    while (b && (bf_used (b) < o)) {
-      o -= bf_used (b);
-      b = b->next;
-    }
-    ASSERT (b);
-    /* write out data in buffer chain */
-    for (; b; b = b->next) {
-      l = bf_used (b) - o;
-      w = esocket_send (es, b, o);
-      if (w < 0) {
-	switch (errno) {
-	  case EAGAIN:
-	  case ENOMEM:
-	    break;
-	  case EPIPE:
-#ifndef USE_WINDOWS
-	  case ECONNRESET:
-#endif
-	    buf_mem += cl->outgoing.size;
-	    server_disconnect_user (cl, __ ("Connection closed."));
-	    return -1;
-	  default:
-	    buf_mem += cl->outgoing.size;
-	    return -1;
-	}
-	w = 0;
-	break;
-      }
-      t += w;
-      cl->offset += w;
-      hubstats.TotalBytesSend += w;
-      if ((unsigned) w != l)
-	break;
-      o = 0;
-    }
-    if (b)
-      break;
-
-    /* prepare for next buffer */
-    cl->offset = 0;
-    string_list_del (&cl->outgoing, e);
-  }
-  if (cl->credit) {
-    if (cl->credit > t) {
-      cl->credit -= t;
-    } else {
-      cl->credit = 0;
-    };
-  }
-  STRINGLIST_VERIFY (&cl->outgoing);
-
-  /* still not all data written */
-  if (b) {
-    if ((cl->state == HUB_STATE_OVERFLOW)
-	&& ((cl->outgoing.size - cl->offset) < (config.BufferSoftLimit + cl->credit))) {
-      server_settimer (cl, config.TimeoutBuffering);
-      cl->state = HUB_STATE_BUFFERING;
-    }
-
-    buf_mem += cl->outgoing.size;
-
-    BUF_DPRINTF (" wrote %lu, still %u buffers, size %lu (offset %lu, credit %lu)\n", t,
-		 cl->outgoing.count, cl->outgoing.size, cl->offset, cl->credit);
-    return 0;
-  }
-
-  BUF_DPRINTF (" wrote %lu, ALL CLEAR (%u, %lu)!!\n", t, cl->outgoing.count, cl->offset);
-
-  /* all data was written, we don't need the output event anymore */
-  ASSERT (!cl->outgoing.count);
-
-  esocket_clearevents (cl->es, ESOCKET_EVENT_OUT);
-  server_settimer (cl, 0);
-  buffering--;
-  cl->state = HUB_STATE_NORMAL;
-
-  return 0;
-}
-
-int server_handle_input (esocket_t * s)
-{
-  client_t *cl = (client_t *) s->context;
-  buffer_t *b;
-  int n, first;
-
-  ASSERT (cl->es == s);
-
-  /* read available data */
-  first = 1;
-  for (;;) {
-    /* alloc new buffer and read data in it. break loop if no data available */
-    b = bf_alloc (HUB_INPUTBUFFER_SIZE);
-    if (!b)
-      return -1;
-
-    n = recv (s->socket, b->s, HUB_INPUTBUFFER_SIZE, 0);
-    if (n <= 0)
-      break;
-
-    hubstats.TotalBytesReceived += n;
-    first = 0;
-    /* init buffer and store */
-    b->e = b->s + n;
-    bf_append (&cl->buffers, b);
-
-    if (n < HUB_INPUTBUFFER_SIZE)
-      break;
-  };
-  if (n <= 0) {
-    bf_free (b);
-    b = NULL;
-  }
-
-  if ((n <= 0) && first) {
-    server_disconnect_user (cl, __ ("Error on read."));
-    return -1;
-  }
-
-  gettime ();
-  if (cl->buffers)
-    cl->proto->handle_input (cl->user, &cl->buffers);
-
-  return 0;
-}
-
-int server_handle_timeout (client_t * cl)
-{
-  esocket_t *s = cl->es;
-
-  ASSERT (s->state != SOCKSTATE_FREED);
-  if (s->state == SOCKSTATE_FREED)
-    return 0;
-
-  DPRINTF ("Buffering timeout user %s : %d\n", cl->user->nick, cl->user->state);
-  return server_disconnect_user (cl, __ ("Buffering Timeout"));
-}
-
-int server_error (esocket_t * s)
-{
-  char buffer[256];
-
-  client_t *cl = (client_t *) ((uintptr_t) s->context);
-
-  if (!cl)
-    return 0;
-
-  ASSERT (s->state != SOCKSTATE_FREED);
-  if (s->state == SOCKSTATE_FREED)
-    return 0;
-
-
-  DPRINTF ("Error on user %s : %d\n", cl->user->nick, cl->user->state);
-
-  if (s->error) {
-    sprintf (buffer, __ ("Socket error %d."), s->error);
-  } else {
-    sprintf (buffer, __ ("Socket errno %d."), errno);
-  }
-
-  return server_disconnect_user (cl, buffer);
-}
-
 int server_add_port (esocket_handler_t * h, proto_t * proto, unsigned long address, int port)
 {
   return setup_incoming_socket (proto, h, es_type_listen, address, port) != NULL;
@@ -681,6 +697,7 @@ int server_init ()
   banlist_init (&softbanlist);
 
   core_config_init ();
+  core_stats_init ();
 
   return 0;
 }

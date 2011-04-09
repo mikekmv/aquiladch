@@ -66,6 +66,9 @@ endif
 if PLUGIN_STATBOT
 STATBOT_SOURCES =  pi_statbot.c
 endif
+if PLUGIN_RRD
+RRD_SOURCES =  pi_rrd.c
+endif
 if PLUGIN_RSS
 RSS_SOURCES =  pi_rss.c
 endif
@@ -85,6 +88,7 @@ PLUGIN_SOURCES= $(CHATLOG_SOURCES) \
 		$(HUBLIST_SOURCES) \
 		$(IPLOG_SOURCES) \
 		$(LUA_SOURCES) \
+		$(RRD_SOURCES) \
 		$(RSS_SOURCES) \
 		$(STATBOT_SOURCES) \
 		$(STATISTICS_SOURCES) \
@@ -97,13 +101,14 @@ PLUGIN_CFLAGS = @PLUGIN_CHATLOG@ \
 		@PLUGIN_HUBLIST@ \
 		@PLUGIN_IPLOG@ \
 		@PLUGIN_LUA@ @LUA_INCLUDES@ \
+		@PLUGIN_RRD@ \
 		@PLUGIN_RSS@ \
 		@PLUGIN_STATBOT@ \
 		@PLUGIN_STATISTICS@ \
 		@PLUGIN_TRIGGER@ \
 		@PLUGIN_USER@
 
-PLUGIN_LIBS =	@LUALIB@
+PLUGIN_LIBS = @LUALIB@ @RRD_LIBS@
 
 if EPOLL
 NETWORKAPI_CFLAGS = -DUSE_EPOLL
@@ -133,7 +138,7 @@ EXTRA_DIST = buffer.h commands.h hash.h nmdc_protocol.h rbt.h banlistclient.h co
 	     defaults.h hub.h plugin.h utils.h builtincmd.h dllist.h leakybucket.h plugin_int.h cap.h \
 	     esocket.h nmdc.h proto.h stacktrace.c stacktrace.h getaddrinfo.h getaddrinfo.c pi_lua.c \
 	     nmdc_nicklistcache.h banlist.h nmdc_local.h tth.h aqtime.h iplist.h gettext.h dns.h xml.h \
-	     sys_windows.h flags.h aquila.rc etimer.h \
+	     sys_windows.h flags.h aquila.rc etimer.h value.h stats.h \
 	     esocket_epoll.c esocket_poll.c esocket_select.c esocket_iocp.c
 
 DISTCLEANFILES = .indent
@@ -166,6 +171,8 @@ aquila_SOURCES = $(NETWORK_SOURCES) \
 		 aqtime.c \
 		 iplist.c \
 		 xml.c \
+		 value.c \
+		 stats.c \
 		 $(NMDC_SOURCES) \
 		 $(PLUGIN_SOURCES) \
 		 $(DEBUG_FILES) \

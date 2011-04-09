@@ -300,6 +300,10 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
   output = bf_alloc (2048);
   output->s[0] = '\0';
 
+  /* no nick supplied. */
+  if (!*tkn->argument)
+    return 0;
+
   /* nick already used ? */
   do {
     /* check nick for illegal characters */

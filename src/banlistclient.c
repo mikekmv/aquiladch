@@ -205,7 +205,7 @@ unsigned int banlist_client_load_old (banlist_client_t * list, unsigned char *fi
   t = 0;
   fp = fopen (file, "r+");
   if (!fp) {
-    return errno;
+    return 0;
   }
 
   while (!feof (fp)) {
@@ -225,7 +225,7 @@ unsigned int banlist_client_load_old (banlist_client_t * list, unsigned char *fi
     t++;
   }
   fclose (fp);
-  return t;
+  return 0;
 }
 
 void banlist_client_init (banlist_client_t * list)

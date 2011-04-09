@@ -138,6 +138,8 @@ unsigned int parserights (unsigned char *caps, unsigned long long *cap, unsigned
     if ((*d == '-') || (*d == '+'))
       d++;
     for (j = 0; Capabilities[j].name; j++) {
+      if (!Capabilities[j].flag)
+	continue;
       if (!strcasecmp (Capabilities[j].name, d)) {
 	if (c[0] != '-') {
 	  *cap |= Capabilities[j].flag;
@@ -1732,13 +1734,17 @@ void pi_lua_purgebots (lua_context_t * ctx)
  */
 
 typedef struct pi_lua_timer_context {
-  etimer_t timer;
+  struct pi_lua_timer_context *next, *prev;
 
   unsigned long interval;
   int funcref;
   int dataref;
   lua_State *lua;
+
+  etimer_t timer;
 } pi_lua_timer_context_t;
+
+pi_lua_timer_context_t timerlist;
 
 unsigned long pi_lua_handle_timeout (pi_lua_timer_context_t * ctx)
 {
@@ -1760,9 +1766,14 @@ unsigned long pi_lua_handle_timeout (pi_lua_timer_context_t * ctx)
     plugin_report (buf);
     bf_free (buf);
 
+    /* unlink */
+    ctx->prev->next = ctx->next;
+    ctx->next->prev = ctx->prev;
+
     /* delete timer */
     luaL_unref (lua, LUA_REGISTRYINDEX, ctx->funcref);
     luaL_unref (lua, LUA_REGISTRYINDEX, ctx->dataref);
+
     free (ctx);
 
     return 0;
@@ -1776,10 +1787,39 @@ unsigned long pi_lua_handle_timeout (pi_lua_timer_context_t * ctx)
     /* restart the timer */
     etimer_set (&ctx->timer, ctx->interval);
   } else {
+    /* unlink */
+    ctx->prev->next = ctx->next;
+    ctx->next->prev = ctx->prev;
+
     /* destroy the timer */
     luaL_unref (lua, LUA_REGISTRYINDEX, ctx->funcref);
     luaL_unref (lua, LUA_REGISTRYINDEX, ctx->dataref);
     free (ctx);
+  }
+
+  return 0;
+}
+
+int pi_lua_timerclear (lua_State * lua)
+{
+  pi_lua_timer_context_t *ctx;
+
+  for (ctx = timerlist.next; ctx != &timerlist; ctx = ctx->next) {
+    if (ctx->lua != lua)
+      continue;
+
+    etimer_cancel (&ctx->timer);
+
+    /* unlink */
+    ctx->prev->next = ctx->next;
+    ctx->next->prev = ctx->prev;
+
+    /* destroy the timer */
+    luaL_unref (lua, LUA_REGISTRYINDEX, ctx->funcref);
+    luaL_unref (lua, LUA_REGISTRYINDEX, ctx->dataref);
+    free (ctx);
+
+    ctx = timerlist.next;
   }
 
   return 0;
@@ -1815,6 +1855,11 @@ int pi_lua_timeradd (lua_State * lua)
 
   lua_pushvalue (lua, 3);
   ctx->dataref = luaL_ref (lua, LUA_REGISTRYINDEX);
+
+  ctx->next = &timerlist;
+  ctx->prev = timerlist.prev;
+  ctx->next->prev = ctx;
+  ctx->prev->next = ctx;
 
   etimer_init (&ctx->timer, (etimer_handler_t *) pi_lua_handle_timeout, ctx);
   etimer_set (&ctx->timer, interval);
@@ -2263,6 +2308,7 @@ late_error:
   ctx->prev->next = ctx->next;
   pi_lua_purgebots (ctx);
   pi_lua_cmdclean (l);
+  pi_lua_timerclear (l);
   free (ctx->name);
   free (ctx);
   lua_ctx_cnt--;
@@ -2282,6 +2328,7 @@ unsigned int pi_lua_close (unsigned char *name)
     if (strcmp (name, ctx->name))
       continue;
 
+    pi_lua_timerclear (ctx->l);
     pi_lua_cmdclean (ctx->l);
     pi_lua_purgebots (ctx);
 
@@ -2576,6 +2623,9 @@ int pi_lua_init ()
   lua_list.name = NULL;
   lua_ctx_cnt = 0;
   lua_ctx_peak = 0;
+
+  timerlist.next = &timerlist;
+  timerlist.prev = &timerlist;
 
   pi_lua_command_list.next = &pi_lua_command_list;
   pi_lua_command_list.prev = &pi_lua_command_list;

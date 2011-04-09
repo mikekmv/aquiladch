@@ -574,8 +574,8 @@ restart:
 
   /* data element or tree element ? */
   if ((*c == '<') && (*(c + 1) != '/')) {
-    if (*(c + 1) != '!') {
-      /* subnode */
+    if ((*(c + 1) != '!') || (*(c + 2) == '-')) {
+      /* subnode (including <!-- --> comments */
       node = xml_node_add (*parent, name);
       if (attr)
 	xml_import_attr (node, attr);
