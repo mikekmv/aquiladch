@@ -59,6 +59,8 @@ unsigned long buffering = 0;
 unsigned long buf_mem = 0;
 
 unsigned int ndelay = 1;
+unsigned int blockonoverflow = 1;
+unsigned int disconnectontimeout = 1;
 
 /* banlist */
 banlist_t hardbanlist, softbanlist;
@@ -81,6 +83,9 @@ int server_handle_timeout (client_t * cl)
 
   ASSERT (s->state != SOCKSTATE_FREED);
   if (s->state == SOCKSTATE_FREED)
+    return 0;
+
+  if (!disconnectontimeout)
     return 0;
 
   DPRINTF ("Buffering timeout user %s : %d\n", cl->user->nick, cl->user->state);
@@ -245,6 +250,13 @@ int server_handle_input (esocket_t * s)
 #endif
     server_disconnect_user (cl, __ ("Error on read."));
     return -1;
+  }
+
+  if (blockonoverflow && (cl->state == HUB_STATE_OVERFLOW)) {
+    bf_free (cl->buffers);
+    cl->buffers = NULL;
+    cl->proto->handle_input (cl->user, NULL);
+    return 0;
   }
 
   gettime ();

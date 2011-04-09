@@ -1104,26 +1104,6 @@ int plugin_config_save (buffer_t * output)
   xml_free (node);
 
 leave:
-  //return 0;
-
-  retval = config_save_old (ConfigFile);
-  if (retval)
-    bf_printf (output, _("Error saving configuration to %s: %s\n"), ConfigFile, strerror (retval));
-
-  retval = accounts_save_old (AccountsFile);
-  if (retval)
-    bf_printf (output, _("Error saving configuration to %s: %s\n"), AccountsFile,
-	       strerror (retval));
-
-  retval = banlist_save_old (&hardbanlist, HardBanFile);
-  if (retval)
-    bf_printf (output, _("Error saving configuration to %s: %s\n"), HardBanFile, strerror (retval));
-
-  retval = banlist_save_old (&softbanlist, SoftBanFile);
-  if (retval)
-    bf_printf (output, _("Error saving configuration to %s: %s\n"), SoftBanFile, strerror (retval));
-
-
   return 0;
 
 }

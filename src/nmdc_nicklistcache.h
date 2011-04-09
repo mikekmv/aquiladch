@@ -80,9 +80,35 @@ typedef struct {
   buffer_t *nicklistzpipe;
 #endif
   buffer_t *infolistupdate;
+
   unsigned long length_estimate;
   unsigned long length_estimate_op;
   unsigned long length_estimate_info;
+  
+  unsigned long nicklist_length;
+  unsigned long oplist_length;
+  unsigned long infolist_length;
+  unsigned long hellolist_length;
+#ifdef ZLINES
+  unsigned long infolistzline_length;
+  unsigned long nicklistzline_length;
+  unsigned long infolistzpipe_length;
+  unsigned long nicklistzpipe_length;
+#endif
+  unsigned long infolistupdate_length;
+
+  unsigned long nicklist_count;
+  unsigned long oplist_count;
+  unsigned long infolist_count;
+  unsigned long hellolist_count;
+#ifdef ZLINES
+  unsigned long infolistzline_count;
+  unsigned long nicklistzline_count;
+  unsigned long infolistzpipe_count;
+  unsigned long nicklistzpipe_count;
+#endif
+  unsigned long infolistupdate_bytes;
+  
 } cache_t;
 
 extern int nicklistcache_adduser (user_t * u);

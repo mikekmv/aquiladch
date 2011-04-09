@@ -32,6 +32,8 @@
 #include "hub.h"
 
 extern int ndelay;
+extern unsigned int blockonoverflow;
+extern unsigned int disconnectontimeout;
 
 #ifdef USE_IOCP
 extern unsigned long iocpFragments;
@@ -132,6 +134,9 @@ int core_config_init ()
   config_register ("hub.reconnectsize", CFG_ELEM_ULONG, &iplist_size, _("This is the number of IP address to remember."));
 
   config_register ("hub.ndelay", CFG_ELEM_UINT, &ndelay, _("This turns on or off the ndelay setting."));
+
+  config_register ("hub.BufferBlockOnOverflow", CFG_ELEM_UINT, &blockonoverflow, _("This turns on or off input processing for users in overflow mode."));
+  config_register ("hub.BufferDisconnectOnTimeout", CFG_ELEM_UINT, &disconnectontimeout, _("This turns on or off disconnecting users on buffering timeout."));
 
 #ifdef USE_IOCP
   config_register ("socket.fragments", CFG_ELEM_ULONG, &iocpFragments, _("Maximum number of outstanding data buffers per user."));

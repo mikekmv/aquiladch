@@ -225,32 +225,6 @@ unsigned int chatroom_load (xml_node_t * node)
   return 0;
 }
 
-unsigned int chatroom_save_old (unsigned char *filename)
-{
-  FILE *fp;
-  chatroom_t *room;
-
-  fp = fopen (filename, "w+");
-  if (!fp) {
-    plugin_perror ("ERROR saving %s", filename);
-    return errno;
-  }
-#ifndef USE_WINDOWS
-  for (room = chatrooms.next; (room != &chatrooms); room = room->next) {
-    fprintf (fp, "%s %lu %llu %s\n", room->name, room->flags, room->rights & ~CAP_CUSTOM_MASK,
-	     room->description);
-  }
-#else
-  for (room = chatrooms.next; (room != &chatrooms); room = room->next) {
-    fprintf (fp, "%s %lu %I64u %s\n", room->name, room->flags, room->rights & ~CAP_CUSTOM_MASK,
-	     room->description);
-  }
-#endif
-  fclose (fp);
-
-  return 0;
-}
-
 unsigned int chatroom_load_old (unsigned char *filename)
 {
   FILE *fp;
@@ -591,7 +565,6 @@ unsigned long pi_chatroom_event_save (plugin_user_t * user, void *dummy,
 				      unsigned long event, void *arg)
 {
   chatroom_save (arg);
-  chatroom_save_old (pi_chatroom_savefile);
   return PLUGIN_RETVAL_CONTINUE;
 }
 

@@ -42,6 +42,8 @@ extern banlist_t reconnectbanlist;
 
 extern unsigned int cloning;
 
+extern unsigned int notimeout;
+
 extern unsigned char *nickchars;
 extern unsigned char nickchar_map[256];
 extern unsigned char nmdc_forbiddenchars[256];

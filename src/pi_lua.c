@@ -2546,26 +2546,6 @@ unsigned long pi_lua_event_load (plugin_user_t * user, void *dummy, unsigned lon
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-unsigned long pi_lua_event_save_old (plugin_user_t * user, void *dummy,
-				     unsigned long event, buffer_t * token)
-{
-  FILE *fp;
-  lua_context_t *ctx;
-
-  fp = fopen (pi_lua_savefile, "w+");
-  if (!fp) {
-    plugin_perror (__ ("LUA: ERROR saving %s"), pi_lua_savefile);
-    return PLUGIN_RETVAL_CONTINUE;
-  }
-
-  for (ctx = lua_list.next; (ctx != &lua_list); ctx = ctx->next)
-    fprintf (fp, "%s\n", ctx->name);
-
-  fclose (fp);
-
-  return PLUGIN_RETVAL_CONTINUE;
-}
-
 unsigned long pi_lua_event_load_old (plugin_user_t * user, void *dummy,
 				     unsigned long event, buffer_t * token)
 {
@@ -2639,8 +2619,6 @@ int pi_lua_init ()
 
   plugin_request (plugin_lua, PLUGIN_EVENT_LOAD, (plugin_event_handler_t *) & pi_lua_event_load);
   plugin_request (plugin_lua, PLUGIN_EVENT_SAVE, (plugin_event_handler_t *) & pi_lua_event_save);
-  plugin_request (plugin_lua, PLUGIN_EVENT_SAVE,
-		  (plugin_event_handler_t *) & pi_lua_event_save_old);
 
   command_register ("luastat", &handler_luastat, CAP_CONFIG, _("Show lua stats."));
   command_register ("luaload", &handler_luaload, CAP_CONFIG, _("Load a lua script."));

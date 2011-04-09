@@ -259,12 +259,26 @@ int nicklistcache_rebuild (struct timeval now)
   cache.needrebuild = 0;
   cache.lastrebuild = now.tv_sec;
 
+
 #ifdef ZLINES
   zline (cache.infolist, cache.ZpipeSupporters ? &cache.infolistzpipe : NULL,
 	 cache.ZlineSupporters ? &cache.infolistzline : NULL);
   zline (cache.nicklist, cache.ZpipeSupporters ? &cache.nicklistzpipe : NULL,
 	 cache.ZlineSupporters ? &cache.nicklistzline : NULL);
 #endif
+
+  cache.nicklist_length = bf_used (cache.nicklist);
+  cache.oplist_length = bf_used (cache.oplist);
+  cache.infolist_length = bf_used (cache.infolist);
+  cache.hellolist_length = bf_used (cache.hellolist);
+#ifdef ZLINES
+  cache.infolistzline_length = cache.infolistzline ? bf_used (cache.infolistzline) : 0;
+  cache.nicklistzline_length = cache.nicklistzline ? bf_used (cache.nicklistzline) : 0;
+  cache.infolistzpipe_length = cache.infolistzpipe ? bf_used (cache.infolistzpipe) : 0;
+  cache.nicklistzpipe_length = cache.nicklistzpipe ? bf_used (cache.nicklistzpipe) : 0;
+#endif
+  cache.infolistupdate_length = bf_used (cache.infolistupdate);
+
 
   BF_VERIFY (cache.infolist);
   BF_VERIFY (cache.nicklist);
@@ -296,34 +310,44 @@ int nicklistcache_sendnicklist (user_t * target)
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
       server_write_credit (target->parent, cache.nicklistzpipe);
+      cache.nicklistzpipe_count++;
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
       server_write_credit (target->parent, cache.nicklistzline);
+      cache.nicklistzline_count++;
     } else {
       server_write_credit (target->parent, cache.nicklist);
+      cache.nicklist_count++;
     }
 #else
     server_write_credit (target->parent, cache.nicklist);
+    cache.nicklist_count++;
 #endif
   } else {
     if (!(target->supports & NMDC_SUPPORTS_NoGetINFO)) {
       server_write_credit (target->parent, cache.nicklist);
+      cache.nicklist_count++;
     }
   }
   /* always send the oplist */
   server_write_credit (target->parent, cache.oplist);
+  cache.oplist_count++;
 
   /* clients that support NoGetINFO get a infolist and a infolistupdate, other get a  hello list update */
   if (target->supports & NMDC_SUPPORTS_NoGetINFO) {
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
       server_write_credit (target->parent, cache.infolistzpipe);
+      cache.infolistzpipe_count++;
     } else if (target->supports & NMDC_SUPPORTS_ZLine) {
       server_write_credit (target->parent, cache.infolistzline);
+      cache.infolistzline_count++;
     } else {
       server_write_credit (target->parent, cache.infolist);
+      cache.infolist_count++;
     }
 #else
     server_write_credit (target->parent, cache.infolist);
+    cache.infolist_count++;
 #endif
 #ifdef ZLINES
     if (target->supports & NMDC_SUPPORTS_ZPipe) {
@@ -337,8 +361,10 @@ int nicklistcache_sendnicklist (user_t * target)
 
     server_write_credit (target->parent, b);
     bf_free (b);
+    cache.infolistupdate_bytes += bf_used (b);
   } else {
     server_write_credit (target->parent, cache.hellolist);
+    cache.hellolist_count++;
   }
 
   return 0;
@@ -348,7 +374,8 @@ int nicklistcache_sendoplist (user_t * target)
 {
   nicklistcache_rebuild (now);
 
-  /* write out to all users except target. 
+  /* 
+     write out to all users except target. 
      FIXME this wouldn't help since we don't tag the oplist as send by the user...
      target->SearchCnt++;
      target->CacheException++;

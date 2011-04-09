@@ -429,43 +429,6 @@ unsigned int banlist_load (banlist_t * list, xml_node_t * node)
   return 0;
 }
 
-unsigned int banlist_save_old (banlist_t * list, unsigned char *file)
-{
-  FILE *fp;
-  uint32_t i;
-  unsigned long j;
-  banlist_entry_t *e;
-  dllist_entry_t *l, *p, *n;
-
-  fp = fopen (file, "w+");
-  if (!fp)
-    return errno;
-
-  fwrite (list->netmask_inuse, sizeof (unsigned long), 33, fp);
-  dlhashlist_foreach (&list->list_ip, i) {
-    l = dllist_bucket (&list->list_ip, i);
-    for (p = l->next; p != dllist_end (l); p = n) {
-      n = p->next;
-      e = (banlist_entry_t *) p;
-      if (e->expire && (e->expire < now.tv_sec)) {
-	banlist_del (list, e);
-	continue;
-      }
-      j = bf_used (e->message);
-      fwrite (&e->ip, sizeof (e->ip), 1, fp);
-      fwrite (&e->netmask, sizeof (e->netmask), 1, fp);
-      fwrite (e->nick, sizeof (e->nick), 1, fp);
-      fwrite (e->op, sizeof (e->op), 1, fp);
-      fwrite (&e->expire, sizeof (e->expire), 1, fp);
-      fwrite (&j, sizeof (j), 1, fp);
-      fwrite (e->message->s, 1, j, fp);
-    }
-  }
-  fclose (fp);
-  return 0;
-}
-
-
 unsigned int banlist_load_old (banlist_t * list, unsigned char *file)
 {
   FILE *fp;

@@ -396,7 +396,8 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 
     /* if user exists */
     if (existing_user) {
-      if (existing_user->ipaddress != u->ipaddress) {
+      if ((existing_user->ipaddress != u->ipaddress)
+	  && (!notimeout || existing_user->timer.tovalid)) {
 	bf_strcat (output, "$ValidateDenide ");
 	bf_strcat (output, u->nick);
 	bf_strcat (output, "|");

@@ -691,76 +691,6 @@ int trigger_load (xml_node_t * base)
   return PLUGIN_RETVAL_CONTINUE;
 }
 
-int trigger_save_old (unsigned char *file)
-{
-  FILE *fp;
-  trigger_t *trigger;
-  trigger_rule_t *rule;
-
-  fp = fopen (file, "w+");
-  if (!fp) {
-    plugin_perror ("ERROR: saving %s", file);
-    return errno;
-  }
-
-  for (trigger = triggerList.next; trigger != &triggerList; trigger = trigger->next) {
-    fprintf (fp, "trigger %s %lu %lu ", trigger->name, trigger->type, trigger->flags);
-    switch (trigger->type) {
-      case TRIGGER_TYPE_FILE:
-	fprintf (fp, "%s\n", trigger->file);
-	break;
-      case TRIGGER_TYPE_TEXT:
-	{
-	  unsigned char *out = string_escape (trigger->text->s);
-
-	  fprintf (fp, "%s\n", out);
-	  free (out);
-	}
-	break;
-      case TRIGGER_TYPE_COMMAND:
-	break;
-    }
-  }
-
-#ifndef USE_WINDOWS
-  for (rule = ruleListLogin.next; rule != &ruleListLogin; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %llu %lu\n", rule->trigger->name, rule->type,
-	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags);
-  }
-
-  for (rule = ruleListCommand.next; rule != &ruleListCommand; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %llu %lu %s %s\n", rule->trigger->name, rule->type,
-	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->arg,
-	     rule->help ? (char *) rule->help : "");
-  }
-
-  for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %llu %lu %lu\n", rule->trigger->name, rule->type,
-	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->interval);
-  }
-#else
-  for (rule = ruleListLogin.next; rule != &ruleListLogin; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %I64u %lu\n", rule->trigger->name, rule->type,
-	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags);
-  }
-
-  for (rule = ruleListCommand.next; rule != &ruleListCommand; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %I64u %lu %s %s\n", rule->trigger->name, rule->type,
-	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->arg,
-	     rule->help ? (char *) rule->help : "");
-  }
-
-  for (rule = ruleListTimer.next; rule != &ruleListTimer; rule = rule->next) {
-    fprintf (fp, "rule %s %lu %I64u %lu %lu\n", rule->trigger->name, rule->type,
-	     rule->cap & ~CAP_CUSTOM_MASK, rule->flags, rule->interval);
-  }
-#endif
-  fclose (fp);
-
-  return 0;
-}
-
-
 int trigger_load_old (unsigned char *file)
 {
   FILE *fp;
@@ -1145,7 +1075,6 @@ unsigned long pi_trigger_event_save (plugin_user_t * user, void *dummy,
 				     unsigned long event, void *arg)
 {
   trigger_save (arg);
-  trigger_save_old (pi_trigger_SaveFile);
   return PLUGIN_RETVAL_CONTINUE;
 }
 

@@ -1,5 +1,13 @@
 This is the Aquila Changelog.
 
+0.1.11-pre2-beta1:
+	Added nls support in RSS and RRD.
+	Added lots of nicklistcache statistics.
+	Fix Usage printing in !rsstarget
+	Added hub.BufferBlockOnOverflow, hub.BufferDisconnectOnTimeout,
+		nmdc.notimeoutonline
+	Removed all old save functions.
+
 0.1.11-pre1:
 	Added partial hu_HU (FleetCommand)
 	updated sv.po (Thank you en_dator).
@@ -7,8 +15,6 @@ This is the Aquila Changelog.
 		is not available. (Reported yada)
 	Fix rrd configure include path (Reported FleetCommand)
 	RRD: Fix buf in xml load.
-
-0.1.11-pre1-beta39:
 	Fixed compiling pi_statistics.c on windows.
 	Import LastIP correctly.
 	Fixed a bunch of string termination bugs.
@@ -17,8 +23,6 @@ This is the Aquila Changelog.
 	RDD: fix crash in error printing.
 	Added lastip to AccountFind
 	LUA: fixed AccountFind rights printing. (Reported FleetCommand)
-
-0.1.11-pre1-beta38:
 	RRD: Fix problem with DS parsing.
 	RRD: improved error reporting.
 	HUB: don't free client_t of previous socket if setup fails.
@@ -30,8 +34,6 @@ This is the Aquila Changelog.
 	Added generic statistics support.
 	LUA: cancel timers when closing script (reported en_dator).
 	HUB: rearranged order.
-
-0.1.11-pre1-beta37:
 	LUA: fix timer error handling (reported en_dator)
 	HUB: Use real buffer in closing socket.
 	IOCP: Fix delayed close in esocket_iocp.c
