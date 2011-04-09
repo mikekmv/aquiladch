@@ -342,11 +342,13 @@ msgid "Commands are preceded with ! or +\n"
 msgstr "Commands are preceded with ! or + / Komentoja edeltää ! tai +\n"
 
 #: src/builtincmd.c:929
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "This hub is running %s Version %s. For more help, see %s\n"
-msgstr "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
+msgstr ""
+"\n"
+"This hub is running %s Version %s. For more help, see %s\n"
 
 #: src/builtincmd.c:949
 #, c-format
@@ -354,34 +356,34 @@ msgid "Command %s not found.\n"
 msgstr "Command %s not found.\n"
 
 #: src/builtincmd.c:964
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <name> <help>\n"
-msgstr "Käyttö: %s <nick> <ryhmä>"
+msgstr "Käyttö: %s <nimi> <help>\n"
 
 #: src/builtincmd.c:976
 #, c-format
 msgid "Right %s could not be created.\n"
-msgstr ""
+msgstr "Oikeutta %s ei voitu luoda.\n"
 
 #: src/builtincmd.c:978
-#, fuzzy, c-format
+#, c-format
 msgid "Right %s created.\n"
-msgstr "Triggerin %s luominen epäonnistui."
+msgstr "Oikeus %s luotiin.\n"
 
 #: src/builtincmd.c:988 src/pi_rrd.c:466
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <name>\n"
-msgstr "Käyttö: %s <huone>\n"
+msgstr "Käyttö: %s <nimi>\n"
 
 #: src/builtincmd.c:993
-#, fuzzy, c-format
+#, c-format
 msgid "Right %s could not be found.\n"
-msgstr "Report could not be sent, %s not found."
+msgstr "Oikeutta %s ei löytynyt.\n"
 
 #: src/builtincmd.c:995
-#, fuzzy, c-format
+#, c-format
 msgid "Right %s destroyed.\n"
-msgstr "Trigger %s poistettu."
+msgstr "Oikeus %s tuhottu.\n"
 
 #: src/builtincmd.c:1013
 #, c-format
@@ -530,12 +532,12 @@ msgstr ""
 "perusteella:"
 
 #: src/builtincmd.c:1328
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "User %s with group %s.\n"
 "Current rights:"
 msgstr ""
-"Käyttäjä %s luotu ryhmään %s.\n"
+"Käyttäjä %s ryhmässä %s.\n"
 "Nykyiset oikeudet:"
 
 #: src/builtincmd.c:1335
@@ -588,9 +590,9 @@ msgid "User was registered by %s on %s"
 msgstr "Käyttäjän on rekisteröinyt %s päivänä %s"
 
 #: src/builtincmd.c:1415
-#, fuzzy, c-format
+#, c-format
 msgid ", last login %s from %s"
-msgstr ", kirjautunut edellisen kerran %s\n"
+msgstr ", kirjautunut edellisen kerran %s IP:llä %s"
 
 #: src/builtincmd.c:1422
 msgid ", never logged in.\n"
@@ -609,11 +611,11 @@ msgstr "IP: %s Hubit: (%u, %u, %u), Slotit %u\n"
 #: src/builtincmd.c:1451
 #, c-format
 msgid "IP location %s (%s)\n"
-msgstr ""
+msgstr "IP:n sijainti %s (%s)\n"
 
 #: src/builtincmd.c:1454
 msgid "IP location unknown\n"
-msgstr ""
+msgstr "IP:n sijainti tuntematon\n"
 
 #: src/builtincmd.c:1469
 #, c-format
@@ -712,12 +714,12 @@ msgstr ""
 #: src/builtincmd.c:1677
 #, c-format
 msgid "Local is determined by variable %s and set to %s\n"
-msgstr ""
+msgstr "Localin määrittää muuttuja %s joka on asetettu arvoon %s\n"
 
 #: src/builtincmd.c:1679
 #, c-format
 msgid "Locale is set to %s\n"
-msgstr ""
+msgstr "Localeksi on asetettu %s\n"
 
 #: src/builtincmd.c:1685
 #, c-format
@@ -725,6 +727,8 @@ msgid ""
 "WARNING: decimal point is '%c', this will cause problems in parsing tags. "
 "Set LC_NUMERIC to \"C\""
 msgstr ""
+"VAROITUS: desimaalipilkku on '%c', tämä aiheuttaa ongelmia tagien "
+"tunnistamisessa. Aseta LC_NUMERIC-arvoksi \"C\""
 
 #: src/builtincmd.c:1767 src/builtincmd.c:1935
 #, c-format
@@ -762,12 +766,12 @@ msgstr "Maksimiarvo tälle asetukselle on %s\n"
 
 #: src/builtincmd.c:1939
 msgid "Configuration change denied.\n"
-msgstr ""
+msgstr "Asetusten vaihtaminen estetty.\n"
 
 #: src/builtincmd.c:1997
-#, fuzzy, c-format
+#, c-format
 msgid "Sorry, unknown statistics value %s\n"
-msgstr "Tuntematon arvo asetukselle %s\n"
+msgstr "Tuntematon tilastojen arvo %s\n"
 
 #: src/builtincmd.c:2020
 msgid "All Data saved."
@@ -793,7 +797,7 @@ msgstr ""
 
 #: src/builtincmd.c:2074
 msgid "User to send report to. Can be a chatroom."
-msgstr "Käytäjä jolle ilmiannot lähetetään. Voi olla keskusteluhuone."
+msgstr "Käyttäjä, jolle ilmiannot lähetetään. Voi olla myös keskusteluhuone."
 
 #: src/builtincmd.c:2075
 msgid ""
@@ -905,11 +909,11 @@ msgstr "Lähettää yksityisviestin kaikille käyttäjille."
 
 #: src/builtincmd.c:2104
 msgid "Create a custom right."
-msgstr ""
+msgstr "Luo itse nimetty oikeus."
 
 #: src/builtincmd.c:2105
 msgid "Destroy a custom right."
-msgstr ""
+msgstr "Tuhoa itse nimetty oikeus."
 
 #: src/builtincmd.c:2107
 msgid "Add a user group."
@@ -966,14 +970,12 @@ msgid "Set configuration values."
 msgstr "Aseta asetuksen arvo."
 
 #: src/builtincmd.c:2124
-#, fuzzy
 msgid "Show raw statistics."
-msgstr "Näyttää luan tilastot"
+msgstr "Näyttää tilastot"
 
 #: src/builtincmd.c:2125
-#, fuzzy
 msgid "Show statistics help."
-msgstr "Näyttää luan tilastot"
+msgstr "Näyttää tilastojen selitykset"
 
 #: src/builtincmd.c:2127
 msgid ""
@@ -1008,7 +1010,7 @@ msgstr "Näyttää hubin kielen."
 
 #: src/builtincmd.c:2139 src/builtincmd.c:2141
 msgid "Let the hub CRASH!."
-msgstr ""
+msgstr "Kaataa hubin."
 
 #: src/commands.c:63
 msgid "No help available."
@@ -1024,10 +1026,12 @@ msgid ""
 "Your IP has been used to attack this hub. This means one of the other hubs "
 "you are in is being exploited."
 msgstr ""
+"Your IP has been used to attack this hub. This means one of the other hubs "
+"you are in is being exploited."
 
 #: src/nmdc_protocol.c:98 src/nmdc_protocol.c:273
 msgid "CTM Exploit."
-msgstr ""
+msgstr "CTM Exploit."
 
 #: src/nmdc_protocol.c:116
 #, c-format
@@ -1045,7 +1049,7 @@ msgstr "Protocol violation: Bad key."
 
 #: src/nmdc_protocol.c:317 src/nmdc_protocol.c:379
 msgid "Nickname refused due to unacceptable characters."
-msgstr ""
+msgstr "Nickname refused due to unacceptable characters."
 
 #: src/nmdc_protocol.c:334 src/nmdc_protocol.c:405 src/nmdc_protocol.c:661
 msgid "Your nickname is already in use."
@@ -1550,13 +1554,15 @@ msgstr ""
 
 #: src/nmdc_interface.c:1398
 msgid "Online users never get timed out."
-msgstr ""
+msgstr "Käyttäjille ei koskaan tule aikakatkaisua."
 
 #: src/nmdc_interface.c:1402
 msgid ""
 "These are the characters allowed in a nick. An empty string means all "
 "characters. Does NOT support utf-8 character."
 msgstr ""
+"Nämä ovat sallitut merkit nickissä. Mikäli tämän jättää tyhjäksi, kaikki "
+"merkit ovat sallittuja. EI tue utf-8 -merkkejä."
 
 #: src/plugin.c:191
 #, c-format
@@ -1625,9 +1631,9 @@ msgid "Error saving configuration to %s: %s\n"
 msgstr "Virhe asetuksien tallentamisessa tiedostoon %s: %s\n"
 
 #: src/plugin.c:1120
-#, fuzzy, c-format
+#, c-format
 msgid "Error loading configuration from %s: %s\n"
-msgstr "Virhe asetuksien tallentamisessa tiedostoon %s: %s\n"
+msgstr "Virhe asetuksien lataamisessa kohteesta %s: %s\n"
 
 #: src/utils.c:98
 #, c-format
@@ -1761,7 +1767,6 @@ msgid "Allocated size: %llu (max: %llu)\n"
 msgstr "Allocated size: %llu (max: %llu)\n"
 
 #: src/pi_statistics.c:643
-#, fuzzy
 msgid "Allocated size: %I64u (max: %I64u)\n"
 msgstr "Allocated size: %I64u (max: %I64u)\n"
 
@@ -1826,6 +1831,10 @@ msgid ""
 "    Allowed connection attempts: %lu\n"
 "    Blocked connection attempts: %lu\n"
 msgstr ""
+"Connection statistics:\n"
+"  Total IPs remembered (roughly last %us): %lu\n"
+"    Allowed connection attempts: %lu\n"
+"    Blocked connection attempts: %lu\n"
 
 #: src/pi_statistics.c:760
 msgid "Memory Usage:\n"
@@ -1908,9 +1917,8 @@ msgid "Show cache stats."
 msgstr "Show cache stats. / Näyttää välimuistin tilastot"
 
 #: src/pi_statistics.c:887
-#, fuzzy
 msgid "Show bandwidth stats."
-msgstr "Show cache stats. / Näyttää välimuistin tilastot"
+msgstr "Show bamdwidth stats. / Näyttää kaistankäytön tilastot"
 
 #: src/pi_statistics.c:888
 msgid "Show cpu usage stats."
@@ -1939,35 +1947,37 @@ msgstr "Show iocp usage stats."
 #: src/pi_statistics.c:906
 msgid "This is the total size of memory allocated with sbrk by malloc (bytes)."
 msgstr ""
+"This is the total size of memory allocated with sbrk by malloc (bytes)."
 
 #: src/pi_statistics.c:908
-#, fuzzy
 msgid "This is the number of chunks not in use."
-msgstr "Muistettavien IP-osotteiden määrä (suojaamaan hyökkäyksiltä)."
+msgstr "This is the number of chunks not in use."
 
 #: src/pi_statistics.c:910
-#, fuzzy
 msgid "This is the total number of chunks allocated with mmap."
-msgstr "Muistettavien IP-osotteiden määrä (suojaamaan hyökkäyksiltä)."
+msgstr "This is the total number of chunks allocated with mmap."
 
 #: src/pi_statistics.c:912
 msgid "This is the total size of memory allocated with mmap (bytes)."
-msgstr ""
+msgstr "This is the total size of memory allocated with mmap (bytes)."
 
 #: src/pi_statistics.c:914
 msgid ""
 "This is the total size of memory occupied by chunks handed out by malloc."
 msgstr ""
+"This is the total size of memory occupied by chunks handed out by malloc."
 
 #: src/pi_statistics.c:916
 msgid "This is the total size of memory occupied by free (not in use) chunks."
-msgstr ""
+msgstr "This is the total size of memory occupied by free (not in use) chunks."
 
 #: src/pi_statistics.c:919
 msgid ""
 "This is the size of the top-most releasable chunk that normally borders the "
 "end of the heap."
 msgstr ""
+"This is the size of the top-most releasable chunk that normally borders the "
+"end of the heap."
 
 #: src/pi_chatlog.c:48
 msgid "No Chat History configured.\n"
@@ -2023,9 +2033,8 @@ msgid "Chatroom %s already exists."
 msgstr "Keskusteluhuonen %s on jo olemassa."
 
 #: src/pi_chatroom.c:308
-#, fuzzy
 msgid "Spaces are not allowed in chatroom names."
-msgstr "You are not allowed to chat."
+msgstr "Välilyönnit eivät ole sallittuja keskusteluhuoneiden nimissä."
 
 #: src/pi_chatroom.c:317
 msgid "Room is private.\n"
@@ -2192,9 +2201,9 @@ msgid "LUA ERROR ('%s'): %s\n"
 msgstr "LUA VIRHE ('%s'): %s\n"
 
 #: src/pi_lua.c:1768
-#, fuzzy, c-format
+#, c-format
 msgid "LUA ERROR (Timer): %s\n"
-msgstr "LUA VIRHE ('%s'): %s\n"
+msgstr "LUA VIRHE (Ajastin): %s\n"
 
 #: src/pi_lua.c:1965
 msgid "No such LUA function."
@@ -2462,7 +2471,7 @@ msgid "Delete a rule."
 msgstr "Poista sääntö."
 
 #: src/pi_user.c:80
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Unregistered users: %lu / %lu\n"
 "Registered users:   %lu / %lu\n"
@@ -2477,7 +2486,7 @@ msgstr ""
 "Operators           %lu / %lu\n"
 " Total      %lu / %lu\n"
 " Peak             %lu\n"
-" Dropped          %lu\n"
+" Refused          %lu\n"
 " Buffering        %lu\n"
 
 #: src/pi_user.c:111
@@ -2776,30 +2785,27 @@ msgstr "Näytä käyttäjän IP-rajoitus."
 
 #: src/pi_user.c:601
 msgid "Total users in the hub"
-msgstr ""
+msgstr "Hubissa olevien käyttäjien kokonaismäärä"
 
 #: src/pi_user.c:602
 msgid "User peak"
-msgstr ""
+msgstr "Suurin käyttäjämäärä"
 
 #: src/pi_user.c:603
 msgid "Users refused for slot/hub/ratio/user limits."
-msgstr ""
+msgstr "Käyttäjiä torjuttu slot/hub/ratio/käyttäjä -rajojen takia"
 
 #: src/pi_user.c:604
-#, fuzzy
 msgid "Unregistered users."
-msgstr "Rekisteröitymättömien käyttäjien enimmäismäärä."
+msgstr "Rekisteröitymättömät käyttäjät."
 
 #: src/pi_user.c:605
-#, fuzzy
 msgid "Registered users."
-msgstr "Rekisteröityneiden käyttäjien enimmäismäärä."
+msgstr "Rekisteröityneet käyttäjät."
 
 #: src/pi_user.c:606
-#, fuzzy
 msgid "Op users."
-msgstr "Lisää käyttäjätili."
+msgstr "OP-käyttäjät."
 
 #: src/pi_iplog.c:118
 msgid "No IP logging enabled.\n"
@@ -2822,15 +2828,12 @@ msgid "List iplogs."
 msgstr "Listaa IP-logit."
 
 #: src/hub.c:92
-#, fuzzy
 msgid "Buffering Timeout"
-msgstr ""
-"\n"
-"Puskuroivat clientit:\n"
+msgstr "Puskuroinnin aikakatkaisu"
 
 #: src/hub.c:149 src/hub.c:591
 msgid "Connection closed."
-msgstr "Connection closed."
+msgstr "Yhteys suljettu."
 
 #: src/hub.c:251
 msgid "Error on read."
@@ -3005,9 +3008,8 @@ msgstr ""
 "tarkistukset)."
 
 #: src/cap.c:60
-#, fuzzy
 msgid "Users with this right do not show up in the userlist."
-msgstr "Hakemista rajoittavat ajat eivät koske käyttäjää."
+msgstr "Käyttäjät, joilla on tämä oikeus, eivät näy käyttäjälistassa."
 
 #: src/core_config.c:90
 msgid "Port on which the hub will listen."
@@ -3128,6 +3130,8 @@ msgid ""
 "IPs that are used in a CTM exploit attack are hard banned for this time (in "
 "seconds)."
 msgstr ""
+"IP:t, joita käytetään CTM-hyökkäyksissä, bannataan tässä määritetyksi ajaksi "
+"(sekunteina)"
 
 #: src/core_config.c:117
 msgid ""
@@ -3217,299 +3221,260 @@ msgstr "Muistettavien IP-osotteiden määrä (suojaamaan hyökkäyksiltä)."
 
 #: src/core_config.c:136
 msgid "This turns on or off the ndelay setting."
-msgstr ""
+msgstr "Kytkee ndelay-asetuksen päälle tai pois."
 
 #: src/core_config.c:138
 msgid "This turns on or off input processing for users in overflow mode."
-msgstr ""
+msgstr "Tämä kytkee päälle tai pois ylivuoto tilassa olevien käyttäjien sisääntulon prosessoinnin."
 
 #: src/core_config.c:139
 msgid "This turns on or off disconnecting users on buffering timeout."
-msgstr ""
+msgstr "Kytkee käyttäjien pudottamisen puskuroinnin aikakakatkaisun seurauksena päälle tai pois."
 
 #: src/core_config.c:142
-#, fuzzy
 msgid "Maximum number of outstanding data buffers per user."
-msgstr ""
-"Määrittää miten monta kertaa käyttäjä voi yrittää salasanansa arvaamista "
-"ennen kun saa lyhyen bannin."
+msgstr "Maximum number of outstanding data buffers per user."
 
 #: src/core_config.c:143
 msgid "Set this to 0 to enable the send buffer."
-msgstr ""
+msgstr "Aseta arvoksi 0 kytkeäksesi lähetyspuskuroinnin päälle."
 
 #: src/core_config.c:167 src/core_config.c:169
 msgid "Total bytes send by hub since startup."
-msgstr ""
+msgstr "Lähetettyjen tavujen enimmäismäärä käynnistämisen jälkeen."
 
 #: src/core_config.c:170
 msgid "Number of buffering users."
-msgstr ""
+msgstr "Puskuroivien käyttäjien määrä."
 
 #: src/core_config.c:172
 msgid "Total of all data waiting to be written."
-msgstr ""
+msgstr "Datan kokonaismäärä, joka odottaa tulemista kirjoitetuksi."
 
 #: src/core_config.c:176 src/core_config.c:183
-#, fuzzy
 msgid "Number of outstanding buffers."
-msgstr ""
-"Määrittää miten monta kertaa käyttäjä voi yrittää salasanansa arvaamista "
-"ennen kun saa lyhyen bannin."
+msgstr "Number of outstanding buffers."
 
 #: src/core_config.c:178
-#, fuzzy
 msgid "Peak number of outstanding buffers."
-msgstr ""
-"Määrittää miten monta kertaa käyttäjä voi yrittää salasanansa arvaamista "
-"ennen kun saa lyhyen bannin."
+msgstr "Peak number of outstanding buffers."
 
 #: src/core_config.c:180
-#, fuzzy
 msgid "Absolute maximum of outstanding buffers allowed."
-msgstr ""
-"Määrittää miten monta kertaa käyttäjä voi yrittää salasanansa arvaamista "
-"ennen kun saa lyhyen bannin."
+msgstr "Absolute maximum of outstanding buffers allowed."
 
 #: src/core_config.c:185
-#, fuzzy
 msgid "Peak number of outstanding bytes."
-msgstr ""
-"Määrittää miten monta kertaa käyttäjä voi yrittää salasanansa arvaamista "
-"ennen kun saa lyhyen bannin."
+msgstr "Peak number of outstanding bytes."
 
 #: src/core_config.c:187
 msgid "Absolute maximum of outstanding bytes allowed."
-msgstr ""
+msgstr "Absolute maximum of outstanding bytes allowed."
 
 #: src/core_config.c:189
-#, fuzzy
 msgid "Number of IOCP users."
-msgstr "Muistettavien IP:iden määrä."
+msgstr "IOCP-käyttäjien määrä."
 
 #: src/core_config.c:191
-#, fuzzy
 msgid "Absolute maximum of outstanding bytes per user allowed."
-msgstr ""
-"Määrittää miten monta kertaa käyttäjä voi yrittää salasanansa arvaamista "
-"ennen kun saa lyhyen bannin."
+msgstr "Absolute maximum of outstanding bytes per user allowed."
 
 #: src/flags.c:30
-msgid "None"
-msgstr "Ei mitään"
+msgid "None."
+msgstr "Ei mitään."
 
 #: src/flags.c:90
 #, c-format
 msgid "Added %s.\n"
-msgstr "Lisätty %s.\n"
+msgstr "Lisättiin %s.\n"
 
 #: src/flags.c:95
 #, c-format
 msgid "Removed %s.\n"
-msgstr "Poistettu %s.\n"
+msgstr "Poistettiin %s.\n"
 
 #: src/flags.c:103
-#, c-format
 msgid "Unknown %s.\n"
 msgstr "Tuntematon %s.\n"
 
 #: src/xml.c:292
-#, fuzzy
 msgid "!Unknown Type!\n"
-msgstr "%s !Tuntematon tyyppi!\n"
+msgstr "!Tuntematon tyyppi!\n"
 
 #: src/pi_statbot.c:100
-#, fuzzy
 msgid "Command returns info for the statbot."
-msgstr ""
-"Command returns last chatlines. / Näyttää mainchatin viimeisimmät viestit"
+msgstr "Command returns info for the statbot. / Näyttää statbotin tiedot."
 
 #: src/pi_rss.c:609 src/pi_rss.c:643 src/pi_rss.c:676
 #, c-format
 msgid " Title: %s\n"
-msgstr ""
+msgstr " Otsikko: %s\n"
 
 #: src/pi_rss.c:612 src/pi_rss.c:646 src/pi_rss.c:681
 #, c-format
 msgid " Link: %s\n"
-msgstr ""
+msgstr " Linkki: %s\n"
 
 #: src/pi_rss.c:614 src/pi_rss.c:648
-#, fuzzy, c-format
 msgid " Description: %s\n"
-msgstr "Hubin kuvaus (laita \" väliin jos useita sanoja)."
+msgstr " Kuvaus: %s\n"
 
 #: src/pi_rss.c:617 src/pi_rss.c:651 src/pi_rss.c:684
 msgid ""
 "\n"
 " Example node:\n"
 msgstr ""
+"\n"
+" Esimerkki:\n"
 
 #: src/pi_rss.c:706
-#, fuzzy
 msgid "Unknown format.\n"
-msgstr "Tuntematon %s.\n"
+msgstr "Tuntematon formaatti.\n"
 
 #: src/pi_rss.c:815
 #, c-format
 msgid "RSS fetch failed, destination moved permanently: %s"
-msgstr ""
+msgstr "RSS:an noutaminen epäonnistui, kohde muutettu pysyvästi: %s"
 
 #: src/pi_rss.c:829
 #, c-format
 msgid "RSS fetch failed: %s"
-msgstr ""
+msgstr "RSS:an noutaminen epäonnistui: %s"
 
 #: src/pi_rss.c:862 src/pi_rss.c:868
-#, fuzzy, c-format
 msgid "RSS: %s is not a valid RSS feed.\n"
-msgstr "\"%s\" ei ole kelvollinen IP-osoite.\n"
+msgstr "RSS: %s ei ole kelvollinen RSS-syöte.\n"
 
 #: src/pi_rss.c:899
 msgid "Unable to create socket.\n"
-msgstr ""
+msgstr "Ei pystytä luomaan socketia.\n"
 
 #: src/pi_rss.c:907 src/pi_rss.c:912
-#, fuzzy, c-format
 msgid "RSS update ERROR: %s: connect: %s\n"
-msgstr "VIRHE tietojen lähettämisessä hubilistaan: %s: yhdistäminen: %s\n"
+msgstr "VIRHE RSS:an päivittämisessä: %s: yhdistäminen: %s\n"
 
 #: src/pi_rss.c:957
 #, c-format
 msgid "RSS read (%s)"
-msgstr ""
+msgstr "RSS-luku (%s)"
 
 #: src/pi_rss.c:1027
 #, c-format
 msgid "RSS output (%s)"
-msgstr ""
+msgstr "RSS-ulostulo (%s)"
 
 #: src/pi_rss.c:1052
-#, fuzzy, c-format
 msgid "RSS error (%s)"
-msgstr "Socket error %d."
+msgstr "RSS-virhe (%s)"
 
 #: src/pi_rss.c:1075
 #, c-format
 msgid "RSS timeout (%s)"
-msgstr ""
+msgstr "RSS-aikakatkaisu (%s)"
 
 #: src/pi_rss.c:1092 src/pi_rss.c:1274 src/pi_rss.c:1340
-#, fuzzy, c-format
 msgid "Usage: %s <feed>\n"
-msgstr "Käyttö: %s <huone>\n"
+msgstr "Käyttö: %s <syöte>\n"
 
 #: src/pi_rss.c:1093
-#, fuzzy
 msgid " Available feeds:\n"
-msgstr "Available commands / Käytettävissä olevat komennot:\n"
+msgstr " Käytettävissä olevat syötteet:\n"
 
 #: src/pi_rss.c:1098 src/pi_rss.c:1231
-#, fuzzy
 msgid "No description."
-msgstr ""
-"\n"
-"LUA-scriptejä ei ole käynnissä.\n"
+msgstr "Ei kuvausta."
 
 #: src/pi_rss.c:1109 src/pi_rss.c:1177
-#, fuzzy, c-format
 msgid "Feed %s not found\n"
-msgstr "Käyttäjää %s ei löytynyt."
+msgstr "Syötettä %s ei löytynyt\n"
 
 #: src/pi_rss.c:1130
-#, fuzzy, c-format
 msgid "Usage: %s <name> <interval> <url>\n"
-msgstr "Käyttö: %s <nick> <ryhmä>"
+msgstr "Käyttö: %s <nimi> <päivitysväli> <osoite>\n"
 
 #: src/pi_rss.c:1137
 #, c-format
 msgid "Feed interval invalid: %s\n"
-msgstr ""
+msgstr "Syötteen päivitysväli virheellinen: %s\n"
 
 #: src/pi_rss.c:1143
-#, fuzzy, c-format
 msgid "Feed %s already exists.\n"
-msgstr "Käyttäjätili %s on jo olemassa.\n"
+msgstr "Syöte %s on jo olemassa.\n"
 
 #: src/pi_rss.c:1150
-#, fuzzy
 msgid "Feed creation failed.\n"
-msgstr "Säännön luominen epäonnistui."
+msgstr "Syötteen luominen epäonnistui.\n"
 
 #: src/pi_rss.c:1171
-#, fuzzy, c-format
 msgid "Usage: %s <name> <fields>\n"
-msgstr "Käyttö: %s <nick> <ryhmä>"
+msgstr "Käyttö: %s <nimi> <kentät>\n"
 
 #: src/pi_rss.c:1185
-#, fuzzy, c-format
+#, c-format
 msgid " Adding %s\n"
-msgstr "Lisätty %s.\n"
+msgstr " Liitetään %s\n"
 
 #: src/pi_rss.c:1192
 msgid " Feed is active and will be updated later.\n"
-msgstr ""
+msgstr " Syöte on aktiivinen ja päivitetään myöhemmin.\n"
 
 #: src/pi_rss.c:1196
 msgid " Updating feed now...\n"
-msgstr ""
+msgstr " Päivitetään syötettä...\n"
 
 #: src/pi_rss.c:1224
-#, fuzzy
 msgid "No feeds configured\n"
-msgstr "Yhtään hubilistaa ei ole asetettu\n"
+msgstr "Yhtään syötettä ei ole asetettu\n"
 
 #: src/pi_rss.c:1228
 #, c-format
 msgid "Feed: %s (Updated %s)\n"
-msgstr ""
+msgstr "Syöte: %s (Päivitetty %s)\n"
 
 #: src/pi_rss.c:1236
 #, c-format
 msgid "  Target user: %s\n"
-msgstr ""
+msgstr "  Kohdekäyttäjä: %s\n"
 
 #: src/pi_rss.c:1238
-#, fuzzy
 msgid "  Target rights: "
-msgstr " ja vaatii oikeudet "
+msgstr "  Kohdeoikeudet: "
 
 #: src/pi_rss.c:1243
 #, c-format
 msgid "  Link: http://%s:%u/%s\n"
-msgstr ""
+msgstr "  Linkki: http://%s:%u/%s\n"
 
 #: src/pi_rss.c:1245
 #, c-format
 msgid "  Link: http://%s/%s\n"
-msgstr ""
+msgstr "  Linkki: http://%s/%s\n"
 
 #: src/pi_rss.c:1248
 #, c-format
 msgid "  Last modified: %s\n"
-msgstr ""
+msgstr "  Viimeksi muokattu: %s\n"
 
 #: src/pi_rss.c:1250
 msgid "  Next update: Running...\n"
-msgstr ""
+msgstr "  Seuraava päivitys: Suoritetaan...\n"
 
 #: src/pi_rss.c:1252
 #, c-format
 msgid "  Next update: %s\n"
-msgstr ""
+msgstr "  Seuraava päivitys: %s\n"
 
 #: src/pi_rss.c:1256
 msgid " Includes: "
-msgstr ""
+msgstr " Sisältää: "
 
 #: src/pi_rss.c:1283 src/pi_rss.c:1349
 msgid "Feed is being updated. please retry in a few moments.\n"
-msgstr ""
+msgstr "Syötettä päivitetään. Koita hetken päästä uudestaan.\n"
 
 #: src/pi_rss.c:1288
-#, fuzzy, c-format
 msgid "Feed %s deleted\n"
-msgstr "Ryhmä %s poistettu.\n"
+msgstr "Syöte %s poistettiin\n"
 
 #: src/pi_rss.c:1301
 #, c-format
@@ -3518,73 +3483,73 @@ msgid ""
 "  user <target>: send feed output to user\n"
 "  right <rights>: send feed output to all user with <rights>\n"
 msgstr ""
+"Käyttö: %s <syöte> käyttäjä <kohde> &#124; oikeus <oikeudet> &#124; main\n"
+"  käyttäjä <kohde>: lähetä syöte käyttäjälle\n"
+"  oikeus <oikeudet>: lähetä syöte käyttäjille, joilla <oikeudet>\n"
 
 #: src/pi_rss.c:1317
 #, c-format
 msgid "Sending output from feed %s to %s\n"
-msgstr ""
+msgstr "Lähetetään syötteen %s sisältö käyttäjälle %s\n"
 
 #: src/pi_rss.c:1321
 #, c-format
 msgid "Sending output from feed %s to all users with rights "
-msgstr ""
+msgstr "Lähetetään syötteen %s sisältö kaikille käyttäjille, joilla oikeudet "
 
 #: src/pi_rss.c:1354
 #, c-format
 msgid "Feed %s update started.\n"
-msgstr ""
+msgstr "Syötteen %s päivitys aloitettiin.\n"
 
 #: src/pi_rss.c:1548 src/pi_rrd.c:510
 msgid "If set, errors are not reported."
-msgstr ""
+msgstr "Jos kytketty päälle, virheistä ei ilmoiteta."
 
 #: src/pi_rss.c:1550
-#, fuzzy
 msgid "Maximum length of an RSS entry."
-msgstr "Chat-viestin max pituus."
+msgstr "RSS-entryn max pituus."
 
 #: src/pi_rss.c:1552
 msgid "Maximum age of an RSS entry."
-msgstr ""
+msgstr "RSS-viestin enimmäisikä."
 
 #: src/pi_rss.c:1554
 msgid "Add a RSS or Atom feed."
-msgstr ""
+msgstr "Lisää RSS- tai Atom-syöte."
 
 #: src/pi_rss.c:1556
 msgid "List the RSS or Atom feeds."
-msgstr ""
+msgstr "Listaa RSS- tai Atom-syötteet."
 
 #: src/pi_rss.c:1557
-#, fuzzy
 msgid "Delete a RSS or Atom feed."
-msgstr "Poista sääntö."
+msgstr "Poista RSS- tai Atom-syöte."
 
 #: src/pi_rss.c:1559
 msgid "Force an update on a RSS or Atom feed."
-msgstr ""
+msgstr "Pakota RSS- tai Atom-syötteen päivitys."
 
 #: src/pi_rss.c:1561
 msgid "Configure where to send a RSS or Atom feed."
-msgstr ""
+msgstr "Määrittää mihin RSS- tai Atom-syötteet lähetetään."
 
 #: src/pi_rss.c:1563
 msgid "Select elements of a RSS or Atom feed."
-msgstr ""
+msgstr "Valitse RSS- tai Atom-syötteen elementit."
 
 #: src/pi_rss.c:1564
 msgid "Show an RSS or Atom feed."
-msgstr ""
+msgstr "Näytä RSS- tai Atom-syöte."
 
 #: src/pi_rrd.c:96
 #, c-format
 msgid "RRD %s update failed: %s!"
-msgstr ""
+msgstr "RRD %s päivittäminen epäonnistui: %s!"
 
 #: src/pi_rrd.c:169
-#, fuzzy, c-format
 msgid "Statistic %s not found.\n"
-msgstr "Käyttäjää %s ei löytynyt."
+msgstr "Tilastoa %s ei löytynyt.\n"
 
 #: src/pi_rrd.c:362
 #, c-format
@@ -3597,148 +3562,60 @@ msgid ""
 " <period>: how often to sample data (suggestion: 300s)\n"
 "  for the other arguments please consult the rrdtool manual\n"
 msgstr ""
+"Käyttö: %s <nimi> <tiedoston nimi> <aikaväli>\n"
+"          [DS:ds-name:DST:dst arguments]\n"
+"          [RRA:CF:cf arguments]\n"
+" <nimi>: RRD:n nimi\n"
+" <tiedoston nimi>: tiedoston nimi, jonne data tallennetaan\n"
+" <aikaväli>: miten usein dataa kerätään (ehdotus: 300s)\n"
+"  lue muiden argumenttien selitykset rrdtoolin manualista\n"
 
 #: src/pi_rrd.c:374
-#, fuzzy, c-format
 msgid "RRD %s already exists."
-msgstr "Käyttäjätili %s on jo olemassa.\n"
+msgstr "RRD %s on jo olemassa."
 
 #: src/pi_rrd.c:380
-#, fuzzy, c-format
 msgid "%s: %s is not a valid time string\n"
-msgstr "\"%s\" ei ole kelvollinen IP-osoite.\n"
+msgstr "%s: %s is not a valid time string\n"
 
 #: src/pi_rrd.c:399
 #, c-format
 msgid "DS entry has bad format: %s\n"
-msgstr ""
+msgstr "DS entry has bad format: %s\n"
 
 #: src/pi_rrd.c:425
 #, c-format
 msgid "RRD create FAILED: %s\n"
-msgstr ""
+msgstr "RRD:n luominen EPÄONNISTUI: %s\n"
 
 #: src/pi_rrd.c:429
-#, fuzzy, c-format
 msgid "RRD %s created.\n"
-msgstr "Triggerin %s luominen epäonnistui."
+msgstr "RRD %s luotiin.\n"
 
 #: src/pi_rrd.c:448
 #, c-format
 msgid "RRD %s filename: %s period: %lu\n"
-msgstr ""
+msgstr "RRD %s tiedoston nimi: %s aikaväli: %lu\n"
 
 #: src/pi_rrd.c:472
-#, fuzzy, c-format
 msgid "RRD %s not found.\n"
-msgstr "Käyttäjää %s ei löytynyt."
+msgstr "Käyttäjää %s ei löytynyt.\n"
 
 #: src/pi_rrd.c:477
-#, fuzzy, c-format
 msgid "RRD %s deleted.\n"
-msgstr "Ryhmä %s poistettu.\n"
+msgstr "RRD %s poistettiin.\n"
 
 #: src/pi_rrd.c:501
 msgid "Create an RRD file for statistics gathering"
-msgstr ""
+msgstr "Luo RRD-tiedosto tilastotiedon keräämiseen"
 
 #: src/pi_rrd.c:502
-#, fuzzy
 msgid "Show the RRD file generated."
-msgstr "Listaa Zombiet."
+msgstr "Näytä luotu RRD-tiedosto."
 
 #: src/pi_rrd.c:503
-#, fuzzy
 msgid "Remove a RRD file."
-msgstr "Poista lua-scripti."
+msgstr "Poista RRD-tiedosto."
 
 #~ msgid "LUA: ERROR saving %s"
 #~ msgstr "LUA: VIRHE tallentaessa %s"
-
-#~ msgid "Timeout"
-#~ msgstr "Aikakatkaisu"
-
-#~ msgid ""
-#~ "Period of chat cache flush. This controls how often chat messages are "
-#~ "sent to users. Keep this low."
-#~ msgstr ""
-#~ "Chatin välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että miten "
-#~ "usein chat-viestit lähetetään käyttäjille. Pidä matalana."
-
-#~ msgid ""
-#~ "Period of join cache flush. This controls how often users are notified of "
-#~ "new joins."
-#~ msgstr ""
-#~ "Liittyvien käyttäjien välimuistin tyhjennyksen ajanjakso. Tämä määrittää, "
-#~ "että miten usein käyttäjien nicklistaan lisätään hubiin liittyneet uudet "
-#~ "käyttäjät."
-
-#~ msgid ""
-#~ "Period of update cache flush. This controls how often users are sent "
-#~ "MyINFO updates. Keep this high."
-#~ msgstr ""
-#~ "MyINFO päivitysten välimuistin tyhjennyksen ajanjakso. Tämä määrittää, "
-#~ "että miten usein käyttäjille lähetetään MyINFO-päivitykset. Pidä korkeana."
-
-#~ msgid ""
-#~ "Period of operator update cache flush. This controls how often operators "
-#~ "are sent MyINFO updates. Keep this low."
-#~ msgstr ""
-#~ "Operaattoreiden MyINFO-päivitysten välimuistin tyhjennyksen ajanjakso. "
-#~ "Tämä määrittää, että miten usein operaattoreille lähetetään MyINFO-"
-#~ "päivitykset. Pidä matalana."
-
-#~ msgid ""
-#~ "Period of active search cache flush. This controls how often search "
-#~ "messages are sent to active users."
-#~ msgstr ""
-#~ "Active-hakujen välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
-#~ "miten usein haut lähetetään active-käyttäjille."
-
-#~ msgid ""
-#~ "Period of passive search cache flush. This controls how often search "
-#~ "messages are sent to passive users."
-#~ msgstr ""
-#~ "Passive-hakujen välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
-#~ "miten usein haut lähetetään passive-käyttäjille."
-
-#~ msgid ""
-#~ "Period of search results cache flush. This controls how often search "
-#~ "results are sent to passive users."
-#~ msgstr ""
-#~ "Hakutulosten välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
-#~ "miten usein hakutulokset lähetetään passive-käyttäjille."
-
-#~ msgid ""
-#~ "Period of private messages cache flush. This controls how often private "
-#~ "messages are sent to users. Keep this low."
-#~ msgstr ""
-#~ "Yksityisviestien välimuistin tyhjennyksen ajanjakso. Tämä määrittää, että "
-#~ "miten usein yksityisviestit lähetetään käyttäjille. Pidä matalana."
-
-#~ msgid ""
-#~ "Period of active repeated search cache flush. This controls how often "
-#~ "search messages are sent to active users."
-#~ msgstr ""
-#~ "Active-uudelleenhakujen välimuistin tyhjennyksen ajanjakso. Tämä "
-#~ "määrittää, että miten usein haut lähetetään active-käyttäjille."
-
-#~ msgid ""
-#~ "Period of passive repeated search cache flush. This controls how often "
-#~ "search messages are sent to passive users."
-#~ msgstr ""
-#~ "Passive-uudelleenhakujen välimuistin tyhjennyksen ajanjakso. Tämä "
-#~ "määrittää, että miten usein uudelleenhaut lähetetään passive-käyttäjille."
-
-#~ msgid "Total IPs remembered (roughly last %us): %lu\n"
-#~ msgstr ""
-#~ "Muistettavien IP:iden kokonaismäärä (suunnilleen viimeiset %us): %lu\n"
-
-#~ msgid "Hublist update ERROR: %s: write: %s\n"
-#~ msgstr "VIRHE tietojen lähettämisessä hubilistaan: %s: kirjoittaminen: %s\n"
-
-#~ msgid "Bad password"
-#~ msgstr "Bad password"
-
-#~ msgid "Reconnecting"
-#~ msgstr "Reconnecting"
