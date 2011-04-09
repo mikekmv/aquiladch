@@ -233,7 +233,7 @@ unsigned int accounts_load (xml_node_t * base)
   xml_node_t *node;
   unsigned char *name = NULL, *passwd = NULL, *group = NULL, *op = NULL;
   unsigned long long rights;
-  unsigned long regdate, lastlogin;
+  unsigned long regdate, lastlogin, lastip;
   account_type_t *t;
   account_t *a;
 
@@ -268,6 +268,8 @@ unsigned int accounts_load (xml_node_t * base)
 	continue;
       if (!xml_child_get (node, "LastLogin", XML_TYPE_ULONG, &lastlogin))
 	continue;
+      /* optional for now */
+      xml_child_get (node, "LastIP", XML_TYPE_ULONG, &lastip);
 
       t = account_type_find (group);
       if (!t)
@@ -278,6 +280,7 @@ unsigned int accounts_load (xml_node_t * base)
       a->rights = rights;
       a->regged = regdate;
       a->lastlogin = lastlogin;
+      a->lastip = lastip;
     }
   }
 
@@ -319,6 +322,7 @@ unsigned int accounts_save (xml_node_t * base)
     xml_node_add_value (node, "Creator", XML_TYPE_STRING, &a->op);
     xml_node_add_value (node, "RegDate", XML_TYPE_ULONG, &a->regged);
     xml_node_add_value (node, "LastLogin", XML_TYPE_ULONG, &a->lastlogin);
+    xml_node_add_value (node, "LastIP", XML_TYPE_IP, &a->lastip);
     node = xml_parent (node);
   }
 

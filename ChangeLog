@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta24:
+0.1.11-pre1-beta25:
+	USER: added lastip support (Req: ffrag)
+	NMDC: added CTM exploit ban.
+	RSS: added rss.silent to hide error messages.
 	RSS: reset errno before reporting html return code.
 	ESOCKET: always reset errno before reporting a timeout.
 	ESOCKET: in windows: check if socket is still connecting before 

@@ -70,6 +70,7 @@ int core_config_init ()
   config.PasswdBantime = DEFAULT_PASSWDBANTIME;
 
   config.ReconnectBantime = DEFAULT_RECONNECTBANTIME;
+  config.CTMBantime = DEFAULT_CTMBANTIME;
 
   config.ViolationBantime = DEFAULT_VIOLATIONBANTIME;
   config.ProbationPeriod = DEFAULT_PROBATIONPERIOD;
@@ -101,6 +102,7 @@ int core_config_init ()
   config_register ("hub.PasswdBantime",  CFG_ELEM_ULONG,  &config.PasswdBantime, _("Length of automatic ban on too many retries (in seconds)."));
 
   config_register ("hub.ReconnectBantime",  CFG_ELEM_ULONG,  &config.ReconnectBantime, _("Users can only reconnect after this period (in seconds). This is counted from the previous login time, not logout."));
+  config_register ("hub.CTMBantime",  CFG_ELEM_ULONG,  &config.CTMBantime, _("IPs that are used in a CTM exploit attack are hard banned for this time (in seconds)."));
 
   config_register ("hub.DelayedLogout",     CFG_ELEM_ULONG,  &config.DelayedLogout, _("Users that go offline for shorter than this period do not appear to go offline. On rejoing they will get their rate counters back."));
 

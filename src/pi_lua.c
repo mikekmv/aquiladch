@@ -2223,7 +2223,7 @@ unsigned long handler_luastat (plugin_user_t * user, buffer_t * output, void *pr
 {
   lua_context_t *ctx;
 
-  bf_printf (output, _("Lua stats\nVersion: %s\nScripts count/peak: %d/%d"), HUBSOFT_NAME,
+  bf_printf (output, _("Lua stats\nVersion: %s\nScripts count/peak: %d/%d"), LUA_VERSION,
 	     lua_ctx_cnt, lua_ctx_peak);
 
   if (!lua_ctx_cnt) {

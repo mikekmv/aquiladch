@@ -102,6 +102,7 @@ unsigned int pi_rss_es_type;
 unsigned long rss_deadline;
 unsigned long maxitemlength;
 unsigned long maxentryage;
+unsigned long rss_silent;
 
 rss_feed_t feedlist;
 
@@ -759,7 +760,8 @@ int pi_rss_finish (rss_feed_t * feed)
       e = strstr (c, "\r\n");
       *e = 0;
       errno = 0;
-      plugin_perror ("RSS fetch failed: %s\n", c);
+      if (!rss_silent)
+	plugin_perror ("RSS fetch failed: %s\n", c);
 
       bf_free (buf);
       return -1;
@@ -879,7 +881,8 @@ int pi_rss_handle_input (esocket_t * s)
     if (n < 0) {
       if (errno != EAGAIN) {
 	bf_free (buf);
-	plugin_perror ("RSS read (%s)", feed->name);
+	if (!rss_silent)
+	  plugin_perror ("RSS read (%s)", feed->name);
 	esocket_close (feed->es);
 	esocket_remove_socket (feed->es);
 	feed->es = NULL;
@@ -945,7 +948,8 @@ leave:
   if (buf)
     bf_free (buf);
 
-  plugin_perror ("RSS output (%s)", feed->name);
+  if (!rss_silent)
+    plugin_perror ("RSS output (%s)", feed->name);
 
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
@@ -968,7 +972,8 @@ int pi_rss_handle_error (esocket_t * s)
   if (s->state == SOCKSTATE_FREED)
     return 0;
 
-  plugin_perror ("RSS error (%s)", feed->name);
+  if (!rss_silent)
+    plugin_perror ("RSS error (%s)", feed->name);
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
@@ -991,8 +996,8 @@ int pi_rss_handle_timeout (esocket_t * s)
     return 0;
   }
 
-
-  plugin_perror ("RSS timeout (%s)", feed->name);
+  if (!rss_silent)
+    plugin_perror ("RSS timeout (%s)", feed->name);
   esocket_close (feed->es);
   esocket_remove_socket (feed->es);
   feed->es = NULL;
@@ -1459,7 +1464,9 @@ int pi_rss_init (esocket_handler_t * h)
 
   maxitemlength = 256;
   maxentryage = 3600;
-
+  rss_silent = 0;
+  config_register ("rss.silent", CFG_ELEM_ULONG, &rss_silent,
+		   _("If set, errors are not reported."));
   config_register ("rss.maxlength", CFG_ELEM_ULONG, &maxitemlength,
 		   _("Maximum length of an RSS entry."));
   config_register ("rss.maxentryage", CFG_ELEM_ULONG, &maxentryage,

@@ -769,6 +769,15 @@ int proto_nmdc_user_disconnect (user_t * u, char *reason)
 
     hash_deluser (&hashlist, &u->hash);
 
+    /* if the user was regged, log his ip */
+    if (u->flags & PROTO_FLAG_REGISTERED) {
+      account_t *a;
+
+      a = account_find (u->nick);
+      if (a)
+	a->lastip = u->ipaddress;
+    }
+
     /* mark user offline so the verifies don't fail. */
     u->state = PROTO_STATE_DISCONNECTED;
 

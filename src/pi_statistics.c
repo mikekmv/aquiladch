@@ -786,6 +786,7 @@ unsigned long pi_statistics_handler_statnmdc (plugin_user_t * user, buffer_t * o
   bf_printf (output, " brokenkey : %lu\n", nmdc_stats.brokenkey);
   bf_printf (output, " badnick : %lu\n", nmdc_stats.badnick);
   bf_printf (output, " usednick : %lu\n", nmdc_stats.usednick);
+  bf_printf (output, " mynick : %lu\n", nmdc_stats.mynick);
   bf_printf (output, " softban : %lu\n", nmdc_stats.softban);
   bf_printf (output, " nickban : %lu\n", nmdc_stats.nickban);
   bf_printf (output, " badpasswd : %lu\n", nmdc_stats.badpasswd);

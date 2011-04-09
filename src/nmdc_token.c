@@ -32,6 +32,7 @@ struct token_definition Tokens[] = {
 	{ TOKEN_CHAT, 			 1, "<" },
 	{ TOKEN_MYINFO,			 8, "$MyINFO "},
 	{ TOKEN_MYPASS,			 8, "$MyPass "},
+	{ TOKEN_MYNICK,			 8, "$MyNick "},
 	{ TOKEN_MULTISEARCH,		13, "$MultiSearch "},
 	{ TOKEN_MULTICONNECTTOME,	18, "$MultiConnectToMe "},
 	{ TOKEN_SEARCH,			 8, "$Search "},

@@ -63,6 +63,7 @@ typedef struct {
   unsigned long PasswdBantime;
 
   unsigned long ReconnectBantime;
+  unsigned long CTMBantime;
 
   unsigned long ProbationPeriod;
   unsigned long ViolationBantime;

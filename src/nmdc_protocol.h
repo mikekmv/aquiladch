@@ -90,6 +90,7 @@ typedef struct {
   unsigned long brokenkey;	/* all users refused cuz of broken key */
   unsigned long badnick;	/* all users refused cuz of illegal chars in nickname */
   unsigned long usednick;	/* all users refused cuz of nickname already used */
+  unsigned long mynick;		/* all CTM exploit IPs that have been banned. */
   unsigned long softban;
   unsigned long nickban;
   unsigned long badpasswd;

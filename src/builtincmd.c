@@ -1320,7 +1320,7 @@ unsigned long handler_usercap (plugin_user_t * user, buffer_t * output, void *pr
   }
 
 
-  bf_printf (output, _("User %s created with group %s.\nCurrent rights:"), account->nick,
+  bf_printf (output, _("User %s with group %s.\nCurrent rights:"), account->nick,
 	     account->classp->name);
   flags_print ((Capabilities + CAP_PRINT_OFFSET), output,
 	       account->rights | account->classp->rights);
@@ -1399,7 +1399,9 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
       --output->e;
     }
     if (account->lastlogin) {
-      bf_printf (output, _(", last login %s\n"), ctime (&account->lastlogin));
+      in.s_addr = account->lastip;
+      bf_printf (output, _(", last login %s  from %s\n"), ctime (&account->lastlogin),
+		 inet_ntoa (in));
       if (output->e[-2] == '\n')
 	output->e[-2] = '.';
     } else {

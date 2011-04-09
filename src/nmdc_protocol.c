@@ -246,6 +246,19 @@ int proto_nmdc_state_sendlock (user_t * u, token_t * tkn)
 	retval = -1;
 	break;
       }
+
+    case TOKEN_MYNICK:
+      /* this should not happen. this mean the hub is under attack. 
+       *   we are without mercy.
+       */
+      banlist_add (&hardbanlist, HubSec->nick, "", u->ipaddress, 0xFFFFFFFF,
+		   bf_buffer (__
+			      ("Your IP has been used to attack this hub. This means one of the other hubs you are in is being exploited.")),
+		   now.tv_sec + config.CTMBantime);
+      server_disconnect_user (u->parent, _("CTM Exploit."));
+      nmdc_stats.mynick++;
+      retval = -1;
+      break;
   }
 
   bf_free (output);

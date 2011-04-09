@@ -45,6 +45,7 @@ typedef struct account {
   unsigned int refcnt;		/* usually 1 or 0 : user is logged in or not */
   time_t	regged;
   time_t	lastlogin;
+  unsigned long	lastip;
 
   unsigned int	badpw;
 

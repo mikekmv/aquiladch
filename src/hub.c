@@ -319,7 +319,7 @@ int server_write (client_t * cl, buffer_t * b)
       if ((cl->state == HUB_STATE_BUFFERING)
 	  && ((cl->outgoing.size - cl->offset) >= (config.BufferSoftLimit + cl->credit))) {
 	cl->state = HUB_STATE_OVERFLOW;
-	esocket_settimeout (s, config.TimeoutBuffering);
+	esocket_settimeout (s, config.TimeoutOverflow);
       }
     }
 
