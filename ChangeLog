@@ -1,6 +1,7 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta21:
+0.1.11-pre1-beta22:
+	RSS: Added !rsstarget, send messages to users or groups.
 	RSS: handle timeouts better.
 	RSS: fix atom feeds
 	DNS: fix problem when request made before thread started.

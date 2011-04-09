@@ -278,7 +278,7 @@ xml_node_t *xml_node_add_value (xml_node_t * parent, char *name, xml_type_t type
       bf_printf_resize (buf, "%lf", *((double *) value));
       break;
     case XML_TYPE_STRING:
-      bf_printf_resize (buf, "%s", value ? ((unsigned char *) value) : (unsigned char *) "(NULL)");
+      bf_printf_resize (buf, "%s", value ? ((unsigned char *) value) : (unsigned char *) "");
       break;
     case XML_TYPE_IP:
       {

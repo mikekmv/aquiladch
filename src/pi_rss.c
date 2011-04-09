@@ -68,18 +68,25 @@ typedef struct rss_feed {
 
   unsigned char *name;
 
+  /* timing information */
   unsigned char *lastmodified;
   unsigned long stamp;
   unsigned long interval;
 
+  /* feed data */
   unsigned char *title;
   unsigned char *description;
   rss_element_t includes;
   rss_element_t elems;
 
+  /* location */
   unsigned char *address;
   unsigned int port;
   unsigned char *path;
+
+  /* targeting */
+  unsigned char *user;
+  unsigned long long rights;
 
   /* used during retrieval */
   esocket_t *es;
@@ -667,6 +674,7 @@ int rss_feed_describe (rss_feed_t * feed, plugin_user_t * target, buffer_t * b)
 
 int pi_rss_report (rss_feed_t * feed, unsigned long stamp)
 {
+  plugin_user_t *tgt, *prev;
   buffer_t *output = bf_alloc (1024);
 
   bf_printf (output, "\n%s", feed->title);
@@ -675,8 +683,26 @@ int pi_rss_report (rss_feed_t * feed, unsigned long stamp)
   /* add a extra space to it so the hub doesn't delete the last line. */
   bf_printf (output, "\n \n");
 
-  if (rss_item_list (feed, output, stamp))
-    plugin_user_say (NULL, output);
+  if (rss_item_list (feed, output, stamp)) {
+    if (feed->user) {
+      /* send to specific user */
+      if ((tgt = plugin_user_find (feed->user)))
+	plugin_user_priv (NULL, tgt, NULL, output, 0);
+    } else if (feed->rights) {
+      /* send to all users with certain rights */
+      tgt = prev = NULL;
+      while (plugin_user_next (&tgt)) {
+	prev = tgt;
+	if ((tgt->rights & feed->rights) != feed->rights)
+	  continue;
+	if (plugin_user_priv (NULL, tgt, NULL, output, 0) < 0)
+	  tgt = prev;
+      }
+    } else {
+      /* just send to main chat */
+      plugin_user_say (NULL, output);
+    }
+  }
 
   bf_free (output);
 
@@ -1171,9 +1197,46 @@ unsigned long pi_rss_handler_rssdel (plugin_user_t * user, buffer_t * output, vo
   }
   rss_feed_del (feed);
 
+  bf_printf (output, "Feed %s deleted\n", argv[1]);
+
   return 0;
 }
 
+
+unsigned long pi_rss_handler_rsstarget (plugin_user_t * user, buffer_t * output, void *dummy,
+					unsigned int argc, unsigned char **argv)
+{
+  rss_feed_t *feed;
+  unsigned long long ncap = 0;
+
+  if (argc < 2) {
+    bf_printf (output, "Usage: %s <feed> user <target> | right <rights>\n"
+	       "  user <target>: send feed output to user\n"
+	       "  right <rights>: send feed output to all user with <rights>\n", argv[0]);
+    return 0;
+  }
+
+  feed = rss_feed_find (argv[1]);
+  if (!feed)
+    return 0;
+
+  if (feed->user)
+    free (feed->user);
+  if (!strcmp (argv[2], "user")) {
+    feed->user = strdup (argv[3]);
+    feed->rights = 0;
+    bf_printf (output, "Sending output from feed %s to %s\n", feed->name, feed->user);
+  } else if (!strcmp (argv[2], "rights")) {
+    feed->user = NULL;
+    flags_parse (Capabilities, output, argc, argv, 3, &feed->rights, &ncap);
+    bf_printf (output, "Sending output from feed %s to all users with rights ", feed->name);
+    flags_print (Capabilities + CAP_PRINT_OFFSET, output, feed->rights);
+  } else {
+    return pi_rss_handler_rsstarget (NULL, output, NULL, 0, argv);
+  }
+
+  return 0;
+}
 
 unsigned long pi_rss_handler_rssforce (plugin_user_t * user, buffer_t * output, void *dummy,
 				       unsigned int argc, unsigned char **argv)
@@ -1194,6 +1257,8 @@ unsigned long pi_rss_handler_rssforce (plugin_user_t * user, buffer_t * output, 
     return 0;
   }
   pi_rss_retrieve (feed, output);
+
+  bf_printf (output, "Feed %s update started.\n", argv[1]);
 
   return 0;
 }
@@ -1218,6 +1283,8 @@ unsigned long pi_rss_handle_save (plugin_user_t * user, void *ctxt, unsigned lon
     xml_node_add_value (node, "Address", XML_TYPE_STRING, feed->address);
     xml_node_add_value (node, "Port", XML_TYPE_UINT, &feed->port);
     xml_node_add_value (node, "Path", XML_TYPE_STRING, feed->path);
+    xml_node_add_value (node, "User", XML_TYPE_STRING, feed->user);
+    xml_node_add_value (node, "Rights", XML_TYPE_CAP, &feed->rights);
     xml_node_add_value (node, "Interval", XML_TYPE_LONG, &feed->interval);
     node = xml_node_add (node, "Includes");
     if (feed->includes.next != &feed->includes) {
@@ -1233,7 +1300,8 @@ unsigned long pi_rss_handle_save (plugin_user_t * user, void *ctxt, unsigned lon
 unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned long event,
 				  void *token)
 {
-  unsigned char *name = NULL, *address = NULL, *path = NULL;
+  unsigned char *name = NULL, *address = NULL, *path = NULL, *usr = NULL;
+  unsigned long long rights;
   unsigned int port;
   long interval;
   rss_feed_t *feed;
@@ -1257,6 +1325,14 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
       continue;
     if (!xml_child_get (node, "Path", XML_TYPE_STRING, &path))
       continue;
+    if (!xml_child_get (node, "User", XML_TYPE_STRING, &usr)) {
+      if (usr)
+	free (usr);
+      usr = NULL;
+    }
+    if (!xml_child_get (node, "Rights", XML_TYPE_CAP, &rights)) {
+      rights = 0;
+    }
     if (!xml_child_get (node, "Interval", XML_TYPE_LONG, &interval))
       continue;
 
@@ -1265,6 +1341,10 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
     feed->path = strdup (path);
     feed->port = port;
     feed->interval = interval;
+
+    feed->rights = rights;
+    if (usr && *usr)
+      feed->user = strdup (usr);
 
     inc = xml_node_find (node, "Includes");
     for (inc = inc->children; inc; inc = xml_next (inc)) {
@@ -1277,6 +1357,15 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
     feed->target = NULL;
     pi_rss_retrieve (feed, NULL);
   }
+
+  if (name)
+    free (name);
+  if (address)
+    free (address);
+  if (path)
+    free (path);
+  if (user)
+    free (user);
 
   return 0;
 }
@@ -1370,6 +1459,8 @@ int pi_rss_init (esocket_handler_t * h)
   command_register ("rssdel", &pi_rss_handler_rssdel, CAP_CONFIG, _("Delete a RSS or Atom feed."));
   command_register ("rssforce", &pi_rss_handler_rssforce, CAP_CONFIG,
 		    _("Force an update on a RSS or Atom feed."));
+  command_register ("rsstarget", &pi_rss_handler_rsstarget, CAP_CONFIG,
+		    _("Configure where to send a RSS or Atom feed."));
   command_register ("rssselect", &pi_rss_handler_rssselect, CAP_CONFIG,
 		    _("Select elements of a RSS or Atom feed."));
   command_register ("rss", &pi_rss_handler_rss, CAP_CHAT, _("Show an RSS or Atom feed."));
