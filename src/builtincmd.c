@@ -1377,7 +1377,7 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   account_t *account = NULL;
   struct in_addr in;
   plugin_user_t *target;
-  const char *loc;
+  int cc;
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <nick>"), argv[0]);
@@ -1408,7 +1408,8 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
       in.s_addr = account->lastip;
       bf_printf (output, _(", last login %s from %s"), ctime (&account->lastlogin), inet_ntoa (in));
 #ifdef GEOIP
-      bf_printf (output, " (%s)", GeoIP_country_code_by_ipnum (gi, htonl (account->lastlogin)));
+      cc = GeoIP_id_by_ipnum (gi, htonl (target->ipaddress));
+      bf_printf (output, " (%s)", GeoIP_country_code[cc]);
 #endif
       bf_printf (output, "\n");
     } else {
@@ -1439,10 +1440,10 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
     bf_printf (output, _("IP: %s Hubs: (%u, %u, %u), Slots %u\n"), inet_ntoa (in), target->hubs[0],
 	       target->hubs[1], target->hubs[2], target->slots);
 #ifdef GEOIP
-    loc = GeoIP_country_code_by_ipnum (gi, htonl (target->ipaddress));
-    if (loc) {
-      bf_printf (output, _("IP location %s (%s)\n"),
-		 GeoIP_country_name_by_ipnum (gi, htonl (target->ipaddress)), loc);
+    cc = GeoIP_id_by_ipnum (gi, htonl (target->ipaddress));
+    if (cc) {
+      bf_printf (output, _("IP location %s (%s)\n"), GeoIP_country_name[cc],
+		 GeoIP_country_code[cc]);
     } else {
       bf_printf (output, _("IP location unknown\n"));
     }

@@ -511,6 +511,7 @@ int rss_feed_parse (rss_feed_t * feed, buffer_t * b)
     } while (node);
   } else {
     /* unknown format */
+    xml_free (base);
     return -1;
   }
 
@@ -518,6 +519,8 @@ int rss_feed_parse (rss_feed_t * feed, buffer_t * b)
 
   if (feed->target)
     plugin_user_sayto (NULL, feed->target, bf_buffer ("Feed updated."), 0);
+
+  xml_free (base);
 
   return 0;
 }
@@ -879,8 +882,9 @@ int pi_rss_handle_input (esocket_t * s)
     buf = bf_alloc (PI_RSS_INPUT_BUFFERSIZE);
     n = esocket_recv (s, buf);
     if (n < 0) {
+      bf_free (buf);
+
       if (errno != EAGAIN) {
-	bf_free (buf);
 	if (!rss_silent)
 	  plugin_perror ("RSS read (%s)", feed->name);
 	esocket_close (feed->es);
@@ -1381,8 +1385,8 @@ unsigned long pi_rss_handle_load (plugin_user_t * user, void *ctxt, unsigned lon
     free (address);
   if (path)
     free (path);
-  if (user)
-    free (user);
+  if (usr)
+    free (usr);
 
   return 0;
 }

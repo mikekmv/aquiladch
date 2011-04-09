@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta26]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1-beta27]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -374,7 +374,7 @@ if test "${GEOIP}" = "" ;
 then
 	unset GEOIP;
 else
-	AC_CHECK_LIB([GeoIP], [GeoIP_new], [GEOIPLIB=-lGeoIP], [unset GEOIP])
+	AC_CHECK_LIB([GeoIP], [GeoIP_id_by_ipnum], [GEOIPLIB=-lGeoIP], [unset GEOIP])
 fi
 AC_SUBST(GEOIPLIB)
 
