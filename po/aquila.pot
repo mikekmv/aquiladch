@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-03-17 21:16+0100\n"
+"POT-Creation-Date: 2007-03-18 15:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1895,34 +1895,34 @@ msgstr ""
 msgid "Registered at hublist %s\n"
 msgstr ""
 
-#: src/pi_hublist.c:346
+#: src/pi_hublist.c:345
 #, c-format
 msgid "Hublist update ERROR: %s: %s.\n"
 msgstr ""
 
-#: src/pi_hublist.c:382
+#: src/pi_hublist.c:375
 #, c-format
 msgid "Hublist update ERROR: %s: Timed out.\n"
 msgstr ""
 
-#: src/pi_hublist.c:410
+#: src/pi_hublist.c:403
 msgid "Errors during hublist update:\n"
 msgstr ""
 
-#: src/pi_hublist.c:459
+#: src/pi_hublist.c:452
 msgid "list of hublist addresses."
 msgstr ""
 
-#: src/pi_hublist.c:461
+#: src/pi_hublist.c:454
 msgid "Interval of hublist updates."
 msgstr ""
 
-#: src/pi_hublist.c:463
+#: src/pi_hublist.c:456
 msgid ""
 "Do not report errors when hublist registration fails (Use with caution!)."
 msgstr ""
 
-#: src/pi_hublist.c:465
+#: src/pi_hublist.c:458
 msgid "Register at hublists."
 msgstr ""
 

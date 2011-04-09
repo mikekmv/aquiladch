@@ -91,6 +91,11 @@ esocket_t *freelist = NULL;
 #define IOCTX_FREE(ctxt) { ioctx_free (ctxt); free(ctxt); }
 #define SYNC_ERRORS(socket) { errno = socket->error = translate_error(WSAGetLastError()); }
 
+/* 
+ *   connect polling interval
+ */
+#define IOCP_CONNECT_INTERVAL  250
+
 /*
  * memory autotuning 
  */
@@ -151,6 +156,9 @@ unsigned int translate_error (unsigned int winerror)
     case WSAEPROTOTYPE:
       /* return EPROTOTYPE; */
       return EINVAL;
+
+    case WSAEWOULDBLOCK:
+      return EAGAIN;
 
     case WSAEINPROGRESS:
       return EAGAIN;
@@ -1141,11 +1149,17 @@ int esocket_check_connect (esocket_t * s)
   err = s->error;
   esocket_update_state (s, !s->error ? SOCKSTATE_CONNECTED : SOCKSTATE_ERROR);
 
+  if (!s->error) {
+    if (h->types[s->type].output)
+      h->types[s->type].output (s);
+    return 0;
+  }
+
 error:
   if (h->types[s->type].error)
     h->types[s->type].error (s);
 
-  return 0;
+  return -1;
 }
 
 #endif
@@ -1309,6 +1323,12 @@ unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout)
       esocket_deltimeout (s);
     return 0;
   }
+#ifdef USE_IOCP
+  if (s->state == SOCKSTATE_CONNECTING) {
+    s->count = timeout / IOCP_CONNECT_INTERVAL;
+    timeout = IOCP_CONNECT_INTERVAL;
+  }
+#endif
 
   /* if timer is valid already and the new time is later than the old, just set the reset time... 
    * it will be handled when the timer expires 
@@ -1398,6 +1418,35 @@ unsigned int esocket_checktimers (esocket_handler_t * h)
       insertNode (&h->root, rbt);
       continue;
     }
+#ifdef USE_IOCP
+    /* connect polling */
+    if (s->count) {
+      if (esocket_check_connect (s) < 0) {
+	unsigned long long key =
+	  (s->to.tv_sec * 1000LL) + (s->to.tv_usec / 1000LL) + IOCP_CONNECT_INTERVAL;
+
+	/* create timeout */
+	s->to = now;
+	s->to.tv_sec += IOCP_CONNECT_INTERVAL / 1000;
+	s->to.tv_usec += ((IOCP_CONNECT_INTERVAL * 1000) % 1000000);
+	if (s->to.tv_usec > 1000000) {
+	  s->to.tv_sec++;
+	  s->to.tv_usec -= 1000000;
+	}
+	s->tovalid = 1;
+
+	/* insert into rbt */
+	s->rbt.data = key;
+	insertNode (&h->root, &s->rbt);
+
+	h->timercnt++;
+	s->count--;
+	continue;
+      }
+      s->count = 0;
+      continue;
+    }
+#endif
 
     s->tovalid = 0;
     deleteNode (&h->root, rbt);
@@ -1419,8 +1468,12 @@ int esocket_recv (esocket_t * s, buffer_t * buf)
   int ret;
 
   ret = recv (s->socket, buf->e, bf_unused (buf), 0);
-  if (ret < 0)
+  if (ret < 0) {
+#ifdef USE_WINDOWS
+    SYNC_ERRORS (s);
+#endif
     return ret;
+  }
 
   buf->e += ret;
 

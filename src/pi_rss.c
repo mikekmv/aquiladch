@@ -742,8 +742,8 @@ int pi_rss_handle_input (esocket_t * s)
     buf = bf_alloc (PI_RSS_INPUT_BUFFERSIZE);
     n = esocket_recv (s, buf);
     if (n < 0) {
-      bf_free (buf);
       if (errno != EAGAIN) {
+	bf_free (buf);
 	plugin_perror ("RSS read (%s)", feed->name);
 	esocket_close (feed->es);
 	esocket_remove_socket (feed->es);
@@ -756,13 +756,12 @@ int pi_rss_handle_input (esocket_t * s)
 	  rss_deadline = feed->stamp + feed->interval;
 	return -1;
       }
+
       return 0;
     }
     /* connection closed, transfer succesful */
-    if (n == 0) {
-      bf_free (buf);
-      return pi_rss_finish (feed);
-    }
+    if (n == 0)
+      goto succes;
 
     bf_append (&feed->recvd, buf);
   } while (n > 0);
@@ -771,6 +770,9 @@ int pi_rss_handle_input (esocket_t * s)
   esocket_settimeout (feed->es, PI_RSS_CONNECT_TIMEOUT);
 
   return 0;
+succes:
+  bf_free (buf);
+  return pi_rss_finish (feed);
 }
 
 int pi_rss_handle_output (esocket_t * s)
@@ -827,6 +829,9 @@ leave:
 int pi_rss_handle_error (esocket_t * s)
 {
   rss_feed_t *feed = (rss_feed_t *) s->context;
+
+  if (s->state == SOCKSTATE_FREED)
+    return 0;
 
   plugin_perror ("RSS error (%s)", feed->name);
   esocket_close (feed->es);

@@ -1,6 +1,9 @@
 This is the Aquila Changelog.
 
-0.1.11-pre1-beta19:
+0.1.11-pre1-beta20:
+	Fixed handling of WSAEWOULDBLOCK
+	Added IOCP connect polling internal to esocket
+	Attempt to fix feeds on windows.
 	esocket: fixed division by zero error in IOCP code.
 	esocket: succesful connections are now reported
 		to output callback.

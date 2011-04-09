@@ -222,6 +222,8 @@ struct esocket {
   struct esockethandler *handler;
   
 #ifdef USE_IOCP
+  /* connect polling */
+  unsigned int count;
   /* accept context */
   esocket_ioctx_t *ctxt;
   /* LPFN_ACCEPTEX fnAcceptEx; */
@@ -301,6 +303,7 @@ extern unsigned int esocket_remove_socket (esocket_t * s);
 extern int esocket_bind (esocket_t * s, unsigned long address, unsigned int port);
 
 extern int esocket_connect (esocket_t * s, char *address, unsigned int port);
+
 extern unsigned int esocket_select (esocket_handler_t * h, struct timeval *to);
 extern unsigned int esocket_update (esocket_t * s, int fd, unsigned int state);
 extern unsigned int esocket_settimeout (esocket_t * s, unsigned long timeout);
