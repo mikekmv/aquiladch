@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-16 23:50+0200\n"
+"POT-Creation-Date: 2007-04-18 00:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1528,131 +1528,131 @@ msgstr ""
 msgid "BogoMIPS: %.*s\n"
 msgstr ""
 
-#: src/pi_statistics.c:234 src/pi_statistics.c:410
+#: src/pi_statistics.c:234 src/pi_statistics.c:416
 #, c-format
 msgid ""
 "\n"
 "Cpu Statistics at %s"
 msgstr ""
 
-#: src/pi_statistics.c:237 src/pi_statistics.c:413
+#: src/pi_statistics.c:237 src/pi_statistics.c:419
 #, c-format
 msgid " last hour %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:241 src/pi_statistics.c:417
+#: src/pi_statistics.c:241 src/pi_statistics.c:423
 #, c-format
 msgid " last minute %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:245 src/pi_statistics.c:421
+#: src/pi_statistics.c:245 src/pi_statistics.c:427
 #, c-format
 msgid ""
 " last 5 seconds %2.2f%%\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:249 src/pi_statistics.c:425
+#: src/pi_statistics.c:249 src/pi_statistics.c:431
 #, c-format
 msgid "Since boot %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:530
+#: src/pi_statistics.c:536
 #, c-format
 msgid "Total traffic since boot: In %lu, Out %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:539
+#: src/pi_statistics.c:545
 #, c-format
 msgid "In last %lu ms: In %f kbps, Out %f kbps\n"
 msgstr ""
 
-#: src/pi_statistics.c:550
+#: src/pi_statistics.c:556
 #, c-format
 msgid "Average over %d seconds: In %f kbps, Out %f kbps\n"
 msgstr ""
 
-#: src/pi_statistics.c:592
+#: src/pi_statistics.c:598
 #, c-format
 msgid "Total Count: %lu, Total Memory: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:594
+#: src/pi_statistics.c:600
 #, c-format
 msgid ""
 "ZPipe users: %lu, ZLine users: %lu\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:596
+#: src/pi_statistics.c:602
 #, c-format
 msgid "Nicklist cache (last updated %lu seconds ago).\n"
 msgstr ""
 
-#: src/pi_statistics.c:599
+#: src/pi_statistics.c:605
 #, c-format
 msgid "  Nicklist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"
 msgstr ""
 
-#: src/pi_statistics.c:602
+#: src/pi_statistics.c:608
 #, c-format
 msgid "  Infolist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"
 msgstr ""
 
-#: src/pi_statistics.c:606
+#: src/pi_statistics.c:612
 #, c-format
 msgid "  Nicklist length %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:607
+#: src/pi_statistics.c:613
 #, c-format
 msgid "  Infolist length %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:617
+#: src/pi_statistics.c:623
 msgid "Warning: DEBUG build, bandwidth measurements inaccurate.\n"
 msgstr ""
 
-#: src/pi_statistics.c:635
+#: src/pi_statistics.c:641
 #, c-format
 msgid "Allocated size: %llu (max: %llu)\n"
 msgstr ""
 
-#: src/pi_statistics.c:637
+#: src/pi_statistics.c:643
 msgid "Allocated size: %I64u (max: %I64u)\n"
 msgstr ""
 
-#: src/pi_statistics.c:639
+#: src/pi_statistics.c:645
 #, c-format
 msgid "Allocated buffers: %lu (max %lu)\n"
 msgstr ""
 
-#: src/pi_statistics.c:640
+#: src/pi_statistics.c:646
 #, c-format
 msgid " Users having buffered output: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:646
+#: src/pi_statistics.c:652
 msgid ""
 "\n"
 "Buffering clients:\n"
 msgstr ""
 
-#: src/pi_statistics.c:653
+#: src/pi_statistics.c:659
 #, c-format
 msgid "Real user %s without socket?\n"
 msgstr ""
 
-#: src/pi_statistics.c:666
+#: src/pi_statistics.c:672
 #, c-format
 msgid " %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:677
+#: src/pi_statistics.c:683
 msgid " None.\n"
 msgstr ""
 
-#: src/pi_statistics.c:681
+#: src/pi_statistics.c:687
 #, c-format
 msgid ""
 "\n"
@@ -1663,11 +1663,11 @@ msgid ""
 " Average bytes to write %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:693
+#: src/pi_statistics.c:699
 msgid "Warning: DEBUG build, cpu measurements higher as normal.\n"
 msgstr ""
 
-#: src/pi_statistics.c:738
+#: src/pi_statistics.c:744
 #, c-format
 msgid ""
 "Connection statistics:\n"
@@ -1676,138 +1676,138 @@ msgid ""
 "    Blocked connection attempts: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:754
+#: src/pi_statistics.c:760
 msgid "Memory Usage:\n"
 msgstr ""
 
-#: src/pi_statistics.c:762
+#: src/pi_statistics.c:768
 msgid "GNU LibC memory statistics:\n"
 msgstr ""
 
-#: src/pi_statistics.c:763
+#: src/pi_statistics.c:769
 #, c-format
 msgid " Total heap     : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:764
+#: src/pi_statistics.c:770
 #, c-format
 msgid " # Free chunks    : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:765
+#: src/pi_statistics.c:771
 #, c-format
 msgid " # Fastbin blocks : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:766
+#: src/pi_statistics.c:772
 #, c-format
 msgid " Total alloced space : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:768
+#: src/pi_statistics.c:774
 #, c-format
 msgid " Total free space    : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:770
+#: src/pi_statistics.c:776
 #, c-format
 msgid " keepcost : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:771
+#: src/pi_statistics.c:777
 #, c-format
 msgid " # MMAP regions : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:772
+#: src/pi_statistics.c:778
 #, c-format
 msgid ""
 " MMAP space     : %lu (%s)\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:776
+#: src/pi_statistics.c:782
 #, c-format
 msgid "%s stats:\n"
 msgstr ""
 
-#: src/pi_statistics.c:777
+#: src/pi_statistics.c:783
 #, c-format
 msgid " Buffering memory: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:778
+#: src/pi_statistics.c:784
 #, c-format
 msgid " Cachelist size: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:789
+#: src/pi_statistics.c:795
 #, c-format
 msgid "Booted at %.*s, up %lu seconds (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:879
+#: src/pi_statistics.c:885
 msgid "Show buffer stats."
 msgstr ""
 
-#: src/pi_statistics.c:880
+#: src/pi_statistics.c:886
 msgid "Show cache stats."
 msgstr ""
 
-#: src/pi_statistics.c:881
+#: src/pi_statistics.c:887
 msgid "Show bandwidth stats."
 msgstr ""
 
-#: src/pi_statistics.c:882
+#: src/pi_statistics.c:888
 msgid "Show cpu usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:884
+#: src/pi_statistics.c:890
 msgid "Show nmdc protocol stats. Experts only."
 msgstr ""
 
-#: src/pi_statistics.c:885
+#: src/pi_statistics.c:891
 msgid "Show memory usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:886
+#: src/pi_statistics.c:892
 msgid "Show connection stats."
 msgstr ""
 
-#: src/pi_statistics.c:887
+#: src/pi_statistics.c:893
 msgid "Show uptime."
 msgstr ""
 
-#: src/pi_statistics.c:890
+#: src/pi_statistics.c:896
 msgid "Show iocp usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:900
+#: src/pi_statistics.c:906
 msgid "This is the total size of memory allocated with sbrk by malloc (bytes)."
 msgstr ""
 
-#: src/pi_statistics.c:902
+#: src/pi_statistics.c:908
 msgid "This is the number of chunks not in use."
 msgstr ""
 
-#: src/pi_statistics.c:904
+#: src/pi_statistics.c:910
 msgid "This is the total number of chunks allocated with mmap."
 msgstr ""
 
-#: src/pi_statistics.c:906
+#: src/pi_statistics.c:912
 msgid "This is the total size of memory allocated with mmap (bytes)."
 msgstr ""
 
-#: src/pi_statistics.c:908
+#: src/pi_statistics.c:914
 msgid ""
 "This is the total size of memory occupied by chunks handed out by malloc."
 msgstr ""
 
-#: src/pi_statistics.c:910
+#: src/pi_statistics.c:916
 msgid "This is the total size of memory occupied by free (not in use) chunks."
 msgstr ""
 
-#: src/pi_statistics.c:913
+#: src/pi_statistics.c:919
 msgid ""
 "This is the size of the top-most releasable chunk that normally borders the "
 "end of the heap."

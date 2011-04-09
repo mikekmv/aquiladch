@@ -1,5 +1,13 @@
 This is the Aquila Changelog.
 
+0.1.11-pre1:
+	Added partial hu_HU (FleetCommand)
+	updated sv.po (Thank you en_dator).
+	Fallback to processor identifier on windows if ProcessorNameString
+		is not available. (Reported yada)
+	Fix rrd configure include path (Reported FleetCommand)
+	RRD: Fix buf in xml load.
+
 0.1.11-pre1-beta39:
 	Fixed compiling pi_statistics.c on windows.
 	Import LastIP correctly.

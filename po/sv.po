@@ -5,10 +5,10 @@
 # en_dator <endator@gmail.com>, 2007.#
 msgid ""
 msgstr ""
-"Project-Id-Version: Aquila 0.1.11-pre1-beta32\n"
+"Project-Id-Version: Aquila 0.1.11-pre1-beta39\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-16 23:50+0200\n"
-"PO-Revision-Date: 2007-03-12 00:24+0100\n"
+"POT-Creation-Date: 2007-04-18 00:00+0200\n"
+"PO-Revision-Date: 2007-04-17 00:24+0100\n"
 "Last-Translator: en_dator <endator@gmail.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -80,7 +80,7 @@ msgstr "Rapporten kunde inte skickas, %s finns inte."
 
 #: src/builtincmd.c:289
 msgid "Report could not be sent, target not found."
-msgstr "Rapporten kunde inte skickas, inställning för rapporttarget saknas."
+msgstr "Rapporten kunde inte skickas, inställning för reporttarget saknas."
 
 #: src/builtincmd.c:298
 msgid "Report sent."
@@ -197,7 +197,7 @@ msgstr "Tyvärr, \"%s\" ser inte ut som en IP adress."
 #: src/builtincmd.c:564
 #, c-format
 msgid "Nick %s unbanned."
-msgstr "Namnet %s bortaget ur banlistan"
+msgstr "Namnet %s är bortaget ur banlistan"
 
 #: src/builtincmd.c:566
 #, c-format
@@ -207,7 +207,7 @@ msgstr "Kan inte hitta användarnamnet %s i banlistan."
 #: src/builtincmd.c:584 src/builtincmd.c:607
 #, c-format
 msgid "IP %s unbanned."
-msgstr "IP %s bortaget ur banlistan"
+msgstr "IP %s är bortaget ur banlistan"
 
 #: src/builtincmd.c:586 src/builtincmd.c:609
 #, c-format
@@ -267,12 +267,12 @@ msgstr "Användning: %s <nick> [<period>] <reason>"
 #: src/builtincmd.c:717
 #, c-format
 msgid "Banned nick %s forever: %.*s"
-msgstr "Bannat användarnamn %s för evigt: %.*s"
+msgstr "Användarnamn %s bannat för evigt: %.*s"
 
 #: src/builtincmd.c:719
 #, c-format
 msgid "Banned nick %s for %s: %.*s"
-msgstr "Bannat användarnamn %s i %s: %.*s"
+msgstr "Användarnamn %s bannad i %s: %.*s"
 
 #: src/builtincmd.c:767
 #, c-format
@@ -502,8 +502,8 @@ msgid ""
 "User is already logged in. He has been told to set a password and to "
 "relogin.\n"
 msgstr ""
-"Användaren är redan inloggad. Han/Hon har fått meddelande om att skapa "
-"ettlösenord och att logga ut och in igen.\n"
+"Användaren är redan inloggad. Han/Hon har fått meddelande om att skapa ett "
+"lösenord och att logga ut och in igen.\n"
 
 #: src/builtincmd.c:1269
 #, c-format
@@ -539,7 +539,7 @@ msgid ""
 "User %s with group %s.\n"
 "Current rights:"
 msgstr ""
-"Användare %s skapad i grupp %s.\n"
+"Användare %s i grupp %s.\n"
 "Nuvarande rättigheter:"
 
 #: src/builtincmd.c:1335
@@ -770,9 +770,9 @@ msgid "Configuration change denied.\n"
 msgstr "Konfigurationsändringen nekades.\n"
 
 #: src/builtincmd.c:1997
-#, fuzzy, c-format
+#, c-format
 msgid "Sorry, unknown statistics value %s\n"
-msgstr "Tyvärr, inställningsvärde %s finns inte \n"
+msgstr "Tyvärr, statistikvärde %s finns inte\n"
 
 #: src/builtincmd.c:2020
 msgid "All Data saved."
@@ -975,14 +975,12 @@ msgid "Set configuration values."
 msgstr "Ange inställningsvärden."
 
 #: src/builtincmd.c:2124
-#, fuzzy
 msgid "Show raw statistics."
-msgstr "Visa LUA statistik."
+msgstr "Visa all statistik."
 
 #: src/builtincmd.c:2125
-#, fuzzy
 msgid "Show statistics help."
-msgstr "Visa LUA statistik."
+msgstr "Visa statistik hjälp."
 
 #: src/builtincmd.c:2127
 msgid ""
@@ -1038,7 +1036,7 @@ msgstr ""
 
 #: src/nmdc_protocol.c:98 src/nmdc_protocol.c:273
 msgid "CTM Exploit."
-msgstr ""
+msgstr "CTM Exploit."
 
 #: src/nmdc_protocol.c:116
 #, c-format
@@ -1053,7 +1051,7 @@ msgstr ""
 
 #: src/nmdc_protocol.c:260
 msgid "Protocol violation: Bad key."
-msgstr ""
+msgstr "Protocol violation: Bad key."
 
 #: src/nmdc_protocol.c:317 src/nmdc_protocol.c:379
 msgid "Nickname refused due to unacceptable characters."
@@ -1260,12 +1258,12 @@ msgstr "Nerladdning av användarlistan nekades. Max 1 nerladdning per %ds."
 #: src/nmdc_interface.c:957
 #, c-format
 msgid "Rate Probation Violation (Last: %s)."
-msgstr ""
+msgstr "Rate Probation Violation (Last: %s)."
 
 #: src/nmdc_interface.c:961
 #, c-format
 msgid "Rate Violation (Last: %s)."
-msgstr ""
+msgstr "Rate Violation (Last: %s)."
 
 #: src/nmdc_interface.c:980
 #, c-format
@@ -1503,7 +1501,7 @@ msgid ""
 "Burst of user warnings. This controls how many warnings a user that overstep "
 "limits can save up."
 msgstr ""
-"Antal warningar. Detta styr hur många varningar en användare som överskrider "
+"Antal varningar. Detta styr hur många varningar en användare som överskrider "
 "begränsningarna kan 'spara ifatt'"
 
 #: src/nmdc_interface.c:1280
@@ -1678,7 +1676,7 @@ msgstr "     Frekvens: %.*s MHz "
 msgid "BogoMIPS: %.*s\n"
 msgstr "BogoMIPS: %.*s\n"
 
-#: src/pi_statistics.c:234 src/pi_statistics.c:410
+#: src/pi_statistics.c:234 src/pi_statistics.c:416
 #, c-format
 msgid ""
 "\n"
@@ -1687,17 +1685,17 @@ msgstr ""
 "\n"
 "Cpu statistik för %s"
 
-#: src/pi_statistics.c:237 src/pi_statistics.c:413
+#: src/pi_statistics.c:237 src/pi_statistics.c:419
 #, c-format
 msgid " last hour %2.2f%%\n"
 msgstr " sista timmen %2.2f%%\n"
 
-#: src/pi_statistics.c:241 src/pi_statistics.c:417
+#: src/pi_statistics.c:241 src/pi_statistics.c:423
 #, c-format
 msgid " last minute %2.2f%%\n"
 msgstr " sista minuten %2.2f%%\n"
 
-#: src/pi_statistics.c:245 src/pi_statistics.c:421
+#: src/pi_statistics.c:245 src/pi_statistics.c:427
 #, c-format
 msgid ""
 " last 5 seconds %2.2f%%\n"
@@ -1706,32 +1704,32 @@ msgstr ""
 " sista 5 sekunderna %2.2f%%\n"
 "\n"
 
-#: src/pi_statistics.c:249 src/pi_statistics.c:425
+#: src/pi_statistics.c:249 src/pi_statistics.c:431
 #, c-format
 msgid "Since boot %2.2f%%\n"
 msgstr "Sedan uppstart %2.2f%%\n"
 
-#: src/pi_statistics.c:530
+#: src/pi_statistics.c:536
 #, c-format
 msgid "Total traffic since boot: In %lu, Out %lu\n"
-msgstr "Totalt trafik sedan uppstart: In %lu, Ut %lu\n"
+msgstr "Total trafik sedan uppstart: In %lu, Ut %lu\n"
 
-#: src/pi_statistics.c:539
+#: src/pi_statistics.c:545
 #, c-format
 msgid "In last %lu ms: In %f kbps, Out %f kbps\n"
 msgstr "Under senaste %lu ms: In %f kbps, Ut %f kbps\n"
 
-#: src/pi_statistics.c:550
+#: src/pi_statistics.c:556
 #, c-format
 msgid "Average over %d seconds: In %f kbps, Out %f kbps\n"
 msgstr "I genomsnitt under %d sekunder: In %f kbps, Ut %f kbps\n"
 
-#: src/pi_statistics.c:592
+#: src/pi_statistics.c:598
 #, c-format
 msgid "Total Count: %lu, Total Memory: %lu\n"
 msgstr "Totalt antal: %lu, Totalt minne: %lu\n"
 
-#: src/pi_statistics.c:594
+#: src/pi_statistics.c:600
 #, c-format
 msgid ""
 "ZPipe users: %lu, ZLine users: %lu\n"
@@ -1740,57 +1738,57 @@ msgstr ""
 "ZPipe användare: %lu, ZLine användare: %lu\n"
 "\n"
 
-#: src/pi_statistics.c:596
+#: src/pi_statistics.c:602
 #, c-format
 msgid "Nicklist cache (last updated %lu seconds ago).\n"
 msgstr "Nicklist cache (senast uppdaterad för %lu sekunder sedan).\n"
 
-#: src/pi_statistics.c:599
+#: src/pi_statistics.c:605
 #, c-format
 msgid "  Nicklist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"
 msgstr ""
 "  Nicklist längd %lu (zpipe %lu, zline %lu) [Beräknad %lu, Storlek %lu]\n"
 
-#: src/pi_statistics.c:602
+#: src/pi_statistics.c:608
 #, c-format
 msgid "  Infolist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"
 msgstr ""
 "  Infolist längd %lu (zpipe %lu, zline %lu) [Beräknad %lu, Storlek %lu]\n"
 
-#: src/pi_statistics.c:606
+#: src/pi_statistics.c:612
 #, c-format
 msgid "  Nicklist length %lu\n"
 msgstr "  Nicklist längd %lu\n"
 
-#: src/pi_statistics.c:607
+#: src/pi_statistics.c:613
 #, c-format
 msgid "  Infolist length %lu\n"
 msgstr "  Infolist längd %lu\n"
 
-#: src/pi_statistics.c:617
+#: src/pi_statistics.c:623
 msgid "Warning: DEBUG build, bandwidth measurements inaccurate.\n"
 msgstr "Varning: kompilerat med DEBUG, bandbreddsmätningar är inte exakta.\n"
 
-#: src/pi_statistics.c:635
+#: src/pi_statistics.c:641
 #, c-format
 msgid "Allocated size: %llu (max: %llu)\n"
 msgstr "Allokerad storlek: %llu (max: %llu)\n"
 
-#: src/pi_statistics.c:637
+#: src/pi_statistics.c:643
 msgid "Allocated size: %I64u (max: %I64u)\n"
 msgstr "Allokerad storlek: %I64u (max: %I64u)\n"
 
-#: src/pi_statistics.c:639
+#: src/pi_statistics.c:645
 #, c-format
 msgid "Allocated buffers: %lu (max %lu)\n"
 msgstr "Allokerade buffertar: %lu (max %lu)\n"
 
-#: src/pi_statistics.c:640
+#: src/pi_statistics.c:646
 #, c-format
 msgid " Users having buffered output: %lu\n"
 msgstr " Användare med buffrad data: %lu\n"
 
-#: src/pi_statistics.c:646
+#: src/pi_statistics.c:652
 msgid ""
 "\n"
 "Buffering clients:\n"
@@ -1798,21 +1796,21 @@ msgstr ""
 "\n"
 "Buffrande klienter:\n"
 
-#: src/pi_statistics.c:653
+#: src/pi_statistics.c:659
 #, c-format
 msgid "Real user %s without socket?\n"
 msgstr "Riktig användare %s utan socket?\n"
 
-#: src/pi_statistics.c:666
+#: src/pi_statistics.c:672
 #, c-format
 msgid " %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"
-msgstr " %s (online: %s), %lu buffertar, totalt %lu, offset %lu, kredit %lu\n"
+msgstr " %s (online: %s), %lu buffertar, total %lu, offset %lu, kredit %lu\n"
 
-#: src/pi_statistics.c:677
+#: src/pi_statistics.c:683
 msgid " None.\n"
 msgstr " Ingen.\n"
 
-#: src/pi_statistics.c:681
+#: src/pi_statistics.c:687
 #, c-format
 msgid ""
 "\n"
@@ -1829,11 +1827,11 @@ msgstr ""
 " Genomsnitt köade bytes %lu\n"
 " Genomsnitt bytes att skriva %lu\n"
 
-#: src/pi_statistics.c:693
+#: src/pi_statistics.c:699
 msgid "Warning: DEBUG build, cpu measurements higher as normal.\n"
 msgstr "Varning: kompilerat med DEBUG, cpumätningar är högre än normalt.\n"
 
-#: src/pi_statistics.c:738
+#: src/pi_statistics.c:744
 #, c-format
 msgid ""
 "Connection statistics:\n"
@@ -1846,144 +1844,148 @@ msgstr ""
 "    Tillåtna anslutningsförsök: %lu\n"
 "    Blockerade anslutningsförsök: %lu\n"
 
-#: src/pi_statistics.c:754
+#: src/pi_statistics.c:760
 msgid "Memory Usage:\n"
 msgstr "Minnesanvändning:\n"
 
-#: src/pi_statistics.c:762
+#: src/pi_statistics.c:768
 msgid "GNU LibC memory statistics:\n"
 msgstr "GNU LibC minnesstatistik:\n"
 
-#: src/pi_statistics.c:763
+#: src/pi_statistics.c:769
 #, c-format
 msgid " Total heap     : %lu (%s)\n"
 msgstr " Totalt heap    : %lu (%s)\n"
 
-#: src/pi_statistics.c:764
+#: src/pi_statistics.c:770
 #, c-format
 msgid " # Free chunks    : %lu\n"
 msgstr " # Free chunks    : %lu\n"
 
-#: src/pi_statistics.c:765
+#: src/pi_statistics.c:771
 #, c-format
 msgid " # Fastbin blocks : %lu\n"
 msgstr " # Fastbin blocks : %lu\n"
 
-#: src/pi_statistics.c:766
+#: src/pi_statistics.c:772
 #, c-format
 msgid " Total alloced space : %lu (%s)\n"
 msgstr " Totalt allokerat utrymme : %lu (%s)\n"
 
-#: src/pi_statistics.c:768
+#: src/pi_statistics.c:774
 #, c-format
 msgid " Total free space    : %lu (%s)\n"
 msgstr " Totalt ledigt utrymme    : %lu (%s)\n"
 
-#: src/pi_statistics.c:770
+#: src/pi_statistics.c:776
 #, c-format
 msgid " keepcost : %lu (%s)\n"
-msgstr ""
+msgstr " keepcost : %lu (%s)\n"
 
-#: src/pi_statistics.c:771
+#: src/pi_statistics.c:777
 #, c-format
 msgid " # MMAP regions : %lu\n"
-msgstr ""
+msgstr " # MMAP regions : %lu\n"
 
-#: src/pi_statistics.c:772
+#: src/pi_statistics.c:778
 #, c-format
 msgid ""
 " MMAP space     : %lu (%s)\n"
 "\n"
 msgstr ""
+" MMAP space     : %lu (%s)\n"
+"\n"
 
-#: src/pi_statistics.c:776
+#: src/pi_statistics.c:782
 #, c-format
 msgid "%s stats:\n"
 msgstr "%s statistik:\n"
 
-#: src/pi_statistics.c:777
+#: src/pi_statistics.c:783
 #, c-format
 msgid " Buffering memory: %lu\n"
 msgstr " Buffertminne: %lu\n"
 
-#: src/pi_statistics.c:778
+#: src/pi_statistics.c:784
 #, c-format
 msgid " Cachelist size: %lu\n"
 msgstr " Cachelistans storlek: %lu\n"
 
-#: src/pi_statistics.c:789
+#: src/pi_statistics.c:795
 #, c-format
 msgid "Booted at %.*s, up %lu seconds (%s)\n"
 msgstr "Startad %.*s, igång i %lu sekunder (%s)\n"
 
-#: src/pi_statistics.c:879
+#: src/pi_statistics.c:885
 msgid "Show buffer stats."
 msgstr "Visa statistik för buffertanvändning."
 
-#: src/pi_statistics.c:880
+#: src/pi_statistics.c:886
 msgid "Show cache stats."
 msgstr "Visa statistik för cacheanvändning."
 
-#: src/pi_statistics.c:881
+#: src/pi_statistics.c:887
 msgid "Show bandwidth stats."
 msgstr "Visa statistik för bandbreddsanvändning."
 
-#: src/pi_statistics.c:882
+#: src/pi_statistics.c:888
 msgid "Show cpu usage stats."
 msgstr "Visa statistik för cpuanvändning."
 
-#: src/pi_statistics.c:884
+#: src/pi_statistics.c:890
 msgid "Show nmdc protocol stats. Experts only."
 msgstr "Visa nmdc protokollstatistik. Endast för nördar."
 
-#: src/pi_statistics.c:885
+#: src/pi_statistics.c:891
 msgid "Show memory usage stats."
 msgstr "Visa statistik för minnesanvändning."
 
-#: src/pi_statistics.c:886
+#: src/pi_statistics.c:892
 msgid "Show connection stats."
 msgstr "Visa statistik för anslutningar."
 
-#: src/pi_statistics.c:887
+#: src/pi_statistics.c:893
 msgid "Show uptime."
 msgstr "Visa upptid."
 
-#: src/pi_statistics.c:890
+#: src/pi_statistics.c:896
 msgid "Show iocp usage stats."
 msgstr "Visa statistik för iocpanvändning"
 
-#: src/pi_statistics.c:900
+#: src/pi_statistics.c:906
 msgid "This is the total size of memory allocated with sbrk by malloc (bytes)."
 msgstr ""
-
-#: src/pi_statistics.c:902
-#, fuzzy
-msgid "This is the number of chunks not in use."
-msgstr "Det här är antalet IP adresser som sparas."
-
-#: src/pi_statistics.c:904
-#, fuzzy
-msgid "This is the total number of chunks allocated with mmap."
-msgstr "Det här är antalet IP adresser som sparas."
-
-#: src/pi_statistics.c:906
-msgid "This is the total size of memory allocated with mmap (bytes)."
-msgstr ""
+"This is the total size of memory allocated with sbrk by malloc (bytes)."
 
 #: src/pi_statistics.c:908
+msgid "This is the number of chunks not in use."
+msgstr "This is the number of chunks not in use."
+
+#: src/pi_statistics.c:910
+msgid "This is the total number of chunks allocated with mmap."
+msgstr "This is the total number of chunks allocated with mmap."
+
+#: src/pi_statistics.c:912
+msgid "This is the total size of memory allocated with mmap (bytes)."
+msgstr "This is the total size of memory allocated with mmap (bytes)."
+
+#: src/pi_statistics.c:914
 msgid ""
 "This is the total size of memory occupied by chunks handed out by malloc."
 msgstr ""
+"This is the total size of memory occupied by chunks handed out by malloc."
 
-#: src/pi_statistics.c:910
+#: src/pi_statistics.c:916
 msgid "This is the total size of memory occupied by free (not in use) chunks."
-msgstr ""
+msgstr "This is the total size of memory occupied by free (not in use) chunks."
 
-#: src/pi_statistics.c:913
+#: src/pi_statistics.c:919
 msgid ""
 "This is the size of the top-most releasable chunk that normally borders the "
 "end of the heap."
 msgstr ""
+"This is the size of the top-most releasable chunk that normally borders the "
+"end of the heap."
 
 #: src/pi_chatlog.c:48
 msgid "No Chat History configured.\n"
@@ -2124,32 +2126,32 @@ msgstr "Inga hubblistor konfigurerade\n"
 #: src/pi_hublist.c:159
 #, c-format
 msgid "Hublist update ERROR: %s: socket: %s\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: socket: %s\n"
+msgstr "Fel vid uppdatering av hublista: %s: socket: %s\n"
 
 #: src/pi_hublist.c:169 src/pi_hublist.c:172
 #, c-format
 msgid "Hublist update ERROR: %s: connect: %s\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: connect: %s\n"
+msgstr "Fel vid uppdatering av hublista: %s: connect: %s\n"
 
 #: src/pi_hublist.c:207
 #, c-format
 msgid "Hublist update ERROR: %s: read: %s\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: read: %s\n"
+msgstr "Fel vid uppdatering av hublista: %s: read: %s\n"
 
 #: src/pi_hublist.c:219
 #, c-format
 msgid "Hublist update ERROR: %s: getsockname: %s\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: getsockname: %s\n"
+msgstr "Fel vid uppdatering av hublista: %s: getsockname: %s\n"
 
 #: src/pi_hublist.c:239
 #, c-format
 msgid "Hublist update ERROR: %s: illegal input %.*s\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: illegal input %.*s\n"
+msgstr "Fel vid uppdatering av hublista: %s: illegal input %.*s\n"
 
 #: src/pi_hublist.c:308
 #, c-format
 msgid "Hublist update ERROR: %s: send: %s\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: send: %s\n"
+msgstr "Fel vid uppdatering av hublista: %s: send: %s\n"
 
 #: src/pi_hublist.c:316
 #, c-format
@@ -2159,12 +2161,12 @@ msgstr "Registrerad på hublista %s\n"
 #: src/pi_hublist.c:354
 #, c-format
 msgid "Hublist update ERROR: %s: %s.\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: %s.\n"
+msgstr "Fel vid uppdatering av hublista: %s: %s.\n"
 
 #: src/pi_hublist.c:385
 #, c-format
 msgid "Hublist update ERROR: %s: Timed out.\n"
-msgstr "Fel vid uppdatering av hublista ERROR: %s: Timed out.\n"
+msgstr "Fel vid uppdatering av hublista: %s: Timed out.\n"
 
 #: src/pi_hublist.c:413
 msgid "Errors during hublist update:\n"
@@ -2194,7 +2196,7 @@ msgstr "Okänt inställningsvärde."
 
 #: src/pi_lua.c:231 src/pi_lua.c:308
 msgid "Element Type not supported."
-msgstr ""
+msgstr "Element Type not supported."
 
 #: src/pi_lua.c:287 src/pi_lua.c:826 src/pi_lua.c:855 src/pi_lua.c:895
 #: src/pi_lua.c:910 src/pi_lua.c:978
@@ -2207,9 +2209,9 @@ msgid "LUA ERROR ('%s'): %s\n"
 msgstr "LUA ERROR ('%s'): %s\n"
 
 #: src/pi_lua.c:1768
-#, fuzzy, c-format
+#, c-format
 msgid "LUA ERROR (Timer): %s\n"
-msgstr "LUA ERROR ('%s'): %s\n"
+msgstr "LUA ERROR (Timer): %s\n"
 
 #: src/pi_lua.c:1965
 msgid "No such LUA function."
@@ -2375,7 +2377,7 @@ msgstr "Trigger %s visar text %.*s (Använd %ld)\n"
 #: src/pi_trigger.c:984
 #, c-format
 msgid "Unknown trigger rule type %s."
-msgstr "Typen %s för trigger regel är okänd."
+msgstr "Typen %s för triggerregel är okänd."
 
 #: src/pi_trigger.c:1009
 #, c-format
@@ -2434,7 +2436,7 @@ msgid ""
 msgstr ""
 "Användning: %s <name> <id>\n"
 "   name: triggerns namn\n"
-"   id  : ID på regeln\n"
+"   id  : ID för regeln\n"
 
 #: src/pi_trigger.c:1053
 #, c-format
@@ -2571,7 +2573,7 @@ msgstr "Användare %s får inte längre ansluta från %s\n"
 #: src/pi_user.c:319
 #, c-format
 msgid "Could not find source restriction \"%s\" for nick %s\n"
-msgstr "Hittade inte källbegränsning \"%s\" för användare %s\n"
+msgstr "Hittade inte anslutningsbegränsning \"%s\" för användare %s\n"
 
 #: src/pi_user.c:342
 #, c-format
@@ -2641,6 +2643,8 @@ msgid ""
 "WARNING: resourcelimit for this process allows a absolute maximum of %lu "
 "users, currently %lu are configured.\n"
 msgstr ""
+"WARNING: resourcelimit for this process allows a absolute maximum of %lu "
+"users, currently %lu are configured.\n"
 
 #: src/pi_user.c:507
 #, c-format
@@ -2649,6 +2653,9 @@ msgid ""
 "effective maximum size of your hub to %u. Going over this limit may crash "
 "your hub.\n"
 msgstr ""
+"WARNING: You are using an Aquila version based on select(). This limits the "
+"effective maximum size of your hub to %u. Going over this limit may crash "
+"your hub.\n"
 
 #: src/pi_user.c:515
 msgid ""
@@ -2656,6 +2663,9 @@ msgid ""
 "performance of your hub with larger sizes. Please consider moving to kernel "
 "version 2.6 and a recent glibc.\n"
 msgstr ""
+"WARNING: You are using an Aquila version based on poll(). This limits the "
+"performance of your hub with larger sizes. Please consider moving to kernel "
+"version 2.6 and a recent glibc.\n"
 
 #: src/pi_user.c:522
 msgid ""
@@ -2786,30 +2796,27 @@ msgstr "Visa IP begränsningar för en användare."
 
 #: src/pi_user.c:604
 msgid "Total users in the hub"
-msgstr ""
+msgstr "Totalt antal användare i hubben"
 
 #: src/pi_user.c:605
 msgid "User peak"
-msgstr ""
+msgstr "Användarrekord"
 
 #: src/pi_user.c:606
 msgid "Users refused for slot/hub/ratio/user limits."
-msgstr ""
+msgstr "Nekade användare för slott/hub/ratio/user begränsningar."
 
 #: src/pi_user.c:607
-#, fuzzy
 msgid "Unregistered users."
-msgstr "Max antal oregistrerade användare."
+msgstr "Oregistrerade användare."
 
 #: src/pi_user.c:608
-#, fuzzy
 msgid "Registered users."
-msgstr "Max antal registrerade användare."
+msgstr "Registrerade användare."
 
 #: src/pi_user.c:609
-#, fuzzy
 msgid "Op users."
-msgstr "Skapar en ny användare."
+msgstr "Operatörer."
 
 #: src/pi_iplog.c:118
 msgid "No IP logging enabled.\n"
@@ -2832,11 +2839,8 @@ msgid "List iplogs."
 msgstr "Lista lagrade IP nummer."
 
 #: src/hub.c:87
-#, fuzzy
 msgid "Buffering Timeout"
-msgstr ""
-"\n"
-"Buffrande klienter:\n"
+msgstr "Buffering Timeout"
 
 #: src/hub.c:144 src/hub.c:579
 msgid "Connection closed."
@@ -2864,11 +2868,11 @@ msgstr "<%s> Återanslut inte så fort.|"
 #: src/hub.c:364 src/hub.c:373 src/hub.c:388 src/hub.c:400
 #, c-format
 msgid "<%s> This hub is too busy, please try again later.|"
-msgstr ""
+msgstr "<%s> This hub is too busy, please try again later.|"
 
 #: src/cap.c:28
 msgid "Default capabilities: chat, pmop, dl and search."
-msgstr "Standard rättigheter: chat, pmop, dl and search."
+msgstr "Standard rättigheter: chat, pmop, dl och search."
 
 #: src/cap.c:29
 msgid "Default REG capabilities: chat, search, pm, dl."
@@ -2976,15 +2980,15 @@ msgstr "Dessa användare behöver inte ha tagg för att komma in i hubben."
 
 #: src/cap.c:53
 msgid "This hides the share of the user for all excepts ops."
-msgstr "Detta döljer en användares utdelning för alla utom ops."
+msgstr "Detta döljer användarens utdelning för alla utom ops."
 
 #: src/cap.c:54
 msgid ""
 "This blocks everyone from downloading from this user. Only works for active "
 "users."
 msgstr ""
-"Detta hindrar alla att ladda från denna användaren. Fungerar enbart "
-"föraktiva användare."
+"Detta hindrar alla att ladda från denna användaren. Fungerar enbart för "
+"aktiva användare."
 
 #: src/cap.c:55
 msgid "Users with this right can post messages as large as they want."
@@ -3001,7 +3005,7 @@ msgid ""
 "listed for their nick in the userrestict list."
 msgstr ""
 "Användare med denna rättighet är begränsade så att de enbart kommer in i "
-"hubbenom deras IP adress överensstämmer med det som är lagrat i "
+"hubben om deras IP adress överensstämmer med det som är lagrat i "
 "'userrestrict' listan."
 
 #: src/cap.c:58
@@ -3014,12 +3018,11 @@ msgid ""
 "asearch checks)."
 msgstr ""
 "Användare med denna rättighet kan använda lokala ip-nummer (och undvika ctm "
-"och asearch kotroller)."
+"och asearch kontroller)."
 
 #: src/cap.c:60
-#, fuzzy
 msgid "Users with this right do not show up in the userlist."
-msgstr "Användare med denna rättighet kringgår sökbegränsningar."
+msgstr "Användare med denna rättighet syns inte i användarlistan."
 
 #: src/core_config.c:88
 msgid "Port on which the hub will listen."
@@ -3081,7 +3084,7 @@ msgstr "Max längd för en användares utdelningsfält."
 msgid ""
 "Kick the user if the tag is too long. If this is not set, the tag will be "
 "hidden."
-msgstr "Kicka användare med för lång tag, om detta inte anges döljs taggen."
+msgstr "Kicka användare med för lång tagg, om detta inte anges döljs taggen."
 
 #: src/core_config.c:105
 msgid "Redirection target."
@@ -3203,59 +3206,52 @@ msgid "This turns on or off the ndelay setting."
 msgstr "Det här sätter på eller stänger av inställningen för ndelay"
 
 #: src/core_config.c:137
-#, fuzzy
 msgid "Maximum number of outstanding data buffers per user."
-msgstr "Max antal försök för att ange lösenord"
+msgstr "Max antal innestående data buffertar per användare."
 
 #: src/core_config.c:138
 msgid "Set this to 0 to enable the send buffer."
-msgstr ""
+msgstr "Sätt detta till 0 för att sätta på 'send buffer'."
 
 #: src/core_config.c:162 src/core_config.c:164
 msgid "Total bytes send by hub since startup."
-msgstr ""
+msgstr "Totalt antal bytes som hubben skickat sedan uppstart."
 
 #: src/core_config.c:165
 msgid "Number of buffering users."
-msgstr ""
+msgstr "Antal buffrande användare."
 
 #: src/core_config.c:167
 msgid "Total of all data waiting to be written."
-msgstr ""
+msgstr "Total mängd data som väntar på att skrivas."
 
 #: src/core_config.c:171 src/core_config.c:178
-#, fuzzy
 msgid "Number of outstanding buffers."
-msgstr "Max antal försök för att ange lösenord"
+msgstr "Antal innestående buffertar."
 
 #: src/core_config.c:173
-#, fuzzy
 msgid "Peak number of outstanding buffers."
-msgstr "Max antal försök för att ange lösenord"
+msgstr "Högsta antal innestående buffertar."
 
 #: src/core_config.c:175
-#, fuzzy
 msgid "Absolute maximum of outstanding buffers allowed."
-msgstr "Max antal försök för att ange lösenord"
+msgstr "Max antal tillåtna innestående buffertar."
 
 #: src/core_config.c:180
-#, fuzzy
 msgid "Peak number of outstanding bytes."
-msgstr "Max antal försök för att ange lösenord"
+msgstr "Högsta antal innestående bytes."
 
 #: src/core_config.c:182
 msgid "Absolute maximum of outstanding bytes allowed."
-msgstr ""
+msgstr "Max antal tillåtna innestående bytes"
 
 #: src/core_config.c:184
-#, fuzzy
 msgid "Number of IOCP users."
-msgstr "Antal IP nummer att lagra."
+msgstr "Antal IOCP användare."
 
 #: src/core_config.c:186
-#, fuzzy
 msgid "Absolute maximum of outstanding bytes per user allowed."
-msgstr "Max antal försök för att ange lösenord"
+msgstr "Max antal tillåtna innestående bytes per användare."
 
 #~ msgid "None"
 #~ msgstr "Ingen"

@@ -317,8 +317,14 @@ int cpu_parse ()
     ret = RegQueryValueEx (hKey, CPU_NAME, NULL, &dwType, NULL, &dwSize);
     ret = RegQueryValueEx (hKey, CPU_NAME, NULL, &dwType, buf, &dwSize);
     if (ret != ERROR_SUCCESS) {
-      RegCloseKey (hKey);
-      return -1;
+      dwSize = 0;
+      buf[0] = 0;
+      ret = RegQueryValueEx (hKey, CPU_IDENTIFIER, NULL, &dwType, NULL, &dwSize);
+      ret = RegQueryValueEx (hKey, CPU_IDENTIFIER, NULL, &dwType, buf, &dwSize);
+      if (ret != ERROR_SUCCESS) {
+	RegCloseKey (hKey);
+	return -1;
+      }
     }
 
     c = buf;

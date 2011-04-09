@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([[Aquila]], [[0.1.11-pre1-beta39]], [[jove@users.berlios.de]], [aquila])
+AC_INIT([[Aquila]], [[0.1.11-pre1]], [[jove@users.berlios.de]], [aquila])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/banlistclient.c])
 AC_CONFIG_HEADER([config.h])
@@ -309,6 +309,38 @@ AQ_PLUGIN_OPTION([PLUGIN_TRIGGER],	[trigger],	[ON])
 AQ_PLUGIN_OPTION([PLUGIN_USER],		[user],		[ON])
 
 #
+## GEOIP Support
+#
+AC_ARG_WITH([geoip-prefix],
+            [AS_HELP_STRING([--with-geoip-prefix=DIR],
+                            [GeoIP files are in DIR])])
+AC_ARG_WITH([geoip-includes],
+            [AS_HELP_STRING([--with-geoip-includes=DIR],
+                            [GeoIP include file is in DIR])])
+AC_ARG_WITH([geoip-libraries],
+            [AS_HELP_STRING([--with-geoip-libraries=DIR],
+                            [GeoIP library file is in DIR])])
+
+
+if test "x$with_geoip_prefix" = x; then
+    geoip_search_path="$PATH"
+else
+    geoip_search_path="$with_geoip_prefix/bin"
+fi
+
+if test "x$with_geoip_includes" != x; then
+    GEOIP_INCLUDES="-I$with_geoip_includes"
+elif test "x$with_geoip_prefix" != x; then
+    GEOIP_INCLUDES="-I$with_geoip_prefix/include"
+fi
+
+if test "x$with_geoip_libraries" != x; then
+    GEOIP_LIBS="-L$with_geoip_libraries"
+elif test "x$with_geoip_prefix" != x; then
+    GEOIP_LIBS="-L$with_geoip_prefix/lib"
+fi
+
+#
 ## RRD Support
 #
 AC_ARG_WITH([rrd-prefix],
@@ -407,9 +439,11 @@ if test "${GEOIP}" = "" ;
 then
 	unset GEOIP;
 else
-	AC_CHECK_LIB([GeoIP], [GeoIP_id_by_ipnum], [GEOIPLIB=-lGeoIP], [unset GEOIP])
+	save_LIBS="$LIBS"
+	LIBS="$GEOIP_LIBS $LIBS"
+	AC_CHECK_LIB([GeoIP], [GeoIP_id_by_ipnum], [GEOIP_LIBS="$GEOIP_LIBS -lGeoIP"], [unset GEOIP])
+	LIBS="$save_LIBS"
 fi
-AC_SUBST(GEOIPLIB)
 
 #
 ## ZLib library for ZLINE/ZPIPE support
@@ -464,16 +498,38 @@ then
 	AC_CHECK_HEADERS([sys/poll.h])
 fi
 
+#
+##   GeoIP
+#
 if test "${GEOIP}" != "";
 then
+	save_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$GEOIP_INCLUDES $CPPFLAGS"
 	AC_CHECK_HEADERS([GeoIP.h])
+	CPPFLAGS="$safe_CPPFLAGS"
 fi
 
+if test x$GEOIP = x
+then
+	unset GEOIP_INCLUDES
+	unset GEOIP_LIBS
+fi
+AC_SUBST(GEOIP_INCLUDES)
+AC_SUBST(GEOIP_LIBS)
+
+
+#
+## ZLine
+#
 if test "${ZLINE}" != "";
 then
 	AC_CHECK_HEADERS([zlib.h], [], [unset ZLINE])
 fi
 
+
+#
+## RRD
+#
 if test "${PLUGIN_RRD}" != "";
 then
 	save_CPPFLAGS="$CPPFLAGS"
@@ -481,7 +537,12 @@ then
 	AC_CHECK_HEADERS([rrd.h], [], [AQ_PLUGIN_DISABLE([PLUGIN_RRD], [rrd])])
 	CPPFLAGS="$save_CPPFLAGS"
 fi
+AC_SUBST(RRD_INCLUDES)
 
+
+#
+## LUA
+#
 if test "${PLUGIN_LUA}" != "" ;
 then
 	# set the custom include paths
@@ -720,9 +781,9 @@ then
 			unset ALLOW_IOCP
 		fi
 	fi
-	if test x$USE_IOCP != x
+	if test x$USE_IOCP = x
 	then
-		echo "ERROR: you are building for Windows but your system does not support IOCP."
+		echo "ERROR: you are building for Windows but your system does not appear to support IOCP."
 	fi
 	# whatever we do, don't use these on Windows.
 	unset ALLOW_POLL

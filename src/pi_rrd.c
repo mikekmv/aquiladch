@@ -298,6 +298,9 @@ int pi_rrd_load (xml_node_t * base)
   if (!base)
     return PLUGIN_RETVAL_CONTINUE;
 
+  for (rrd = rrdlist.next; rrd != &rrdlist; rrd = rrdlist.next)
+    pi_rrd_delete (rrd);
+
   for (node = base->children; node; node = xml_next (node)) {
     if (!xml_child_get (node, "Name", XML_TYPE_STRING, &name))
       continue;
@@ -306,8 +309,6 @@ int pi_rrd_load (xml_node_t * base)
     if (!xml_child_get (node, "Period", XML_TYPE_ULONG, &period))
       continue;
 
-    for (rrd = rrdlist.next; rrd != &rrdlist; rrd = rrdlist.next)
-      pi_rrd_delete (rrd);
 
     rrd = pi_rrd_create (name, file, period);
     if (!rrd)

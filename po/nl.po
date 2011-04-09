@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-16 23:50+0200\n"
+"POT-Creation-Date: 2007-04-18 00:00+0200\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: src/builtincmd.c:127
 #, c-format
 msgid "Usage: %s <nick> <warning>"
-msgstr ""
+msgstr "Gebruik: %s <nick> <waarschuwing>"
 
 #: src/builtincmd.c:134 src/builtincmd.c:339 src/builtincmd.c:406
 #: src/builtincmd.c:460 src/builtincmd.c:506 src/builtincmd.c:712
@@ -342,11 +342,13 @@ msgid "Commands are preceded with ! or +\n"
 msgstr "Commandos worden voorafgegaan door ! of +\n"
 
 #: src/builtincmd.c:929
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "This hub is running %s Version %s. For more help, see %s\n"
-msgstr "<%s> Deze hub draait %s Versie %s (Uptime %s.%.3lu).|"
+msgstr ""
+"\n"
+"Deze hub draait %s Versie %s. Voor meer hulp, %s\n"
 
 #: src/builtincmd.c:949
 #, c-format
@@ -354,9 +356,9 @@ msgid "Command %s not found.\n"
 msgstr "Commando %s niet gevonden\n"
 
 #: src/builtincmd.c:964
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <name> <help>\n"
-msgstr "Gebruik: %s <nick> <groep>"
+msgstr "Gebruik: %s <naam> <help>\n"
 
 #: src/builtincmd.c:976
 #, c-format
@@ -366,22 +368,22 @@ msgstr ""
 #: src/builtincmd.c:978
 #, c-format
 msgid "Right %s created.\n"
-msgstr ""
+msgstr "Recht %s aangemaakt.\n"
 
 #: src/builtincmd.c:988
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <name>\n"
-msgstr "Gebruik: %s <naam>"
+msgstr "Gebruik: %s <naam>\n"
 
 #: src/builtincmd.c:993
-#, fuzzy, c-format
+#, c-format
 msgid "Right %s could not be found.\n"
-msgstr "Rapport kon niet worden verzonden, %s niet gevonden."
+msgstr "Recht %s niet gevonden.\n"
 
 #: src/builtincmd.c:995
 #, c-format
 msgid "Right %s destroyed.\n"
-msgstr ""
+msgstr "Recht %s verwijderd.\n"
 
 #: src/builtincmd.c:1013
 #, c-format
@@ -391,7 +393,7 @@ msgstr "Gebruik: %s <group> <rechten>...\n"
 #: src/builtincmd.c:1019
 #, c-format
 msgid "Group %s already exists.\n"
-msgstr ""
+msgstr "Groep %s bestaat al.\n"
 
 #: src/builtincmd.c:1034 src/builtincmd.c:1077 src/builtincmd.c:1873
 msgid "You are not allowed to assign rights.\n"
@@ -537,12 +539,12 @@ msgstr ""
 "groep:"
 
 #: src/builtincmd.c:1328
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "User %s with group %s.\n"
 "Current rights:"
 msgstr ""
-"Gebruiker %s aangemaakt met groep %s.\n"
+"Gebruiker %s met groep %s.\n"
 "Huidige rechten:"
 
 #: src/builtincmd.c:1335
@@ -595,9 +597,9 @@ msgid "User was registered by %s on %s"
 msgstr "Gebruiker was geregistreerd door %s op %s"
 
 #: src/builtincmd.c:1415
-#, fuzzy, c-format
+#, c-format
 msgid ", last login %s from %s"
-msgstr ", laatste login %s\n"
+msgstr ", laatste login %s van %s"
 
 #: src/builtincmd.c:1422
 msgid ", never logged in.\n"
@@ -616,11 +618,11 @@ msgstr "IP: %s Hubs: (%u, %u, %u), Slots %u\n"
 #: src/builtincmd.c:1451
 #, c-format
 msgid "IP location %s (%s)\n"
-msgstr ""
+msgstr "IP locatie %s (%s)\n"
 
 #: src/builtincmd.c:1454
 msgid "IP location unknown\n"
-msgstr ""
+msgstr "IP locatie onbekend\n"
 
 #: src/builtincmd.c:1469
 #, c-format
@@ -718,12 +720,12 @@ msgstr ""
 #: src/builtincmd.c:1677
 #, c-format
 msgid "Local is determined by variable %s and set to %s\n"
-msgstr ""
+msgstr "Locale wordt bepaald door variable %s = %s\n"
 
 #: src/builtincmd.c:1679
 #, c-format
 msgid "Locale is set to %s\n"
-msgstr ""
+msgstr "Locale is %s\n"
 
 #: src/builtincmd.c:1685
 #, c-format
@@ -731,6 +733,8 @@ msgid ""
 "WARNING: decimal point is '%c', this will cause problems in parsing tags. "
 "Set LC_NUMERIC to \"C\""
 msgstr ""
+"WAARSCHUWING: het decimale punt is '%c', dit gaat problemen veroorzaken in "
+"het parsen van tags. Zet LC_NUMERIC op \"C\""
 
 #: src/builtincmd.c:1767 src/builtincmd.c:1935
 #, c-format
@@ -768,12 +772,12 @@ msgstr "De maximale waarde voor dit element is %s\n"
 
 #: src/builtincmd.c:1939
 msgid "Configuration change denied.\n"
-msgstr ""
+msgstr "Configuratie verandering gewijgerd.\n"
 
 #: src/builtincmd.c:1997
-#, fuzzy, c-format
+#, c-format
 msgid "Sorry, unknown statistics value %s\n"
-msgstr "Sorry, ongekende configuratie waarde %s\n"
+msgstr "Sorry, ongekende statistiek %s\n"
 
 #: src/builtincmd.c:2020
 msgid "All Data saved."
@@ -914,11 +918,11 @@ msgstr "Stuur een privee bericht naar alle gebruikers."
 
 #: src/builtincmd.c:2104
 msgid "Create a custom right."
-msgstr ""
+msgstr "Voeg een eigen recht too."
 
 #: src/builtincmd.c:2105
 msgid "Destroy a custom right."
-msgstr ""
+msgstr "Verwijder een eigen recht."
 
 #: src/builtincmd.c:2107
 msgid "Add a user group."
@@ -976,11 +980,11 @@ msgstr "Zet configuratie waarden."
 
 #: src/builtincmd.c:2124
 msgid "Show raw statistics."
-msgstr ""
+msgstr "Toon de ruwe statistieken."
 
 #: src/builtincmd.c:2125
 msgid "Show statistics help."
-msgstr ""
+msgstr "Toon de ruwe statistieken help."
 
 #: src/builtincmd.c:2127
 msgid ""
@@ -1007,11 +1011,11 @@ msgstr "Laat de hub een willekeurig wachtwoord voor je aanmaken."
 
 #: src/builtincmd.c:2134
 msgid "Set the locale of the hub."
-msgstr ""
+msgstr "Zet de locale van de hub."
 
 #: src/builtincmd.c:2135
 msgid "Get the locale of the hub."
-msgstr ""
+msgstr "Toon de locale van de hub."
 
 #: src/builtincmd.c:2139 src/builtincmd.c:2141
 msgid "Let the hub CRASH!."
@@ -1031,10 +1035,12 @@ msgid ""
 "Your IP has been used to attack this hub. This means one of the other hubs "
 "you are in is being exploited."
 msgstr ""
+"Uw IP is gebruikt geweest bij het aanvallen van deze hub. Dit betekent dat "
+"een van de andere hubs waarin u zit wordt misbruikt."
 
 #: src/nmdc_protocol.c:98 src/nmdc_protocol.c:273
 msgid "CTM Exploit."
-msgstr ""
+msgstr "CTM Exploit."
 
 #: src/nmdc_protocol.c:116
 #, c-format
@@ -1052,7 +1058,7 @@ msgstr "Protocol overtreding: Slechte key."
 
 #: src/nmdc_protocol.c:317 src/nmdc_protocol.c:379
 msgid "Nickname refused due to unacceptable characters."
-msgstr ""
+msgstr "Nick gewijgerd door onaanvaardbare characters."
 
 #: src/nmdc_protocol.c:334 src/nmdc_protocol.c:404 src/nmdc_protocol.c:660
 msgid "Your nickname is already in use."
@@ -1388,12 +1394,16 @@ msgid ""
 "Period of downloads. This controls how often a user can initiate a download. "
 "Keep this low."
 msgstr ""
+"Periode van de downloads. Dit controleerd hoe vaak een gebruiker een "
+"download mag beginnen. Hou dit laag."
 
 #: src/nmdc_interface.c:1237
 msgid ""
 "Burst of downloads. This controls how many downloads a user can 'save up'. "
 "Keep this reasonable."
 msgstr ""
+"Krediet van de downloads. Dit controleerd hoe veel downloads een gebruiker "
+"mag opsparen. Hou dit redelijk."
 
 #: src/nmdc_interface.c:1240
 msgid ""
@@ -1489,35 +1499,37 @@ msgstr ""
 
 #: src/nmdc_interface.c:1362
 msgid "Allow multiple users from the same IP address."
-msgstr ""
+msgstr "Laat verschillende gebruikers van hetzelfde IP adres toe."
 
 #: src/nmdc_interface.c:1364
 msgid "Maximum length of a chat message."
-msgstr ""
+msgstr "Maximum lengte van een chat message."
 
 #: src/nmdc_interface.c:1366
 msgid "Maximum length of a search message."
-msgstr ""
+msgstr "Maximum lengte van een search message."
 
 #: src/nmdc_interface.c:1368
 msgid "Maximum length of a search result"
-msgstr ""
+msgstr "Maximum lengte van een search resultaat."
 
 #: src/nmdc_interface.c:1371
 msgid "Minimum time before a re-search is considered valid."
-msgstr ""
+msgstr "Minimum tijd voor een re-search is toegelaten."
 
 #: src/nmdc_interface.c:1373
 msgid "Period during which a search is considered a re-search."
-msgstr ""
+msgstr "Tijd waarin een search een research kan zijn."
 
 #: src/nmdc_interface.c:1375
 msgid "Maximum number of searches cached."
-msgstr ""
+msgstr "Maximum aantal gecachte searches."
 
 #: src/nmdc_interface.c:1378
 msgid "This message is send to all banned users when they try to join."
 msgstr ""
+"Deze message wordt naar alle gebande begruikers gestuurd als die proberen te "
+"joinen."
 
 #: src/nmdc_interface.c:1382
 msgid ""
@@ -1536,9 +1548,11 @@ msgid "You have been banned by %s because: %.*s\n"
 msgstr ""
 
 #: src/plugin.c:444
-#, fuzzy, c-format
+#, c-format
 msgid "Found nick ban by %s for %s (IP %s) for %lus because: %.*s"
-msgstr "Gebruiker %2$s (IP %3$s) verbannen door %1$s voor %4$s: %6$.*5$s"
+msgstr ""
+"Nick ban gevonden voor %2$s (IP %3$s) verbannen door %1$s voor %4$lus: %6$.*5"
+"$s"
 
 #: src/plugin.c:448
 #, c-format
@@ -1546,7 +1560,7 @@ msgid "Found nick ban by %s for %s for %lus because: %.*s"
 msgstr "Gebruiker %2$s verbannen door %1$s voor %3$lus: %5$.*4$s"
 
 #: src/plugin.c:453
-#, fuzzy, c-format
+#, c-format
 msgid "Found permanent nick ban by %s for %s (IP %s) because: %.*s"
 msgstr "Nick %2$s (IP %3$s) permanent verbannen door %1$s: %5$.*4$s"
 
@@ -1556,9 +1570,9 @@ msgid "Found permanent nick ban by %s for %s because: %.*s"
 msgstr "Nick %2$s permanent verbannen door %1$s: %4$.*3$s"
 
 #: src/plugin.c:476 src/plugin.c:508
-#, fuzzy, c-format
+#, c-format
 msgid "Found IP ban by %s for %s (%s) for %lus because: %.*s"
-msgstr "Tijdelijke IP Verbanning voor %s (ip %s)voor %s: %.*s"
+msgstr "Tijdelijke IP ban door %s voor %s (ip %s) voor %lus: %.*s"
 
 #: src/plugin.c:480 src/plugin.c:512
 #, c-format
@@ -1566,9 +1580,9 @@ msgid "Found IP ban by %s for %s for %lus because: %.*s"
 msgstr ""
 
 #: src/plugin.c:486 src/plugin.c:518
-#, fuzzy, c-format
+#, c-format
 msgid "Found permanent ban by %s for %s (%s) because: %.*s"
-msgstr "Verbinging met gebruiker %s (ip %s ) werd verbroken omdat: %.*s"
+msgstr "Permanente ban door %s voor %s (ip %s) omdat: %.*s"
 
 #: src/plugin.c:489 src/plugin.c:521
 #, c-format
@@ -1592,9 +1606,9 @@ msgid "Error saving configuration to %s: %s\n"
 msgstr ""
 
 #: src/plugin.c:1140
-#, fuzzy, c-format
+#, c-format
 msgid "Error loading configuration from %s: %s\n"
-msgstr "Sorry, ongekende configuratie waarde %s\n"
+msgstr "Error bij het laden van de configuratie van %s: %s\n"
 
 #: src/utils.c:98
 #, c-format
@@ -1629,131 +1643,131 @@ msgstr ""
 msgid "BogoMIPS: %.*s\n"
 msgstr ""
 
-#: src/pi_statistics.c:234 src/pi_statistics.c:410
+#: src/pi_statistics.c:234 src/pi_statistics.c:416
 #, c-format
 msgid ""
 "\n"
 "Cpu Statistics at %s"
 msgstr ""
 
-#: src/pi_statistics.c:237 src/pi_statistics.c:413
+#: src/pi_statistics.c:237 src/pi_statistics.c:419
 #, c-format
 msgid " last hour %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:241 src/pi_statistics.c:417
+#: src/pi_statistics.c:241 src/pi_statistics.c:423
 #, c-format
 msgid " last minute %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:245 src/pi_statistics.c:421
+#: src/pi_statistics.c:245 src/pi_statistics.c:427
 #, c-format
 msgid ""
 " last 5 seconds %2.2f%%\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:249 src/pi_statistics.c:425
+#: src/pi_statistics.c:249 src/pi_statistics.c:431
 #, c-format
 msgid "Since boot %2.2f%%\n"
 msgstr ""
 
-#: src/pi_statistics.c:530
+#: src/pi_statistics.c:536
 #, c-format
 msgid "Total traffic since boot: In %lu, Out %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:539
+#: src/pi_statistics.c:545
 #, c-format
 msgid "In last %lu ms: In %f kbps, Out %f kbps\n"
 msgstr ""
 
-#: src/pi_statistics.c:550
+#: src/pi_statistics.c:556
 #, c-format
 msgid "Average over %d seconds: In %f kbps, Out %f kbps\n"
 msgstr ""
 
-#: src/pi_statistics.c:592
+#: src/pi_statistics.c:598
 #, c-format
 msgid "Total Count: %lu, Total Memory: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:594
+#: src/pi_statistics.c:600
 #, c-format
 msgid ""
 "ZPipe users: %lu, ZLine users: %lu\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:596
+#: src/pi_statistics.c:602
 #, c-format
 msgid "Nicklist cache (last updated %lu seconds ago).\n"
 msgstr ""
 
-#: src/pi_statistics.c:599
+#: src/pi_statistics.c:605
 #, c-format
 msgid "  Nicklist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"
 msgstr ""
 
-#: src/pi_statistics.c:602
+#: src/pi_statistics.c:608
 #, c-format
 msgid "  Infolist length %lu (zpipe %lu, zline %lu) [Estimate %lu, Size %lu]\n"
 msgstr ""
 
-#: src/pi_statistics.c:606
+#: src/pi_statistics.c:612
 #, c-format
 msgid "  Nicklist length %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:607
+#: src/pi_statistics.c:613
 #, c-format
 msgid "  Infolist length %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:617
+#: src/pi_statistics.c:623
 msgid "Warning: DEBUG build, bandwidth measurements inaccurate.\n"
 msgstr ""
 
-#: src/pi_statistics.c:635
+#: src/pi_statistics.c:641
 #, c-format
 msgid "Allocated size: %llu (max: %llu)\n"
 msgstr ""
 
-#: src/pi_statistics.c:637
+#: src/pi_statistics.c:643
 msgid "Allocated size: %I64u (max: %I64u)\n"
 msgstr ""
 
-#: src/pi_statistics.c:639
+#: src/pi_statistics.c:645
 #, c-format
 msgid "Allocated buffers: %lu (max %lu)\n"
 msgstr ""
 
-#: src/pi_statistics.c:640
+#: src/pi_statistics.c:646
 #, c-format
 msgid " Users having buffered output: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:646
+#: src/pi_statistics.c:652
 msgid ""
 "\n"
 "Buffering clients:\n"
 msgstr ""
 
-#: src/pi_statistics.c:653
+#: src/pi_statistics.c:659
 #, c-format
 msgid "Real user %s without socket?\n"
 msgstr ""
 
-#: src/pi_statistics.c:666
+#: src/pi_statistics.c:672
 #, c-format
 msgid " %s (online: %s), %lu buffers, total %lu, offset %lu, credit %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:677
+#: src/pi_statistics.c:683
 msgid " None.\n"
 msgstr ""
 
-#: src/pi_statistics.c:681
+#: src/pi_statistics.c:687
 #, c-format
 msgid ""
 "\n"
@@ -1764,11 +1778,11 @@ msgid ""
 " Average bytes to write %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:693
+#: src/pi_statistics.c:699
 msgid "Warning: DEBUG build, cpu measurements higher as normal.\n"
 msgstr ""
 
-#: src/pi_statistics.c:738
+#: src/pi_statistics.c:744
 #, c-format
 msgid ""
 "Connection statistics:\n"
@@ -1777,138 +1791,138 @@ msgid ""
 "    Blocked connection attempts: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:754
+#: src/pi_statistics.c:760
 msgid "Memory Usage:\n"
 msgstr ""
 
-#: src/pi_statistics.c:762
+#: src/pi_statistics.c:768
 msgid "GNU LibC memory statistics:\n"
 msgstr ""
 
-#: src/pi_statistics.c:763
+#: src/pi_statistics.c:769
 #, c-format
 msgid " Total heap     : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:764
+#: src/pi_statistics.c:770
 #, c-format
 msgid " # Free chunks    : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:765
+#: src/pi_statistics.c:771
 #, c-format
 msgid " # Fastbin blocks : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:766
+#: src/pi_statistics.c:772
 #, c-format
 msgid " Total alloced space : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:768
+#: src/pi_statistics.c:774
 #, c-format
 msgid " Total free space    : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:770
+#: src/pi_statistics.c:776
 #, c-format
 msgid " keepcost : %lu (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:771
+#: src/pi_statistics.c:777
 #, c-format
 msgid " # MMAP regions : %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:772
+#: src/pi_statistics.c:778
 #, c-format
 msgid ""
 " MMAP space     : %lu (%s)\n"
 "\n"
 msgstr ""
 
-#: src/pi_statistics.c:776
+#: src/pi_statistics.c:782
 #, c-format
 msgid "%s stats:\n"
 msgstr ""
 
-#: src/pi_statistics.c:777
+#: src/pi_statistics.c:783
 #, c-format
 msgid " Buffering memory: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:778
+#: src/pi_statistics.c:784
 #, c-format
 msgid " Cachelist size: %lu\n"
 msgstr ""
 
-#: src/pi_statistics.c:789
+#: src/pi_statistics.c:795
 #, c-format
 msgid "Booted at %.*s, up %lu seconds (%s)\n"
 msgstr ""
 
-#: src/pi_statistics.c:879
+#: src/pi_statistics.c:885
 msgid "Show buffer stats."
 msgstr ""
 
-#: src/pi_statistics.c:880
+#: src/pi_statistics.c:886
 msgid "Show cache stats."
 msgstr ""
 
-#: src/pi_statistics.c:881
+#: src/pi_statistics.c:887
 msgid "Show bandwidth stats."
 msgstr ""
 
-#: src/pi_statistics.c:882
+#: src/pi_statistics.c:888
 msgid "Show cpu usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:884
+#: src/pi_statistics.c:890
 msgid "Show nmdc protocol stats. Experts only."
 msgstr ""
 
-#: src/pi_statistics.c:885
+#: src/pi_statistics.c:891
 msgid "Show memory usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:886
+#: src/pi_statistics.c:892
 msgid "Show connection stats."
 msgstr ""
 
-#: src/pi_statistics.c:887
+#: src/pi_statistics.c:893
 msgid "Show uptime."
 msgstr ""
 
-#: src/pi_statistics.c:890
+#: src/pi_statistics.c:896
 msgid "Show iocp usage stats."
 msgstr ""
 
-#: src/pi_statistics.c:900
+#: src/pi_statistics.c:906
 msgid "This is the total size of memory allocated with sbrk by malloc (bytes)."
 msgstr ""
 
-#: src/pi_statistics.c:902
+#: src/pi_statistics.c:908
 msgid "This is the number of chunks not in use."
 msgstr ""
 
-#: src/pi_statistics.c:904
+#: src/pi_statistics.c:910
 msgid "This is the total number of chunks allocated with mmap."
 msgstr ""
 
-#: src/pi_statistics.c:906
+#: src/pi_statistics.c:912
 msgid "This is the total size of memory allocated with mmap (bytes)."
 msgstr ""
 
-#: src/pi_statistics.c:908
+#: src/pi_statistics.c:914
 msgid ""
 "This is the total size of memory occupied by chunks handed out by malloc."
 msgstr ""
 
-#: src/pi_statistics.c:910
+#: src/pi_statistics.c:916
 msgid "This is the total size of memory occupied by free (not in use) chunks."
 msgstr ""
 
-#: src/pi_statistics.c:913
+#: src/pi_statistics.c:919
 msgid ""
 "This is the size of the top-most releasable chunk that normally borders the "
 "end of the heap."
@@ -1955,10 +1969,10 @@ msgstr ""
 msgid "Chatroom %s already exists."
 msgstr ""
 
+#
 #: src/pi_chatroom.c:334
-#, fuzzy
 msgid "Spaces are not allowed in chatroom names."
-msgstr "U hebt geen toestemming om te praten."
+msgstr "Spatie is niet toegelaten in een chatroom naam."
 
 #: src/pi_chatroom.c:343
 msgid "Room is private.\n"
@@ -2666,10 +2680,10 @@ msgstr ""
 msgid "Registered users."
 msgstr ""
 
+#
 #: src/pi_user.c:609
-#, fuzzy
 msgid "Op users."
-msgstr "Voeg een gebruikers registratie toe."
+msgstr "Op gebruikers."
 
 #: src/pi_iplog.c:118
 msgid "No IP logging enabled.\n"
