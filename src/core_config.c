@@ -1,5 +1,6 @@
 /*                                                                                                                                    
- *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
+ *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
+ *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -54,7 +55,9 @@ int core_config_init ()
   config.Hostname        = strdup (DEFAULT_ADDRESS);
   config.HubSecurityNick = strdup (DEFAULT_HUBSECURITY_NICK);
   config.HubSecurityDesc = strdup (DEFAULT_HUBSECURITY_DESCRIPTION);
-
+  config.HubAddvertise = strdup (DEFAULT_HUBADDVERTISE);
+  config.HubAddStatus = DEFAULT_HUBADD_STATUS;
+  config.HubSupportMsg = DEFAULT_HUB_SUPPORT_MSG;
   config.MaxDescriptionLength = DEFAULT_MAXDESCRIPTIONLENGTH;
   config.MaxTagLength         = DEFAULT_MAXTAGLENGTH;
   config.MaxSpeedLength       = DEFAULT_MAXSPEEDLENGTH;
@@ -96,7 +99,9 @@ int core_config_init ()
   config_register ("HubOwner",           CFG_ELEM_STRING, &config.HubOwner,        _("Owner of the hub."));
   config_register ("HubSecurity.Nick",   CFG_ELEM_STRING, &config.HubSecurityNick, _("Name of the Hub Security bot."));
   config_register ("HubSecurity.Desc",   CFG_ELEM_STRING, &config.HubSecurityDesc, _("Description of the Hub Security bot."));
-
+  config_register ("HubAddvertise",	CFG_ELEM_STRING, &config.HubAddvertise, _("Hosting/Hub Addvertise Message."));
+  config_register ("HubAdd.Status",	CFG_ELEM_UINT, &config.HubAddStatus, _("Hosting/Hub Addvertise Message On/Off Value Here 1 for on 0 for off."));
+  config_register ("HubSupportMsg",	CFG_ELEM_UINT, &config.HubSupportMsg, _("Aquila Hub Support Message During Login 1 For On 0 For Off."));
   config_register ("tag.MaxDescLength",    CFG_ELEM_UINT,   &config.MaxDescriptionLength, _("Maximum Length of the users description field."));
   config_register ("tag.MaxTagLength",     CFG_ELEM_UINT,   &config.MaxTagLength,    _("Maximum length of the users tag field."));
   config_register ("tag.MaxSpeedLength",   CFG_ELEM_UINT,   &config.MaxSpeedLength,  _("Maximum length of the users speed field."));

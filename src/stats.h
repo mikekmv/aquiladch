@@ -1,5 +1,6 @@
 /*                                                                                                                                    
- *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
+ *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
+ *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *  
- */
+ */                                                                                                                                 
 
 #ifndef _STATS_H_
 #define _STATS_H_

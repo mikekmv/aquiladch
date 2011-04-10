@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2007-04-24 17:55+0200\n"
+"POT-Creation-Date: 2011-01-16 12:42-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -962,219 +962,243 @@ msgstr ""
 msgid "Command not found: %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:96 src/nmdc_protocol.c:271
+#: src/nmdc_protocol.c:100 src/nmdc_protocol.c:282
 msgid ""
 "Your IP has been used to attack this hub. This means one of the other hubs "
 "you are in is being exploited."
 msgstr ""
 
-#: src/nmdc_protocol.c:98 src/nmdc_protocol.c:273
+#: src/nmdc_protocol.c:102 src/nmdc_protocol.c:284
 msgid "CTM Exploit."
 msgstr ""
 
-#: src/nmdc_protocol.c:116
+#: src/nmdc_protocol.c:120
 #, c-format
-msgid "<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"
+msgid "<[-C-']['-]> This hub is running %s Version %s .|"
 msgstr ""
 
-#: src/nmdc_protocol.c:121 src/nmdc_protocol.c:389
+#: src/nmdc_protocol.c:122
+#, c-format
+msgid "<[-C-']['-]> This %s Hub Uses CrAsherTeam Hub Mod v1.0 |"
+msgstr ""
+
+#: src/nmdc_protocol.c:123
+#, c-format
+msgid "<%s> Current Hub Uptime Is: %s |"
+msgstr ""
+
+#: src/nmdc_protocol.c:124
+#, c-format
+msgid "<%s> Your Login Was Logged At: %s |"
+msgstr ""
+
+#: src/nmdc_protocol.c:127
+#, c-format
+msgid "<%s> %s |"
+msgstr ""
+
+#: src/nmdc_protocol.c:132 src/nmdc_protocol.c:400
 #, c-format
 msgid "<%s> Do not reconnect too fast, time remaining: %s|"
 msgstr ""
 
-#: src/nmdc_protocol.c:260
+#: src/nmdc_protocol.c:271
 msgid "Protocol violation: Bad key."
 msgstr ""
 
-#: src/nmdc_protocol.c:317 src/nmdc_protocol.c:379
+#: src/nmdc_protocol.c:328 src/nmdc_protocol.c:390
 msgid "Nickname refused due to unacceptable characters."
 msgstr ""
 
-#: src/nmdc_protocol.c:334 src/nmdc_protocol.c:405 src/nmdc_protocol.c:661
+#: src/nmdc_protocol.c:345 src/nmdc_protocol.c:416 src/nmdc_protocol.c:672
 msgid "Your nickname is already in use."
 msgstr ""
 
-#: src/nmdc_protocol.c:361
+#: src/nmdc_protocol.c:372
 msgid "Your account priviliges will not be awarded until you set a password."
 msgstr ""
 
-#: src/nmdc_protocol.c:413 src/nmdc_protocol.c:562 src/nmdc_protocol.c:669
+#: src/nmdc_protocol.c:424 src/nmdc_protocol.c:573 src/nmdc_protocol.c:680
 msgid "Another instance of you is connecting, bye!"
 msgstr ""
 
-#: src/nmdc_protocol.c:415 src/nmdc_protocol.c:564 src/nmdc_protocol.c:671
-msgid "Reconnecting."
+#: src/nmdc_protocol.c:426
+msgid "Reconnecting...."
 msgstr ""
 
-#: src/nmdc_protocol.c:426
+#: src/nmdc_protocol.c:437
 msgid ""
 "Cloning is not allowed. Another user is already logged in from this IP "
 "address."
 msgstr ""
 
-#: src/nmdc_protocol.c:434
+#: src/nmdc_protocol.c:445
 msgid "Do not reconnect too fast."
 msgstr ""
 
-#: src/nmdc_protocol.c:448 src/nmdc_protocol.c:472 src/nmdc_protocol.c:610
+#: src/nmdc_protocol.c:459 src/nmdc_protocol.c:483 src/nmdc_protocol.c:621
 #, c-format
 msgid "<%s> You have been banned by %s because: "
 msgstr ""
 
-#: src/nmdc_protocol.c:452 src/nmdc_protocol.c:476 src/nmdc_protocol.c:614
+#: src/nmdc_protocol.c:463 src/nmdc_protocol.c:487 src/nmdc_protocol.c:625
 #, c-format
 msgid "<%s> Time remaining %s|"
 msgstr ""
 
-#: src/nmdc_protocol.c:459 src/nmdc_protocol.c:483 src/nmdc_protocol.c:621
+#: src/nmdc_protocol.c:470 src/nmdc_protocol.c:494 src/nmdc_protocol.c:632
 msgid "Banned."
 msgstr ""
 
-#: src/nmdc_protocol.c:537 src/nmdc_protocol.c:540
+#: src/nmdc_protocol.c:548 src/nmdc_protocol.c:551
 msgid "Bad password."
 msgstr ""
 
-#: src/nmdc_protocol.c:546
+#: src/nmdc_protocol.c:557
 msgid "Password retry overflow."
 msgstr ""
 
-#: src/nmdc_protocol.c:593
+#: src/nmdc_protocol.c:575 src/nmdc_protocol.c:682
+msgid "Reconnecting."
+msgstr ""
+
+#: src/nmdc_protocol.c:604
 msgid ""
 "Your account priviliges will not be awarded until you set a password. Use !"
 "passwd or !pwgen."
 msgstr ""
 
-#: src/nmdc_protocol.c:689 src/nmdc_protocol.c:954
+#: src/nmdc_protocol.c:700 src/nmdc_protocol.c:965
 msgid "WARNING: You should use a client that uses tags!"
 msgstr ""
 
-#: src/nmdc_protocol.c:695 src/nmdc_protocol.c:963
+#: src/nmdc_protocol.c:706 src/nmdc_protocol.c:974
 msgid "This hub requires tags, please upgrade to a client that supports them."
 msgstr ""
 
-#: src/nmdc_protocol.c:704
+#: src/nmdc_protocol.c:715
 msgid "Your login was refused, your MyINFO seems corrupt."
 msgstr ""
 
-#: src/nmdc_protocol.c:729 src/nmdc_protocol.c:824
-msgid "Your login was refused."
+#: src/nmdc_protocol.c:740 src/nmdc_protocol.c:835
+msgid "This Is A Private Network. Login Request Denied"
 msgstr ""
 
-#: src/nmdc_protocol.c:849
+#: src/nmdc_protocol.c:860
 msgid "You are not allowed to chat."
 msgstr ""
 
-#: src/nmdc_protocol.c:855
+#: src/nmdc_protocol.c:866
 msgid "Think before you talk and don't spam."
 msgstr ""
 
-#: src/nmdc_protocol.c:863
+#: src/nmdc_protocol.c:874
 msgid "Your chat message was too long."
 msgstr ""
 
-#: src/nmdc_protocol.c:972
+#: src/nmdc_protocol.c:983
 msgid "Broken MyINFO, get lost."
 msgstr ""
 
-#: src/nmdc_protocol.c:987
+#: src/nmdc_protocol.c:998
 msgid "Sorry, you no longer satisfy the necessary requirements for this hub."
 msgstr ""
 
-#: src/nmdc_protocol.c:1077
+#: src/nmdc_protocol.c:1088
 #, c-format
 msgid "Active searches are limited to %u every %u seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1080
+#: src/nmdc_protocol.c:1091
 #, c-format
 msgid "Passive searches are limited to %u every %u seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1090
+#: src/nmdc_protocol.c:1101
 msgid "Your search message is too long."
 msgstr ""
 
-#: src/nmdc_protocol.c:1107
+#: src/nmdc_protocol.c:1118
 msgid "You claim to be active. Passive search DENIED."
 msgstr ""
 
-#: src/nmdc_protocol.c:1123
+#: src/nmdc_protocol.c:1134
 msgid "You claim to be passive. Active search DENIED."
 msgstr ""
 
-#: src/nmdc_protocol.c:1142
+#: src/nmdc_protocol.c:1153
 #, c-format
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1159
+#: src/nmdc_protocol.c:1170
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr ""
 
-#: src/nmdc_protocol.c:1341 src/nmdc_protocol.c:1420
+#: src/nmdc_protocol.c:1352 src/nmdc_protocol.c:1431
 msgid "You are not allowed to download."
 msgstr ""
 
-#: src/nmdc_protocol.c:1368 src/nmdc_protocol.c:1460
+#: src/nmdc_protocol.c:1379 src/nmdc_protocol.c:1471
 #, c-format
 msgid "You cannot download from %s."
 msgstr ""
 
-#: src/nmdc_protocol.c:1389
+#: src/nmdc_protocol.c:1400
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1491
+#: src/nmdc_protocol.c:1502
 msgid "You are not allowed to send private messages."
 msgstr ""
 
-#: src/nmdc_protocol.c:1500
+#: src/nmdc_protocol.c:1511
 msgid "Don't send private messages so fast."
 msgstr ""
 
-#: src/nmdc_protocol.c:1530
+#: src/nmdc_protocol.c:1541
 msgid "Bad From: nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1532
+#: src/nmdc_protocol.c:1543
 msgid "Attempted PM faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1551
+#: src/nmdc_protocol.c:1562
 msgid "Bad display nick. No faking."
 msgstr ""
 
-#: src/nmdc_protocol.c:1553
+#: src/nmdc_protocol.c:1564
 msgid "Attempted display nick faking"
 msgstr ""
 
-#: src/nmdc_protocol.c:1567
+#: src/nmdc_protocol.c:1578
 msgid "Sorry, you can only send private messages to operators."
 msgstr ""
 
-#: src/nmdc_protocol.c:1600
+#: src/nmdc_protocol.c:1611
 msgid "You are not allowed to redirect users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1680 src/nmdc_protocol.c:1738
+#: src/nmdc_protocol.c:1691 src/nmdc_protocol.c:1749
 msgid "Redirect refused.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1709
+#: src/nmdc_protocol.c:1720
 msgid "You are not allowed to kick users."
 msgstr ""
 
-#: src/nmdc_protocol.c:1733
+#: src/nmdc_protocol.c:1744
 msgid "You were kicked."
 msgstr ""
 
-#: src/nmdc_protocol.c:1759
+#: src/nmdc_protocol.c:1770
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr ""
 
-#: src/nmdc_protocol.c:1825
+#: src/nmdc_protocol.c:1836
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr ""
@@ -2304,7 +2328,11 @@ msgid "Sorry, your login is not accepted from this IP (%s)"
 msgstr ""
 
 #: src/pi_user.c:220
-msgid "Sorry, the hub is full. It cannot accept more users from your class.\n"
+msgid ""
+"\n"
+"==============================================\n"
+"Most Likely You Dont Have Right To Access This Hub.\n"
+"==============================================\n"
 msgstr ""
 
 #: src/pi_user.c:277 src/pi_user.c:308
@@ -2610,12 +2638,21 @@ msgstr ""
 
 #: src/hub.c:366
 #, c-format
-msgid "<%s> Don't reconnect so fast.|"
+msgid ""
+"<%s> \n"
+"=============================\n"
+"Private Network Reconecting Will Not Help\n"
+"=============================\n"
+".|"
 msgstr ""
 
 #: src/hub.c:376 src/hub.c:385 src/hub.c:400 src/hub.c:412
 #, c-format
-msgid "<%s> This hub is too busy, please try again later.|"
+msgid ""
+"<%s> \n"
+"==============================================\n"
+"There Is Nobody To Take Your Call Please Try Again Later :P\n"
+"==============================================|"
 msgstr ""
 
 #: src/cap.c:28
@@ -2757,221 +2794,229 @@ msgstr ""
 msgid "Users with this right do not show up in the userlist."
 msgstr ""
 
-#: src/core_config.c:90
+#: src/core_config.c:91
 msgid "Port on which the hub will listen."
 msgstr ""
 
-#: src/core_config.c:91
+#: src/core_config.c:92
 msgid "IP on which the hub will listen, set to 0.0.0.0 for all."
 msgstr ""
 
-#: src/core_config.c:92
+#: src/core_config.c:93
 msgid "Extra NMDC ports to listen on."
 msgstr ""
 
-#: src/core_config.c:93
+#: src/core_config.c:94
 msgid "A hostname (or IP address) where your machine will be reachable."
 msgstr ""
 
-#: src/core_config.c:94
+#: src/core_config.c:95
 msgid "Name of the hub"
 msgstr ""
 
-#: src/core_config.c:95
+#: src/core_config.c:96
 msgid "Description of the hub."
 msgstr ""
 
-#: src/core_config.c:96
+#: src/core_config.c:97
 msgid "Owner of the hub."
 msgstr ""
 
-#: src/core_config.c:97
+#: src/core_config.c:98
 msgid "Name of the Hub Security bot."
 msgstr ""
 
-#: src/core_config.c:98
+#: src/core_config.c:99
 msgid "Description of the Hub Security bot."
 msgstr ""
 
 #: src/core_config.c:100
-msgid "Maximum Length of the users description field."
+msgid "Hosting/Hub Addvertise Message."
 msgstr ""
 
 #: src/core_config.c:101
-msgid "Maximum length of the users tag field."
+msgid "Hosting/Hub Addvertise Message On/Off Value Here 1 for on 0 for off."
 msgstr ""
 
 #: src/core_config.c:102
-msgid "Maximum length of the users speed field."
+msgid "Maximum Length of the users description field."
 msgstr ""
 
 #: src/core_config.c:103
-msgid "Maximum length of the users email address field."
+msgid "Maximum length of the users tag field."
 msgstr ""
 
 #: src/core_config.c:104
-msgid "Maximum length of the users sharesize field."
+msgid "Maximum length of the users speed field."
 msgstr ""
 
 #: src/core_config.c:105
+msgid "Maximum length of the users email address field."
+msgstr ""
+
+#: src/core_config.c:106
+msgid "Maximum length of the users sharesize field."
+msgstr ""
+
+#: src/core_config.c:107
 msgid ""
 "Kick the user if the tag is too long. If this is not set, the tag will be "
 "hidden."
 msgstr ""
 
-#: src/core_config.c:107
+#: src/core_config.c:109
 msgid "Redirection target."
 msgstr ""
 
-#: src/core_config.c:108
+#: src/core_config.c:110
 msgid "Redirection target in case of kick or ban."
 msgstr ""
 
-#: src/core_config.c:109
+#: src/core_config.c:111
 msgid "Length of automatic temporary ban after a kick."
 msgstr ""
 
-#: src/core_config.c:111
+#: src/core_config.c:113
 msgid "Maximum number of retries a user is allowed for his password."
 msgstr ""
 
-#: src/core_config.c:112
+#: src/core_config.c:114
 msgid "Length of automatic ban on too many retries (in seconds)."
 msgstr ""
 
-#: src/core_config.c:114
+#: src/core_config.c:116
 msgid ""
 "Users can only reconnect after this period (in seconds). This is counted "
 "from the previous login time, not logout."
 msgstr ""
 
-#: src/core_config.c:115
+#: src/core_config.c:117
 msgid ""
 "IPs that are used in a CTM exploit attack are hard banned for this time (in "
 "seconds)."
 msgstr ""
 
-#: src/core_config.c:117
+#: src/core_config.c:119
 msgid ""
 "Users that go offline for shorter than this period do not appear to go "
 "offline. On rejoing they will get their rate counters back."
 msgstr ""
 
-#: src/core_config.c:119
+#: src/core_config.c:121
 msgid "The hub sends all error messages here."
 msgstr ""
 
-#: src/core_config.c:121
+#: src/core_config.c:123
 msgid ""
 "If a user has more data buffered than this setting, he has limited time to "
 "read it all."
 msgstr ""
 
-#: src/core_config.c:122
+#: src/core_config.c:124
 msgid ""
 "If a user has more data buffered than this setting, no more will be allowed."
 msgstr ""
 
-#: src/core_config.c:123
+#: src/core_config.c:125
 msgid ""
 "If the hub is buffering more than this setting, no more will be allowed."
 msgstr ""
 
-#: src/core_config.c:125
+#: src/core_config.c:127
 msgid ""
 "If the hub start buffering for a user, after this many milliseconds, the "
 "user will be disconnected."
 msgstr ""
 
-#: src/core_config.c:126
+#: src/core_config.c:128
 msgid ""
 "If the hub start buffering for a user and the amount exceed hub."
 "BufferSoftLimit, he wil be disconnected after this many milliseconds."
 msgstr ""
 
-#: src/core_config.c:128
+#: src/core_config.c:130
 msgid ""
 "If a user violates the rate controls too much, he will be banned for this "
 "amount of time."
 msgstr ""
 
-#: src/core_config.c:129
+#: src/core_config.c:131
 msgid ""
 "If the user violatest the rate controls too much within this period after "
 "joining, he will be hardbanned permanently."
 msgstr ""
 
-#: src/core_config.c:131
+#: src/core_config.c:133
 msgid "These are the rights of an unregistered user."
 msgstr ""
 
-#: src/core_config.c:133
+#: src/core_config.c:135
 msgid ""
 "This is the minimum time before an IP address is allowed to reconnect to the "
 "hub. NEVER TURN THIS OFF."
 msgstr ""
 
-#: src/core_config.c:134
+#: src/core_config.c:136
 msgid "This is the number of IP address to remember."
 msgstr ""
 
-#: src/core_config.c:136
+#: src/core_config.c:138
 msgid "This turns on or off the ndelay setting."
 msgstr ""
 
-#: src/core_config.c:138
+#: src/core_config.c:140
 msgid "This turns on or off input processing for users in overflow mode."
 msgstr ""
 
-#: src/core_config.c:139
+#: src/core_config.c:141
 msgid "This turns on or off disconnecting users on buffering timeout."
 msgstr ""
 
-#: src/core_config.c:142
+#: src/core_config.c:144
 msgid "Maximum number of outstanding data buffers per user."
 msgstr ""
 
-#: src/core_config.c:143
+#: src/core_config.c:145
 msgid "Set this to 0 to enable the send buffer."
 msgstr ""
 
-#: src/core_config.c:167 src/core_config.c:169
+#: src/core_config.c:169 src/core_config.c:171
 msgid "Total bytes send by hub since startup."
 msgstr ""
 
-#: src/core_config.c:170
+#: src/core_config.c:172
 msgid "Number of buffering users."
 msgstr ""
 
-#: src/core_config.c:172
+#: src/core_config.c:174
 msgid "Total of all data waiting to be written."
 msgstr ""
 
-#: src/core_config.c:176 src/core_config.c:183
+#: src/core_config.c:178 src/core_config.c:185
 msgid "Number of outstanding buffers."
 msgstr ""
 
-#: src/core_config.c:178
+#: src/core_config.c:180
 msgid "Peak number of outstanding buffers."
 msgstr ""
 
-#: src/core_config.c:180
+#: src/core_config.c:182
 msgid "Absolute maximum of outstanding buffers allowed."
 msgstr ""
 
-#: src/core_config.c:185
+#: src/core_config.c:187
 msgid "Peak number of outstanding bytes."
 msgstr ""
 
-#: src/core_config.c:187
+#: src/core_config.c:189
 msgid "Absolute maximum of outstanding bytes allowed."
 msgstr ""
 
-#: src/core_config.c:189
+#: src/core_config.c:191
 msgid "Number of IOCP users."
 msgstr ""
 
-#: src/core_config.c:191
+#: src/core_config.c:193
 msgid "Absolute maximum of outstanding bytes per user allowed."
 msgstr ""
 

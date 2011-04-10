@@ -1,5 +1,6 @@
 /*                                                                                                                                    
- *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
+ *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
+ *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -45,8 +46,8 @@
 #endif
 
 #define HUBSOFT_NAME		"Aquila"
-#define HUBSOFT_HOMEPAGE	"http://aquiladc.sourceforge.net/"
-#define HUBSOFT_AUTHOR		"Johan Verrept"
+#define HUBSOFT_HOMEPAGE	"https://Aquila-dc.info"
+#define HUBSOFT_AUTHOR		"AquilaDCH"
 /*
  * These values determine the size and mask of the configuration value
  *   hash tables.
@@ -67,9 +68,9 @@
  * Default hubname, description and owner
  */
 
-#define HUBNAME  "Capitol"
-#define HUBDESC  "Licat volare si super tergum Aquila volat."
-#define HUBOWNER "Unknown"
+#define HUBNAME  "Aquila"
+#define HUBDESC  "Aquila Direct Connect Hub"
+#define HUBOWNER "AquilaDCH"
 
 /*
  * These are generic settings in the hub. modifying them can influence memory usage.
@@ -109,9 +110,14 @@
  * Hub security defaults.
  */
 
-#define DEFAULT_HUBSECURITY_NICK     		"Aquila"
-#define DEFAULT_HUBSECURITY_DESCRIPTION		"His attribute is the lightning bolt and the eagle is both his symbol and his messenger."
-
+#define DEFAULT_HUBSECURITY_NICK     		"[-Bot-]"
+#define DEFAULT_HUBSECURITY_DESCRIPTION		"Im Invisible."
+/*
+ * Hub Addvertise defaults.
+ */
+#define DEFAULT_HUBADDVERTISE		"This Is A Custom Hub Hosting Msg"
+#define DEFAULT_HUBADD_STATUS		1
+#define DEFAULT_HUB_SUPPORT_MSG		1
 /*
  * Filenames of the core savefiles.
  */
@@ -120,7 +126,7 @@
 #define DEFAULT_SOFTBANFILE	"softban.conf"
 #define DEFAULT_ACCOUNTSFILE	"accounts.conf"
 
-#define DEFAULT_REDIRECT	""
+#define DEFAULT_REDIRECT	"programers.aquila-dc.info"
 
 /*
  * Where to send reports...

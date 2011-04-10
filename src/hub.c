@@ -1,5 +1,6 @@
-/*
- *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
+/*                                                                                                                                    
+ *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
+ *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -363,7 +364,7 @@ int accept_new_user (esocket_t * s)
     /* check last connection list */
     if (iplist_interval) {
       if (iplist_find (&lastlist, client_address.sin_addr.s_addr)) {
-	l = snprintf (buffer, sizeof (buffer), __ ("<%s> Don't reconnect so fast.|"), HUBSOFT_NAME);
+	l = snprintf (buffer, sizeof (buffer), __ ("<%s> \n=============================\nPrivate Network Reconecting Will Not Help\n=============================\n.|"), HUBSOFT_NAME);
 	goto error;
       }
       iplist_add (&lastlist, client_address.sin_addr.s_addr);
@@ -373,7 +374,7 @@ int accept_new_user (esocket_t * s)
     if (buf_mem > config.BufferTotalLimit) {
       l =
 	snprintf (buffer, sizeof (buffer),
-		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
+		  __ ("<%s> \n==============================================\nThere Is Nobody To Take Your Call Please Try Again Later :P\n==============================================|"), HUBSOFT_NAME);
       goto error;
     }
 
@@ -382,7 +383,7 @@ int accept_new_user (esocket_t * s)
     if (!cl) {
       l =
 	snprintf (buffer, sizeof (buffer),
-		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
+		  __ ("<%s> \n==============================================\nThere Is Nobody To Take Your Call Please Try Again Later :P\n==============================================|"), HUBSOFT_NAME);
 
       goto error;
     }
@@ -397,7 +398,7 @@ int accept_new_user (esocket_t * s)
     if (!cl->user) {
       l =
 	snprintf (buffer, sizeof (buffer),
-		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
+		  __ ("<%s> \n==============================================\nThere Is Nobody To Take Your Call Please Try Again Later :P\n==============================================|"), HUBSOFT_NAME);
 
       goto error;
     }
@@ -409,7 +410,7 @@ int accept_new_user (esocket_t * s)
     if (!cl->es) {
       l =
 	snprintf (buffer, sizeof (buffer),
-		  __ ("<%s> This hub is too busy, please try again later.|"), HUBSOFT_NAME);
+		  __ ("<%s> \n==============================================\nThere Is Nobody To Take Your Call Please Try Again Later :P\n==============================================|"), HUBSOFT_NAME);
 
       goto error;
     }

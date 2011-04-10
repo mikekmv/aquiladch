@@ -1,5 +1,6 @@
-/*
- *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
+/*                                                                                                                                    
+ *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
+ *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-
+#include <time.h>
 #include "../config.h"
 #ifndef __USE_W32_SOCKETS
 #  ifdef HAVE_NETINET_IN_H
@@ -79,12 +80,18 @@ extern struct timeval boottime;
 
 int proto_nmdc_state_init (user_t * u, token_t * tkn)
 {
+  
   unsigned int i;
   int retval = 0;
   buffer_t *output;
   struct timeval tnow;
   banlist_entry_t *ban;
-
+  time_t t;
+  time(&t);
+  unsigned int dc;
+  dc = (config.HubAddStatus);
+  unsigned int spt;
+  spt = (config.HubSupportMsg);
   if (tkn) {
     /* we should not get anything, but we just ignore anything except a MyNick token */
     if (tkn->type != TOKEN_MYNICK)
@@ -113,8 +120,16 @@ int proto_nmdc_state_init (user_t * u, token_t * tkn)
 
   bf_strncat (output, u->lock, LOCKLENGTH);
   bf_strncat (output, "]] Pk=Aquila|", 13);
-  bf_printf (output, _("<%s> This hub is running %s Version %s (Uptime %s.%.3lu).|"), HubSec->nick,
-	     HUBSOFT_NAME, AQUILA_VERSION, time_print (tnow.tv_sec), tnow.tv_usec / 1000);
+  bf_printf (output, _("<Aquila> This hub is running %s Version %s .|"),
+	     HUBSOFT_NAME, AQUILA_VERSION);
+    if ( spt > 0 & spt < 2 ) {
+  bf_printf (output, _("<%s> Hub Soft Support Forum https://Aquila-Dc.info |"), HUBSOFT_NAME);
+}
+  bf_printf (output, _("<%s> Current Hub Uptime Is: %s |"), HubSec->nick, time_print (tnow.tv_sec));
+  bf_printf (output, _("<%s> Today Is: %s |"), HubSec->nick, ctime(&t));
+    if ( dc > 0 & dc < 2 ) {
+  bf_printf (output, _("<%s> %s |"), HubSec->nick, (config.HubAddvertise));
+}
 
   /* check for a reconnect ban */
   if (!cloning && (ban = banlist_find_bynet (&reconnectbanlist, u->ipaddress, 0xFFFFFFFF))) {
@@ -412,7 +427,7 @@ int proto_nmdc_state_waitnick (user_t * u, token_t * tkn)
 	proto_nmdc_user_say_string (HubSec, buf,
 				    __ ("Another instance of you is connecting, bye!"));
 	server_write (existing_user->parent, buf);
-	server_disconnect_user (existing_user->parent, __ ("Reconnecting."));
+	server_disconnect_user (existing_user->parent, __ ("Reconnecting...."));
 
 	bf_free (buf);
       }
@@ -726,7 +741,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
     /* send the login event before we announce the new user to the hub so plugins can redirect those users */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_PRELOGIN, u->MyINFO) !=
 	PLUGIN_RETVAL_CONTINUE) {
-      proto_nmdc_user_redirect (u, bf_buffer (__ ("Your login was refused.")));
+      proto_nmdc_user_redirect (u, bf_buffer (__ ("This Is A Private Network. Login Request Denied")));
       retval = -1;
       nmdc_stats.preloginevent++;
       break;
@@ -821,7 +836,7 @@ int proto_nmdc_state_hello (user_t * u, token_t * tkn, buffer_t * b)
 
     /* send the login event */
     if (plugin_send_event (u->plugin_priv, PLUGIN_EVENT_LOGIN, u->MyINFO) != PLUGIN_RETVAL_CONTINUE) {
-      proto_nmdc_user_redirect (u, bf_buffer (__ ("Your login was refused.")));
+      proto_nmdc_user_redirect (u, bf_buffer (__ ("This Is A Private Network. Login Request Denied")));
       retval = -1;
       nmdc_stats.loginevent++;
       break;

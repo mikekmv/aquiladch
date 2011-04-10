@@ -1,5 +1,6 @@
 /*                                                                                                                                    
- *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                                                      
+ *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
+ *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -217,7 +218,7 @@ unsigned long pi_user_event_prelogin (plugin_user_t * user, void *dummy, unsigne
     }
   }
   plugin_user_printf (user,
-		      _("Sorry, the hub is full. It cannot accept more users from your class.\n"));
+		      _("\n==============================================\nMost Likely You Dont Have Right To Access This Hub.\n==============================================\n"));
 
 drop:
   /* owners always get in. */
