@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * $Id: stacktrace.c,v 1.2 1999/08/19 16:04:41 breese Exp $
+ * $Id$
  *
  * Copyright (c) 1998 by Bjorn Reese <breese@mail1.stofanet.dk>
  *

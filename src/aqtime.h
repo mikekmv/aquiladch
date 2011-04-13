@@ -1,4 +1,4 @@
-/* $Id:$
+/* $Id$
  *  (C) Copyright 2011 Former Developer: Johan Verrept (jove@users.berlios.de)
  *                      Now Continued And Maitained By https://Aquila-dc.info                                                 
  *
