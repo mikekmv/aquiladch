@@ -1,10 +1,10 @@
-#ifndef _RBT_H_
-#define _RBT_H_
-
-/*
+/* $Id$
  * from http://www.cs.auckland.ac.nz/software/AlgAnim/niemann/s_man.htm
  * Public domain.
  */ 
+
+#ifndef _RBT_H_
+#define _RBT_H_
   
 /* red-black tree */ 
   

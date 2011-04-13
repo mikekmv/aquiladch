@@ -1,4 +1,4 @@
-/*
+/* $Id$
  * Copyright (c) 2001, 02  Motoyuki Kasahara
  *
  * Redistribution and use in source and binary forms, with or without

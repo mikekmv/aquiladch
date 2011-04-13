@@ -1,4 +1,4 @@
-/*                                                                                                          
+/* $Id$
  *  (C) Copyright 2006 Johan Verrept (jove@users.berlios.de)                                            
  *
  *   This program is free software; you can redistribute it and/or modify

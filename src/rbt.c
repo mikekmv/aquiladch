@@ -1,9 +1,11 @@
-#include "rbt.h"
-
-/*
+/* $Id$
+ *
  * from http://www.cs.auckland.ac.nz/software/AlgAnim/niemann/s_man.htm
  * Source code, when part of a software project, may be used freely without reference to the author
+ *
  */
+
+#include "rbt.h"
 
 #define compLT(a,b) (a < b)
 #define compEQ(a,b) (a == b)

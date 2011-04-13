@@ -1,4 +1,5 @@
-/* Convenience header for conditional use of GNU <libintl.h>.
+/* $Id$ 
+   Convenience header for conditional use of GNU <libintl.h>.
    Copyright (C) 1995-1998, 2000-2002, 2004-2006 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify it
@@ -14,7 +15,8 @@
    You should have received a copy of the GNU Library General Public
    License along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
-   USA.  */
+   USA.  
+ */
 
 #ifndef _LIBGETTEXT_H
 #define _LIBGETTEXT_H 1
