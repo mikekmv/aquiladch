@@ -1,4 +1,4 @@
-
+$Id$
 Develstatus:
 	- maintain group order. cosmetic fix. (ffrag)
 	- move AcceptEx to handler. Add ConnectEx and the other one.

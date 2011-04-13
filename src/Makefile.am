@@ -1,3 +1,4 @@
+# $Id$
 # for gettext
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
