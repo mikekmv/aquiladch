@@ -20,6 +20,10 @@
 
 #include <sys/types.h>
 
+#ifdef HAVE_CONFIG_H
+#include "../config.h"
+#endif
+
 #ifndef __USE_W32_SOCKETS
 #  include <sys/socket.h>
 #  ifdef HAVE_NETINET_IN_H

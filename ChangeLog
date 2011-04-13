@@ -2,6 +2,10 @@ This is the Aquila Changelog.
 
 0.1.11-pre3-beta1
 	***
+	Changed copyright notice and link to projet home in source files 
+
+0.1.11-pre2-beta2p1
+	Patch for building and running on OpenBSD, but you must use autoconf for building on OpenBSD 
 
 0.1.11-pre2-beta2 (unoffical):
 	Fixed Aquila.xml permission when using the installation script and daemontools

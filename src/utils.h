@@ -21,6 +21,10 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#ifdef HAVE_CONFIG_H
+#include "../config.h"
+#endif
+
 #ifndef __USE_W32_SOCKETS
 #  ifdef HAVE_NETINET_IN_H
 #    include <netinet/in.h>
