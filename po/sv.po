@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.11-pre1-beta39\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2012-10-16 11:39+0200\n"
+"POT-Creation-Date: 2015-02-17 21:23+0100\n"
 "PO-Revision-Date: 2007-04-17 00:24+0100\n"
 "Last-Translator: en_dator <endator@gmail.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -1184,74 +1184,78 @@ msgstr "Du påstår dig vara passiv. Aktiva sökningar tillåts ej."
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr "Din klient använder IP %s vid sökning, men du har %s\n"
 
-#: src/nmdc_protocol.c:1159
+#: src/nmdc_protocol.c:1157
+msgid "Your client used an invalid port number in an active search request.\n"
+msgstr ""
+
+#: src/nmdc_protocol.c:1172
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr "Upprepa inte samma sökning oftare än %d sekunder."
 
-#: src/nmdc_protocol.c:1341 src/nmdc_protocol.c:1420
+#: src/nmdc_protocol.c:1354 src/nmdc_protocol.c:1433
 msgid "You are not allowed to download."
 msgstr "Du har inte rätt att ladda ner."
 
-#: src/nmdc_protocol.c:1368 src/nmdc_protocol.c:1460
+#: src/nmdc_protocol.c:1381 src/nmdc_protocol.c:1473
 #, c-format
 msgid "You cannot download from %s."
 msgstr "Du kan inte ladda ner från %s."
 
-#: src/nmdc_protocol.c:1389
+#: src/nmdc_protocol.c:1402
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr "Din klient använder IP %s vid nerladdning, men du har %s\n"
 
-#: src/nmdc_protocol.c:1491
+#: src/nmdc_protocol.c:1504
 msgid "You are not allowed to send private messages."
 msgstr "Du har inte rätt att skicka PM."
 
-#: src/nmdc_protocol.c:1500
+#: src/nmdc_protocol.c:1513
 msgid "Don't send private messages so fast."
 msgstr "Skicka inte PM så ofta"
 
-#: src/nmdc_protocol.c:1536
+#: src/nmdc_protocol.c:1549
 msgid "Bad From: nick. No faking."
 msgstr "Felaktigt From: nick. Fuska inte."
 
-#: src/nmdc_protocol.c:1538
+#: src/nmdc_protocol.c:1551
 msgid "Attempted PM faking."
 msgstr "Försök till PM fusk."
 
-#: src/nmdc_protocol.c:1561
+#: src/nmdc_protocol.c:1574
 msgid "Bad display nick. No faking."
 msgstr "Felaktigt användarnamn. Fuska inte."
 
-#: src/nmdc_protocol.c:1563
+#: src/nmdc_protocol.c:1576
 msgid "Attempted display nick faking"
 msgstr "Försök till fusk med användarnamn."
 
-#: src/nmdc_protocol.c:1577
+#: src/nmdc_protocol.c:1590
 msgid "Sorry, you can only send private messages to operators."
 msgstr "Tyvärr, du har enbart rätt att skicka PM till OP's"
 
-#: src/nmdc_protocol.c:1610
+#: src/nmdc_protocol.c:1623
 msgid "You are not allowed to redirect users."
 msgstr "Du har inte rätt att vidarebefodra användare"
 
-#: src/nmdc_protocol.c:1690 src/nmdc_protocol.c:1748
+#: src/nmdc_protocol.c:1703 src/nmdc_protocol.c:1761
 msgid "Redirect refused.\n"
 msgstr "Vidarebefodran nekades.\n"
 
-#: src/nmdc_protocol.c:1719
+#: src/nmdc_protocol.c:1732
 msgid "You are not allowed to kick users."
 msgstr "Du har inte rätt att kicka användare."
 
-#: src/nmdc_protocol.c:1743
+#: src/nmdc_protocol.c:1756
 msgid "You were kicked."
 msgstr "Du är kickad."
 
-#: src/nmdc_protocol.c:1769
+#: src/nmdc_protocol.c:1782
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr "Tänk innan du frågar HubINFO och undvik att spamma.\n"
 
-#: src/nmdc_protocol.c:1835
+#: src/nmdc_protocol.c:1848
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Nerladdning av användarlistan nekades. Max 1 nerladdning per %ds."

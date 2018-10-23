@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aquila 0.1.10-pre3-beta25\n"
 "Report-Msgid-Bugs-To: jove@users.berlios.de\n"
-"POT-Creation-Date: 2012-10-16 11:39+0200\n"
+"POT-Creation-Date: 2015-02-17 21:23+0100\n"
 "PO-Revision-Date: 2006-11-30 23:31+0100\n"
 "Last-Translator:  <jove@users.berlios.de>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -1186,74 +1186,78 @@ msgstr "U beweerd passief te zijn, Actief zoeken GEWIJGERD."
 msgid "Your client uses IP %s for searching, while you have IP %s\n"
 msgstr "Uw client gebruikt IP %s om te zoeken, terwijl u IP %s gebruikt.\n"
 
-#: src/nmdc_protocol.c:1159
+#: src/nmdc_protocol.c:1157
+msgid "Your client used an invalid port number in an active search request.\n"
+msgstr ""
+
+#: src/nmdc_protocol.c:1172
 #, c-format
 msgid "Do not repeat searches within %d seconds."
 msgstr "Dezelfde zoek bewerking niet herhalen binnen %d seconden."
 
-#: src/nmdc_protocol.c:1341 src/nmdc_protocol.c:1420
+#: src/nmdc_protocol.c:1354 src/nmdc_protocol.c:1433
 msgid "You are not allowed to download."
 msgstr "U hebt geen toestemming om te downloaden."
 
-#: src/nmdc_protocol.c:1368 src/nmdc_protocol.c:1460
+#: src/nmdc_protocol.c:1381 src/nmdc_protocol.c:1473
 #, c-format
 msgid "You cannot download from %s."
 msgstr "U kan niet downloaden van %s."
 
-#: src/nmdc_protocol.c:1389
+#: src/nmdc_protocol.c:1402
 #, c-format
 msgid "Your client uses IP %s for downloading, while you have IP %s\n"
 msgstr "Uw client gebruikt IP %s om te downloaden, terwijl u IP %s gebruikt.\n"
 
-#: src/nmdc_protocol.c:1491
+#: src/nmdc_protocol.c:1504
 msgid "You are not allowed to send private messages."
 msgstr "U hebt geen toestemming om privee berichten te sturen."
 
-#: src/nmdc_protocol.c:1500
+#: src/nmdc_protocol.c:1513
 msgid "Don't send private messages so fast."
 msgstr "Stuur niet zo snel privee berichten."
 
-#: src/nmdc_protocol.c:1536
+#: src/nmdc_protocol.c:1549
 msgid "Bad From: nick. No faking."
 msgstr "Slechte bron naam. Geen faking."
 
-#: src/nmdc_protocol.c:1538
+#: src/nmdc_protocol.c:1551
 msgid "Attempted PM faking."
 msgstr "PM faking poging."
 
-#: src/nmdc_protocol.c:1561
+#: src/nmdc_protocol.c:1574
 msgid "Bad display nick. No faking."
 msgstr "Slechte display naam. Geen faking."
 
-#: src/nmdc_protocol.c:1563
+#: src/nmdc_protocol.c:1576
 msgid "Attempted display nick faking"
 msgstr "Display naam vervalsing."
 
-#: src/nmdc_protocol.c:1577
+#: src/nmdc_protocol.c:1590
 msgid "Sorry, you can only send private messages to operators."
 msgstr "Het spijt ons, u kan alleen privee berichten sturen naar operators."
 
-#: src/nmdc_protocol.c:1610
+#: src/nmdc_protocol.c:1623
 msgid "You are not allowed to redirect users."
 msgstr "U hebt geen toestemming om gebruikers te redirected."
 
-#: src/nmdc_protocol.c:1690 src/nmdc_protocol.c:1748
+#: src/nmdc_protocol.c:1703 src/nmdc_protocol.c:1761
 msgid "Redirect refused.\n"
 msgstr "Redirect gewijgerd.\n"
 
-#: src/nmdc_protocol.c:1719
+#: src/nmdc_protocol.c:1732
 msgid "You are not allowed to kick users."
 msgstr "U hebt geen toestemming om gebruikers te kicken."
 
-#: src/nmdc_protocol.c:1743
+#: src/nmdc_protocol.c:1756
 msgid "You were kicked."
 msgstr "U werd gekickt."
 
-#: src/nmdc_protocol.c:1769
+#: src/nmdc_protocol.c:1782
 msgid "Think before you ask HubINFO and don't spam.\n"
 msgstr "Denk voor u een HubINFO vraagt en spam niet.\n"
 
-#: src/nmdc_protocol.c:1835
+#: src/nmdc_protocol.c:1848
 #, c-format
 msgid "Userlist request denied. Maximum 1 reload per %ds."
 msgstr "Gebruikerslijst gewijgerd. Maximum 1 reload per %ds."

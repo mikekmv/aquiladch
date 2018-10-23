@@ -1,5 +1,8 @@
 This is the Aquila Changelog.
 
+0.1.11-pre4-beta4:
+	Fix http://www.te-home.net/?id=54&title=Second+largest+exploit+in+NMDC+history
+
 0.1.11-pre4-beta3:
 	Expand rss input filtering to filter out % and \
 	Handle lack of required Banlist entries in config file gracefully.

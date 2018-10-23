@@ -1145,7 +1145,20 @@ int proto_nmdc_state_online_search (user_t * u, token_t * tkn, buffer_t * output
 	  *c = ':';
 	  break;
 	}
-	*c = ':';
+	*c++ = ':';
+
+	/* check the portnumber */
+	n = c;
+	SKIPTOCHAR (c, b->e, ' ');
+	for (; (*n >= '0') && (*n <= '9'); n++);
+	if (n != c) {
+	  proto_nmdc_user_warn (u, &now,
+				__
+				("Your client used an invalid port number in an active search request.\n")
+	    );
+	  nmdc_stats.searchcorrupt++;
+	  break;
+	}
       }
     }
 
