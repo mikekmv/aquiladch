@@ -29,15 +29,15 @@
 
 #include "../config.h"
 #ifndef __USE_W32_SOCKETS
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
-#  ifdef HAVE_NETINET_TCP_H
-#    include <netinet/tcp.h>
-#  endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
 #else
-#  define SHUT_RDWR	SD_BOTH
-#  define close(x) closesocket(x)
+#define SHUT_RDWR	SD_BOTH
+#define close(x) closesocket(x)
 #endif
 
 #if 0

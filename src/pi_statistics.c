@@ -24,13 +24,13 @@
 #include <sys/time.h>
 
 #ifndef USE_WINDOWS
-#  include <sys/resource.h>
+#include <sys/resource.h>
 #endif
 
 #include <limits.h>
 
 #ifdef HAVE_MALLOC_H
-#  include <malloc.h>
+#include <malloc.h>
 #endif
 
 #include "aqtime.h"
@@ -43,11 +43,11 @@
 #include "stats.h"
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 #ifndef ULLONG_MAX
-#   define ULLONG_MAX   18446744073709551615ULL
+#define ULLONG_MAX   18446744073709551615ULL
 #endif
 
 #define STATS_NUM_MEASUREMENTS 360

@@ -12,6 +12,7 @@
 rbt_t sentinel = {
   NIL, NIL, 0, BLACK, 0
 };
+
 void rotateLeft (rbt_t ** root, rbt_t * x)
 {
 

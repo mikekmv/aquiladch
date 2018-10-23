@@ -419,6 +419,10 @@ int bf_printf (buffer_t * dst, const char *format, ...)
   retval = vsnprintf (dst->e, available, gettext (format), ap);
   va_end (ap);
 
+  /* in case of error, return. Happens on glibc 2.0 and Windows */
+  if (retval < 0)
+    return retval;
+
   /* make sure dst->e is always valid */
   dst->e += (retval > available) ? available : retval;
 
@@ -442,6 +446,10 @@ repeat:
   va_start (ap, format);
   retval = vsnprintf (dst->e, available, gettext (format), ap);
   va_end (ap);
+
+  /* in case of error, resize and retry. Happens on glibc 2.0 and Windows */
+  if (retval < 0)
+    goto resize;
 
   /* make sure dst->e is always valid */
   if (retval >= available)
@@ -480,6 +488,10 @@ int bf_vprintf (buffer_t * dst, const char *format, va_list ap)
 
   /* print to the buffer */
   retval = vsnprintf (dst->e, available, gettext (format), ap);
+
+  /* in case of error, return. Happens on glibc 2.0 and Windows */
+  if (retval < 0)
+    return retval;
 
   /* make sure dst->e is always valid */
   dst->e += (retval > available) ? available : retval;

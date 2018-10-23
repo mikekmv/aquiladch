@@ -29,9 +29,9 @@
 #include "hash.h"
 
 #ifndef USE_WINDOWS
-#  ifdef HAVE_ARPA_INET_H
-#    include <arpa/inet.h>
-#  endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #endif
 
 __inline__ uint32_t netmask_to_numbits (uint32_t netmask)

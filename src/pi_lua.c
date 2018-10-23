@@ -24,11 +24,11 @@
 #include <assert.h>
 
 #ifndef USE_WINDOWS
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #else
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 #include <stdlib.h>
@@ -294,16 +294,17 @@ int pi_lua_setconfig (lua_State * lua)
       *elem->val.v_ulonglong = parse_size (value);
       break;
 
-    case CFG_ELEM_PTR:
+    case CFG_ELEM_CAP:
       {
 	unsigned long long caps = 0, ncaps = 0;
 
 	parserights (value, &caps, &ncaps);
 
-	*elem->val.v_ulong = caps;
+	*elem->val.v_ulonglong |= caps;
+	*elem->val.v_ulonglong &= ~ncaps;
       }
       break;
-    case CFG_ELEM_CAP:
+    case CFG_ELEM_PTR:
     default:
       lua_pushstring (lua, __ ("Element Type not supported."));
       lua_error (lua);
@@ -636,6 +637,33 @@ int pi_lua_setuserrights (lua_State * lua)
 /******************************************************************************************
  *  LUA Functions User handling
  */
+
+int pi_lua_user_forcemove (lua_State * lua)
+{
+  buffer_t *b;
+  unsigned char *nick = (unsigned char *) luaL_checkstring (lua, 1);
+  unsigned char *destination = (unsigned char *) luaL_checkstring (lua, 2);
+  unsigned char *message = (unsigned char *) luaL_checkstring (lua, 3);
+  plugin_user_t *u;
+
+  u = plugin_user_find (nick);
+
+  if (!u) {
+    lua_pushboolean (lua, 0);
+    return 1;
+  }
+
+  b = bf_alloc (10240);
+  bf_printf (b, "%s", message);
+
+  plugin_user_forcemove (u, destination, b);
+
+  bf_free (b);
+
+  lua_pushboolean (lua, 1);
+
+  return 1;
+}
 
 int pi_lua_user_kick (lua_State * lua)
 {
@@ -2097,6 +2125,7 @@ pi_lua_symboltable_element_t pi_lua_symboltable[] = {
   {"UserIsZombie", pi_lua_useriszombie,},
 
   /* kick and ban functions */
+  {"UserForcemove", pi_lua_user_forcemove,},
   {"UserKick", pi_lua_user_kick,},
   {"UserDrop", pi_lua_user_drop,},
   {"UserBan", pi_lua_user_ban,},

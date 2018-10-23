@@ -31,7 +31,7 @@
 #include "cap.h"
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 buffer_t *rebuild_myinfo (user_t * u, buffer_t * b)
@@ -340,7 +340,7 @@ int zline (buffer_t * input, buffer_t ** zpipe, buffer_t ** zline)
   memset (&stream, 0, sizeof (stream));
   stream.zalloc = Z_NULL;
   stream.zfree = Z_NULL;
-  stream.data_type = Z_TEXT;
+  stream.opaque = Z_NULL;
 
   deflateInit (&stream, Z_BEST_COMPRESSION);
 
@@ -453,7 +453,7 @@ buffer_t *zunline (buffer_t * input)
   memset (&stream, 0, sizeof (stream));
   stream.zalloc = Z_NULL;
   stream.zfree = Z_NULL;
-  stream.data_type = Z_TEXT;
+  stream.opaque = Z_NULL;
 
   stream.avail_in = bf_used (work);
   stream.next_in = work->s;

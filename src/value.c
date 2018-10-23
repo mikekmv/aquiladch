@@ -30,17 +30,17 @@
 #include "../config.h"
 
 #ifndef __USE_W32_SOCKETS
-#  include <sys/socket.h>
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
-#  ifdef HAVE_ARPA_INET_H
-#    include <arpa/inet.h>
-#  endif
+#include <sys/socket.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #endif /* __USE_W32_SOCKETS */
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 

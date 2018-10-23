@@ -21,11 +21,11 @@
 
 #include "../config.h"
 #if HAVE_INTTYPES_H
-# include <inttypes.h>
+#include <inttypes.h>
 #else
-# if HAVE_STDINT_H
-#  include <stdint.h>
-# endif
+#if HAVE_STDINT_H
+#include <stdint.h>
+#endif
 #endif
 
 #include "hash.h"

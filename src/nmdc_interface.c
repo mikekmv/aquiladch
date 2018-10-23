@@ -20,13 +20,13 @@
 #include <sys/types.h>
 
 #ifndef __USE_W32_SOCKETS
-#  include <sys/socket.h>
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
-#  ifdef HAVE_ARPA_INET_H
-#    include <arpa/inet.h>
-#  endif
+#include <sys/socket.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #endif /* __USE_W32_SOCKETS */
 
 #include "hub.h"
@@ -884,7 +884,7 @@ int proto_nmdc_user_drop (user_t * u, buffer_t * message)
   if (u->MessageCnt)
     proto_nmdc_user_flush (u);
 
-  if (message) {
+  if (message && bf_used (message)) {
     b = bf_alloc (265 + bf_used (message));
 
     proto_nmdc_user_say (HubSec, b, message);

@@ -32,13 +32,13 @@
 
 #include "../config.h"
 #ifndef __USE_W32_SOCKETS
-#  include <sys/socket.h>
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
-#  include <arpa/inet.h>
+#include <sys/socket.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#include <arpa/inet.h>
 #else
-#  include <winsock2.h>
+#include <winsock2.h>
 #endif /* __USE_W32_SOCKETS */
 
 #include <sys/time.h>
@@ -51,7 +51,7 @@
 #include "utils.h"
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 #ifdef GEOIP
@@ -436,7 +436,7 @@ unsigned long handler_drop (plugin_user_t * user, buffer_t * output, void *priv,
   }
 
   /* actually kick the user. */
-  plugin_user_drop (target, buf);
+  plugin_user_drop (target, bf_used (buf) ? buf : NULL);
 
 leave:
   bf_free (buf);
@@ -1377,7 +1377,10 @@ unsigned long handler_userinfo (plugin_user_t * user, buffer_t * output, void *p
   account_t *account = NULL;
   struct in_addr in;
   plugin_user_t *target;
+
+#ifdef GEOIP
   int cc;
+#endif
 
   if (argc < 2) {
     bf_printf (output, _("Usage: %s <nick>"), argv[0]);
@@ -2025,6 +2028,7 @@ unsigned long handler_save (plugin_user_t * user, buffer_t * output, void *priv,
 
   return retval;
 }
+
 unsigned long handler_load (plugin_user_t * user, buffer_t * output, void *priv, unsigned int argc,
 			    unsigned char **argv)
 {

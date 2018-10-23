@@ -25,9 +25,9 @@
 #include <assert.h>
 
 #ifndef __USE_W32_SOCKETS
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #endif
 
 #include "aqtime.h"

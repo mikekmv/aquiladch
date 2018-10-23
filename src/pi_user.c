@@ -23,7 +23,7 @@
 #include <string.h>
 #include <sys/time.h>
 #ifndef USE_WINDOWS
-#  include <sys/resource.h>
+#include <sys/resource.h>
 #endif
 
 #include "plugin.h"

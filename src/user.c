@@ -31,11 +31,11 @@
 #include "cap.h"
 
 #ifndef USE_WINDOWS
-#  ifdef HAVE_CRYPT_H
-#    include <crypt.h>
-#  endif
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
 #else
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif /* USE_WINDOWS */
 
 

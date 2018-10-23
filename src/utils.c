@@ -27,14 +27,14 @@
 #include "utils.h"
 
 #ifndef __USE_W32_SOCKETS
-#  include <sys/socket.h>
+#include <sys/socket.h>
 #endif
 
 #include "buffer.h"
 #include "gettext.h"
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 const char *units[] = { "Bytes", "Kilobyte", "Megabyte", "Gigabyte", "Terabyte", "Petabyte" };
@@ -208,6 +208,7 @@ leave:
   free (work);
   return retval;
 }
+
 unsigned char *string_escape (unsigned char *in)
 {
   unsigned char *c;

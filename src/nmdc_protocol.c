@@ -27,9 +27,9 @@
 
 #include "../config.h"
 #ifndef __USE_W32_SOCKETS
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #endif
 
 #include "aqtime.h"
@@ -47,7 +47,7 @@
 #include "nmdc_protocol.h"
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 /******************************************************************************\
@@ -1509,6 +1509,8 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
 
     /* find end of nick */
     SKIPTOCHAR (c, b->e, ' ');
+    if (!*c)
+      break;
     l = c - n;
 
     /* find target */
@@ -1520,10 +1522,14 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
 
     /* find end of From: */
     for (c++; *c && (*c != ' '); c++);
+    if (!*c)
+      break;
 
     /* find end of from Nick */
     n = ++c;
     for (c++; *c && (*c != ' '); c++);
+    if (!*c)
+      break;
     l = c - n;
 
     if (strncmp (u->nick, n, l)) {
@@ -1537,6 +1543,8 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
 
     /* find $ */
     for (c++; *c && (*c != '$'); c++);
+    if (!*c)
+      break;
     c++;
     if (*c != '<')
       break;
@@ -1545,6 +1553,8 @@ int proto_nmdc_state_online_to (user_t * u, token_t * tkn, buffer_t * output, bu
     /* find end of from Nick */
     n = c;
     for (c++; *c && (*c != '>'); c++);
+    if (!*c)
+      break;
     l = c - n;
 
     if (strncmp (u->nick, n, l)) {

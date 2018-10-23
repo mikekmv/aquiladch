@@ -32,7 +32,7 @@ endif
 	@rm -f CommitMessage
 
 release: commit dist
-	svn copy  ${CURRENTURL} svn://gw/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
+	svn copy  ${CURRENTURL} svn://atom/aquila/tags/aquila-${VERSION} -m "Aquila Release ${VERSION}"
 	@echo Release ${VERSION}
 	@echo File: aquila-${VERSION}.tar.gz
 

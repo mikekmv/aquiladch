@@ -21,7 +21,7 @@
 #include "etimer.h"
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 
 #include <stdio.h>
@@ -33,19 +33,19 @@
 #include <limits.h>
 
 #ifndef ASSERT
-#  ifdef DEBUG
-#    define ASSERT assert
-#  else
-#    define ASSERT(...)
-#  endif
+#ifdef DEBUG
+#define ASSERT assert
+#else
+#define ASSERT(...)
+#endif
 #endif
 
 #ifndef DPRINTF
-#  ifdef DEBUG
-#     define DPRINTF printf
-#  else
-#    define DPRINTF(...)
-#  endif
+#ifdef DEBUG
+#define DPRINTF printf
+#else
+#define DPRINTF(...)
+#endif
 #endif
 
 esocket_t *freelist = NULL;
@@ -109,8 +109,8 @@ int esocket_setevents (esocket_t * s, unsigned int events)
     ee.events = events;
     ee.data.ptr = s;
     epoll_ctl (h->epfd,
-	       events ? (s->
-			 events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL, s->socket, &ee);
+	       events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) : EPOLL_CTL_DEL, s->socket,
+	       &ee);
     s->events = events;
   }
 
@@ -128,8 +128,7 @@ int esocket_addevents (esocket_t * s, unsigned int events)
     ee.events = s->events | events;
     ee.data.ptr = s;
     epoll_ctl (h->epfd,
-	       ee.events ? (s->
-			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
+	       ee.events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
 	       EPOLL_CTL_DEL, s->socket, &ee);
     s->events = ee.events;
   }
@@ -148,8 +147,7 @@ int esocket_clearevents (esocket_t * s, unsigned int events)
     ee.events = s->events & ~events;
     ee.data.ptr = s;
     epoll_ctl (h->epfd,
-	       ee.events ? (s->
-			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
+	       ee.events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
 	       EPOLL_CTL_DEL, s->socket, &ee);
     s->events = ee.events;
   }
@@ -223,8 +221,7 @@ int esocket_update_state (esocket_t * s, unsigned int newstate)
     ee.events = events;
     ee.data.ptr = s;
     epoll_ctl (h->epfd,
-	       ee.events ? (s->
-			    events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
+	       ee.events ? (s->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD) :
 	       EPOLL_CTL_DEL, s->socket, &ee);
     s->events = events;
   }

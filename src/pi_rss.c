@@ -36,16 +36,16 @@
 #include "../config.h"
 
 #ifndef __USE_W32_SOCKETS
-#  ifdef HAVE_NETINET_IN_H
-#    include <netinet/in.h>
-#  endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #else
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 #ifdef USE_WINDOWS
-#  include "sys_windows.h"
+#include "sys_windows.h"
 #endif
 
 #define PI_RSS_CONNECT_TIMEOUT	3000

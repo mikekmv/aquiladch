@@ -1,10 +1,24 @@
 This is the Aquila Changelog.
 
-0.1.11-pre2-beta2 (unoffical):
-	Fixed Aquila.xml permission when using the installation script and daemontools
-	Updated the Finnish translation
+0.1.11-pre4-beta2:
+	Fix pi_chatroom to handle lack of space after nick correctly.
+	Fix xml save issue on Windows and glibc < 2.0.6. vsnprintf returns
+		-1 on buffer overflow on those platforms not full length.
 
-0.1.11-pre2-beta1:
+0.1.11-pre4-beta1:
+	Made $To: parsing more paranoid.
+	Fixed Aquila.xml permission when using the installation script and daemontools
+	Skipped to -pre4 to skip "intermediate versions" of other
+		maintainers.
+
+0.1.11-pre2-beta2:
+	Fix bug in LUA config where configset did not handle CFG_ELEM_CAP
+		correctly
+	Don't send notification on user drop if message is empty.
+	Moved fi_OP to fi_FI
+	LUA: Added UserForcemove() function
+	Updated nl translation
+	Updated fi translation (Thanks maksalaatikko)
 	Added nls support in RSS and RRD.
 	Added lots of nicklistcache statistics.
 	Fix Usage printing in !rsstarget

@@ -510,8 +510,10 @@ unsigned long pi_chatroom_event_pm (plugin_user_t * user, void *dummy, unsigned 
 
   /* skip until after nick */
   buf->s = strchr (buf->s, '$');
-  buf->s = strchr (buf->s, ' ');
+  buf->s = strchr (buf->s, '>');
   buf->s++;
+  if (*(buf->s) == ' ')
+    buf->s++;
 
   /* find user. */
   source = plugin_user_find (n);
