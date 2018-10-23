@@ -1138,9 +1138,11 @@ int plugin_config_load (buffer_t * output)
   config_load (node);
   accounts_load (node);
   list = xml_node_find (node, "HardBanList");
-  banlist_load (&hardbanlist, list);
+  if (list)
+    banlist_load (&hardbanlist, list);
   list = xml_node_find (node, "SoftBanList");
-  banlist_load (&softbanlist, list);
+  if (list)
+    banlist_load (&softbanlist, list);
 
   plugin_send_event (NULL, PLUGIN_EVENT_LOAD, node);
 

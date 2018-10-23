@@ -135,6 +135,17 @@ unsigned char *rss_html_filter (unsigned char *s)
 	  c += 6;
 	}
 	break;
+	/* the following two are required to prevent vsnprint
+	 * to fail on this input.
+	 */
+      case '\\':
+	break;
+      case '%':
+	if (!intag) {
+	  memcpy (c, "%%", 2);
+	  c += 2;
+	}
+	break;
       default:
 	if (!intag)
 	  *c++ = *s;

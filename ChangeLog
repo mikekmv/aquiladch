@@ -1,5 +1,9 @@
 This is the Aquila Changelog.
 
+0.1.11-pre4-beta3:
+	Expand rss input filtering to filter out % and \
+	Handle lack of required Banlist entries in config file gracefully.
+
 0.1.11-pre4-beta2:
 	Fix pi_chatroom to handle lack of space after nick correctly.
 	Fix xml save issue on Windows and glibc < 2.0.6. vsnprintf returns
